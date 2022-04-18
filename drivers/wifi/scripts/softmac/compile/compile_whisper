@@ -1,0 +1,1 @@
+make SOC=X86 RPU_VER=4XT RPU_MODE=LPW RPU_SGI_SUPPORT=false BUSIF=PCIE KERNEL=4_4 KROOT=/lib/modules/4.4.0-72-generic/build $1

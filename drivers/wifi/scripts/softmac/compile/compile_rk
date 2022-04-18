@@ -1,0 +1,1 @@
+make CC=gcc-4.8 SOC=X86 RPU_VER=4XT RPU_MODE=LPW RPU_SGI_SUPPORT=false BUSIF=PCIE KERNEL=3_10 KROOT=/lib/modules/3.10.0-3-generic/build $1

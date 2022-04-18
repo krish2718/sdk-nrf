@@ -1,0 +1,813 @@
+/*
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/**
+ * @brief Header containing OS specific definitions for the
+ * Zephyr OS layer of the Wi-Fi driver.
+ */
+
+#include <zephyr.h>
+#include <sys/printk.h>
+#include <drivers/gpio.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <sys/time.h>
+#include "shim.h"
+
+#include "tasklet.h"
+#include "timer.h"
+
+#include "osal_ops.h"
+
+#include "qspi_if.h"
+
+static void *zep_shim_mem_alloc(size_t size)
+{
+	size = (size + 4) & 0xfffffffc;
+	return k_malloc(size);
+}
+
+static void *zep_shim_mem_zalloc(size_t size)
+{
+	size = (size + 4) & 0xfffffffc;
+	return k_calloc(size, sizeof(char));
+}
+
+static void *zep_shim_mem_cpy(void *dest,
+			      const void *src,
+			      size_t count)
+{
+	return memcpy(dest, src, count);
+}
+
+static void *zep_shim_mem_set(void *start,
+			      int val,
+			      size_t size)
+{
+	return memset(start, val, size);
+}
+
+static unsigned int zep_shim_qspi_read_reg32(void *priv, unsigned long addr)
+{
+	unsigned int val;
+	struct zep_shim_bus_qspi_priv *qspi_priv = priv;
+	struct qspi_dev *dev;
+
+	dev = qspi_priv->qspi_dev;
+
+	if (addr < 0x0C0000)
+		dev->hl_read(addr, &val, 4);
+	else
+		dev->read(addr, &val, 4);
+
+	return val;
+}
+
+static void zep_shim_qspi_write_reg32(void *priv, unsigned long addr, unsigned int val)
+{
+	struct zep_shim_bus_qspi_priv *qspi_priv = priv;
+	struct qspi_dev *dev;
+
+	dev = qspi_priv->qspi_dev;
+
+	dev->write(addr, &val, 4);
+}
+
+static void zep_shim_qspi_cpy_from(void *priv, void *dest, unsigned long addr, size_t count)
+{
+	struct zep_shim_bus_qspi_priv *qspi_priv = priv;
+	struct qspi_dev *dev;
+
+	dev = qspi_priv->qspi_dev;
+
+	if (count%4 != 0)
+		count = (count + 4) & 0xfffffffc;
+
+	dev->read(addr, dest, count);
+}
+
+static void zep_shim_qspi_cpy_to(void *priv, unsigned long addr, const void *src, size_t count)
+{
+	struct zep_shim_bus_qspi_priv *qspi_priv = priv;
+	struct qspi_dev *dev;
+
+	dev = qspi_priv->qspi_dev;
+
+	if (count%4 != 0)
+		count = (count + 4) & 0xfffffffc;
+
+	dev->write(addr, src, count);
+}
+
+static void *zep_shim_spinlock_alloc(void)
+{
+	struct k_sem *lock = NULL;
+
+	lock = k_malloc(sizeof(*lock));
+
+	if (!lock)
+		printk("%s: Unable to allocate memory for spinlock\n", __func__);
+
+	return lock;
+}
+
+static void zep_shim_spinlock_free(void *lock)
+{
+	k_free(lock);
+}
+
+static void zep_shim_spinlock_init(void *lock)
+{
+	k_sem_init(lock, 1, 1);
+}
+
+static void zep_shim_spinlock_take(void *lock)
+{
+	k_sem_take(lock, K_FOREVER);
+}
+
+static void zep_shim_spinlock_rel(void *lock)
+{
+	k_sem_give(lock);
+}
+
+static void zep_shim_spinlock_irq_take(void *lock, unsigned long *flags)
+{
+	k_sem_take(lock, K_FOREVER);
+}
+
+static void zep_shim_spinlock_irq_rel(void *lock, unsigned long *flags)
+{
+	k_sem_give(lock);
+}
+
+static int zep_shim_pr_dbg(const char *fmt, va_list args)
+{
+	char *mod_fmt = NULL;
+
+	mod_fmt = k_calloc(strlen(fmt) + 1 + 3, sizeof(char));
+
+	if (!mod_fmt) {
+		printk("%s: Unable to allocate memory for mod_fmt\n",
+		       __func__);
+		return -1;
+	}
+
+	strcpy(mod_fmt, "Debug: ");
+	strcat(mod_fmt, fmt);
+
+	vprintk(mod_fmt, args);
+
+	return 0;
+}
+
+static int zep_shim_pr_info(const char *fmt, va_list args)
+{
+	char *mod_fmt = NULL;
+
+	mod_fmt = k_calloc(strlen(fmt) + 1 + 3, sizeof(char));
+
+	if (!mod_fmt) {
+		printk("%s: Unable to allocate memory for mod_fmt\n",
+		       __func__);
+		return -1;
+	}
+
+	strcpy(mod_fmt, "Info: ");
+	strcat(mod_fmt, fmt);
+
+	vprintk(mod_fmt, args);
+
+	return 0;
+}
+
+static int zep_shim_pr_err(const char *fmt, va_list args)
+{
+	char *mod_fmt = NULL;
+
+	mod_fmt = k_calloc(strlen(fmt) + 1 + 3, sizeof(char));
+
+	if (!mod_fmt) {
+		printk("%s: Unable to allocate memory for mod_fmt\n",
+		       __func__);
+		return -1;
+	}
+
+	strcpy(mod_fmt, "Error: ");
+	strcat(mod_fmt, fmt);
+
+	vprintk(mod_fmt, args);
+
+	return 0;
+}
+
+struct nwb {
+	unsigned char *data;
+	unsigned char *tail;
+	int    len;
+	int    headroom;
+	void *next;
+	void *priv;
+	int iftype;
+	void *ifaddr;
+	void *dev;
+	int hostbuffer;
+	void *cleanup_ctx;
+	void (*cleanup_cb)();
+};
+
+static void *zep_shim_nbuf_alloc(unsigned int size)
+{
+	struct nwb *nwb;
+
+	nwb = (struct nwb *)k_calloc(sizeof(struct nwb), sizeof(char));
+
+	nwb->priv = k_calloc(size, sizeof(char));
+
+	if (!nwb->priv) {
+		k_free(nwb);
+		return NULL;
+	}
+
+	nwb->data = (unsigned char *)nwb->priv;
+	nwb->tail = nwb->data;
+	nwb->len = 0;
+	nwb->headroom = 0;
+	nwb->next = NULL;
+
+	return nwb;
+}
+
+
+void zep_shim_nbuf_free(void *nbuf)
+{
+	struct nwb *nwb;
+
+	nwb = nbuf;
+
+	k_free(((struct nwb *)nbuf)->priv);
+
+	k_free(nbuf);
+}
+
+
+static void zep_shim_nbuf_headroom_res(void *nbuf,
+				       unsigned int size)
+{
+	struct nwb *nwb = (struct nwb *)nbuf;
+
+	nwb->data += size;
+	nwb->tail += size;
+	nwb->headroom += size;
+
+	/* return nwb->data; */
+}
+
+static unsigned int zep_shim_nbuf_headroom_get(void *nbuf)
+{
+	return ((struct nwb *)nbuf)->headroom;
+}
+
+static unsigned int zep_shim_nbuf_data_size(void *nbuf)
+{
+	return ((struct nwb *)nbuf)->len;
+}
+
+static void *zep_shim_nbuf_data_get(void *nbuf)
+{
+	return ((struct nwb *)nbuf)->data;
+}
+
+static void *zep_shim_nbuf_data_put(void *nbuf,
+				    unsigned int size)
+{
+	struct nwb *nwb = (struct nwb *)nbuf;
+	unsigned char *data = nwb->tail;
+
+	nwb->tail += size;
+	nwb->len += size;
+
+	return data;
+}
+
+static void *zep_shim_nbuf_data_push(void *nbuf,
+				     unsigned int size)
+{
+	struct nwb *nwb = (struct nwb *)nbuf;
+
+	nwb->data -= size;
+	nwb->headroom -= size;
+	nwb->len += size;
+
+	return nwb->data;
+}
+
+static void *zep_shim_nbuf_data_pull(void *nbuf,
+				     unsigned int size)
+{
+	struct nwb *nwb = (struct nwb *)nbuf;
+
+	nwb->data += size;
+	nwb->headroom += size;
+	nwb->len -= size;
+
+	return nwb->data;
+}
+
+#include <net/ethernet.h>
+#include <net/net_core.h>
+
+void *net_pkt_to_nbuf(struct net_pkt *pkt)
+{
+	struct nwb *nwb;
+	unsigned char *data;
+	unsigned int len;
+
+	len = net_pkt_get_len(pkt);
+
+	/* printk("Tx : %d\n", len); */
+
+	nwb = zep_shim_nbuf_alloc(len + 100);
+
+	zep_shim_nbuf_headroom_res(nwb, 100);
+
+	data = zep_shim_nbuf_data_put(nwb, len);
+
+	net_pkt_read(pkt, data, len);
+
+	net_pkt_unref(pkt);
+
+	return nwb;
+}
+
+void *net_pkt_from_nbuf(void *iface, struct nwb *nwb)
+{
+	struct net_pkt *pkt;
+	unsigned char *data;
+	unsigned int len;
+
+	len = zep_shim_nbuf_data_size(nwb);
+
+	/* printk("Rx : %d\n", len); */
+
+	data = zep_shim_nbuf_data_get(nwb);
+
+	pkt = net_pkt_rx_alloc_with_buffer(iface, len, AF_UNSPEC, 0, K_FOREVER);
+
+	if (net_pkt_write(pkt, data, len)) {
+		printk("Out of memory for received frame");
+		net_pkt_unref(pkt);
+		pkt = NULL;
+	}
+
+	zep_shim_nbuf_free(nwb);
+
+	return pkt;
+}
+
+static void *zep_shim_llist_node_alloc(void)
+{
+	struct zep_shim_llist_node *llist_node = NULL;
+
+	llist_node = k_calloc(sizeof(*llist_node), sizeof(char));
+
+	if (!llist_node)
+		printk("%s: Unable to allocate memory for linked list node\n", __func__);
+
+	sys_dnode_init(&llist_node->head);
+
+	return llist_node;
+}
+
+static void zep_shim_llist_node_free(void *llist_node)
+{
+	k_free(llist_node);
+}
+
+static void *zep_shim_llist_node_data_get(void *llist_node)
+{
+	struct zep_shim_llist_node *zep_llist_node = NULL;
+
+	zep_llist_node = (struct zep_shim_llist_node *)llist_node;
+
+	return zep_llist_node->data;
+}
+
+static void zep_shim_llist_node_data_set(void *llist_node,
+					 void *data)
+{
+	struct zep_shim_llist_node *zep_llist_node = NULL;
+
+	zep_llist_node = (struct zep_shim_llist_node *)llist_node;
+
+	zep_llist_node->data = data;
+}
+
+static void *zep_shim_llist_alloc(void)
+{
+	struct zep_shim_llist *llist = NULL;
+
+	llist = k_calloc(sizeof(*llist), sizeof(char));
+
+	if (!llist)
+		printk("%s: Unable to allocate memory for linked list\n", __func__);
+
+	return llist;
+}
+
+static void zep_shim_llist_free(void *llist)
+{
+	k_free(llist);
+}
+
+static void zep_shim_llist_init(void *llist)
+{
+	struct zep_shim_llist *zep_llist = NULL;
+
+	zep_llist = (struct zep_shim_llist *)llist;
+
+	sys_dlist_init(&zep_llist->head);
+}
+
+static void zep_shim_llist_add_node_tail(void *llist,
+					 void *llist_node)
+{
+	struct zep_shim_llist *zep_llist = NULL;
+	struct zep_shim_llist_node *zep_node = NULL;
+
+	zep_llist = (struct zep_shim_llist *)llist;
+	zep_node = (struct zep_shim_llist_node *)llist_node;
+
+	sys_dlist_append(&zep_llist->head, &zep_node->head);
+
+	zep_llist->len += 1;
+}
+
+static void *zep_shim_llist_get_node_head(void *llist)
+{
+	struct zep_shim_llist_node *zep_head_node = NULL;
+	struct zep_shim_llist *zep_llist = NULL;
+
+	zep_llist = (struct zep_shim_llist *)llist;
+
+	if (!zep_llist->len)
+		return NULL;
+
+	zep_head_node =
+		(struct zep_shim_llist_node *)sys_dlist_peek_head(&zep_llist->head);
+
+	return zep_head_node;
+}
+
+static void *zep_shim_llist_get_node_nxt(void *llist, void *llist_node)
+{
+	struct zep_shim_llist_node *zep_node = NULL;
+	struct zep_shim_llist_node *zep_nxt_node = NULL;
+	struct zep_shim_llist *zep_llist = NULL;
+
+	zep_llist = (struct zep_shim_llist *)llist;
+	zep_node = (struct zep_shim_llist_node *)llist_node;
+
+	/* if (zep_node->head.next == &zep_llist->head) */
+	/* return NULL; */
+
+	zep_nxt_node =
+		(struct zep_shim_llist_node *)sys_dlist_peek_next(&zep_llist->head, &zep_node->head);
+
+	return zep_nxt_node;
+}
+
+static void zep_shim_llist_del_node(void *llist,
+				    void *llist_node)
+{
+	struct zep_shim_llist_node *zep_node = NULL;
+	struct zep_shim_llist *zep_llist = NULL;
+
+	zep_llist = (struct zep_shim_llist *)llist;
+	zep_node = (struct zep_shim_llist_node *)llist_node;
+
+	sys_dlist_remove(&zep_node->head);
+
+	zep_llist->len -= 1;
+}
+
+static unsigned int zep_shim_llist_len(void *llist)
+{
+	struct zep_shim_llist *zep_llist = NULL;
+
+	zep_llist = (struct zep_shim_llist *)llist;
+
+	return zep_llist->len;
+}
+
+static void *zep_shim_tasklet_alloc(void)
+{
+	struct tasklet_struct *tasklet = NULL;
+
+	tasklet = k_malloc(sizeof(*tasklet));
+
+	if (!tasklet)
+		printk("%s: Unable to allocate memory for tasklet\n", __func__);
+
+	return tasklet;
+}
+
+static void zep_shim_tasklet_free(void *tasklet)
+{
+	k_free(tasklet);
+}
+
+static void zep_shim_tasklet_init(void *tasklet,
+				  void (*callback)(unsigned long data),
+				  unsigned long data)
+{
+	tasklet_init(tasklet,
+		     callback,
+		     data);
+}
+
+static void zep_shim_tasklet_schedule(void *tasklet)
+{
+	tasklet_schedule(tasklet);
+}
+
+static void zep_shim_tasklet_kill(void *tasklet)
+{
+	tasklet_kill(tasklet);
+}
+
+static unsigned long zep_shim_time_get_curr_us(void)
+{
+	struct timeval curr_time;
+	unsigned long curr_time_us = 0;
+
+	gettimeofday(&curr_time, NULL);
+
+	curr_time_us = (curr_time.tv_sec * 1000 * 1000) + curr_time.tv_usec;
+
+	return curr_time_us;
+}
+
+static unsigned int zep_shim_time_elapsed_us(unsigned long start_time_us)
+{
+	struct timeval curr_time;
+	unsigned long curr_time_us = 0;
+
+	gettimeofday(&curr_time, NULL);
+
+	curr_time_us = (curr_time.tv_sec * 1000 * 1000) + curr_time.tv_usec;
+
+	return curr_time_us - start_time_us;
+}
+
+
+static enum nvlsi_rpu_status zep_shim_bus_qspi_dev_init(void *os_qspi_dev_ctx)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	struct qspi_dev *dev = NULL;
+
+	dev = os_qspi_dev_ctx;
+
+	status = NVLSI_RPU_STATUS_SUCCESS;
+
+	return status;
+}
+
+
+static void zep_shim_bus_qspi_dev_deinit(void *os_qspi_dev_ctx)
+{
+	struct qspi_dev *dev = NULL;
+
+	dev = os_qspi_dev_ctx;
+
+	dev->deinit();
+}
+
+
+static void *zep_shim_bus_qspi_dev_add(void *os_qspi_priv,
+				       void *osal_qspi_dev_ctx)
+{
+	struct zep_shim_bus_qspi_priv *zep_qspi_priv = NULL;
+	struct qspi_dev *dev = NULL;
+
+	zep_qspi_priv = os_qspi_priv;
+
+	dev = qspi_dev();
+
+	dev->hard_reset();
+
+	dev->init(qspi_defconfig());
+
+	zep_qspi_priv->qspi_dev = dev;
+	zep_qspi_priv->dev_added = true;
+
+	return zep_qspi_priv;
+}
+
+
+static void zep_shim_bus_qspi_dev_rem(void *os_qspi_dev_ctx)
+{
+	struct qspi_dev *dev = NULL;
+
+	dev = os_qspi_dev_ctx;
+
+	/* TODO: Make qspi_dev a dynamic instance and remove it here */
+}
+
+
+void *zep_shim_bus_qspi_init(void)
+{
+	struct zep_shim_bus_qspi_priv *qspi_priv = NULL;
+
+	qspi_priv = k_calloc(sizeof(*qspi_priv), sizeof(char));
+
+	if (!qspi_priv) {
+		printk("%s: Unable to allocate memory for qspi_priv\n", __func__);
+		goto out;
+	}
+out:
+	return qspi_priv;
+}
+
+
+void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
+{
+	struct zep_shim_bus_qspi_priv *qspi_priv = NULL;
+
+	qspi_priv = os_qspi_priv;
+
+	k_free(qspi_priv);
+}
+
+
+static void zep_shim_bus_qspi_dev_host_map_get(void *os_qspi_dev_ctx,
+					       struct nvlsi_rpu_osal_host_map *host_map)
+{
+	if (!os_qspi_dev_ctx || !host_map) {
+		printk("%s: Invalid parameters\n", __func__);
+		return;
+	}
+
+	host_map->addr = 0;
+}
+
+
+static void irq_work_handler(struct k_work *work)
+{
+	struct zep_shim_intr_priv *intr_priv = NULL;
+	int ret = 0;
+
+	intr_priv = (struct zep_shim_intr_priv *)
+		CONTAINER_OF(work, struct zep_shim_intr_priv, work);
+
+	ret = intr_priv->callbk_fn(intr_priv->callbk_data);
+
+	if (ret)
+		printk("%s: Interrupt callback failed\n", __func__);
+}
+
+
+void zep_shim_irq_handler(const struct device *dev,
+			  struct gpio_callback *cb,
+			  uint32_t pins)
+{
+	struct zep_shim_intr_priv *intr_priv = NULL;
+
+	intr_priv = (struct zep_shim_intr_priv *)cb;
+
+	k_work_schedule(&intr_priv->work, K_NO_WAIT);
+}
+
+
+enum nvlsi_rpu_status zep_shim_bus_qspi_intr_reg(void *os_dev_ctx,
+						 void *callbk_data,
+						 int (*callbk_fn)(void *callbk_data))
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	struct zep_shim_intr_priv *intr_priv = NULL;
+	int ret = -1;
+
+	intr_priv = k_calloc(sizeof(*intr_priv), sizeof(char));
+
+	if (!intr_priv) {
+		printk("%s: Unable to allocate memory for intr_priv\n", __func__);
+		goto out;
+	}
+
+	intr_priv->callbk_data = callbk_data;
+	intr_priv->callbk_fn = callbk_fn;
+
+	k_work_init_delayable(&intr_priv->work,
+			      irq_work_handler);
+
+	ret = gpio_request_irq(24,
+			       &intr_priv->gpio_cb_data,
+			       zep_shim_irq_handler);
+
+	if (ret) {
+		printk("%s: request_irq failed\n", __func__);
+		k_free(intr_priv);
+		intr_priv = NULL;
+		goto out;
+	}
+
+	status = NVLSI_RPU_STATUS_SUCCESS;
+
+out:
+	return status;
+}
+
+
+void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
+{
+#ifdef notyet
+	struct zep_shim_intr_priv *intr_priv = NULL;
+
+	intr_priv = (struct zep_shim_intr_priv *)os_intr_priv;
+
+	gpio_free_irq(24, &intr_priv->gpio_cb_data);
+
+	k_free(intr_priv);
+#endif
+}
+
+
+struct nvlsi_rpu_osal_ops nvlsi_os_zep_ops = {
+	.mem_alloc = zep_shim_mem_alloc,
+	.mem_zalloc = zep_shim_mem_zalloc,
+	.mem_free = k_free,
+	.mem_cpy = zep_shim_mem_cpy,
+	.mem_set = zep_shim_mem_set,
+
+	.qspi_read_reg32 = zep_shim_qspi_read_reg32,
+	.qspi_write_reg32 = zep_shim_qspi_write_reg32,
+	.qspi_cpy_from = zep_shim_qspi_cpy_from,
+	.qspi_cpy_to = zep_shim_qspi_cpy_to,
+
+	.spinlock_alloc = zep_shim_spinlock_alloc,
+	.spinlock_free = zep_shim_spinlock_free,
+	.spinlock_init = zep_shim_spinlock_init,
+	.spinlock_take = zep_shim_spinlock_take,
+	.spinlock_rel = zep_shim_spinlock_rel,
+
+	.spinlock_irq_take = zep_shim_spinlock_irq_take,
+	.spinlock_irq_rel = zep_shim_spinlock_irq_rel,
+
+	.log_dbg = zep_shim_pr_dbg,
+	.log_info = zep_shim_pr_info,
+	.log_err = zep_shim_pr_err,
+
+	.llist_node_alloc = zep_shim_llist_node_alloc,
+	.llist_node_free = zep_shim_llist_node_free,
+	.llist_node_data_get = zep_shim_llist_node_data_get,
+	.llist_node_data_set = zep_shim_llist_node_data_set,
+
+	.llist_alloc = zep_shim_llist_alloc,
+	.llist_free = zep_shim_llist_free,
+	.llist_init = zep_shim_llist_init,
+	.llist_add_node_tail = zep_shim_llist_add_node_tail,
+	.llist_get_node_head = zep_shim_llist_get_node_head,
+	.llist_get_node_nxt = zep_shim_llist_get_node_nxt,
+	.llist_del_node = zep_shim_llist_del_node,
+	.llist_len = zep_shim_llist_len,
+
+	.nbuf_alloc = zep_shim_nbuf_alloc,
+	.nbuf_free = zep_shim_nbuf_free,
+	.nbuf_headroom_res = zep_shim_nbuf_headroom_res,
+	.nbuf_headroom_get = zep_shim_nbuf_headroom_get,
+	.nbuf_data_size = zep_shim_nbuf_data_size,
+	.nbuf_data_get = zep_shim_nbuf_data_get,
+	.nbuf_data_put = zep_shim_nbuf_data_put,
+	.nbuf_data_push = zep_shim_nbuf_data_push,
+	.nbuf_data_pull = zep_shim_nbuf_data_pull,
+
+	.tasklet_alloc = zep_shim_tasklet_alloc,
+	.tasklet_free = zep_shim_tasklet_free,
+	.tasklet_init = zep_shim_tasklet_init,
+	.tasklet_schedule = zep_shim_tasklet_schedule,
+	.tasklet_kill = zep_shim_tasklet_kill,
+
+	.sleep_ms = k_msleep,
+	.delay_us = k_usleep,
+	.time_get_curr_us = zep_shim_time_get_curr_us,
+	.time_elapsed_us = zep_shim_time_elapsed_us,
+
+	.bus_qspi_init = zep_shim_bus_qspi_init,
+	.bus_qspi_deinit = zep_shim_bus_qspi_deinit,
+	.bus_qspi_dev_add = zep_shim_bus_qspi_dev_add,
+	.bus_qspi_dev_rem = zep_shim_bus_qspi_dev_rem,
+	.bus_qspi_dev_init = zep_shim_bus_qspi_dev_init,
+	.bus_qspi_dev_deinit = zep_shim_bus_qspi_dev_deinit,
+	.bus_qspi_dev_intr_reg = zep_shim_bus_qspi_intr_reg,
+	.bus_qspi_dev_intr_unreg = zep_shim_bus_qspi_intr_unreg,
+	.bus_qspi_dev_host_map_get = zep_shim_bus_qspi_dev_host_map_get,
+};
+
+struct nvlsi_rpu_osal_ops *get_os_ops(void)
+{
+	return &nvlsi_os_zep_ops;
+}

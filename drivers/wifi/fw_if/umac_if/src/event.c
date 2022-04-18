@@ -1,0 +1,503 @@
+/*
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/**
+ * @brief File containing event specific definitions for the
+ * FMAC IF Layer of the Wi-Fi driver.
+ */
+
+#include "host_rpu_umac_if.h"
+#include "fmac_rx.h"
+#include "fmac_tx.h"
+#include "fmac_peer.h"
+#include "fmac_cmd.h"
+#include "fmac_ap.h"
+
+#ifdef notyet
+static enum nvlsi_rpu_status nvlsi_wlan_fmac_if_state_chg_event_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+									unsigned char *umac_head,
+									enum nvlsi_wlan_fmac_if_state if_state)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	unsigned char if_idx = 0;
+
+	if (!fmac_dev_ctx || !umac_head) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Invalid parameters\n",
+				       __func__);
+
+		goto out;
+	}
+
+	if (!fmac_dev_ctx->fpriv->callbk_fns.if_state_chg_callbk_fn) {
+		nvlsi_rpu_osal_log_dbg(fmac_dev_ctx->fpriv->opriv,
+				       "%s: No callback handler registered\n",
+				       __func__);
+
+		status = NVLSI_RPU_STATUS_SUCCESS;
+		goto out;
+	}
+
+	if_idx = ((struct img_data_carrier_state *)umac_head)->wdev_id;
+
+	if (if_idx >= MAX_NUM_VIFS) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Invalid wdev_id recd from UMAC %d\n",
+				       __func__,
+				       if_idx);
+		goto out;
+	}
+
+	vif_ctx = fmac_dev_ctx->vif_ctx[if_idx];
+
+	status = fmac_dev_ctx->fpriv->callbk_fns.if_state_chg_callbk_fn(vif_ctx->os_vif_ctx,
+									if_state);
+
+	if (status != NVLSI_RPU_STATUS_SUCCESS) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: If state change callback function failed for VIF idx = %d\n",
+				       __func__,
+				       if_idx);
+		goto out;
+	}
+out:
+	return status;
+}
+#endif /* notyet */
+
+static void umac_if_event(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+			  void *event_data)
+{
+	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx;
+	unsigned int if_index = 0;
+
+	struct img_umac_event_vif_state *event = NULL;
+
+	event = (struct img_umac_event_vif_state *)event_data;
+
+	if (event->umac_hdr.cmd_evnt != IMG_UMAC_EVENT_IFFLAGS_STATUS)
+		return;
+
+	if (event->status < 0)
+		return;
+
+	if_index = event->umac_hdr.ids.wdev_id;
+
+	vif_ctx = fmac_dev_ctx->vif_ctx[if_index];
+
+	vif_ctx->ifflags = true;
+}
+
+
+static void umac_event_connect(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+			       void *event_data)
+{
+	unsigned char if_index = 0;
+	int peer_id = -1;
+	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct img_umac_event_new_station *event = NULL;
+
+	event = (struct img_umac_event_new_station *)event_data;
+
+	if_index = event->umac_hdr.ids.wdev_id;
+
+	vif_ctx = fmac_dev_ctx->vif_ctx[if_index];
+
+	if (if_index >= MAX_NUM_VIFS) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Invalid wdev_id recd from UMAC %d\n",
+				       __func__,
+				       if_index);
+		return;
+	}
+
+	if (event->umac_hdr.cmd_evnt == IMG_UMAC_EVENT_NEW_STATION) {
+		if (vif_ctx->if_type == 2)
+			nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					       vif_ctx->bssid,
+					       event->mac_addr,
+					       IMG_ETH_ALEN);
+
+		peer_id = nvlsi_wlan_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
+
+		if (peer_id == -1) {
+
+			peer_id = nvlsi_wlan_fmac_peer_add(fmac_dev_ctx,
+							   if_index,
+							   event->mac_addr,
+							   event->is_sta_legacy,
+							   event->wme);
+
+			if (peer_id == -1) {
+				nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+						       "%s:Can't add new station.\n",
+						       __func__);
+				return;
+			}
+		}
+	} else if (event->umac_hdr.cmd_evnt == IMG_UMAC_EVENT_DEL_STATION) {
+		peer_id = nvlsi_wlan_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
+		if (peer_id != -1) {
+			nvlsi_wlan_fmac_peer_remove(fmac_dev_ctx,
+						    if_index,
+						    peer_id);
+		}
+	}
+
+	return;
+
+}
+
+
+static enum nvlsi_rpu_status umac_event_ctrl_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+						     void *event_data,
+						     unsigned int event_len)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_SUCCESS;
+	struct img_umac_hdr *umac_hdr = NULL;
+	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct nvlsi_wlan_fmac_callbk_fns *callbk_fns = NULL;
+	unsigned char if_id = 0;
+	unsigned int event_num = 0;
+	bool more_res = false;
+
+	umac_hdr = event_data;
+	if_id = umac_hdr->ids.wdev_id;
+	event_num = umac_hdr->cmd_evnt;
+
+	if (if_id >= MAX_NUM_VIFS) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Invalid wdev_id recd from UMAC %d\n",
+				       __func__,
+				       if_id);
+
+		goto out;
+	}
+
+	vif_ctx = fmac_dev_ctx->vif_ctx[if_id];
+	callbk_fns = &fmac_dev_ctx->fpriv->callbk_fns;
+
+	switch (umac_hdr->cmd_evnt) {
+	case IMG_UMAC_EVENT_TRIGGER_SCAN_START:
+		if (callbk_fns->scan_start_callbk_fn)
+			callbk_fns->scan_start_callbk_fn(vif_ctx->os_vif_ctx);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_SCAN_DONE:
+		if (callbk_fns->scan_done_callbk_fn)
+			callbk_fns->scan_done_callbk_fn(vif_ctx->os_vif_ctx,
+							event_data);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_SCAN_RESULT:
+		if (umac_hdr->seq != 0)
+			more_res = false;
+
+		if (callbk_fns->disp_scan_res_callbk_fn)
+			callbk_fns->scan_res_callbk_fn(vif_ctx->os_vif_ctx,
+						       event_data,
+						       more_res);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_SCAN_DISPLAY_RESULT:
+		if (umac_hdr->seq != 0)
+			more_res = true;
+
+		if (callbk_fns->disp_scan_res_callbk_fn)
+			callbk_fns->disp_scan_res_callbk_fn(vif_ctx->os_vif_ctx,
+							    event_data,
+							    more_res);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_AUTHENTICATE:
+		if (callbk_fns->auth_resp_callbk_fn)
+			callbk_fns->auth_resp_callbk_fn(vif_ctx->os_vif_ctx,
+							event_data);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_ASSOCIATE:
+		if (callbk_fns->assoc_resp_callbk_fn)
+			callbk_fns->assoc_resp_callbk_fn(vif_ctx->os_vif_ctx,
+							 event_data);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_DEAUTHENTICATE:
+		if (callbk_fns->deauth_callbk_fn)
+			callbk_fns->deauth_callbk_fn(vif_ctx->os_vif_ctx,
+						     event_data);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	case IMG_UMAC_EVENT_DISASSOCIATE:
+		if (callbk_fns->disassoc_callbk_fn)
+			callbk_fns->disassoc_callbk_fn(vif_ctx->os_vif_ctx,
+						       event_data);
+		else
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: No callback registered for event %d\n",
+					       __func__,
+					       umac_hdr->cmd_evnt);
+		break;
+	default:
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: No callback registered for event %d\n",
+				       __func__,
+				       umac_hdr->cmd_evnt);
+		break;
+	}
+
+out:
+	return status;
+}
+
+
+#ifdef notyet
+static enum nvlsi_rpu_status nvlsi_wlan_fmac_data_event_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+								void *umac_head)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum img_umac_data_commands event = -1;
+
+	if (!fmac_dev_ctx)
+		goto out;
+
+	if (!umac_head) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Invalid parameters\n",
+				       __func__);
+		goto out;
+	}
+
+	event = ((struct img_umac_head *)umac_head)->cmd;
+
+	switch (event) {
+	case IMG_CMD_RX_BUFF:
+		status = nvlsi_wlan_fmac_rx_event_process(fmac_dev_ctx,
+							  umac_head);
+		break;
+	case IMG_CMD_TX_BUFF_DONE:
+		status = nvlsi_wlan_fmac_tx_done_event_process(fmac_dev_ctx,
+							       umac_head);
+		break;
+	case IMG_CMD_CARRIER_ON:
+		status = nvlsi_wlan_fmac_if_state_chg_event_process(fmac_dev_ctx,
+								    umac_head,
+								    NVLSI_WLAN_FMAC_IF_STATE_UP);
+		break;
+	case IMG_CMD_CARRIER_OFF:
+		status = nvlsi_wlan_fmac_if_state_chg_event_process(fmac_dev_ctx,
+								    umac_head,
+								    NVLSI_WLAN_FMAC_IF_STATE_DOWN);
+		break;
+	case IMG_CMD_PM_MODE:
+		status = sap_client_update_pmmode(fmac_dev_ctx,
+						  umac_head);
+		break;
+	case IMG_CMD_PS_GET_FRAMES:
+		status = sap_client_ps_get_frames(fmac_dev_ctx,
+						  umac_head);
+		break;
+	default:
+		break;
+	}
+
+out:
+	if (status != NVLSI_RPU_STATUS_SUCCESS)
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Failed for event = %d\n",
+				       __func__,
+				       event);
+
+	return status;
+}
+
+
+static enum nvlsi_rpu_status nvlsi_wlan_fmac_data_events_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+								 struct host_rpu_msg *rpu_msg)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	unsigned char *umac_head = NULL;
+	int host_rpu_length_left = 0;
+
+	if (!fmac_dev_ctx || !rpu_msg)
+		goto out;
+
+	umac_head = (unsigned char *)rpu_msg->msg;
+	host_rpu_length_left = rpu_msg->hdr.len - sizeof(struct host_rpu_msg);
+
+	while (host_rpu_length_left > 0) {
+		status = nvlsi_wlan_fmac_data_event_process(fmac_dev_ctx,
+							    umac_head);
+
+		if (status != NVLSI_RPU_STATUS_SUCCESS) {
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: umac_process_data_event failed\n",
+					       __func__);
+			goto out;
+		}
+
+		host_rpu_length_left -= ((struct img_umac_head *)umac_head)->len;
+		umac_head += ((struct img_umac_head *)umac_head)->len;
+	}
+out:
+	return status;
+}
+#endif /* notyet */
+
+static enum nvlsi_rpu_status umac_event_stats_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+						      void *event)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	struct img_umac_event_stats *stats = NULL;
+
+	if (!event) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Invalid parameters\n",
+				       __func__);
+		goto out;
+	}
+
+	if (!fmac_dev_ctx->stats_req) {
+		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				       "%s: Stats recd when req was not sent!\n",
+				       __func__);
+		goto out;
+	}
+
+	stats = ((struct img_umac_event_stats *)event);
+
+	nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+			       fmac_dev_ctx->fw_stats,
+			       &stats->fw,
+			       sizeof(*fmac_dev_ctx->fw_stats));
+
+	fmac_dev_ctx->stats_req = false;
+
+	status = NVLSI_RPU_STATUS_SUCCESS;
+
+out:
+	return status;
+}
+
+
+static enum nvlsi_rpu_status umac_process_sys_events(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+						     struct host_rpu_msg *rpu_msg)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	unsigned char *sys_head = NULL;
+
+	sys_head = (unsigned char *)rpu_msg->msg;
+
+	switch (((struct img_sys_head *)sys_head)->cmd_event) {
+	case IMG_EVENT_STATS:
+		status = umac_event_stats_process(fmac_dev_ctx,
+						  sys_head);
+		break;
+	case IMG_EVENT_INIT_DONE:
+		fmac_dev_ctx->init_done = 1;
+		status = NVLSI_RPU_STATUS_SUCCESS;
+		break;
+	case IMG_EVENT_DEINIT_DONE:
+		fmac_dev_ctx->deinit_done = 1;
+		status = NVLSI_RPU_STATUS_SUCCESS;
+		break;
+	default:
+		status = NVLSI_RPU_STATUS_FAIL;
+		break;
+	}
+
+	return status;
+}
+
+
+enum nvlsi_rpu_status nvlsi_wlan_fmac_event_callback(void *mac_dev_ctx,
+						     void *rpu_event_data,
+						     unsigned int rpu_event_len)
+{
+	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct host_rpu_msg *rpu_msg = NULL;
+	struct img_umac_hdr *umac_hdr = NULL;
+	unsigned int umac_msg_len = 0;
+	enum img_umac_events umac_msg_type = IMG_UMAC_EVENT_UNSPECIFIED;
+
+	fmac_dev_ctx = (struct nvlsi_wlan_fmac_dev_ctx *)mac_dev_ctx;
+
+	rpu_msg = (struct host_rpu_msg *)rpu_event_data;
+	umac_hdr = (struct img_umac_hdr *)rpu_msg->msg;
+	umac_msg_len = rpu_msg->hdr.len;
+	umac_msg_type = umac_hdr->cmd_evnt;
+
+	switch (rpu_msg->type) {
+	case IMG_HOST_RPU_MSG_TYPE_DATA:
+#ifdef notyet
+		status = nvlsi_wlan_fmac_data_events_process(fmac_dev_ctx,
+							     rpu_msg);
+#else
+		status = NVLSI_RPU_STATUS_SUCCESS;
+#endif /* notyet */
+		break;
+	case IMG_HOST_RPU_MSG_TYPE_UMAC:
+		status = umac_event_ctrl_process(fmac_dev_ctx,
+						 rpu_msg->msg,
+						 rpu_msg->hdr.len);
+
+		if (status != NVLSI_RPU_STATUS_SUCCESS) {
+			nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+					       "%s: umac_event_ctrl_process failed\n",
+					       __func__);
+			goto out;
+		}
+
+		if (umac_msg_type == IMG_UMAC_EVENT_IFFLAGS_STATUS)
+			umac_if_event(fmac_dev_ctx,
+				      rpu_msg->msg);
+
+		if ((umac_msg_type == IMG_UMAC_EVENT_NEW_STATION) ||
+		    (umac_msg_type == IMG_UMAC_EVENT_DEL_STATION))
+			umac_event_connect(fmac_dev_ctx,
+					   rpu_msg->msg);
+
+		break;
+	case IMG_HOST_RPU_MSG_TYPE_SYSTEM:
+		status = umac_process_sys_events(fmac_dev_ctx,
+						 rpu_msg);
+		break;
+	default:
+		goto out;
+	}
+
+out:
+	return status;
+}
