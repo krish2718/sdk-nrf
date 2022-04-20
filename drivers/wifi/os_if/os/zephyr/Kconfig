@@ -7,6 +7,6 @@
 
 menuconfig NVLSI_WIFI
         bool "Nordic WiFi driver"
-	default y
+	default n
         help
           Nordic Wifi Driver
