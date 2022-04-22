@@ -19,7 +19,7 @@
 /* TODO: Move this to driver_zephyr.c */
 extern struct wpa_supplicant *wpa_s_0;
 
-static enum img_auth_type get_nvlsi_auth_type(int wpa_auth_alg)
+static enum img_auth_type get_wifi_nrf_auth_type(int wpa_auth_alg)
 {
 	if (wpa_auth_alg & WPA_AUTH_ALG_OPEN)
 		return IMG_AUTHTYPE_OPEN_SYSTEM;
@@ -80,9 +80,9 @@ static unsigned int wpa_alg_to_cipher_suite(enum wpa_alg alg, size_t key_len)
 }
 #endif /* notyet */
 
-void nvlsi_wpa_supp_event_proc_scan_start(void *if_priv)
+void wifi_nrf_wpa_supp_event_proc_scan_start(void *if_priv)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 
 	vif_ctx_zep = if_priv;
 
@@ -92,15 +92,15 @@ void nvlsi_wpa_supp_event_proc_scan_start(void *if_priv)
 	/* TODO: Fix this when FW starts sending SCAN_DONE before scan results */
 	wpa_supp_event_handler(vif_ctx_zep,
 			       NULL,
-			       nvlsi_wpa_supp_event_proc_scan_done);
+			       wifi_nrf_wpa_supp_event_proc_scan_done);
 }
 
 
-void nvlsi_wpa_supp_event_proc_scan_done(void *if_priv,
+void wifi_nrf_wpa_supp_event_proc_scan_done(void *if_priv,
 					 struct img_umac_event_trigger_scan *scan_done_event,
 					 int aborted)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data *event = NULL;
 	struct scan_info *info = NULL;
 #ifdef notyet
@@ -165,11 +165,11 @@ void nvlsi_wpa_supp_event_proc_scan_done(void *if_priv,
 }
 
 
-void nvlsi_wpa_supp_event_proc_scan_res(void *if_priv,
+void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 					struct img_umac_event_new_scan_results *scan_res,
 					bool more_res)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	struct wpa_scan_res *r = NULL;
 	const unsigned char *ie = NULL;
 	const unsigned char *beacon_ie = NULL;
@@ -274,10 +274,10 @@ void nvlsi_wpa_supp_event_proc_scan_res(void *if_priv,
 }
 
 
-void nvlsi_wpa_supp_event_proc_auth_resp(void *if_priv,
+void wifi_nrf_wpa_supp_event_proc_auth_resp(void *if_priv,
 					 struct img_umac_event_mlme *auth_resp)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data event;
 	const struct ieee80211_mgmt *mgmt = NULL;
 	const unsigned char *frame = NULL;
@@ -335,10 +335,10 @@ void nvlsi_wpa_supp_event_proc_auth_resp(void *if_priv,
 }
 
 
-void nvlsi_wpa_supp_event_proc_assoc_resp(void *if_priv,
+void wifi_nrf_wpa_supp_event_proc_assoc_resp(void *if_priv,
 					  struct img_umac_event_mlme *assoc_resp)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data event;
 	const struct ieee80211_mgmt *mgmt = NULL;
 	const unsigned char *frame = NULL;
@@ -399,7 +399,7 @@ void nvlsi_wpa_supp_event_proc_assoc_resp(void *if_priv,
 }
 
 
-void nvlsi_wpa_supp_event_proc_deauth(void *if_priv,
+void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv,
 				      struct img_umac_event_mlme *deauth)
 {
 	/* TODO */
@@ -407,7 +407,7 @@ void nvlsi_wpa_supp_event_proc_deauth(void *if_priv,
 }
 
 
-void nvlsi_wpa_supp_event_proc_disassoc(void *if_priv,
+void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv,
 					struct img_umac_event_mlme *disassoc)
 {
 	/* TODO */
@@ -415,12 +415,12 @@ void nvlsi_wpa_supp_event_proc_disassoc(void *if_priv,
 }
 
 
-void *nvlsi_wpa_supp_dev_init(void *supp_drv_if_ctx,
+void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx,
 			      const char *iface_name,
 			      struct zep_wpa_supp_dev_callbk_fns *supp_callbk_fns)
 {
 	const struct device *dev = NULL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 
 	/* TODO: Need to figure out what needs to be done here */
 #ifdef notyet
@@ -440,9 +440,9 @@ void *nvlsi_wpa_supp_dev_init(void *supp_drv_if_ctx,
 }
 
 
-void nvlsi_wpa_supp_dev_deinit(void *if_priv)
+void wifi_nrf_wpa_supp_dev_deinit(void *if_priv)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 
 	vif_ctx_zep = if_priv;
 
@@ -450,12 +450,12 @@ void nvlsi_wpa_supp_dev_deinit(void *if_priv)
 }
 
 
-int nvlsi_wpa_supp_scan2(void *if_priv,
+int wifi_nrf_wpa_supp_scan2(void *if_priv,
 			 struct wpa_driver_scan_params *params)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_scan_info scan_info;
 	int indx = 0;
 #ifdef notyet
@@ -569,7 +569,7 @@ int nvlsi_wpa_supp_scan2(void *if_priv,
 	scan_info.scan_mode = 0;
 	scan_info.scan_reason = SCAN_CONNECT;
 
-	status = nvlsi_wlan_fmac_scan(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_scan(rpu_ctx_zep->rpu_ctx,
 				      vif_ctx_zep->vif_idx,
 				      &scan_info);
 
@@ -587,9 +587,9 @@ out:
 }
 
 
-int nvlsi_wpa_supp_scan_abort(void *if_priv)
+int wifi_nrf_wpa_supp_scan_abort(void *if_priv)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 
 	vif_ctx_zep = if_priv;
 
@@ -601,11 +601,11 @@ int nvlsi_wpa_supp_scan_abort(void *if_priv)
 }
 
 
-int nvlsi_wpa_supp_scan_results_get(void *if_priv)
+int wifi_nrf_wpa_supp_scan_results_get(void *if_priv)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	int ret = -1;
 
 	if (!if_priv) {
@@ -616,12 +616,12 @@ int nvlsi_wpa_supp_scan_results_get(void *if_priv)
 	vif_ctx_zep = if_priv;
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	status = nvlsi_wlan_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
 					      vif_ctx_zep->vif_idx,
 					      SCAN_CONNECT);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: nvlsi_wlan_fmac_scan_res_get failed\n", __func__);
+		printk("%s: wifi_nrf_wlan_fmac_scan_res_get failed\n", __func__);
 		goto out;
 	}
 
@@ -631,13 +631,13 @@ out:
 }
 
 
-int nvlsi_wpa_supp_deauthenticate(void *if_priv,
+int wifi_nrf_wpa_supp_deauthenticate(void *if_priv,
 				  const char *addr,
 				  unsigned short reason_code)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_disconn_info deauth_info;
 	int ret = -1;
 
@@ -659,12 +659,12 @@ int nvlsi_wpa_supp_deauthenticate(void *if_priv,
 	       addr,
 	       sizeof(deauth_info.mac_addr));
 
-	status = nvlsi_wlan_fmac_deauth(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_deauth(rpu_ctx_zep->rpu_ctx,
 					vif_ctx_zep->vif_idx,
 					&deauth_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: nvlsi_wlan_fmac_scan_res_get failed\n", __func__);
+		printk("%s: wifi_nrf_wlan_fmac_scan_res_get failed\n", __func__);
 		goto out;
 	}
 
@@ -675,7 +675,7 @@ out:
 
 
 #ifdef notyet
-int nvlsi_wpa_supp_add_key(struct img_umac_key_info *key_info,
+int wifi_nrf_wpa_supp_add_key(struct img_umac_key_info *key_info,
 			   enum wpa_alg alg,
 			   int key_idx,
 			   int defkey,
@@ -717,13 +717,13 @@ int nvlsi_wpa_supp_add_key(struct img_umac_key_info *key_info,
 #endif /* notyet */
 
 
-int nvlsi_wpa_supp_authenticate(void *if_priv,
+int wifi_nrf_wpa_supp_authenticate(void *if_priv,
 				struct wpa_driver_auth_params *params)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct wpa_bss *curr_bss = NULL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_auth_info auth_info;
 	int ret = -1;
 #ifdef notyet
@@ -749,7 +749,7 @@ int nvlsi_wpa_supp_authenticate(void *if_priv,
 		if (!params->wep_key[i])
 			continue;
 
-		nvlsi_wpa_supp_set_key(vif_ctx_zep,
+		wifi_nrf_wpa_supp_set_key(vif_ctx_zep,
 				       NULL,
 				       WPA_ALG_WEP,
 				       NULL,
@@ -763,7 +763,7 @@ int nvlsi_wpa_supp_authenticate(void *if_priv,
 		if (params->wep_tx_keyidx != i)
 			continue;
 
-		if (nvlsi_wpa_supp_add_key(&auth_info.key_info,
+		if (wifi_nrf_wpa_supp_add_key(&auth_info.key_info,
 					   WPA_ALG_WEP,
 					   i,
 					   1,
@@ -827,7 +827,7 @@ int nvlsi_wpa_supp_authenticate(void *if_priv,
 		       params->auth_data_len);
 	}
 
-	type = get_nvlsi_auth_type(params->auth_alg);
+	type = get_wifi_nrf_auth_type(params->auth_alg);
 
 	if (type != IMG_AUTHTYPE_MAX)
 		auth_info.auth_type = type;
@@ -835,7 +835,7 @@ int nvlsi_wpa_supp_authenticate(void *if_priv,
 	if (params->local_state_change)
 		auth_info.img_flags |= IMG_CMD_AUTHENTICATE_LOCAL_STATE_CHANGE;
 
-	status = nvlsi_wlan_fmac_auth(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_auth(rpu_ctx_zep->rpu_ctx,
 				      vif_ctx_zep->vif_idx,
 				      &auth_info);
 
@@ -858,12 +858,12 @@ out:
 }
 
 
-int nvlsi_wpa_supp_associate(void *if_priv,
+int wifi_nrf_wpa_supp_associate(void *if_priv,
 			     struct wpa_driver_associate_params *params)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_assoc_info assoc_info;
 	int ret = -1;
 
@@ -921,7 +921,7 @@ int nvlsi_wpa_supp_associate(void *if_priv,
 	if (params->mgmt_frame_protection == MGMT_FRAME_PROTECTION_REQUIRED)
 		assoc_info.use_mfp = IMG_MFP_REQUIRED;
 
-	status = nvlsi_wlan_fmac_assoc(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_assoc(rpu_ctx_zep->rpu_ctx,
 				       vif_ctx_zep->vif_idx,
 				       &assoc_info);
 
@@ -940,7 +940,7 @@ out:
 
 
 #ifdef notyet
-int nvlsi_wpa_supp_set_key(void *if_priv,
+int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			   const unsigned char *ifname,
 			   enum wpa_alg alg,
 			   const unsigned char *addr,
@@ -951,9 +951,9 @@ int nvlsi_wpa_supp_set_key(void *if_priv,
 			   const unsigned char *key,
 			   size_t key_len)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_key_info key_info;
 	const unsigned char *mac_addr = NULL;
 	unsigned int suite;
@@ -1019,23 +1019,23 @@ int nvlsi_wpa_supp_set_key(void *if_priv,
 	key_info.valid_fields |= IMG_KEY_IDX_VALID;
 
 	if (alg == WPA_ALG_NONE) {
-		status = nvlsi_wlan_fmac_del_key(rpu_ctx_zep,
+		status = wifi_nrf_wlan_fmac_del_key(rpu_ctx_zep,
 						 vif_ctx_zep->vif_idx,
 						 &key_info,
 						 mac_addr);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS)
-			printk("%s: nvlsi_wlan_fmac_del_key failed\n", __func__);
+			printk("%s: wifi_nrf_wlan_fmac_del_key failed\n", __func__);
 		else
 			ret = 0;
 	} else {
-		status = nvlsi_wlan_fmac_add_key(rpu_ctx_zep,
+		status = wifi_nrf_wlan_fmac_add_key(rpu_ctx_zep,
 						 vif_ctx_zep->vif_idx,
 						 &key_info,
 						 mac_addr);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS)
-			printk("%s: nvlsi_wlan_fmac_add_key failed\n", __func__);
+			printk("%s: wifi_nrf_wlan_fmac_add_key failed\n", __func__);
 		else
 			ret = 0;
 	}
@@ -1075,12 +1075,12 @@ int nvlsi_wpa_supp_set_key(void *if_priv,
 	else if (addr)
 		key_info.img_flags |= IMG_KEY_DEFAULT_TYPE_UNICAST;
 
-	status = nvlsi_wlan_fmac_set_key(rpu_ctx_zep,
+	status = wifi_nrf_wlan_fmac_set_key(rpu_ctx_zep,
 					 vif_ctx_zep->vif_idx,
 					 &key_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: nvlsi_wlan_fmac_set_key failed\n", __func__);
+		printk("%s: wifi_nrf_wlan_fmac_set_key failed\n", __func__);
 		ret = -1;
 	} else
 		ret = 0;

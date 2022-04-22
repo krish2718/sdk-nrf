@@ -20,7 +20,7 @@
 #include "host_rpu_umac_if.h"
 
 
-struct nvlsi_rpu_vif_ctx_zep {
+struct wifi_nrf_vif_ctx_zep {
 	const struct device *zep_dev_ctx;
 	struct net_if *zep_net_if_ctx;
 	void *supp_drv_if_ctx;
@@ -36,16 +36,16 @@ struct nvlsi_rpu_vif_ctx_zep {
 };
 
 
-struct nvlsi_rpu_ctx_zep {
+struct wifi_nrf_ctx_zep {
 	void *drv_priv_zep;
 	void *rpu_ctx;
-	struct nvlsi_rpu_vif_ctx_zep vif_ctx_zep[MAX_NUM_VIFS];
+	struct wifi_nrf_vif_ctx_zep vif_ctx_zep[MAX_NUM_VIFS];
 };
 
 
-struct nvlsi_rpu_drv_priv_zep {
-	struct nvlsi_wlan_fmac_priv *fmac_priv;
+struct wifi_nrf_drv_priv_zep {
+	struct wifi_nrf_wlan_fmac_priv *fmac_priv;
 	/* TODO: Replace with a linked list to handle unlimited RPUs */
-	struct nvlsi_rpu_ctx_zep rpu_ctx_zep;
+	struct wifi_nrf_ctx_zep rpu_ctx_zep;
 };
 #endif /* __ZEPHYR_FMAC_MAIN_H__ */

@@ -11,17 +11,17 @@
 
 #include "bal_api.h"
 
-struct nvlsi_rpu_bal_dev_ctx *nvlsi_rpu_bal_dev_add(struct nvlsi_rpu_bal_priv *bpriv,
+struct wifi_nrf_bal_dev_ctx *wifi_nrf_bal_dev_add(struct wifi_nrf_bal_priv *bpriv,
 						    void *hal_dev_ctx)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 
-	bal_dev_ctx = nvlsi_rpu_osal_mem_zalloc(bpriv->opriv,
+	bal_dev_ctx = wifi_nrf_osal_mem_zalloc(bpriv->opriv,
 						sizeof(*bal_dev_ctx));
 
 	if (!bal_dev_ctx) {
-		nvlsi_rpu_osal_log_err(bpriv->opriv,
+		wifi_nrf_osal_log_err(bpriv->opriv,
 				       "%s: Unable to allocate bal_dev_ctx\n", __func__);
 		goto out;
 	}
@@ -33,7 +33,7 @@ struct nvlsi_rpu_bal_dev_ctx *nvlsi_rpu_bal_dev_add(struct nvlsi_rpu_bal_priv *b
 						       bal_dev_ctx);
 
 	if (!bal_dev_ctx->bus_dev_ctx) {
-		nvlsi_rpu_osal_log_err(bpriv->opriv,
+		wifi_nrf_osal_log_err(bpriv->opriv,
 				       "%s: Bus dev_add failed\n", __func__);
 		goto out;
 	}
@@ -42,7 +42,7 @@ struct nvlsi_rpu_bal_dev_ctx *nvlsi_rpu_bal_dev_add(struct nvlsi_rpu_bal_priv *b
 out:
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
 		if (bal_dev_ctx) {
-			nvlsi_rpu_osal_mem_free(bpriv->opriv,
+			wifi_nrf_osal_mem_free(bpriv->opriv,
 						bal_dev_ctx);
 			bal_dev_ctx = NULL;
 		}
@@ -52,23 +52,23 @@ out:
 }
 
 
-void nvlsi_rpu_bal_dev_rem(struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx)
+void wifi_nrf_bal_dev_rem(struct wifi_nrf_bal_dev_ctx *bal_dev_ctx)
 {
 	bal_dev_ctx->bpriv->ops->dev_rem(bal_dev_ctx->bus_dev_ctx);
 
-	nvlsi_rpu_osal_mem_free(bal_dev_ctx->bpriv->opriv,
+	wifi_nrf_osal_mem_free(bal_dev_ctx->bpriv->opriv,
 				bal_dev_ctx);
 }
 
 
-enum nvlsi_rpu_status nvlsi_rpu_bal_dev_init(struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx)
+enum wifi_nrf_status wifi_nrf_bal_dev_init(struct wifi_nrf_bal_dev_ctx *bal_dev_ctx)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
 	status = bal_dev_ctx->bpriv->ops->dev_init(bal_dev_ctx->bus_dev_ctx);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(bal_dev_ctx->bpriv->opriv,
+		wifi_nrf_osal_log_err(bal_dev_ctx->bpriv->opriv,
 				       "%s: dev_init failed\n", __func__);
 		goto out;
 	}
@@ -77,18 +77,18 @@ out:
 }
 
 
-void nvlsi_rpu_bal_dev_deinit(struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx)
+void wifi_nrf_bal_dev_deinit(struct wifi_nrf_bal_dev_ctx *bal_dev_ctx)
 {
 	bal_dev_ctx->bpriv->ops->dev_deinit(bal_dev_ctx->bus_dev_ctx);
 }
 
 
-static enum nvlsi_rpu_status nvlsi_rpu_bal_isr(void *ctx)
+static enum wifi_nrf_status wifi_nrf_bal_isr(void *ctx)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	status = bal_dev_ctx->bpriv->intr_callbk_fn(bal_dev_ctx->hal_dev_ctx);
 
@@ -96,17 +96,17 @@ static enum nvlsi_rpu_status nvlsi_rpu_bal_isr(void *ctx)
 }
 
 
-struct nvlsi_rpu_bal_priv *nvlsi_rpu_bal_init(struct nvlsi_rpu_osal_priv *opriv,
-					      struct nvlsi_rpu_bal_cfg_params *cfg_params,
-					      enum nvlsi_rpu_status (*intr_callbk_fn)(void *hal_dev_ctx))
+struct wifi_nrf_bal_priv *wifi_nrf_bal_init(struct wifi_nrf_osal_priv *opriv,
+					      struct wifi_nrf_bal_cfg_params *cfg_params,
+					      enum wifi_nrf_status (*intr_callbk_fn)(void *hal_dev_ctx))
 {
-	struct nvlsi_rpu_bal_priv *bpriv = NULL;
+	struct wifi_nrf_bal_priv *bpriv = NULL;
 
-	bpriv = nvlsi_rpu_osal_mem_zalloc(opriv,
+	bpriv = wifi_nrf_osal_mem_zalloc(opriv,
 					  sizeof(*bpriv));
 
 	if (!bpriv) {
-		nvlsi_rpu_osal_log_err(opriv,
+		wifi_nrf_osal_log_err(opriv,
 				       "%s: Unable to allocate memory for bpriv\n", __func__);
 		goto out;
 	}
@@ -119,12 +119,12 @@ struct nvlsi_rpu_bal_priv *nvlsi_rpu_bal_init(struct nvlsi_rpu_osal_priv *opriv,
 
 	bpriv->bus_priv = bpriv->ops->init(opriv,
 					   cfg_params,
-					   &nvlsi_rpu_bal_isr);
+					   &wifi_nrf_bal_isr);
 
 	if (!bpriv->bus_priv) {
-		nvlsi_rpu_osal_log_err(opriv,
+		wifi_nrf_osal_log_err(opriv,
 				       "%s: Failed\n", __func__);
-		nvlsi_rpu_osal_mem_free(opriv,
+		wifi_nrf_osal_mem_free(opriv,
 					bpriv);
 		bpriv = NULL;
 	}
@@ -134,22 +134,22 @@ out:
 }
 
 
-void nvlsi_rpu_bal_deinit(struct nvlsi_rpu_bal_priv *bpriv)
+void wifi_nrf_bal_deinit(struct wifi_nrf_bal_priv *bpriv)
 {
 	bpriv->ops->deinit(bpriv->bus_priv);
 
-	nvlsi_rpu_osal_mem_free(bpriv->opriv,
+	wifi_nrf_osal_mem_free(bpriv->opriv,
 				bpriv);
 }
 
 
-unsigned int nvlsi_rpu_bal_read_word(void *ctx,
+unsigned int wifi_nrf_bal_read_word(void *ctx,
 				     unsigned long addr_offset)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 	unsigned int val = 0;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	val = bal_dev_ctx->bpriv->ops->read_word(bal_dev_ctx->bus_dev_ctx,
 						 addr_offset);
@@ -158,13 +158,13 @@ unsigned int nvlsi_rpu_bal_read_word(void *ctx,
 }
 
 
-void nvlsi_rpu_bal_write_word(void *ctx,
+void wifi_nrf_bal_write_word(void *ctx,
 			      unsigned long addr_offset,
 			      unsigned int val)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	bal_dev_ctx->bpriv->ops->write_word(bal_dev_ctx->bus_dev_ctx,
 					    addr_offset,
@@ -172,14 +172,14 @@ void nvlsi_rpu_bal_write_word(void *ctx,
 }
 
 
-void nvlsi_rpu_bal_read_block(void *ctx,
+void wifi_nrf_bal_read_block(void *ctx,
 			      void *dest_addr,
 			      unsigned long src_addr_offset,
 			      size_t len)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	bal_dev_ctx->bpriv->ops->read_block(bal_dev_ctx->bus_dev_ctx,
 					    dest_addr,
@@ -188,14 +188,14 @@ void nvlsi_rpu_bal_read_block(void *ctx,
 }
 
 
-void nvlsi_rpu_bal_write_block(void *ctx,
+void wifi_nrf_bal_write_block(void *ctx,
 			       unsigned long dest_addr_offset,
 			       const void *src_addr,
 			       size_t len)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	bal_dev_ctx->bpriv->ops->write_block(bal_dev_ctx->bus_dev_ctx,
 					     dest_addr_offset,
@@ -204,15 +204,15 @@ void nvlsi_rpu_bal_write_block(void *ctx,
 }
 
 
-unsigned long nvlsi_rpu_bal_dma_map(void *ctx,
+unsigned long wifi_nrf_bal_dma_map(void *ctx,
 				    unsigned long virt_addr,
 				    size_t len,
-				    enum nvlsi_rpu_osal_dma_dir dma_dir)
+				    enum wifi_nrf_osal_dma_dir dma_dir)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 	unsigned long phy_addr = 0;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	phy_addr = bal_dev_ctx->bpriv->ops->dma_map(bal_dev_ctx->bus_dev_ctx,
 						    virt_addr,
@@ -223,15 +223,15 @@ unsigned long nvlsi_rpu_bal_dma_map(void *ctx,
 }
 
 
-unsigned long nvlsi_rpu_bal_dma_unmap(void *ctx,
+unsigned long wifi_nrf_bal_dma_unmap(void *ctx,
 				      unsigned long phy_addr,
 				      size_t len,
-				      enum nvlsi_rpu_osal_dma_dir dma_dir)
+				      enum wifi_nrf_osal_dma_dir dma_dir)
 {
-	struct nvlsi_rpu_bal_dev_ctx *bal_dev_ctx = NULL;
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 	unsigned long virt_addr = 0;
 
-	bal_dev_ctx = (struct nvlsi_rpu_bal_dev_ctx *)ctx;
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
 	virt_addr = bal_dev_ctx->bpriv->ops->dma_unmap(bal_dev_ctx->bus_dev_ctx,
 						       phy_addr,

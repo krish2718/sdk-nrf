@@ -38,7 +38,7 @@ static bool hal_rpu_is_mem_bev(unsigned int addr_val)
 }
 
 
-static bool hal_rpu_is_mem_core(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static bool hal_rpu_is_mem_core(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 				unsigned int addr_val)
 {
 	bool is_mem = false;
@@ -74,7 +74,7 @@ static bool hal_rpu_is_mem_readable(unsigned int addr)
 }
 
 
-static bool hal_rpu_is_mem_writable(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static bool hal_rpu_is_mem_writable(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 				    unsigned int addr)
 {
 	if (hal_rpu_is_mem_ram(addr) ||
@@ -86,12 +86,12 @@ static bool hal_rpu_is_mem_writable(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
 }
 
 
-static enum nvlsi_rpu_status rpu_mem_read_ram(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static enum wifi_nrf_status rpu_mem_read_ram(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 					      void *src_addr,
 					      unsigned int ram_addr_val,
 					      unsigned int len)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned long addr_offset = 0;
 
 	status = pal_rpu_addr_offset_get(hal_dev_ctx->hpriv->opriv,
@@ -99,13 +99,13 @@ static enum nvlsi_rpu_status rpu_mem_read_ram(struct nvlsi_rpu_hal_dev_ctx *hal_
 					 &addr_offset);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: pal_rpu_addr_offset_get failed\n",
 				       __func__);
 		return status;
 	}
 
-	nvlsi_rpu_bal_read_block(hal_dev_ctx->bal_dev_ctx,
+	wifi_nrf_bal_read_block(hal_dev_ctx->bal_dev_ctx,
 				 src_addr,
 				 addr_offset,
 				 len);
@@ -115,12 +115,12 @@ static enum nvlsi_rpu_status rpu_mem_read_ram(struct nvlsi_rpu_hal_dev_ctx *hal_
 }
 
 
-static enum nvlsi_rpu_status rpu_mem_write_ram(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static enum wifi_nrf_status rpu_mem_write_ram(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 					       unsigned int ram_addr_val,
 					       void *src_addr,
 					       unsigned int len)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned long addr_offset = 0;
 
 	status = pal_rpu_addr_offset_get(hal_dev_ctx->hpriv->opriv,
@@ -128,13 +128,13 @@ static enum nvlsi_rpu_status rpu_mem_write_ram(struct nvlsi_rpu_hal_dev_ctx *hal
 					 &addr_offset);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: pal_rpu_addr_offset_get failed\n",
 				       __func__);
 		return status;
 	}
 
-	nvlsi_rpu_bal_write_block(hal_dev_ctx->bal_dev_ctx,
+	wifi_nrf_bal_write_block(hal_dev_ctx->bal_dev_ctx,
 				  addr_offset,
 				  src_addr,
 				  len);
@@ -144,7 +144,7 @@ static enum nvlsi_rpu_status rpu_mem_write_ram(struct nvlsi_rpu_hal_dev_ctx *hal
 }
 
 
-static enum nvlsi_rpu_status rpu_mem_write_core(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static enum wifi_nrf_status rpu_mem_write_core(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 						unsigned int core_addr_val,
 						void *src_addr,
 						unsigned int len)
@@ -161,14 +161,14 @@ static enum nvlsi_rpu_status rpu_mem_write_core(struct nvlsi_rpu_hal_dev_ctx *ha
 	 */
 	if (!hal_rpu_is_mem_core(hal_dev_ctx,
 				 core_addr_val)) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid memory address\n",
 				       __func__);
 		goto out;
 	}
 
 	if (core_addr_val % 4 != 0) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Address not multiple of 4 bytes\n",
 				       __func__);
 		goto out;
@@ -193,7 +193,7 @@ static enum nvlsi_rpu_status rpu_mem_write_core(struct nvlsi_rpu_hal_dev_ctx *ha
 				   addr);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Writing to address reg failed\n",
 				       __func__);
 		goto out;
@@ -207,7 +207,7 @@ static enum nvlsi_rpu_status rpu_mem_write_core(struct nvlsi_rpu_hal_dev_ctx *ha
 					   data);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
-			nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 					       "%s: Writing to data reg failed\n",
 					       __func__);
 			goto out;
@@ -219,7 +219,7 @@ out:
 }
 
 
-static unsigned int rpu_get_bev_addr_remap(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static unsigned int rpu_get_bev_addr_remap(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 					   unsigned int bev_addr_val)
 {
 	unsigned int addr = 0;
@@ -237,7 +237,7 @@ static unsigned int rpu_get_bev_addr_remap(struct nvlsi_rpu_hal_dev_ctx *hal_dev
 }
 
 
-static enum nvlsi_rpu_status rpu_mem_write_bev(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+static enum wifi_nrf_status rpu_mem_write_bev(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 					       unsigned int bev_addr_val,
 					       void *src_addr,
 					       unsigned int len)
@@ -253,7 +253,7 @@ static enum nvlsi_rpu_status rpu_mem_write_bev(struct nvlsi_rpu_hal_dev_ctx *hal
 	if ((bev_addr_val < RPU_ADDR_BEV_START) ||
 	    (bev_addr_val > RPU_ADDR_BEV_END) ||
 	    (bev_addr_val % 4 != 0)) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Address not in range or not a multiple of 4 bytes\n",
 				       __func__);
 		goto out;
@@ -274,7 +274,7 @@ static enum nvlsi_rpu_status rpu_mem_write_bev(struct nvlsi_rpu_hal_dev_ctx *hal
 					   data);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
-			nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 					       "%s: Writing to BEV reg failed\n",
 					       __func__);
 			goto out;
@@ -286,25 +286,25 @@ out:
 }
 
 
-enum nvlsi_rpu_status hal_rpu_mem_read(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status hal_rpu_mem_read(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 				       void *src_addr,
 				       unsigned int rpu_mem_addr_val,
 				       unsigned int len)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
 	if (!hal_dev_ctx)
 		goto out;
 
 	if (!src_addr) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid params\n",
 				       __func__);
 		goto out;
 	}
 
 	if (!hal_rpu_is_mem_readable(rpu_mem_addr_val)) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid memory address 0x%X\n",
 				       __func__,
 				       rpu_mem_addr_val);
@@ -320,18 +320,18 @@ out:
 }
 
 
-enum nvlsi_rpu_status hal_rpu_mem_write(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status hal_rpu_mem_write(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 					unsigned int rpu_mem_addr_val,
 					void *src_addr,
 					unsigned int len)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
 	if (!hal_dev_ctx)
 		return status;
 
 	if (!src_addr) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid params\n",
 				       __func__);
 		return status;
@@ -339,7 +339,7 @@ enum nvlsi_rpu_status hal_rpu_mem_write(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ct
 
 	if (!hal_rpu_is_mem_writable(hal_dev_ctx,
 				     rpu_mem_addr_val)) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid memory address 0x%X\n",
 				       __func__,
 				       rpu_mem_addr_val);
@@ -363,7 +363,7 @@ enum nvlsi_rpu_status hal_rpu_mem_write(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ct
 					   src_addr,
 					   len);
 	else {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid memory address 0x%X\n",
 				       __func__,
 				       rpu_mem_addr_val);
@@ -375,11 +375,11 @@ out:
 }
 
 
-enum nvlsi_rpu_status hal_rpu_mem_clr(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status hal_rpu_mem_clr(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 				      enum RPU_PROC_TYPE proc,
 				      enum HAL_RPU_MEM_TYPE mem_type)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int mem_addr = 0;
 	unsigned int start_addr = 0;
 	unsigned int end_addr = 0;
@@ -402,7 +402,7 @@ enum nvlsi_rpu_status hal_rpu_mem_clr(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
 			start_addr = RPU_ADDR_MCU2_CORE_ROM_START;
 			end_addr = RPU_ADDR_MCU2_CORE_ROM_END;
 		} else {
-			nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 					       "%s: Invalid proc(%d)\n",
 					       __func__,
 					       hal_dev_ctx->curr_proc);
@@ -416,7 +416,7 @@ enum nvlsi_rpu_status hal_rpu_mem_clr(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
 			start_addr = RPU_ADDR_MCU2_CORE_RET_START;
 			end_addr = RPU_ADDR_MCU2_CORE_RET_END;
 		} else {
-			nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 					       "%s: Invalid proc(%d)\n",
 					       __func__,
 					       hal_dev_ctx->curr_proc);
@@ -430,14 +430,14 @@ enum nvlsi_rpu_status hal_rpu_mem_clr(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
 			start_addr = RPU_ADDR_MCU2_CORE_SCRATCH_START;
 			end_addr = RPU_ADDR_MCU2_CORE_SCRATCH_END;
 		} else {
-			nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 					       "%s: Invalid proc(%d)\n",
 					       __func__,
 					       hal_dev_ctx->curr_proc);
 			goto out;
 		}
 	} else {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid mem_type(%d)\n",
 				       __func__,
 				       mem_type);
@@ -453,7 +453,7 @@ enum nvlsi_rpu_status hal_rpu_mem_clr(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
 					   sizeof(mem_val));
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
-			nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 					       "%s: hal_rpu_mem_write failed\n",
 					       __func__);
 			goto out;

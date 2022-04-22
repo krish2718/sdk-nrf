@@ -1,9 +1,7 @@
 /*
- * File Name: osal_ops.h
+ * Copyright (c) 2022 Nordic Semiconductor ASA
  *
- * Copyright (c) 2011-2020 Imagination Technologies Ltd.
- * All rights reserved
- *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 #ifndef __OSAL_OPS_H__
 #define __OSAL_OPS_H__
@@ -13,7 +11,7 @@
 
 
 /**
- * struct nvlsi_rpu_osal_ops - Ops to be provided by a specific OS implementation.
+ * struct wifi_nrf_osal_ops - Ops to be provided by a specific OS implementation.
  * @init: Initialize the OS shim. This is expected to return any OS Shim
  * specific context information that might be needed.
  *
@@ -163,7 +161,7 @@
  * function will then need to be mapped to the corresponding Op.
  *
  */
-struct nvlsi_rpu_osal_ops {
+struct wifi_nrf_osal_ops {
 	void * (*mem_alloc)(size_t size);
 	void * (*mem_zalloc)(size_t size);
 	void (*mem_free)(void *buf);
@@ -243,23 +241,23 @@ struct nvlsi_rpu_osal_ops {
 				   void *osal_pcie_dev_ctx);
 	void (*bus_pcie_dev_rem)(void *os_pcie_dev_ctx);
 
-	enum nvlsi_rpu_status (*bus_pcie_dev_init)(void *os_pcie_dev_ctx);
+	enum wifi_nrf_status (*bus_pcie_dev_init)(void *os_pcie_dev_ctx);
 	void (*bus_pcie_dev_deinit)(void *os_pcie_dev_ctx);
 
-	enum nvlsi_rpu_status (*bus_pcie_dev_intr_reg)(void *os_pcie_dev_ctx,
+	enum wifi_nrf_status (*bus_pcie_dev_intr_reg)(void *os_pcie_dev_ctx,
 						       void *callbk_data,
 						       int (*callback_fn)(void *callbk_data));
 	void (*bus_pcie_dev_intr_unreg)(void *os_pcie_dev_ctx);
 	void * (*bus_pcie_dev_dma_map)(void *os_pcie_dev_ctx,
 				       void *virt_addr,
 				       size_t size,
-				       enum nvlsi_rpu_osal_dma_dir dir);
+				       enum wifi_nrf_osal_dma_dir dir);
 	void (*bus_pcie_dev_dma_unmap)(void *os_pcie_dev_ctx,
 				       void *dma_addr,
 				       size_t size,
-				       enum nvlsi_rpu_osal_dma_dir dir);
+				       enum wifi_nrf_osal_dma_dir dir);
 	void (*bus_pcie_dev_host_map_get)(void *os_pcie_dev_ctx,
-					  struct nvlsi_rpu_osal_host_map *host_map);
+					  struct wifi_nrf_osal_host_map *host_map);
 
 	void * (*bus_qspi_init)(void);
 	void (*bus_qspi_deinit)(void *os_qspi_priv);
@@ -267,15 +265,15 @@ struct nvlsi_rpu_osal_ops {
 				   void *osal_qspi_dev_ctx);
 	void (*bus_qspi_dev_rem)(void *os_qspi_dev_ctx);
 
-	enum nvlsi_rpu_status (*bus_qspi_dev_init)(void *os_qspi_dev_ctx);
+	enum wifi_nrf_status (*bus_qspi_dev_init)(void *os_qspi_dev_ctx);
 	void (*bus_qspi_dev_deinit)(void *os_qspi_dev_ctx);
 
-	enum nvlsi_rpu_status (*bus_qspi_dev_intr_reg)(void *os_qspi_dev_ctx,
+	enum wifi_nrf_status (*bus_qspi_dev_intr_reg)(void *os_qspi_dev_ctx,
 						       void *callbk_data,
 						       int (*callback_fn)(void *callbk_data));
 	void (*bus_qspi_dev_intr_unreg)(void *os_qspi_dev_ctx);
 	void (*bus_qspi_dev_host_map_get)(void *os_qspi_dev_ctx,
-					  struct nvlsi_rpu_osal_host_map *host_map);
+					  struct wifi_nrf_osal_host_map *host_map);
 };
 
 
@@ -284,9 +282,9 @@ struct nvlsi_rpu_osal_ops {
  *                of OS specific Ops.
  *
  * This Op is expected to be implemented by a specific OS shim and is expected
- * to return a pointer to a initialized instance of struct nvlsi_rpu_osal_ops.
+ * to return a pointer to a initialized instance of struct wifi_nrf_osal_ops.
  *
  * Returns: Pointer to instance of OS specific Ops.
  */
-struct nvlsi_rpu_osal_ops *get_os_ops(void);
+struct wifi_nrf_osal_ops *get_os_ops(void);
 #endif /* __OSAL_OPS_H__ */

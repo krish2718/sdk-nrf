@@ -565,9 +565,9 @@ static unsigned int zep_shim_time_elapsed_us(unsigned long start_time_us)
 }
 
 
-static enum nvlsi_rpu_status zep_shim_bus_qspi_dev_init(void *os_qspi_dev_ctx)
+static enum wifi_nrf_status zep_shim_bus_qspi_dev_init(void *os_qspi_dev_ctx)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct qspi_dev *dev = NULL;
 
 	dev = os_qspi_dev_ctx;
@@ -645,7 +645,7 @@ void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
 
 
 static void zep_shim_bus_qspi_dev_host_map_get(void *os_qspi_dev_ctx,
-					       struct nvlsi_rpu_osal_host_map *host_map)
+					       struct wifi_nrf_osal_host_map *host_map)
 {
 	if (!os_qspi_dev_ctx || !host_map) {
 		printk("%s: Invalid parameters\n", __func__);
@@ -683,11 +683,11 @@ void zep_shim_irq_handler(const struct device *dev,
 }
 
 
-enum nvlsi_rpu_status zep_shim_bus_qspi_intr_reg(void *os_dev_ctx,
+enum wifi_nrf_status zep_shim_bus_qspi_intr_reg(void *os_dev_ctx,
 						 void *callbk_data,
 						 int (*callbk_fn)(void *callbk_data))
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct zep_shim_intr_priv *intr_priv = NULL;
 	int ret = -1;
 
@@ -736,7 +736,7 @@ void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
 }
 
 
-struct nvlsi_rpu_osal_ops nvlsi_os_zep_ops = {
+struct wifi_nrf_osal_ops wifi_nrf_os_zep_ops = {
 	.mem_alloc = zep_shim_mem_alloc,
 	.mem_zalloc = zep_shim_mem_zalloc,
 	.mem_free = k_free,
@@ -807,7 +807,7 @@ struct nvlsi_rpu_osal_ops nvlsi_os_zep_ops = {
 	.bus_qspi_dev_host_map_get = zep_shim_bus_qspi_dev_host_map_get,
 };
 
-struct nvlsi_rpu_osal_ops *get_os_ops(void)
+struct wifi_nrf_osal_ops *get_os_ops(void)
 {
-	return &nvlsi_os_zep_ops;
+	return &wifi_nrf_os_zep_ops;
 }

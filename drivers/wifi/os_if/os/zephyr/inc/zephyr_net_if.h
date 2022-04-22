@@ -17,8 +17,8 @@
 #include <net/ethernet.h>
 
 
-void nvlsi_if_init(struct net_if *iface);
-enum ethernet_hw_caps nvlsi_if_caps_get(const struct device *dev);
-int nvlsi_if_send(const struct device *dev,
+void wifi_nrf_if_init(struct net_if *iface);
+enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev);
+int wifi_nrf_if_send(const struct device *dev,
 		  struct net_pkt *pkt);
 #endif /* __ZEPHYR_NET_IF_H__ */

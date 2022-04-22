@@ -40,7 +40,7 @@ enum HAL_RPU_MEM_TYPE {
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_mem_read(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_mem_read(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 				       void *host_addr,
 				       unsigned int rpu_mem_addr,
 				       unsigned int len);
@@ -61,7 +61,7 @@ enum nvlsi_rpu_status hal_rpu_mem_read(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_mem_write(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_mem_write(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					unsigned int rpu_mem_addr,
 					void *host_addr,
 					unsigned int len);
@@ -78,7 +78,7 @@ enum nvlsi_rpu_status hal_rpu_mem_write(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_mem_clr(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_mem_clr(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 				      enum RPU_PROC_TYPE rpu_proc,
 				      enum HAL_RPU_MEM_TYPE mem_type);
 #endif /* __HAL_MEM_H__ */

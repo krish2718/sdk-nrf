@@ -15,21 +15,21 @@
 #include <stddef.h>
 #include "osal_ops.h"
 
-void *nvlsi_wlan_utils_q_alloc(struct nvlsi_rpu_osal_priv *opriv);
+void *wifi_nrf_wlan_utils_q_alloc(struct wifi_nrf_osal_priv *opriv);
 
-void nvlsi_wlan_utils_q_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_wlan_utils_q_free(struct wifi_nrf_osal_priv *opriv,
 			     void *q);
 
-enum nvlsi_rpu_status nvlsi_wlan_utils_q_enqueue(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_wlan_utils_q_enqueue(struct wifi_nrf_osal_priv *opriv,
 						 void *q,
 						 void *q_node);
 
-void *nvlsi_wlan_utils_q_dequeue(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_wlan_utils_q_dequeue(struct wifi_nrf_osal_priv *opriv,
 				 void *q);
 
-void *nvlsi_wlan_utils_q_peek(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_wlan_utils_q_peek(struct wifi_nrf_osal_priv *opriv,
 			      void *q);
 
-unsigned int nvlsi_wlan_utils_q_len(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_wlan_utils_q_len(struct wifi_nrf_osal_priv *opriv,
 				    void *q);
 #endif /* __QUEUE_H__ */

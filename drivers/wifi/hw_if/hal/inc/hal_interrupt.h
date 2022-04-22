@@ -24,7 +24,7 @@
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_irq_enable(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
+enum wifi_nrf_status hal_rpu_irq_enable(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 
 
 /**
@@ -37,7 +37,7 @@ enum nvlsi_rpu_status hal_rpu_irq_enable(struct nvlsi_rpu_hal_dev_ctx *hal_dev_c
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_irq_disable(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
+enum wifi_nrf_status hal_rpu_irq_disable(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 
 
 /**
@@ -57,5 +57,5 @@ enum nvlsi_rpu_status hal_rpu_irq_disable(struct nvlsi_rpu_hal_dev_ctx *hal_dev_
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_irq_process(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
+enum wifi_nrf_status hal_rpu_irq_process(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 #endif /* __HAL_INTERRUPT_H__ */

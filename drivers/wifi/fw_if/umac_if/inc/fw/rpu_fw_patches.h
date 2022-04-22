@@ -8,17 +8,17 @@
  * @brief File containing patches for the RPU ROM firmware.
  */
 
-unsigned char nvlsi_wlan_lmac_patch_pri_bimg[] = {
+unsigned char wifi_nrf_wlan_lmac_patch_pri_bimg[] = {
 };
 
 
-unsigned char nvlsi_wlan_lmac_patch_sec_bin[] = {
+unsigned char wifi_nrf_wlan_lmac_patch_sec_bin[] = {
 };
 
 
-unsigned char nvlsi_wlan_umac_patch_pri_bimg[] = {
+unsigned char wifi_nrf_wlan_umac_patch_pri_bimg[] = {
 };
 
 
-unsigned char nvlsi_wlan_umac_patch_sec_bin[] = {
+unsigned char wifi_nrf_wlan_umac_patch_sec_bin[] = {
 };

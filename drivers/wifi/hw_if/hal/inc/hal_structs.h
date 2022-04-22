@@ -52,7 +52,7 @@ enum NVLSI_RPU_HAL_MSG_TYPE {
 };
 
 
-struct nvlsi_rpu_hal_cfg_params {
+struct wifi_nrf_hal_cfg_params {
 	unsigned int max_cmd_size;
 	unsigned int max_event_size;
 
@@ -65,7 +65,7 @@ struct nvlsi_rpu_hal_cfg_params {
 
 
 /**
- * struct nvlsi_rpu_hal_priv - Structure to hold context information for the
+ * struct wifi_nrf_hal_priv - Structure to hold context information for the
  *                           HAL layer.
  * @opriv: Pointer to the OS abstraction layer.
  * @bpriv: Pointer to the Bus abstraction layer.
@@ -82,9 +82,9 @@ struct nvlsi_rpu_hal_cfg_params {
  * This structure maintains the context information necessary for the
  * operation of the HAL layer.
  */
-struct nvlsi_rpu_hal_priv {
-	struct nvlsi_rpu_osal_priv *opriv;
-	struct nvlsi_rpu_bal_priv *bpriv;
+struct wifi_nrf_hal_priv {
+	struct wifi_nrf_osal_priv *opriv;
+	struct wifi_nrf_bal_priv *bpriv;
 	unsigned char num_devs;
 
 	void *add_dev_callbk_data;
@@ -92,19 +92,19 @@ struct nvlsi_rpu_hal_priv {
 				    void *hal_dev_ctx);
 	void (*rem_dev_callbk_fn)(void *mac_ctx);
 
-	enum nvlsi_rpu_status (*init_dev_callbk_fn)(void *mac_ctx);
+	enum wifi_nrf_status (*init_dev_callbk_fn)(void *mac_ctx);
 	void (*deinit_dev_callbk_fn)(void *mac_ctx);
 
-	enum nvlsi_rpu_status (*intr_callbk_fn)(void *mac_ctx,
+	enum wifi_nrf_status (*intr_callbk_fn)(void *mac_ctx,
 						void *event_data,
 						unsigned int len);
-	struct nvlsi_rpu_hal_cfg_params cfg_params;
+	struct wifi_nrf_hal_cfg_params cfg_params;
 	unsigned long addr_pktram_base;
 };
 
 
 /**
- * struct nvlsi_rpu_hal_info - Structure to hold RPU information.
+ * struct wifi_nrf_hal_info - Structure to hold RPU information.
  * @hpqm_info: HPQM queue(s) related information.
  * @rx_cmd_base: The base address for posting RX commands.
  * @tx_cmd_base: The base address for posting TX commands.
@@ -112,14 +112,14 @@ struct nvlsi_rpu_hal_priv {
  * This structure contains RPU related information needed by the
  * HAL layer.
  */
-struct nvlsi_rpu_hal_info {
+struct wifi_nrf_hal_info {
 	struct host_rpu_hpqm_info hpqm_info;
 	unsigned int rx_cmd_base;
 	unsigned int tx_cmd_base;
 };
 
 
-struct nvlsi_rpu_hal_buf_map_info {
+struct wifi_nrf_hal_buf_map_info {
 	bool mapped;
 	unsigned long virt_addr;
 	unsigned long phy_addr;
@@ -128,7 +128,7 @@ struct nvlsi_rpu_hal_buf_map_info {
 
 
 /**
- * struct nvlsi_rpu_hal_dev_ctx - Structure to hold per device context information
+ * struct wifi_nrf_hal_dev_ctx - Structure to hold per device context information
  *                              for the HAL layer.
  * @hpriv: Pointer to the HAL abstraction layer.
  * @idx: The index of the HAL instantiation (the instance of the device to
@@ -162,13 +162,13 @@ struct nvlsi_rpu_hal_buf_map_info {
  * initialized durign the initialization of the driver while others need to
  * be kept updated over the duration of the driver operation.
  */
-struct nvlsi_rpu_hal_dev_ctx {
-	struct nvlsi_rpu_hal_priv *hpriv;
+struct wifi_nrf_hal_dev_ctx {
+	struct wifi_nrf_hal_priv *hpriv;
 	void *mac_dev_ctx;
 	void *bal_dev_ctx;
 	unsigned char idx;
 
-	struct nvlsi_rpu_hal_info rpu_info;
+	struct wifi_nrf_hal_info rpu_info;
 
 	unsigned int num_cmds;
 
@@ -187,8 +187,8 @@ struct nvlsi_rpu_hal_dev_ctx {
 	void *rx_tasklet;
 	void *lock_rx;
 
-	struct nvlsi_rpu_hal_buf_map_info *rx_buf_info[MAX_NUM_OF_RX_QUEUES];
-	struct nvlsi_rpu_hal_buf_map_info *tx_buf_info;
+	struct wifi_nrf_hal_buf_map_info *rx_buf_info[MAX_NUM_OF_RX_QUEUES];
+	struct wifi_nrf_hal_buf_map_info *tx_buf_info;
 
 	unsigned long addr_rpu_pktram_base;
 	unsigned long addr_rpu_pktram_base_tx;
@@ -204,13 +204,13 @@ struct nvlsi_rpu_hal_dev_ctx {
 
 
 /**
- * struct nvlsi_rpu_hal_msg - Structure to hold information about a HAL message.
+ * struct wifi_nrf_hal_msg - Structure to hold information about a HAL message.
  * @len: Length of the HAL message.
  * @data: Pointer to the buffer containing the HAL message.
  *
  * This structure contains information about a HAL message (command/event).
  */
-struct nvlsi_rpu_hal_msg {
+struct wifi_nrf_hal_msg {
 	unsigned int len;
 	char data[0];
 };

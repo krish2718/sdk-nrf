@@ -13,18 +13,18 @@
 #include "hal_mem.h"
 #include "hal_common.h"
 
-enum nvlsi_rpu_status hal_rpu_hpq_enqueue(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_hpq_enqueue(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					  struct host_rpu_hpq *hpq,
 					  unsigned int val)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
 	status = hal_rpu_reg_write(hal_ctx,
 				   hpq->enqueue_addr,
 				   val);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_ctx->hpriv->opriv,
 				       "%s: Writing to enqueue address failed\n",
 				       __func__);
 		goto out;
@@ -35,18 +35,18 @@ out:
 }
 
 
-enum nvlsi_rpu_status hal_rpu_hpq_dequeue(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_hpq_dequeue(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					  struct host_rpu_hpq *hpq,
 					  unsigned int *val)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
 	status = hal_rpu_reg_read(hal_ctx,
 				  val,
 				  hpq->dequeue_addr);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_ctx->hpriv->opriv,
 				       "%s: Dequeue failed, val (0x%X)\n",
 				       __func__,
 				       *val);
@@ -60,7 +60,7 @@ enum nvlsi_rpu_status hal_rpu_hpq_dequeue(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
 					   *val);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
-			nvlsi_rpu_osal_log_err(hal_ctx->hpriv->opriv,
+			wifi_nrf_osal_log_err(hal_ctx->hpriv->opriv,
 					       "%s: Writing to dequeue address failed, val (0x%X)\n",
 					       __func__,
 					       *val);

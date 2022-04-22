@@ -5,8 +5,9 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-menuconfig NVLSI_WIFI
+menuconfig WIFI_NRF
         bool "Nordic WiFi driver"
-	default n
+        select WPA_SUPP
+        select NRFX_QSPI
         help
           Nordic Wifi Driver

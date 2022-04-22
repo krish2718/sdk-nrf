@@ -24,7 +24,7 @@
 
 
 /**
- * nvlsi_rpu_hal_init() - Initialize the HAL layer.
+ * wifi_nrf_hal_init() - Initialize the HAL layer.
  *
  * @opriv: Pointer to the OSAL layer.
  * @cfg_params: Parameters needed to configure the HAL for WLAN operation.
@@ -37,39 +37,39 @@
  *
  * Returns: Pointer to instance of HAL layer context.
  */
-struct nvlsi_rpu_hal_priv *nvlsi_rpu_hal_init(struct nvlsi_rpu_osal_priv *opriv,
-					      struct nvlsi_rpu_hal_cfg_params *cfg_params,
-					      enum nvlsi_rpu_status (*intr_callbk_fn)(void *nvlsi_mac_ctx,
+struct wifi_nrf_hal_priv *wifi_nrf_hal_init(struct wifi_nrf_osal_priv *opriv,
+					      struct wifi_nrf_hal_cfg_params *cfg_params,
+					      enum wifi_nrf_status (*intr_callbk_fn)(void *wifi_nrf_mac_ctx,
 										      void *event_data,
 										      unsigned int len));
 
 /**
- * nvlsi_rpu_hal_deinit() - Deinitialize the HAL layer.
- * @hpriv: Pointer to the HAL context returned by the @nvlsi_rpu_hal_init API.
+ * wifi_nrf_hal_deinit() - Deinitialize the HAL layer.
+ * @hpriv: Pointer to the HAL context returned by the @wifi_nrf_hal_init API.
  *
  * This API is used to deinitialize the HAL layer and is expected to be called
  * after done using the HAL layer.
  *
  * Returns: None.
  */
-void nvlsi_rpu_hal_deinit(struct nvlsi_rpu_hal_priv *hpriv);
+void wifi_nrf_hal_deinit(struct wifi_nrf_hal_priv *hpriv);
 
 
-struct nvlsi_rpu_hal_dev_ctx *nvlsi_rpu_hal_dev_add(struct nvlsi_rpu_hal_priv *hpriv,
+struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpriv,
 						    void *mac_dev_ctx);
 
 
-void nvlsi_rpu_hal_dev_rem(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
+void wifi_nrf_hal_dev_rem(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 
 
-enum nvlsi_rpu_status nvlsi_rpu_hal_dev_init(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
+enum wifi_nrf_status wifi_nrf_hal_dev_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 
 
-void nvlsi_rpu_hal_dev_deinit(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
+void wifi_nrf_hal_dev_deinit(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 
 
 /**
- * nvlsi_rpu_hal_ctrl_cmd_send() - Sends a control command to the RPU.
+ * wifi_nrf_hal_ctrl_cmd_send() - Sends a control command to the RPU.
  * @hal_ctx: Pointer to HAL context.
  * @cmd: Pointer to command data.
  * @cmd_size: Size of the command data pointed to by @cmd.
@@ -91,13 +91,13 @@ void nvlsi_rpu_hal_dev_deinit(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx);
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status nvlsi_rpu_hal_ctrl_cmd_send(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status wifi_nrf_hal_ctrl_cmd_send(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 						  void *cmd,
 						  unsigned int cmd_size);
 
 
 /**
- * nvlsi_rpu_hal_data_cmd_send() - Send a data command to the RPU.
+ * wifi_nrf_hal_data_cmd_send() - Send a data command to the RPU.
  * @hal_ctx: Pointer to HAL context.
  * @cmd_type: Type of the data command to send to the RPU.
  * @data_cmd: The data command to be sent to the RPU.
@@ -113,7 +113,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_ctrl_cmd_send(struct nvlsi_rpu_hal_dev_ctx *
  *		Pass : %NVLSI_RPU_STATUS_SUCCESS
  *		Error: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status nvlsi_rpu_hal_data_cmd_send(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status wifi_nrf_hal_data_cmd_send(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 						  enum NVLSI_RPU_HAL_MSG_TYPE cmd_type,
 						  void *data_cmd,
 						  unsigned int data_cmd_size,
@@ -134,34 +134,34 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_data_cmd_send(struct nvlsi_rpu_hal_dev_ctx *
  *		Pass: %NVLSI_RPU_STATUS_SUCCESS
  *		Fail: %NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_eventq_process(struct nvlsi_rpu_hal_dev_ctx *hal_ctx);
+enum wifi_nrf_status hal_rpu_eventq_process(struct wifi_nrf_hal_dev_ctx *hal_ctx);
 
 
-unsigned long nvlsi_rpu_hal_buf_map_rx(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+unsigned long wifi_nrf_hal_buf_map_rx(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 				       unsigned long buf,
 				       unsigned int buf_len,
 				       unsigned int pool_id,
 				       unsigned int buf_id);
 
-unsigned long nvlsi_rpu_hal_buf_unmap_rx(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+unsigned long wifi_nrf_hal_buf_unmap_rx(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					 unsigned int data_len,
 					 unsigned int pool_id,
 					 unsigned int buf_id);
 
-unsigned long nvlsi_rpu_hal_buf_map_tx(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+unsigned long wifi_nrf_hal_buf_map_tx(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 				       unsigned long buf,
 				       unsigned int buf_len,
 				       unsigned int desc_id);
 
-unsigned long nvlsi_rpu_hal_buf_unmap_tx(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+unsigned long wifi_nrf_hal_buf_unmap_tx(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					 unsigned int desc_id);
 
-void nvlsi_rpu_hal_proc_ctx_set(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+void wifi_nrf_hal_proc_ctx_set(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 				enum RPU_PROC_TYPE proc);
 
-enum nvlsi_rpu_status nvlsi_rpu_hal_proc_reset(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status wifi_nrf_hal_proc_reset(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					       enum RPU_PROC_TYPE rpu_proc);
 
-enum nvlsi_rpu_status nvlsi_rpu_hal_fw_chk_boot(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status wifi_nrf_hal_fw_chk_boot(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 						enum RPU_PROC_TYPE rpu_proc);
 #endif /* __HAL_API_H__ */

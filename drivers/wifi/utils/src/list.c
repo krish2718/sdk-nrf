@@ -12,20 +12,20 @@
 
 #include "list.h"
 
-void *nvlsi_wlan_utils_list_alloc(struct nvlsi_rpu_osal_priv *opriv)
+void *wifi_nrf_wlan_utils_list_alloc(struct wifi_nrf_osal_priv *opriv)
 {
 	void *list = NULL;
 
-	list = nvlsi_rpu_osal_llist_alloc(opriv);
+	list = wifi_nrf_osal_llist_alloc(opriv);
 
 	if (!list) {
-		nvlsi_rpu_osal_log_err(opriv,
+		wifi_nrf_osal_log_err(opriv,
 				       "%s: Unable to allocate list\n",
 				       __func__);
 		goto out;
 	}
 
-	nvlsi_rpu_osal_llist_init(opriv,
+	wifi_nrf_osal_llist_init(opriv,
 				  list);
 
 out:
@@ -34,41 +34,41 @@ out:
 }
 
 
-void nvlsi_wlan_utils_list_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_wlan_utils_list_free(struct wifi_nrf_osal_priv *opriv,
 				void *list)
 {
-	nvlsi_rpu_osal_llist_free(opriv,
+	wifi_nrf_osal_llist_free(opriv,
 				  list);
 }
 
 
-enum nvlsi_rpu_status nvlsi_wlan_utils_list_add_tail(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_wlan_utils_list_add_tail(struct wifi_nrf_osal_priv *opriv,
 						     void *list,
 						     void *data)
 {
 	void *list_node = NULL;
 
-	list_node = nvlsi_rpu_osal_llist_node_alloc(opriv);
+	list_node = wifi_nrf_osal_llist_node_alloc(opriv);
 
 	if (!list_node) {
-		nvlsi_rpu_osal_log_err(opriv,
+		wifi_nrf_osal_log_err(opriv,
 				       "%s: Unable to allocate list node\n",
 				       __func__);
 		return NVLSI_RPU_STATUS_FAIL;
 	}
 
-	nvlsi_rpu_osal_llist_node_data_set(opriv,
+	wifi_nrf_osal_llist_node_data_set(opriv,
 					   list_node,
 					   data);
 
-	nvlsi_rpu_osal_llist_add_node_tail(opriv,
+	wifi_nrf_osal_llist_add_node_tail(opriv,
 					   list,
 					   list_node);
 
 	return NVLSI_RPU_STATUS_SUCCESS;
 }
 
-void nvlsi_wlan_utils_list_del_node(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_wlan_utils_list_del_node(struct wifi_nrf_osal_priv *opriv,
 				    void *list,
 				    void *data)
 {
@@ -76,23 +76,23 @@ void nvlsi_wlan_utils_list_del_node(struct nvlsi_rpu_osal_priv *opriv,
 	void *list_node = NULL;
 	void *list_node_next = NULL;
 
-	list_node = nvlsi_rpu_osal_llist_get_node_head(opriv,
+	list_node = wifi_nrf_osal_llist_get_node_head(opriv,
 						       list);
 
 	while (list_node) {
-		stored_data = nvlsi_rpu_osal_llist_node_data_get(opriv,
+		stored_data = wifi_nrf_osal_llist_node_data_get(opriv,
 								 list_node);
 
-		list_node_next = nvlsi_rpu_osal_llist_get_node_nxt(opriv,
+		list_node_next = wifi_nrf_osal_llist_get_node_nxt(opriv,
 								   list,
 								   list_node);
 
 		if (stored_data == data) {
-			nvlsi_rpu_osal_llist_del_node(opriv,
+			wifi_nrf_osal_llist_del_node(opriv,
 						      list,
 						      list_node);
 
-			nvlsi_rpu_osal_llist_node_free(opriv,
+			wifi_nrf_osal_llist_node_free(opriv,
 						       list_node);
 		}
 
@@ -100,25 +100,25 @@ void nvlsi_wlan_utils_list_del_node(struct nvlsi_rpu_osal_priv *opriv,
 	}
 }
 
-void *nvlsi_wlan_utils_list_del_head(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_wlan_utils_list_del_head(struct wifi_nrf_osal_priv *opriv,
 				     void *list)
 {
 	void *list_node = NULL;
 	void *data = NULL;
 
-	list_node = nvlsi_rpu_osal_llist_get_node_head(opriv,
+	list_node = wifi_nrf_osal_llist_get_node_head(opriv,
 						       list);
 
 	if (!list_node)
 		goto out;
 
-	data = nvlsi_rpu_osal_llist_node_data_get(opriv,
+	data = wifi_nrf_osal_llist_node_data_get(opriv,
 						  list_node);
 
-	nvlsi_rpu_osal_llist_del_node(opriv,
+	wifi_nrf_osal_llist_del_node(opriv,
 				      list,
 				      list_node);
-	nvlsi_rpu_osal_llist_node_free(opriv,
+	wifi_nrf_osal_llist_node_free(opriv,
 				       list_node);
 
 out:
@@ -126,19 +126,19 @@ out:
 }
 
 
-void *nvlsi_wlan_utils_list_peek(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_wlan_utils_list_peek(struct wifi_nrf_osal_priv *opriv,
 				 void *list)
 {
 	void *list_node = NULL;
 	void *data = NULL;
 
-	list_node = nvlsi_rpu_osal_llist_get_node_head(opriv,
+	list_node = wifi_nrf_osal_llist_get_node_head(opriv,
 						       list);
 
 	if (!list_node)
 		goto out;
 
-	data = nvlsi_rpu_osal_llist_node_data_get(opriv,
+	data = wifi_nrf_osal_llist_node_data_get(opriv,
 						  list_node);
 
 out:
@@ -146,29 +146,29 @@ out:
 }
 
 
-unsigned int nvlsi_wlan_utils_list_len(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_wlan_utils_list_len(struct wifi_nrf_osal_priv *opriv,
 				       void *list)
 {
-	return nvlsi_rpu_osal_llist_len(opriv,
+	return wifi_nrf_osal_llist_len(opriv,
 					list);
 }
 
 
-enum nvlsi_rpu_status nvlsi_wlan_utils_list_traverse(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_wlan_utils_list_traverse(struct wifi_nrf_osal_priv *opriv,
 						     void *list,
 						     void *callbk_data,
-						     enum nvlsi_rpu_status (*callbk_func)(void *callbk_data,
+						     enum wifi_nrf_status (*callbk_func)(void *callbk_data,
 											  void *data))
 {
 	void *list_node = NULL;
 	void *data = NULL;
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
-	list_node = nvlsi_rpu_osal_llist_get_node_head(opriv,
+	list_node = wifi_nrf_osal_llist_get_node_head(opriv,
 						       list);
 
 	while (list_node) {
-		data = nvlsi_rpu_osal_llist_node_data_get(opriv,
+		data = wifi_nrf_osal_llist_node_data_get(opriv,
 							  list_node);
 
 		status = callbk_func(callbk_data,
@@ -177,7 +177,7 @@ enum nvlsi_rpu_status nvlsi_wlan_utils_list_traverse(struct nvlsi_rpu_osal_priv 
 		if (status != NVLSI_RPU_STATUS_SUCCESS)
 			goto out;
 
-		list_node = nvlsi_rpu_osal_llist_get_node_nxt(opriv,
+		list_node = wifi_nrf_osal_llist_get_node_nxt(opriv,
 							      list,
 							      list_node);
 	}

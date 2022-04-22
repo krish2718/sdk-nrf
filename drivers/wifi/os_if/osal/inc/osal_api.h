@@ -12,7 +12,7 @@
 #include "osal_structs.h"
 
 /**
- * nvlsi_rpu_osal_init() - Initialize the OSAL layer.
+ * wifi_nrf_osal_init() - Initialize the OSAL layer.
  *
  * Initializes the OSAL layer and is expected to be called
  * before using the OSAL layer. Returns a pointer to the OSAL context
@@ -20,24 +20,24 @@
  *
  * Return: Pointer to instance of OSAL context.
  */
-struct nvlsi_rpu_osal_priv *nvlsi_rpu_osal_init(void);
+struct wifi_nrf_osal_priv *wifi_nrf_osal_init(void);
 
 
 /**
- * nvlsi_rpu_osal_deinit() - Deinitialize the OSAL layer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_deinit() - Deinitialize the OSAL layer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Deinitializes the OSAL layer and is expected to be called after done using
  * the OSAL layer.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_deinit(struct nvlsi_rpu_osal_priv *opriv);
+void wifi_nrf_osal_deinit(struct wifi_nrf_osal_priv *opriv);
 
 
 /**
- * nvlsi_rpu_osal_mem_alloc() - Allocate memory.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_mem_alloc() - Allocate memory.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @size: Size of the memory to be allocated in bytes.
  *
  * Allocates memory of @size bytes and returns a pointer to the start
@@ -47,12 +47,12 @@ void nvlsi_rpu_osal_deinit(struct nvlsi_rpu_osal_priv *opriv);
  *		Pass: Pointer to start of allocated memory.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_mem_alloc(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_mem_alloc(struct wifi_nrf_osal_priv *opriv,
 			       size_t size);
 
 /**
- * nvlsi_rpu_osal_mem_zalloc() - Allocated zero-initialized memory.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_mem_zalloc() - Allocated zero-initialized memory.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @size: Size of the memory to be allocated in bytes.
  *
  * Allocates memory of @size bytes, zeroes it out and returns a pointer to the
@@ -62,25 +62,25 @@ void *nvlsi_rpu_osal_mem_alloc(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to start of allocated memory.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_mem_zalloc(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_mem_zalloc(struct wifi_nrf_osal_priv *opriv,
 				size_t size);
 
 /**
- * nvlsi_rpu_osal_mem_free() - Free previously allocated memory.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_mem_free() - Free previously allocated memory.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @buf: Pointer to the memory to be freed.
  *
- * Free up memory which has been allocated using @nvlsi_rpu_osal_mem_alloc or
- * @nvlsi_rpu_osal_mem_zalloc.
+ * Free up memory which has been allocated using @wifi_nrf_osal_mem_alloc or
+ * @wifi_nrf_osal_mem_zalloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_mem_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_mem_free(struct wifi_nrf_osal_priv *opriv,
 			     void *buf);
 
 /**
- * nvlsi_rpu_osal_mem_cpy() - Copy contents from one memory location to another.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_mem_cpy() - Copy contents from one memory location to another.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @dest: Pointer to the memory location where contents are to be copied.
  * @src: Pointer to the memory location from where contents are to be copied.
  * @count: Number of bytes to be copied.
@@ -92,14 +92,14 @@ void nvlsi_rpu_osal_mem_free(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to destination memory.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_mem_cpy(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_mem_cpy(struct wifi_nrf_osal_priv *opriv,
 			     void *dest,
 			     const void *src,
 			     size_t count);
 
 /**
- * nvlsi_rpu_osal_mem_set() - Fill a block of memory with a particular value.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_mem_set() - Fill a block of memory with a particular value.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @start: Pointer to the memory location whose contents are to be set.
  * @val: Value to be set.
  * @size: Number of bytes to be set.
@@ -111,15 +111,15 @@ void *nvlsi_rpu_osal_mem_cpy(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to memory location which was set.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_mem_set(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_mem_set(struct wifi_nrf_osal_priv *opriv,
 			     void *start,
 			     int val,
 			     size_t size);
 
 
 /**
- * nvlsi_rpu_osal_iomem_mmap() - Memory map IO memory into CPU space.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_iomem_mmap() - Memory map IO memory into CPU space.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @addr: Address of the IO memory to be mapped.
  * @size: Size of the IO memory in bytes.
  *
@@ -129,26 +129,26 @@ void *nvlsi_rpu_osal_mem_set(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the mapped IO memory.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_iomem_mmap(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_iomem_mmap(struct wifi_nrf_osal_priv *opriv,
 				unsigned long addr,
 				unsigned long size);
 
 /**
- * nvlsi_rpu_osal_iomem_unmap() - Unmap previously mapped IO memory from CPU space.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_iomem_unmap() - Unmap previously mapped IO memory from CPU space.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @addr: Pointer to mapped IO memory to be unmapped.
  *
- * Unmaps IO memory from CPU space that was mapped using @nvlsi_rpu_osal_iomem_mmap.
+ * Unmaps IO memory from CPU space that was mapped using @wifi_nrf_osal_iomem_mmap.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_iomem_unmap(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_iomem_unmap(struct wifi_nrf_osal_priv *opriv,
 				volatile void *addr);
 
 /**
- * nvlsi_rpu_osal_iomem_read_reg32() - Read value from a 32 bit IO memory mapped
+ * wifi_nrf_osal_iomem_read_reg32() - Read value from a 32 bit IO memory mapped
  *                                   register.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @addr: Pointer to the IO memory mapped register address.
  *
  * Reads value from a 32 bit device register using a memory mapped
@@ -156,12 +156,12 @@ void nvlsi_rpu_osal_iomem_unmap(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: 32 bit value read from register.
  */
-unsigned int nvlsi_rpu_osal_iomem_read_reg32(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_osal_iomem_read_reg32(struct wifi_nrf_osal_priv *opriv,
 					     const volatile void *addr);
 
 /**
- * nvlsi_rpu_osal_iomem_write_reg32() - Write a 32 bit value to a IO memory mapped register.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_iomem_write_reg32() - Write a 32 bit value to a IO memory mapped register.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @addr: Pointer to the IO memory mapped register address.
  * @val: Value to be written to the register.
  *
@@ -170,14 +170,14 @@ unsigned int nvlsi_rpu_osal_iomem_read_reg32(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_iomem_write_reg32(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_iomem_write_reg32(struct wifi_nrf_osal_priv *opriv,
 				      volatile void *addr,
 				      unsigned int val);
 
 /**
- * nvlsi_rpu_osal_iomem_cpy_from() - Copy data from the memory of a memory
+ * wifi_nrf_osal_iomem_cpy_from() - Copy data from the memory of a memory
  *                                 mapped IO device to host memory.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @dest: Pointer to the host memory where data is to be copied.
  * @src: Pointer to the memory of the memory mapped IO device from where
  *       data is to be copied.
@@ -188,15 +188,15 @@ void nvlsi_rpu_osal_iomem_write_reg32(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_iomem_cpy_from(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_iomem_cpy_from(struct wifi_nrf_osal_priv *opriv,
 				   void *dest,
 				   const volatile void *src,
 				   size_t count);
 
 /**
- * nvlsi_rpu_osal_iomem_cpy_to() - Copy data to the memory of a memory
+ * wifi_nrf_osal_iomem_cpy_to() - Copy data to the memory of a memory
  *                               mapped IO device from host memory.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @dest: Pointer to the memory of the memory mapped IO device where
  *        data is to be copied.
  * @src: Pointer to the host memory from where data is to be copied.
@@ -207,15 +207,15 @@ void nvlsi_rpu_osal_iomem_cpy_from(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_iomem_cpy_to(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_iomem_cpy_to(struct wifi_nrf_osal_priv *opriv,
 				 volatile void *dest,
 				 const void *src,
 				 size_t count);
 
 
 /**
- * nvlsi_rpu_osal_spinlock_alloc() - Allocate a busy lock.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_spinlock_alloc() - Allocate a busy lock.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Allocates a busy lock.
  *
@@ -223,64 +223,64 @@ void nvlsi_rpu_osal_iomem_cpy_to(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the busy lock instance.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_spinlock_alloc(struct nvlsi_rpu_osal_priv *opriv);
+void *wifi_nrf_osal_spinlock_alloc(struct wifi_nrf_osal_priv *opriv);
 
 /**
- * nvlsi_rpu_osal_spinlock_free() - Free a busy lock.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_spinlock_free() - Free a busy lock.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @lock: Pointer to a busy lock instance.
  *
- * Frees a busy lock (@lock) allocated by @nvlsi_rpu_osal_spinlock_alloc
+ * Frees a busy lock (@lock) allocated by @wifi_nrf_osal_spinlock_alloc
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_spinlock_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_spinlock_free(struct wifi_nrf_osal_priv *opriv,
 				  void *lock);
 
 
 /**
- * nvlsi_rpu_osal_spinlock_init() - Initialize a busy lock.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_spinlock_init() - Initialize a busy lock.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @lock: Pointer to a busy lock instance.
  *
- * Initializes a busy lock (@lock) allocated by @nvlsi_rpu_osal_spinlock_alloc.
+ * Initializes a busy lock (@lock) allocated by @wifi_nrf_osal_spinlock_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_spinlock_init(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_spinlock_init(struct wifi_nrf_osal_priv *opriv,
 				  void *lock);
 
 
 /**
- * nvlsi_rpu_osal_spinlock_take() - Acquire a buys lock.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_spinlock_take() - Acquire a buys lock.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @lock: Pointer to a busy lock instance.
  *
- * Acquires a busy lock (@lock) allocated by @nvlsi_rpu_osal_spinlock_alloc.
+ * Acquires a busy lock (@lock) allocated by @wifi_nrf_osal_spinlock_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_spinlock_take(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_spinlock_take(struct wifi_nrf_osal_priv *opriv,
 				  void *lock);
 
 
 /**
- * nvlsi_rpu_osal_spinlock_rel() - Releases a busy lock.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_spinlock_rel() - Releases a busy lock.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @lock: Pointer to a busy lock instance.
  *
- * Releases a busy lock (@lock) acquired by @nvlsi_rpu_osal_spinlock_take.
+ * Releases a busy lock (@lock) acquired by @wifi_nrf_osal_spinlock_take.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_spinlock_rel(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_spinlock_rel(struct wifi_nrf_osal_priv *opriv,
 				 void *lock);
 
 
 /**
- * nvlsi_rpu_osal_spinlock_irq_take() - Acquire a busy lock and disable
+ * wifi_nrf_osal_spinlock_irq_take() - Acquire a busy lock and disable
  *                                    interrupts.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @lock: Pointer to a busy lock instance.
  * @flags: Interrupt state flags.
  *
@@ -289,30 +289,30 @@ void nvlsi_rpu_osal_spinlock_rel(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_spinlock_irq_take(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_spinlock_irq_take(struct wifi_nrf_osal_priv *opriv,
 				      void *lock,
 				      unsigned long *flags);
 
 
 /**
- * nvlsi_rpu_osal_spinlock_irq_rel() - Release a busy lock and enable interrupts.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_spinlock_irq_rel() - Release a busy lock and enable interrupts.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @lock: Pointer to a busy lock instance.
  * @flags: Interrupt state flags.
  *
  * Restores interrupt states (@flags) and releases busy lock (@lock) acquired
- * using @nvlsi_rpu_osal_spinlock_irq_take.
+ * using @wifi_nrf_osal_spinlock_irq_take.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_spinlock_irq_rel(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_spinlock_irq_rel(struct wifi_nrf_osal_priv *opriv,
 				     void *lock,
 				     unsigned long *flags);
 
 
 /**
- * nvlsi_rpu_osal_log_dbg() - Log a debug message.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_log_dbg() - Log a debug message.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @fmt: Format string.
  * @...: Variable arguments.
  *
@@ -320,13 +320,13 @@ void nvlsi_rpu_osal_spinlock_irq_rel(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: Number of characters of the message logged.
  */
-int nvlsi_rpu_osal_log_dbg(struct nvlsi_rpu_osal_priv *opriv,
+int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv,
 			   const char *fmt, ...);
 
 
 /**
- * nvlsi_rpu_osal_log_info() - Log a informational message.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_log_info() - Log a informational message.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @fmt: Format string.
  * @...: Variable arguments.
  *
@@ -334,13 +334,13 @@ int nvlsi_rpu_osal_log_dbg(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: Number of characters of the message logged.
  */
-int nvlsi_rpu_osal_log_info(struct nvlsi_rpu_osal_priv *opriv,
+int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv,
 			    const char *fmt, ...);
 
 
 /**
- * nvlsi_rpu_osal_log_err() - Logs an error message.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_log_err() - Logs an error message.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @fmt: Format string.
  * @...: Variable arguments.
  *
@@ -348,13 +348,13 @@ int nvlsi_rpu_osal_log_info(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: Number of characters of the message logged.
  */
-int nvlsi_rpu_osal_log_err(struct nvlsi_rpu_osal_priv *opriv,
+int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv,
 			   const char *fmt, ...);
 
 
 /**
- * nvlsi_rpu_osal_llist_node_alloc() - Allocate a linked list mode.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_node_alloc() - Allocate a linked list mode.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Allocates a linked list node.
  *
@@ -362,25 +362,25 @@ int nvlsi_rpu_osal_log_err(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the linked list node allocated.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_llist_node_alloc(struct nvlsi_rpu_osal_priv *opriv);
+void *wifi_nrf_osal_llist_node_alloc(struct wifi_nrf_osal_priv *opriv);
 
 
 /**
- * nvlsi_rpu_osal_llist_node_free() - Free a linked list node.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_node_free() - Free a linked list node.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @node: Pointer to a linked list node.
  *
  * Frees a linked list node(@node) which was allocated by
- * @nvlsi_rpu_osal_llist_node_alloc.
+ * @wifi_nrf_osal_llist_node_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_llist_node_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_llist_node_free(struct wifi_nrf_osal_priv *opriv,
 				    void *node);
 
 /**
- * nvlsi_rpu_osal_llist_node_data_get() - Get data stored in a linked list node.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_node_data_get() - Get data stored in a linked list node.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @node: Pointer to a linked list node.
  *
  * Gets the pointer to the data which the linked list node(@node) points to.
@@ -389,13 +389,13 @@ void nvlsi_rpu_osal_llist_node_free(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the data stored in the linked list node.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_llist_node_data_get(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_llist_node_data_get(struct wifi_nrf_osal_priv *opriv,
 					 void *node);
 
 
 /**
- * nvlsi_rpu_osal_llist_node_data_set() - Set data in a linked list node.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_node_data_set() - Set data in a linked list node.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @node: Pointer to a linked list node.
  * @data: Pointer to the data to be stored in the linked list node.
  *
@@ -404,14 +404,14 @@ void *nvlsi_rpu_osal_llist_node_data_get(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_llist_node_data_set(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_llist_node_data_set(struct wifi_nrf_osal_priv *opriv,
 					void *node,
 					void *data);
 
 
 /**
- * nvlsi_rpu_osal_llist_alloc() - Allocate a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_alloc() - Allocate a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Allocates a linked list.
  *
@@ -419,54 +419,54 @@ void nvlsi_rpu_osal_llist_node_data_set(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the allocated linked list.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_llist_alloc(struct nvlsi_rpu_osal_priv *opriv);
+void *wifi_nrf_osal_llist_alloc(struct wifi_nrf_osal_priv *opriv);
 
 
 /**
- * nvlsi_rpu_osal_llist_free() - Free a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_free() - Free a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  *
- * Frees a linked list(@llist) allocated by @nvlsi_rpu_osal_llist_alloc.
+ * Frees a linked list(@llist) allocated by @wifi_nrf_osal_llist_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_llist_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_llist_free(struct wifi_nrf_osal_priv *opriv,
 			       void *llist);
 
 
 /**
- * nvlsi_rpu_osal_llist_init() - Initialize a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_init() - Initialize a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  *
- * Initializes a linked list(@llist) allocated by @nvlsi_rpu_osal_llist_alloc.
+ * Initializes a linked list(@llist) allocated by @wifi_nrf_osal_llist_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_llist_init(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_llist_init(struct wifi_nrf_osal_priv *opriv,
 			       void *llist);
 
 
 /**
- * nvlsi_rpu_osal_llist_add_node_tail() - Add a node to the tail of a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_add_node_tail() - Add a node to the tail of a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  * @llist_node: Pointer to a linked list node.
  *
- * Adds a linked list node(@llist_node) allocated by @nvlsi_rpu_osal_llist_node_alloc
- * to the tail of a linked list(@llist) allocated by @nvlsi_rpu_osal_llist_alloc.
+ * Adds a linked list node(@llist_node) allocated by @wifi_nrf_osal_llist_node_alloc
+ * to the tail of a linked list(@llist) allocated by @wifi_nrf_osal_llist_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_llist_add_node_tail(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_llist_add_node_tail(struct wifi_nrf_osal_priv *opriv,
 					void *llist,
 					void *llist_node);
 
 
 /**
- * nvlsi_rpu_osal_llist_get_node_head() - Get the head of a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_get_node_head() - Get the head of a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  *
  * Returns the head node from a linked list(@llist) while still leaving the
@@ -477,13 +477,13 @@ void nvlsi_rpu_osal_llist_add_node_tail(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the head of the linked list.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_llist_get_node_head(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_llist_get_node_head(struct wifi_nrf_osal_priv *opriv,
 					 void *llist);
 
 
 /**
- * nvlsi_rpu_osal_llist_get_node_nxt() - Get the next node in a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_get_node_nxt() - Get the next node in a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  * @llist_node: Pointer to a linked list node.
  *
@@ -494,14 +494,14 @@ void *nvlsi_rpu_osal_llist_get_node_head(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the next node in the linked list.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_llist_get_node_nxt(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_llist_get_node_nxt(struct wifi_nrf_osal_priv *opriv,
 					void *llist,
 					void *llist_node);
 
 
 /**
- * nvlsi_rpu_osal_llist_del_node() - Delete node from a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_del_node() - Delete node from a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  * @llist_node: Pointer to a linked list node.
  *
@@ -510,27 +510,27 @@ void *nvlsi_rpu_osal_llist_get_node_nxt(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_llist_del_node(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_llist_del_node(struct wifi_nrf_osal_priv *opriv,
 				   void *llist,
 				   void *llist_node);
 
 
 /**
- * nvlsi_rpu_osal_llist_len() - Get length of a linked list.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_llist_len() - Get length of a linked list.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @llist: Pointer to a linked list.
  *
  * Returns the length of the linked list(@llist).
  *
  * Return: Linked list length in bytes.
  */
-unsigned int nvlsi_rpu_osal_llist_len(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_osal_llist_len(struct wifi_nrf_osal_priv *opriv,
 				      void *llist);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_alloc() - Allocate a network buffer
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_nbuf_alloc() - Allocate a network buffer
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @size: Size in bytes of the network buffer to allocated.
  *
  * Allocates a network buffer of size @size.
@@ -539,27 +539,27 @@ unsigned int nvlsi_rpu_osal_llist_len(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the allocated network buffer.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_nbuf_alloc(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_nbuf_alloc(struct wifi_nrf_osal_priv *opriv,
 				unsigned int size);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_free() - Free a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_nbuf_free() - Free a network buffer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  *
  * Frees a network buffer(@nbuf) which was allocated by
- * @nvlsi_rpu_osal_nbuf_alloc.
+ * @wifi_nrf_osal_nbuf_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_nbuf_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_nbuf_free(struct wifi_nrf_osal_priv *opriv,
 			      void *nbuf);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_headroom_res() - Reserve headroom space in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_nbuf_headroom_res() - Reserve headroom space in a network buffer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  * @size: Size in bytes of the headroom to be reserved.
  *
@@ -568,15 +568,15 @@ void nvlsi_rpu_osal_nbuf_free(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_nbuf_headroom_res(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_nbuf_headroom_res(struct wifi_nrf_osal_priv *opriv,
 				      void *nbuf,
 				      unsigned int size);
 
 
 
 /**
- * nvlsi_rpu_osal_nbuf_headroom_get() - Get the size of the headroom in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_nbuf_headroom_get() - Get the size of the headroom in a network buffer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  *
  * Gets the size of the reserved headroom at the beginning
@@ -584,25 +584,25 @@ void nvlsi_rpu_osal_nbuf_headroom_res(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: Size of the network buffer data headroom in bytes.
  */
-unsigned int nvlsi_rpu_osal_nbuf_headroom_get(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_osal_nbuf_headroom_get(struct wifi_nrf_osal_priv *opriv,
 					      void *nbuf);
 
 /**
- * nvlsi_rpu_osal_nbuf_data_size() - Get the size of data in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_nbuf_data_size() - Get the size of data in a network buffer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  *
  * Gets the size of the data area of a network buffer(@nbuf).
  *
  * Return: Size of the network buffer data in bytes.
  */
-unsigned int nvlsi_rpu_osal_nbuf_data_size(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_osal_nbuf_data_size(struct wifi_nrf_osal_priv *opriv,
 					   void *nbuf);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_data_get() - Get a handle to the data in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_nbuf_data_get() - Get a handle to the data in a network buffer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  *
  * Gets the pointer to the data area of a network buffer(@nbuf).
@@ -611,14 +611,14 @@ unsigned int nvlsi_rpu_osal_nbuf_data_size(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_nbuf_data_get(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_nbuf_data_get(struct wifi_nrf_osal_priv *opriv,
 				   void *nbuf);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_data_put() - Extend the tail portion of the data
+ * wifi_nrf_osal_nbuf_data_put() - Extend the tail portion of the data
  *                                in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  * @size: Size in bytes, of the extension.
  *
@@ -630,15 +630,15 @@ void *nvlsi_rpu_osal_nbuf_data_get(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Updated pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_nbuf_data_put(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_nbuf_data_put(struct wifi_nrf_osal_priv *opriv,
 				   void *nbuf,
 				   unsigned int size);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_data_push() - Extend the head portion of the data
+ * wifi_nrf_osal_nbuf_data_push() - Extend the head portion of the data
  *                                 in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  * @size: Size in bytes, of the extension.
  *
@@ -650,15 +650,15 @@ void *nvlsi_rpu_osal_nbuf_data_put(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Updated pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_nbuf_data_push(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_nbuf_data_push(struct wifi_nrf_osal_priv *opriv,
 				    void *nbuf,
 				    unsigned int size);
 
 
 /**
- * nvlsi_rpu_osal_nbuf_data_pull() - Reduce the head portion of the data
+ * wifi_nrf_osal_nbuf_data_pull() - Reduce the head portion of the data
  *                                 in a network buffer.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @nbuf: Pointer to a network buffer.
  * @size: Size in bytes, of the reduction.
  *
@@ -670,14 +670,14 @@ void *nvlsi_rpu_osal_nbuf_data_push(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Updated pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_nbuf_data_pull(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_nbuf_data_pull(struct wifi_nrf_osal_priv *opriv,
 				    void *nbuf,
 				    unsigned int size);
 
 
 /**
- * nvlsi_rpu_osal_tasklet_alloc() - Allocate a tasklet.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_tasklet_alloc() - Allocate a tasklet.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Allocates a tasklet structure and returns a pointer to it.
  *
@@ -685,90 +685,90 @@ void *nvlsi_rpu_osal_nbuf_data_pull(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the tasklet instance allocated.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_tasklet_alloc(struct nvlsi_rpu_osal_priv *opriv);
+void *wifi_nrf_osal_tasklet_alloc(struct wifi_nrf_osal_priv *opriv);
 
 
 /**
- * nvlsi_rpu_osal_tasklet_free() - Free a tasklet.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_tasklet_free() - Free a tasklet.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @tasklet: Pointer to a tasklet.
  *
  * Frees a tasklet structure that had been allocated using
- * @nvlsi_rpu_osal_tasklet_alloc.
+ * @wifi_nrf_osal_tasklet_alloc.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_tasklet_free(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_tasklet_free(struct wifi_nrf_osal_priv *opriv,
 				 void *tasklet);
 
 
 /**
- * nvlsi_rpu_osal_tasklet_init() - Initialize a tasklet.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_tasklet_init() - Initialize a tasklet.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @tasklet:  Pointer to a tasklet.
  * @callbk_fn: Callback function to be invoked by the tasklet.
  * @data: Data to be passed to the callback function when the tasklet
  *        invokes it.
  *
  * Initializes a tasklet structure(@tasklet) that had been allocated using
- * @nvlsi_rpu_osal_tasklet_alloc. Needs to be passed a callback
+ * @wifi_nrf_osal_tasklet_alloc. Needs to be passed a callback
  * function (@callbk_fn) which should get invoked when the tasklet is
  * scheduled and the data(@data) which needs to be passed to the
  * callback function.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_tasklet_init(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_tasklet_init(struct wifi_nrf_osal_priv *opriv,
 				 void *tasklet,
 				 void (*callbk_fn)(unsigned long),
 				 unsigned long data);
 
 
 /**
- * nvlsi_rpu_osal_tasklet_schedule() - Schedule a tasklet.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_tasklet_schedule() - Schedule a tasklet.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @tasklet:  Pointer to a tasklet.
  *
  * Schedules a tasklet that had been allocated using
- * @nvlsi_rpu_osal_tasklet_alloc and initialized using
- * @nvlsi_rpu_osal_tasklet_init.
+ * @wifi_nrf_osal_tasklet_alloc and initialized using
+ * @wifi_nrf_osal_tasklet_init.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_tasklet_schedule(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_tasklet_schedule(struct wifi_nrf_osal_priv *opriv,
 				     void *tasklet);
 
 
 /**
- * nvlsi_rpu_osal_tasklet_kill() - Terminate a tasklet.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_tasklet_kill() - Terminate a tasklet.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @tasklet:  Pointer to a tasklet.
  *
  * Terminates a tasklet(@tasklet) that had been scheduled by
- * @nvlsi_rpu_osal_tasklet_schedule.
+ * @wifi_nrf_osal_tasklet_schedule.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_tasklet_kill(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_tasklet_kill(struct wifi_nrf_osal_priv *opriv,
 				 void *tasklet);
 
 
 /**
- * nvlsi_rpu_osal_sleep_ms() - Sleep for a specified duration in milliseconds.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_sleep_ms() - Sleep for a specified duration in milliseconds.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @msecs: Sleep duration in milliseconds.
  *
  * Puts the calling thread to sleep for atleast @msecs milliseconds.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_sleep_ms(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_sleep_ms(struct wifi_nrf_osal_priv *opriv,
 			     unsigned int msecs);
 
 
 /**
- * nvlsi_rpu_osal_delay_us() - Delay for a specified duration in microseconds.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_delay_us() - Delay for a specified duration in microseconds.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @usecs: Delay duration in microseconds.
  *
  * Delays execution of calling thread for @usecs microseconds. This is
@@ -777,24 +777,24 @@ void nvlsi_rpu_osal_sleep_ms(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_delay_us(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_delay_us(struct wifi_nrf_osal_priv *opriv,
 			     unsigned long usecs);
 
 
 /**
- * nvlsi_rpu_osal_time_get_curr_us() - Get current system uptime in microseconds.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_time_get_curr_us() - Get current system uptime in microseconds.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Gets the current system uptime in microseconds.
  *
  * Return: System uptime in microseconds.
  */
-unsigned long nvlsi_rpu_osal_time_get_curr_us(struct nvlsi_rpu_osal_priv *opriv);
+unsigned long wifi_nrf_osal_time_get_curr_us(struct wifi_nrf_osal_priv *opriv);
 
 
 /**
- * nvlsi_rpu_osal_time_elapsed_us() - Get elapsed time in microseconds
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_time_elapsed_us() - Get elapsed time in microseconds
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @start_time_us: The timestamp in microseconds from which elapsed
  *                 time is to be measured.
  *
@@ -803,14 +803,14 @@ unsigned long nvlsi_rpu_osal_time_get_curr_us(struct nvlsi_rpu_osal_priv *opriv)
  *
  * Return: Elapsed time in microseconds.
  */
-unsigned int nvlsi_rpu_osal_time_elapsed_us(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_osal_time_elapsed_us(struct wifi_nrf_osal_priv *opriv,
 					    unsigned long start_time_us);
 
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_init() - Initialize a PCIe driver.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_init() - Initialize a PCIe driver.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @dev_name: Name of the PCIe device.
  * @vendor_id: Vendor ID of the PCIe device.
  * @sub_vendor_id: Sub-vendor ID of the PCIE device.
@@ -821,7 +821,7 @@ unsigned int nvlsi_rpu_osal_time_elapsed_us(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: OS specific PCIe device context.
  */
-void *nvlsi_rpu_osal_bus_pcie_init(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_bus_pcie_init(struct wifi_nrf_osal_priv *opriv,
 				   const char *dev_name,
 				   unsigned int vendor_id,
 				   unsigned int sub_vendor_id,
@@ -830,8 +830,8 @@ void *nvlsi_rpu_osal_bus_pcie_init(struct nvlsi_rpu_osal_priv *opriv,
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_deinit() - Deinitialize a PCIe device driver.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_deinit() - Deinitialize a PCIe device driver.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_priv: OS specific PCIe context.
  *
  * This API should be called when the PCIe device driver is
@@ -839,13 +839,13 @@ void *nvlsi_rpu_osal_bus_pcie_init(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_pcie_deinit(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_pcie_deinit(struct wifi_nrf_osal_priv *opriv,
 				    void *os_pcie_priv);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_add() - Add a PCIe device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_add() - Add a PCIe device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @osal_pcie_dev_ctx: Pointer to the OSAL PCIe device context.
  *
  * Function to be invoked when a matching PCIe device is added to the system.
@@ -853,30 +853,30 @@ void nvlsi_rpu_osal_bus_pcie_deinit(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: OS specific PCIe device context.
  */
-void *nvlsi_rpu_osal_bus_pcie_dev_add(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_bus_pcie_dev_add(struct wifi_nrf_osal_priv *opriv,
 				      void *os_pcie_priv,
 				      void *osal_pcie_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_rem() - Remove a PCIe device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_rem() - Remove a PCIe device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: Pointer to the OS specific PCIe device context which was
- *                   returned by @nvlsi_rpu_osal_bus_pcie_dev_add.
+ *                   returned by @wifi_nrf_osal_bus_pcie_dev_add.
  *
  * Function to be invoked when a matching PCIe device is removed from the system.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_pcie_dev_rem(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_pcie_dev_rem(struct wifi_nrf_osal_priv *opriv,
 				     void *os_pcie_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_init() - Initialize a PCIe device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_init() - Initialize a PCIe device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: Pointer to the OS specific PCIe device context which was
- *                   returned by @nvlsi_rpu_osal_bus_pcie_dev_add.
+ *                   returned by @wifi_nrf_osal_bus_pcie_dev_add.
  *
  * Function to be invoked when a PCIe device is to be initialized.
  *
@@ -884,27 +884,27 @@ void nvlsi_rpu_osal_bus_pcie_dev_rem(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: NVLSI_RPU_STATUS_SUCCESS.
  *		Fail: NVLSI_RPU_STATUS_FAIL.
  */
-enum nvlsi_rpu_status nvlsi_rpu_osal_bus_pcie_dev_init(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_osal_bus_pcie_dev_init(struct wifi_nrf_osal_priv *opriv,
 						       void *os_pcie_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_deinit() - Deinitialize a PCIe device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_deinit() - Deinitialize a PCIe device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: Pointer to the OS specific PCIe device context which was
- *                   returned by @nvlsi_rpu_osal_bus_pcie_dev_add.
+ *                   returned by @wifi_nrf_osal_bus_pcie_dev_add.
  *
  * Function to be invoked when a PCIe device is to be deinitialized.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_pcie_dev_deinit(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_pcie_dev_deinit(struct wifi_nrf_osal_priv *opriv,
 					void *os_pcie_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_intr_reg() - Register a interrupt handler for a PCIe device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_intr_reg() - Register a interrupt handler for a PCIe device.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: OS specific PCIe device context.
  * @callbk_data: Data to be passed to the ISR.
  * @callbk_fn: ISR to be invoked on receiving an interrupt.
@@ -916,29 +916,29 @@ void nvlsi_rpu_osal_bus_pcie_dev_deinit(struct nvlsi_rpu_osal_priv *opriv,
  *	    Pass: NVLSI_RPU_STATUS_SUCCESS.
  *	    Fail: NVLSI_RPU_STATUS_FAIL.
  */
-enum nvlsi_rpu_status nvlsi_rpu_osal_bus_pcie_dev_intr_reg(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_osal_bus_pcie_dev_intr_reg(struct wifi_nrf_osal_priv *opriv,
 							   void *os_pcie_dev_ctx,
 							   void *callbk_data,
 							   int (*callbk_fn)(void *callbk_data));
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_intr_unreg() - Unregister an interrupt handler for a PCIe device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_intr_unreg() - Unregister an interrupt handler for a PCIe device.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: OS specific PCIe device context.
  *
  * Unregisters the interrupt handler that was registered using
- * @nvlsi_rpu_osal_bus_pcie_dev_intr_reg.
+ * @wifi_nrf_osal_bus_pcie_dev_intr_reg.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_pcie_dev_intr_unreg(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_pcie_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv,
 					    void *os_pcie_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_dma_map() - Map host memory for DMA access.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_dma_map() - Map host memory for DMA access.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: Pointer to a OS specific PCIe device handle.
  * @virt_addr: Virtual host address to be DMA mapped.
  * @size: Size in bytes of the host memory to be DMA mapped.
@@ -956,35 +956,35 @@ void nvlsi_rpu_osal_bus_pcie_dev_intr_unreg(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: Pointer to the DMA mapped physical address.
  *		Error: NULL.
  */
-void *nvlsi_rpu_osal_bus_pcie_dev_dma_map(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_bus_pcie_dev_dma_map(struct wifi_nrf_osal_priv *opriv,
 					  void *os_pcie_dev_ctx,
 					  void *virt_addr,
 					  size_t size,
-					  enum nvlsi_rpu_osal_dma_dir dir);
+					  enum wifi_nrf_osal_dma_dir dir);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_dma_unmap() - Unmap DMA mapped host memory.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_dma_unmap() - Unmap DMA mapped host memory.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: Pointer to a OS specific PCIe device handle.
  * @dma_addr: DMA mapped physical host memory address.
  * @size: Size in bytes of the DMA mapped host memory.
  * @dir: DMA direction.
  *
- * Unmaps the host memory which was mapped for DMA using @nvlsi_rpu_osal_dma_map.
+ * Unmaps the host memory which was mapped for DMA using @wifi_nrf_osal_dma_map.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_pcie_dev_dma_unmap(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_pcie_dev_dma_unmap(struct wifi_nrf_osal_priv *opriv,
 					   void *os_pcie_dev_ctx,
 					   void *dma_addr,
 					   size_t size,
-					   enum nvlsi_rpu_osal_dma_dir dir);
+					   enum wifi_nrf_osal_dma_dir dir);
 
 
 /**
- * nvlsi_rpu_osal_bus_pcie_dev_host_map_get() - Get host mapped address for a PCIe device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_pcie_dev_host_map_get() - Get host mapped address for a PCIe device.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_pcie_dev_ctx: OS specific PCIe device context.
  * @host_map: Host map address information.
  *
@@ -992,27 +992,27 @@ void nvlsi_rpu_osal_bus_pcie_dev_dma_unmap(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_pcie_dev_host_map_get(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_pcie_dev_host_map_get(struct wifi_nrf_osal_priv *opriv,
 					      void *os_pcie_dev_ctx,
-					      struct nvlsi_rpu_osal_host_map *host_map);
+					      struct wifi_nrf_osal_host_map *host_map);
 
 
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_init() - Initialize a qspi driver.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_init() - Initialize a qspi driver.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  *
  * Registers a qspi device driver to the OS's qspi core.
  *
  * Return: OS specific qspi device context.
  */
-void *nvlsi_rpu_osal_bus_qspi_init(struct nvlsi_rpu_osal_priv *opriv);
+void *wifi_nrf_osal_bus_qspi_init(struct wifi_nrf_osal_priv *opriv);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_deinit() - Deinitialize a qspi device driver.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_deinit() - Deinitialize a qspi device driver.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_priv: OS specific qspi context.
  *
  * This API should be called when the qspi device driver is
@@ -1020,13 +1020,13 @@ void *nvlsi_rpu_osal_bus_qspi_init(struct nvlsi_rpu_osal_priv *opriv);
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_qspi_deinit(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_qspi_deinit(struct wifi_nrf_osal_priv *opriv,
 				    void *os_qspi_priv);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_add() - Add a qspi device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_add() - Add a qspi device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @osal_qspi_dev_ctx: Pointer to the OSAL qspi device context.
  *
  * Function to be invoked when a matching qspi device is added to the system.
@@ -1034,30 +1034,30 @@ void nvlsi_rpu_osal_bus_qspi_deinit(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: OS specific qspi device context.
  */
-void *nvlsi_rpu_osal_bus_qspi_dev_add(struct nvlsi_rpu_osal_priv *opriv,
+void *wifi_nrf_osal_bus_qspi_dev_add(struct wifi_nrf_osal_priv *opriv,
 				      void *os_qspi_priv,
 				      void *osal_qspi_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_rem() - Remove a qspi device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_rem() - Remove a qspi device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_dev_ctx: Pointer to the OS specific qspi device context which was
- *                   returned by @nvlsi_rpu_osal_bus_qspi_dev_add.
+ *                   returned by @wifi_nrf_osal_bus_qspi_dev_add.
  *
  * Function to be invoked when a matching qspi device is removed from the system.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_qspi_dev_rem(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_qspi_dev_rem(struct wifi_nrf_osal_priv *opriv,
 				     void *os_qspi_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_init() - Initialize a qspi device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_init() - Initialize a qspi device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_dev_ctx: Pointer to the OS specific qspi device context which was
- *                   returned by @nvlsi_rpu_osal_bus_qspi_dev_add.
+ *                   returned by @wifi_nrf_osal_bus_qspi_dev_add.
  *
  * Function to be invoked when a qspi device is to be initialized.
  *
@@ -1065,27 +1065,27 @@ void nvlsi_rpu_osal_bus_qspi_dev_rem(struct nvlsi_rpu_osal_priv *opriv,
  *		Pass: NVLSI_RPU_STATUS_SUCCESS.
  *		Fail: NVLSI_RPU_STATUS_FAIL.
  */
-enum nvlsi_rpu_status nvlsi_rpu_osal_bus_qspi_dev_init(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_osal_bus_qspi_dev_init(struct wifi_nrf_osal_priv *opriv,
 						       void *os_qspi_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_deinit() - Deinitialize a qspi device instance.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_deinit() - Deinitialize a qspi device instance.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_dev_ctx: Pointer to the OS specific qspi device context which was
- *                   returned by @nvlsi_rpu_osal_bus_qspi_dev_add.
+ *                   returned by @wifi_nrf_osal_bus_qspi_dev_add.
  *
  * Function to be invoked when a qspi device is to be deinitialized.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_qspi_dev_deinit(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_qspi_dev_deinit(struct wifi_nrf_osal_priv *opriv,
 					void *os_qspi_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_intr_reg() - Register a interrupt handler for a qspi device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_intr_reg() - Register a interrupt handler for a qspi device.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_dev_ctx: OS specific qspi device context.
  * @callbk_data: Data to be passed to the ISR.
  * @callbk_fn: ISR to be invoked on receiving an interrupt.
@@ -1097,29 +1097,29 @@ void nvlsi_rpu_osal_bus_qspi_dev_deinit(struct nvlsi_rpu_osal_priv *opriv,
  *	    Pass: NVLSI_RPU_STATUS_SUCCESS.
  *	    Fail: NVLSI_RPU_STATUS_FAIL.
  */
-enum nvlsi_rpu_status nvlsi_rpu_osal_bus_qspi_dev_intr_reg(struct nvlsi_rpu_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_osal_bus_qspi_dev_intr_reg(struct wifi_nrf_osal_priv *opriv,
 							   void *os_qspi_dev_ctx,
 							   void *callbk_data,
 							   int (*callbk_fn)(void *callbk_data));
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_intr_unreg() - Unregister an interrupt handler for a qspi device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_intr_unreg() - Unregister an interrupt handler for a qspi device.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_dev_ctx: OS specific qspi device context.
  *
  * Unregisters the interrupt handler that was registered using
- * @nvlsi_rpu_osal_bus_qspi_dev_intr_reg.
+ * @wifi_nrf_osal_bus_qspi_dev_intr_reg.
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_qspi_dev_intr_unreg(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_qspi_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv,
 					    void *os_qspi_dev_ctx);
 
 
 /**
- * nvlsi_rpu_osal_bus_qspi_dev_host_map_get() - Get host mapped address for a qspi device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_bus_qspi_dev_host_map_get() - Get host mapped address for a qspi device.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @os_qspi_dev_ctx: OS specific qspi device context.
  * @host_map: Host map address information.
  *
@@ -1127,14 +1127,14 @@ void nvlsi_rpu_osal_bus_qspi_dev_intr_unreg(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_bus_qspi_dev_host_map_get(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_bus_qspi_dev_host_map_get(struct wifi_nrf_osal_priv *opriv,
 					      void *os_qspi_dev_ctx,
-					      struct nvlsi_rpu_osal_host_map *host_map);
+					      struct wifi_nrf_osal_host_map *host_map);
 
 /**
- * nvlsi_rpu_osal_qspi_read_reg32() - Read value from a 32 bit register on a
+ * wifi_nrf_osal_qspi_read_reg32() - Read value from a 32 bit register on a
  *                                  QSPI slave device.
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @priv:
  * @addr: Address of the register to read from.
  *
@@ -1143,13 +1143,13 @@ void nvlsi_rpu_osal_bus_qspi_dev_host_map_get(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: 32 bit value read from register.
  */
-unsigned int nvlsi_rpu_osal_qspi_read_reg32(struct nvlsi_rpu_osal_priv *opriv,
+unsigned int wifi_nrf_osal_qspi_read_reg32(struct wifi_nrf_osal_priv *opriv,
 					    void *priv,
 					    unsigned long addr);
 
 /**
- * nvlsi_rpu_osal_qspi_write_reg32() -
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_qspi_write_reg32() -
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @priv:
  * @addr: Address of the register to write to.
  * @val: Value to be written to the register.
@@ -1159,14 +1159,14 @@ unsigned int nvlsi_rpu_osal_qspi_read_reg32(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_qspi_write_reg32(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_qspi_write_reg32(struct wifi_nrf_osal_priv *opriv,
 				     void *priv,
 				     unsigned long addr,
 				     unsigned int val);
 
 /**
- * nvlsi_rpu_osal_qspi_cpy_from() -
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_qspi_cpy_from() -
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @priv:
  * @dest:
  * @src:
@@ -1175,15 +1175,15 @@ void nvlsi_rpu_osal_qspi_write_reg32(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_qspi_cpy_from(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_qspi_cpy_from(struct wifi_nrf_osal_priv *opriv,
 				  void *priv,
 				  void *dest,
 				  unsigned long addr,
 				  size_t count);
 
 /**
- * nvlsi_rpu_osal_qspi_cpy_to() -
- * @opriv: Pointer to the OSAL context returned by the @nvlsi_rpu_osal_init API.
+ * wifi_nrf_osal_qspi_cpy_to() -
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
  * @priv:
  * @dest:
  * @src:
@@ -1192,7 +1192,7 @@ void nvlsi_rpu_osal_qspi_cpy_from(struct nvlsi_rpu_osal_priv *opriv,
  *
  * Return: None.
  */
-void nvlsi_rpu_osal_qspi_cpy_to(struct nvlsi_rpu_osal_priv *opriv,
+void wifi_nrf_osal_qspi_cpy_to(struct wifi_nrf_osal_priv *opriv,
 				void *priv,
 				unsigned long addr,
 				const void *src,

@@ -20,19 +20,19 @@ unsigned char llc_header[]  = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00 };
 unsigned char aarp_ipx_header[] = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0xf8 };
 
 
-bool nvlsi_wlan_util_is_multicast_addr(const unsigned char *addr)
+bool wifi_nrf_wlan_util_is_multicast_addr(const unsigned char *addr)
 {
 	return (0x01 & *addr);
 }
 
 
-bool nvlsi_wlan_util_is_unicast_addr(const unsigned char *addr)
+bool wifi_nrf_wlan_util_is_unicast_addr(const unsigned char *addr)
 {
-	return !nvlsi_wlan_util_is_multicast_addr(addr);
+	return !wifi_nrf_wlan_util_is_multicast_addr(addr);
 }
 
 
-bool nvlsi_wlan_util_ether_addr_equal(const unsigned char *addr_1,
+bool wifi_nrf_wlan_util_ether_addr_equal(const unsigned char *addr_1,
 				      const unsigned char *addr_2)
 {
 	const unsigned short *a = (const unsigned short *)addr_1;
@@ -42,7 +42,7 @@ bool nvlsi_wlan_util_ether_addr_equal(const unsigned char *addr_1,
 }
 
 
-unsigned short nvlsi_wlan_util_rx_get_eth_type(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned short wifi_nrf_wlan_util_rx_get_eth_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 					       void *nwb)
 {
 	unsigned  char *payload = NULL;
@@ -52,7 +52,7 @@ unsigned short nvlsi_wlan_util_rx_get_eth_type(struct nvlsi_wlan_fmac_dev_ctx *f
 }
 
 
-unsigned short nvlsi_wlan_util_tx_get_eth_type(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned short wifi_nrf_wlan_util_tx_get_eth_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 					       void *nwb)
 {
 	unsigned  char *payload = NULL;
@@ -62,7 +62,7 @@ unsigned short nvlsi_wlan_util_tx_get_eth_type(struct nvlsi_wlan_fmac_dev_ctx *f
 }
 
 
-int nvlsi_wlan_util_get_skip_header_bytes(unsigned short eth_type)
+int wifi_nrf_wlan_util_get_skip_header_bytes(unsigned short eth_type)
 {
 	int skip_header_bytes = sizeof(eth_type);
 
@@ -76,62 +76,62 @@ int nvlsi_wlan_util_get_skip_header_bytes(unsigned short eth_type)
 }
 
 
-void nvlsi_wlan_util_convert_to_eth(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_wlan_util_convert_to_eth(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 				    void *nwb,
-				    struct nvlsi_wlan_fmac_ieee80211_hdr *hdr,
+				    struct wifi_nrf_wlan_fmac_ieee80211_hdr *hdr,
 				    unsigned short eth_type)
 {
 
-	struct nvlsi_wlan_fmac_eth_hdr *ehdr = NULL;
+	struct wifi_nrf_wlan_fmac_eth_hdr *ehdr = NULL;
 	unsigned int len = 0;
 
-	len = nvlsi_rpu_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
+	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
 					    nwb);
 
-	ehdr = (struct nvlsi_wlan_fmac_eth_hdr *)
-		nvlsi_rpu_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
+	ehdr = (struct wifi_nrf_wlan_fmac_eth_hdr *)
+		wifi_nrf_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
 					      nwb,
-					      sizeof(struct nvlsi_wlan_fmac_eth_hdr));
+					      sizeof(struct wifi_nrf_wlan_fmac_eth_hdr));
 
 	switch (hdr->fc & (NVLSI_WLAN_FCTL_TODS | NVLSI_WLAN_FCTL_FROMDS)) {
 	case (NVLSI_WLAN_FCTL_TODS | NVLSI_WLAN_FCTL_FROMDS):
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->src,
 				       hdr->addr_4,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
 
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->dst,
 				       hdr->addr_1,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
 		break;
 	case (NVLSI_WLAN_FCTL_FROMDS):
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->src,
 				       hdr->addr_3,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->dst,
 				       hdr->addr_1,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
 		break;
 	case (NVLSI_WLAN_FCTL_TODS):
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->src,
 				       hdr->addr_2,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->dst,
 				       hdr->addr_3,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
 		break;
 	default:
 		/* Both FROM and TO DS bit is zero*/
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->src,
 				       hdr->addr_2,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
-		nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 				       ehdr->dst,
 				       hdr->addr_1,
 				       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
@@ -144,44 +144,44 @@ void nvlsi_wlan_util_convert_to_eth(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx
 		ehdr->proto = len;
 }
 
-void nvlsi_wlan_util_rx_convert_amsdu_to_eth(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_wlan_util_rx_convert_amsdu_to_eth(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 					     void *nwb)
 {
-	struct nvlsi_wlan_fmac_eth_hdr *ehdr = NULL;
-	struct nvlsi_wlan_fmac_amsdu_hdr amsdu_hdr;
+	struct wifi_nrf_wlan_fmac_eth_hdr *ehdr = NULL;
+	struct wifi_nrf_wlan_fmac_amsdu_hdr amsdu_hdr;
 	unsigned int len = 0;
 	unsigned short eth_type = 0;
-	unsigned char amsdu_hdr_len = sizeof(struct nvlsi_wlan_fmac_amsdu_hdr);
+	unsigned char amsdu_hdr_len = sizeof(struct wifi_nrf_wlan_fmac_amsdu_hdr);
 
-	nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 			       &amsdu_hdr,
-			       nvlsi_rpu_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+			       wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 							    nwb),
 			       amsdu_hdr_len);
 
-	eth_type = nvlsi_wlan_util_rx_get_eth_type(fmac_dev_ctx,
-						   (void *)((char *)nvlsi_rpu_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+	eth_type = wifi_nrf_wlan_util_rx_get_eth_type(fmac_dev_ctx,
+						   (void *)((char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 												 nwb) + amsdu_hdr_len));
 
-	nvlsi_rpu_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
+	wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
 				      nwb,
 				      (amsdu_hdr_len +
-				       nvlsi_wlan_util_get_skip_header_bytes(eth_type)));
+				       wifi_nrf_wlan_util_get_skip_header_bytes(eth_type)));
 
-	len = nvlsi_rpu_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
+	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
 					    nwb);
 
-	ehdr = (struct nvlsi_wlan_fmac_eth_hdr *)
-		nvlsi_rpu_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
+	ehdr = (struct wifi_nrf_wlan_fmac_eth_hdr *)
+		wifi_nrf_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
 					      nwb,
-					      sizeof(struct nvlsi_wlan_fmac_eth_hdr));
+					      sizeof(struct wifi_nrf_wlan_fmac_eth_hdr));
 
-	nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 			       ehdr->src,
 			       amsdu_hdr.src,
 			       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
 
-	nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 			       ehdr->dst,
 			       amsdu_hdr.dst,
 			       NVLSI_WLAN_FMAC_ETH_ADDR_LEN);
@@ -192,7 +192,7 @@ void nvlsi_wlan_util_rx_convert_amsdu_to_eth(struct nvlsi_wlan_fmac_dev_ctx *fma
 		ehdr->proto = len;
 }
 
-int nvlsi_wlan_util_get_tid(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_wlan_util_get_tid(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 			    void *nwb)
 {
 	unsigned short ether_type = 0;
@@ -206,10 +206,10 @@ int nvlsi_wlan_util_get_tid(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 	unsigned short ipv6_hdr = 0;
 	unsigned char *nwb_data = NULL;
 
-	ether_type = nvlsi_wlan_util_tx_get_eth_type(fmac_dev_ctx,
-						     nvlsi_rpu_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+	ether_type = wifi_nrf_wlan_util_tx_get_eth_type(fmac_dev_ctx,
+						     wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 										  nwb));
-	nwb_data = (unsigned char *)nvlsi_rpu_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+	nwb_data = (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 								 nwb) + NVLSI_WLAN_FMAC_ETH_HDR_LEN;
 
 	switch (ether_type & NVLSI_WLAN_FMAC_ETH_TYPE_MASK) {
@@ -269,22 +269,22 @@ int nvlsi_wlan_util_get_tid(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-int nvlsi_wlan_util_get_vif_indx(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_wlan_util_get_vif_indx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 				 const unsigned char *mac_addr)
 {
 	int i = 0;
 	int vif_index = -1;
 
 	for (i = 0; i < MAX_PEERS; i++) {
-		if (!nvlsi_wlan_util_ether_addr_equal(
+		if (!wifi_nrf_wlan_util_ether_addr_equal(
 						      fmac_dev_ctx->tx_config.peers[i].ra_addr,
 						      mac_addr)) {
-			vif_index = fmac_dev_ctx->tx_config.peers[i].nvlsi_vif_idx;
+			vif_index = fmac_dev_ctx->tx_config.peers[i].wifi_nrf_vif_idx;
 			break;
 		}
 	}
 	if (vif_index == -1)
-		nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
 				       "%s: Invalid vif_index = %d",
 				       __func__,
 				       vif_index);
@@ -293,34 +293,34 @@ int nvlsi_wlan_util_get_vif_indx(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-unsigned char *nvlsi_wlan_util_get_dest(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned char *wifi_nrf_wlan_util_get_dest(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 					void *nwb)
 {
-	return nvlsi_rpu_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+	return wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 					    nwb);
 }
 
 
-unsigned char *nvlsi_wlan_util_get_ra(struct nvlsi_wlan_fmac_vif_ctx *vif,
+unsigned char *wifi_nrf_wlan_util_get_ra(struct wifi_nrf_wlan_fmac_vif_ctx *vif,
 				      void *nwb)
 {
 	if (vif->if_type == IMG_IFTYPE_STATION)
 		return vif->bssid;
 
-	return nvlsi_rpu_osal_nbuf_data_get(vif->fmac_dev_ctx->fpriv->opriv,
+	return wifi_nrf_osal_nbuf_data_get(vif->fmac_dev_ctx->fpriv->opriv,
 					    nwb);
 }
 
 
-unsigned char *nvlsi_wlan_util_get_src(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned char *wifi_nrf_wlan_util_get_src(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 				       void *nwb)
 {
-	return (unsigned char *)nvlsi_rpu_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+	return (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 							     nwb) + NVLSI_WLAN_FMAC_ETH_ADDR_LEN;
 }
 
 
-bool nvlsi_wlan_util_is_arr_zero(unsigned char *arr,
+bool wifi_nrf_wlan_util_is_arr_zero(unsigned char *arr,
 				 unsigned int arr_sz)
 {
 	unsigned int i = 0;

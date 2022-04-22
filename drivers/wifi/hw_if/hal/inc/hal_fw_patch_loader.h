@@ -14,7 +14,7 @@
 
 #include "hal_structs.h"
 
-enum nvlsi_wlan_fw_patch_type {
+enum wifi_nrf_wlan_fw_patch_type {
 	NVLSI_WLAN_FW_PATCH_TYPE_PRI,
 	NVLSI_WLAN_FW_PATCH_TYPE_SEC,
 	NVLSI_WLAN_FW_PATCH_TYPE_MAX
@@ -24,14 +24,14 @@ enum nvlsi_wlan_fw_patch_type {
 /*
  * Downloads a firmware patch into RPU memory.
  */
-enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_load(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 						  enum RPU_PROC_TYPE rpu_proc,
 						  void *fw_pri_patch_data,
 						  unsigned int fw_pri_patch_size,
 						  void *fw_sec_patch_data,
 						  unsigned int fw_sec_patch_size);
 
-enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status wifi_nrf_hal_fw_patch_boot(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 						  enum RPU_PROC_TYPE rpu_proc,
 						  bool is_patch_present);
 #endif /* __HAL_FW_PATCH_LOADER_H__ */

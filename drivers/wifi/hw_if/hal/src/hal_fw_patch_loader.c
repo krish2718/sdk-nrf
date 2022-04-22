@@ -16,19 +16,19 @@
 /*
  * Copies the firmware patches to the RPU memory.
  */
-enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_load(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 						  enum RPU_PROC_TYPE rpu_proc,
 						  void *fw_pri_patch_data,
 						  unsigned int fw_pri_patch_size,
 						  void *fw_sec_patch_data,
 						  unsigned int fw_sec_patch_size)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int pri_dest_addr = 0;
 	unsigned int sec_dest_addr = 0;
 
 	if (!fw_pri_patch_data) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Primary patch missing for RPU (%d)\n",
 				       __func__,
 				       rpu_proc);
@@ -37,7 +37,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_load(struct nvlsi_rpu_hal_dev_ctx *
 	}
 
 	if (!fw_sec_patch_data) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Secondary patch missing for RPU (%d)\n",
 				       __func__,
 				       rpu_proc);
@@ -58,7 +58,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_load(struct nvlsi_rpu_hal_dev_ctx *
 		sec_dest_addr = RPU_MEM_UMAC_PATCH_BIN;
 		break;
 	default:
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid RPU processor type[%d]\n",
 				       __func__,
 				       rpu_proc);
@@ -73,7 +73,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_load(struct nvlsi_rpu_hal_dev_ctx *
 				   fw_pri_patch_size);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Copying of primary ROM patch to RPU (%d) failed\n",
 				       __func__,
 				       rpu_proc);
@@ -88,7 +88,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_load(struct nvlsi_rpu_hal_dev_ctx *
 				   fw_sec_patch_size);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Copying of secondary ROM patch to RPU (%d) failed\n",
 				       __func__,
 				       rpu_proc);
@@ -107,11 +107,11 @@ out:
 }
 
 
-enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status wifi_nrf_hal_fw_patch_boot(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 						  enum RPU_PROC_TYPE rpu_proc,
 						  bool is_patch_present)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int boot_sig_addr = 0;
 	unsigned int boot_sig_val = 0;
 	unsigned int boot_excp_0_addr = 0;
@@ -157,7 +157,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 			sleepctrl_val = IMG_WLAN_UMAC_ROM_PATCH_OFFSET;
 		}
 	} else {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid RPU processor type %d\n",
 				       __func__,
 				       rpu_proc);
@@ -174,7 +174,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 				   sizeof(boot_sig_val));
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Clearing of FW pass signature failed for RPU(%d)\n",
 				       __func__,
 				       rpu_proc);
@@ -195,7 +195,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 				   boot_excp_0_val);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Writing to Boot exception 0 reg for RPU processor(%d) failed\n",
 				       __func__,
 				       rpu_proc);
@@ -209,7 +209,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 				   boot_excp_1_val);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Writing to Boot exception 1 reg for RPU processor(%d) failed\n",
 				       __func__,
 				       rpu_proc);
@@ -223,7 +223,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 				   boot_excp_2_val);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Writing to Boot exception 2 reg for RPU processor(%d) failed\n",
 				       __func__,
 				       rpu_proc);
@@ -237,7 +237,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 				   boot_excp_3_val);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Writing to Boot exception 3 reg for RPU processor(%d) failed\n",
 				       __func__,
 				       rpu_proc);
@@ -251,7 +251,7 @@ enum nvlsi_rpu_status nvlsi_rpu_hal_fw_patch_boot(struct nvlsi_rpu_hal_dev_ctx *
 				   0x1);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: RPU processor(%d) run failed\n",
 				       __func__,
 				       rpu_proc);

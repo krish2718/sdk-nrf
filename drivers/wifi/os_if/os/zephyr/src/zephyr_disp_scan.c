@@ -15,12 +15,12 @@
 #include "zephyr_fmac_main.h"
 #include "zephyr_disp_scan.h"
 
-int nvlsi_disp_scan_zep(const struct device *dev,
+int wifi_nrf_disp_scan_zep(const struct device *dev,
 			scan_result_cb_t cb)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	struct img_umac_scan_info scan_info;
 	int ret = -1;
 
@@ -41,12 +41,12 @@ int nvlsi_disp_scan_zep(const struct device *dev,
 	scan_info.scan_mode = AUTO_SCAN;
 	scan_info.scan_reason = SCAN_DISPLAY;
 
-	status = nvlsi_wlan_fmac_scan(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_scan(rpu_ctx_zep->rpu_ctx,
 				      vif_ctx_zep->vif_idx,
 				      &scan_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: nvlsi_wlan_fmac_scan failed\n", __func__);
+		printk("%s: wifi_nrf_wlan_fmac_scan failed\n", __func__);
 		goto out;
 	}
 
@@ -59,19 +59,19 @@ out:
 }
 
 
-enum nvlsi_rpu_status nvlsi_disp_scan_res_get_zep(struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep)
+enum wifi_nrf_status wifi_nrf_disp_scan_res_get_zep(struct wifi_nrf_vif_ctx_zep *vif_ctx_zep)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	status = nvlsi_wlan_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_wlan_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
 					      vif_ctx_zep->vif_idx,
 					      SCAN_DISPLAY);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: nvlsi_wlan_fmac_scan failed\n", __func__);
+		printk("%s: wifi_nrf_wlan_fmac_scan failed\n", __func__);
 		goto out;
 	}
 
@@ -81,11 +81,11 @@ out:
 }
 
 
-void nvlsi_event_proc_disp_scan_res_zep(void *vif_ctx,
+void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 					struct img_umac_event_new_scan_display_results *scan_res,
 					bool more_res)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	struct umac_display_results *r = NULL;
 	struct wifi_scan_result res;
 	unsigned int i = 0;

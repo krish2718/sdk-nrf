@@ -14,7 +14,7 @@ rsource "sensor/Kconfig"
 rsource "gps/Kconfig"
 rsource "serial/Kconfig"
 rsource "flash/Kconfig"
-rsource "wifi/os_if/os/zephyr/Kconfig"
+rsource "wifi/Kconfig"
 
 if MPSL
 rsource "mpsl/Kconfig"

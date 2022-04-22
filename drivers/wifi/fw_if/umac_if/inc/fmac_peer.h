@@ -14,20 +14,20 @@
 
 #include "fmac_structs.h"
 
-int nvlsi_wlan_fmac_peer_get_id(struct nvlsi_wlan_fmac_dev_ctx *fmac_ctx,
+int wifi_nrf_wlan_fmac_peer_get_id(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_ctx,
 				const unsigned char *mac_addr);
 
-int nvlsi_wlan_fmac_peer_add(struct nvlsi_wlan_fmac_dev_ctx *fmac_ctx,
-			     unsigned char nvlsi_vif_idx,
+int wifi_nrf_wlan_fmac_peer_add(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_ctx,
+			     unsigned char wifi_nrf_vif_idx,
 			     const unsigned char *mac_addr,
 			     unsigned char is_legacy,
 			     unsigned char qos_supported);
 
-void nvlsi_wlan_fmac_peer_remove(struct nvlsi_wlan_fmac_dev_ctx *fmac_ctx,
-				 unsigned char nvlsi_vif_idx,
+void wifi_nrf_wlan_fmac_peer_remove(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_ctx,
+				 unsigned char wifi_nrf_vif_idx,
 				 int peer_id);
 
-void nvlsi_wlan_fmac_peers_flush(struct nvlsi_wlan_fmac_dev_ctx *fmac_ctx,
-				 unsigned char nvlsi_vif_idx);
+void wifi_nrf_wlan_fmac_peers_flush(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_ctx,
+				 unsigned char wifi_nrf_vif_idx);
 
 #endif /* __FMAC_PEER_H__ */

@@ -15,9 +15,9 @@
 #include "zephyr_fmac_main.h"
 #include "zephyr_net_if.h"
 
-void nvlsi_if_init(struct net_if *iface)
+void wifi_nrf_if_init(struct net_if *iface)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	const struct device *dev = NULL;
 	char mac_addr[] = {0x00, 0x23, 0x23, 0x23, 0x23, 0x23};
 
@@ -41,7 +41,7 @@ void nvlsi_if_init(struct net_if *iface)
 }
 
 
-enum ethernet_hw_caps nvlsi_if_caps_get(const struct device *dev)
+enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev)
 {
 	return (ETHERNET_LINK_10BASE_T |
 		ETHERNET_LINK_100BASE_T |
@@ -49,11 +49,11 @@ enum ethernet_hw_caps nvlsi_if_caps_get(const struct device *dev)
 }
 
 
-int nvlsi_if_send(const struct device *dev,
+int wifi_nrf_if_send(const struct device *dev,
 		  struct net_pkt *pkt)
 {
-	struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct nvlsi_rpu_ctx_zep *rpu_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 
 	vif_ctx_zep = dev->data;
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
@@ -65,7 +65,7 @@ int nvlsi_if_send(const struct device *dev,
 	}
 
 	/* TODO : net_pkt to nbuf ?? */
-	return nvlsi_wlan_fmac_start_xmit(rpu_ctx_zep->rpu_ctx,
+	return wifi_nrf_wlan_fmac_start_xmit(rpu_ctx_zep->rpu_ctx,
 					  vif_ctx_zep->vif_idx,
 					  net_pkt_to_nbuf(pkt));
 }

@@ -16,12 +16,12 @@
 #include <net/wifi_mgmt.h>
 #include "osal_api.h"
 
-int nvlsi_disp_scan_zep(const struct device *dev,
+int wifi_nrf_disp_scan_zep(const struct device *dev,
 			scan_result_cb_t cb);
 
-enum nvlsi_rpu_status nvlsi_disp_scan_res_get_zep(struct nvlsi_rpu_vif_ctx_zep *vif_ctx_zep);
+enum wifi_nrf_status wifi_nrf_disp_scan_res_get_zep(struct wifi_nrf_vif_ctx_zep *vif_ctx_zep);
 
-void nvlsi_event_proc_disp_scan_res_zep(void *vif_ctx,
+void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 					struct img_umac_event_new_scan_display_results *scan_res,
 					bool is_last);
 #endif /*  __ZEPHYR_DISP_SCAN_H__ */

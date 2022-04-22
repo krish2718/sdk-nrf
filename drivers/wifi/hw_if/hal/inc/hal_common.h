@@ -12,11 +12,11 @@
 #ifndef __HAL_COMMON_H__
 #define __HAL_COMMON_H__
 
-enum nvlsi_rpu_status hal_rpu_hpq_enqueue(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_hpq_enqueue(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					  struct host_rpu_hpq *hpq,
 					  unsigned int val);
 
-enum nvlsi_rpu_status hal_rpu_hpq_dequeue(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_hpq_dequeue(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					  struct host_rpu_hpq *hpq,
 					  unsigned int *val);
 #endif /* __HAL_COMMON_H__ */

@@ -8,17 +8,6 @@
  * @brief Header containing register read/write specific declarations for the
  * HAL Layer of the Wi-Fi driver.
  */
-
-
-/*
- * File Name: hal_reg.h
- *
- * HAL APIs to read/write from/to RPU registers.
- *
- * Copyright (c) 2011-2020 Imagination Technologies Ltd.
- * All rights reserved.
- *
- */
 #ifndef __HAL_REG_H__
 #define __HAL_REG_H__
 
@@ -39,7 +28,7 @@
  *		Pass : NVLSI_RPU_STATUS_SUCCESS
  *		Error: NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_reg_read(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 				       unsigned int *val,
 				       unsigned int rpu_reg_addr);
 
@@ -56,7 +45,7 @@ enum nvlsi_rpu_status hal_rpu_reg_read(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
  *		Pass : NVLSI_RPU_STATUS_SUCCESS
  *		Error: NVLSI_RPU_STATUS_FAIL
  */
-enum nvlsi_rpu_status hal_rpu_reg_write(struct nvlsi_rpu_hal_dev_ctx *hal_ctx,
+enum wifi_nrf_status hal_rpu_reg_write(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					unsigned int rpu_reg_addr,
 					unsigned int val);
 #endif /* __HAL_REG_H__ */

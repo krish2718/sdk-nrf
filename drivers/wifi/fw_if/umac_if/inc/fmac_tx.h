@@ -26,21 +26,21 @@ struct tx_pkt_info {
 };
 
 struct tx_cmd_prep_info {
-	struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx;
+	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx;
 	struct img_tx_buff *config;
 };
 
-enum nvlsi_rpu_status tx_init(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx);
+enum wifi_nrf_status tx_init(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx);
 
-void tx_deinit(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx);
+void tx_deinit(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx);
 
-enum nvlsi_rpu_status nvlsi_wlan_fmac_tx_done_event_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_wlan_fmac_tx_done_event_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 							    struct img_tx_buff_done *config);
 
-unsigned int tx_desc_get(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned int tx_desc_get(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 			 int queue);
 
-enum nvlsi_rpu_status tx_pending_process(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status tx_pending_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 					 unsigned int desc,
 					 unsigned int ac);
 #endif /* __FMAC_TX_H__ */

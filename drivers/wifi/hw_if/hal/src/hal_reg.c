@@ -26,11 +26,11 @@ static bool hal_rpu_is_reg(unsigned int addr_val)
 }
 
 
-enum nvlsi_rpu_status hal_rpu_reg_read(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 				       unsigned int *val,
 				       unsigned int rpu_reg_addr)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned long addr_offset = 0;
 
 	if (!hal_dev_ctx)
@@ -38,7 +38,7 @@ enum nvlsi_rpu_status hal_rpu_reg_read(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx
 
 	if ((val == NULL) ||
 	    !hal_rpu_is_reg(rpu_reg_addr)) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid params, val = %p, rpu_reg (0x%x)\n",
 				       __func__,
 				       val,
@@ -51,17 +51,17 @@ enum nvlsi_rpu_status hal_rpu_reg_read(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx
 					 &addr_offset);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: pal_rpu_addr_offset_get failed\n",
 				       __func__);
 		return status;
 	}
 
-	*val = nvlsi_rpu_bal_read_word(hal_dev_ctx->bal_dev_ctx,
+	*val = wifi_nrf_bal_read_word(hal_dev_ctx->bal_dev_ctx,
 				       addr_offset);
 
 	if (*val == 0xFFFFFFFF) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Error !! Value read at addr_offset = %x is = %X\n",
 				       __func__,
 				       addr_offset,
@@ -75,18 +75,18 @@ out:
 	return status;
 }
 
-enum nvlsi_rpu_status hal_rpu_reg_write(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ctx,
+enum wifi_nrf_status hal_rpu_reg_write(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 					unsigned int rpu_reg_addr,
 					unsigned int val)
 {
-	enum nvlsi_rpu_status status = NVLSI_RPU_STATUS_FAIL;
+	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned long addr_offset = 0;
 
 	if (!hal_dev_ctx)
 		return status;
 
 	if (!hal_rpu_is_reg(rpu_reg_addr)) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: Invalid params, rpu_reg_addr (0x%X)\n",
 				       __func__,
 				       rpu_reg_addr);
@@ -98,13 +98,13 @@ enum nvlsi_rpu_status hal_rpu_reg_write(struct nvlsi_rpu_hal_dev_ctx *hal_dev_ct
 					 &addr_offset);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		nvlsi_rpu_osal_log_err(hal_dev_ctx->hpriv->opriv,
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				       "%s: pal_rpu_get_region_offset failed\n",
 				       __func__);
 		return status;
 	}
 
-	nvlsi_rpu_bal_write_word(hal_dev_ctx->bal_dev_ctx,
+	wifi_nrf_bal_write_word(hal_dev_ctx->bal_dev_ctx,
 				 addr_offset,
 				 val);
 

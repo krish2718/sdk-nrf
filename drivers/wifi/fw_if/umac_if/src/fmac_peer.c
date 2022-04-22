@@ -14,20 +14,20 @@
 #include "host_rpu_umac_if.h"
 #include "fmac_util.h"
 
-int nvlsi_wlan_fmac_peer_get_id(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_wlan_fmac_peer_get_id(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 				const unsigned char *mac_addr)
 {
 	int i;
 	struct peers_info *peer;
 
-	if (nvlsi_wlan_util_is_multicast_addr(mac_addr))
+	if (wifi_nrf_wlan_util_is_multicast_addr(mac_addr))
 		return MAX_PEERS;
 
 	for (i = 0; i < MAX_PEERS; i++) {
 		peer = &fmac_dev_ctx->tx_config.peers[i];
 		if (peer->peer_id == -1)
 			continue;
-		if ((nvlsi_wlan_util_ether_addr_equal(mac_addr,
+		if ((wifi_nrf_wlan_util_ether_addr_equal(mac_addr,
 						      (void *)peer->ra_addr))) {
 			return peer->peer_id;
 		}
@@ -35,22 +35,22 @@ int nvlsi_wlan_fmac_peer_get_id(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 	return -1;
 }
 
-int nvlsi_wlan_fmac_peer_add(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
-			     unsigned char nvlsi_vif_idx,
+int wifi_nrf_wlan_fmac_peer_add(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+			     unsigned char wifi_nrf_vif_idx,
 			     const unsigned char *mac_addr,
 			     unsigned char is_legacy,
 			     unsigned char qos_supported)
 {
 	int i;
 	struct peers_info *peer;
-	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
 
-	vif_ctx = fmac_dev_ctx->vif_ctx[nvlsi_vif_idx];
+	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
-	if (nvlsi_wlan_util_is_multicast_addr(mac_addr)
+	if (wifi_nrf_wlan_util_is_multicast_addr(mac_addr)
 	    && (vif_ctx->if_type == IMG_IFTYPE_AP)) {
 
-		fmac_dev_ctx->tx_config.peers[MAX_PEERS].nvlsi_vif_idx = nvlsi_vif_idx;
+		fmac_dev_ctx->tx_config.peers[MAX_PEERS].wifi_nrf_vif_idx = wifi_nrf_vif_idx;
 		fmac_dev_ctx->tx_config.peers[MAX_PEERS].peer_id = MAX_PEERS;
 		fmac_dev_ctx->tx_config.peers[MAX_PEERS].is_legacy = 1;
 
@@ -61,11 +61,11 @@ int nvlsi_wlan_fmac_peer_add(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 		peer = &fmac_dev_ctx->tx_config.peers[i];
 
 		if (peer->peer_id == -1) {
-			nvlsi_rpu_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 					       peer->ra_addr,
 					       mac_addr,
 					       IMG_ETH_ALEN);
-			peer->nvlsi_vif_idx = nvlsi_vif_idx;
+			peer->wifi_nrf_vif_idx = wifi_nrf_vif_idx;
 			peer->peer_id = i;
 			peer->is_legacy = is_legacy;
 			peer->qos_supported = qos_supported;
@@ -81,7 +81,7 @@ int nvlsi_wlan_fmac_peer_add(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 		}
 	}
 
-	nvlsi_rpu_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+	wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
 			       "%s: Failed !! No Space Available",
 			       __func__);
 
@@ -89,17 +89,17 @@ int nvlsi_wlan_fmac_peer_add(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-void nvlsi_wlan_fmac_peer_remove(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
-				 unsigned char nvlsi_vif_idx,
+void wifi_nrf_wlan_fmac_peer_remove(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+				 unsigned char wifi_nrf_vif_idx,
 				 int peer_id)
 {
 	struct peers_info *peer;
-	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
 
-	vif_ctx = fmac_dev_ctx->vif_ctx[nvlsi_vif_idx];
+	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 	peer = &fmac_dev_ctx->tx_config.peers[peer_id];
 
-	nvlsi_rpu_osal_mem_set(fmac_dev_ctx->fpriv->opriv,
+	wifi_nrf_osal_mem_set(fmac_dev_ctx->fpriv->opriv,
 			       peer,
 			       0x0,
 			       sizeof(struct peers_info));
@@ -116,20 +116,20 @@ void nvlsi_wlan_fmac_peer_remove(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-void nvlsi_wlan_fmac_peers_flush(struct nvlsi_wlan_fmac_dev_ctx *fmac_dev_ctx,
-				 unsigned char nvlsi_vif_idx)
+void wifi_nrf_wlan_fmac_peers_flush(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+				 unsigned char wifi_nrf_vif_idx)
 {
-	struct nvlsi_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
 	unsigned int i = 0;
 	struct peers_info *peer = NULL;
 
-	vif_ctx = fmac_dev_ctx->vif_ctx[nvlsi_vif_idx];
+	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 	fmac_dev_ctx->tx_config.peers[MAX_PEERS].peer_id = -1;
 
 	for (i = 0; i < MAX_PEERS; i++) {
 		peer = &fmac_dev_ctx->tx_config.peers[i];
-		if (peer->nvlsi_vif_idx == nvlsi_vif_idx) {
-			nvlsi_rpu_osal_mem_set(fmac_dev_ctx->fpriv->opriv,
+		if (peer->wifi_nrf_vif_idx == wifi_nrf_vif_idx) {
+			wifi_nrf_osal_mem_set(fmac_dev_ctx->fpriv->opriv,
 					       peer,
 					       0x0,
 					       sizeof(struct peers_info));
