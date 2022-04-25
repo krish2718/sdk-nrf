@@ -36,20 +36,20 @@
 #define SOC_MMAP_ADDR_OFFSET_PBUS 0x40000
 #endif /* RPU_CONFIG_72 */
 
-#define NVLSI_WLAN_FW_LMAC_PATCH_LOC_PRI "img/wlan/wifi_nrf_wlan_lmac_patch_pri.bimg"
-#define NVLSI_WLAN_FW_LMAC_PATCH_LOC_SEC "img/wlan/wifi_nrf_wlan_lmac_patch_sec.bin"
-#define NVLSI_WLAN_FW_UMAC_PATCH_LOC_PRI "img/wlan/wifi_nrf_wlan_umac_patch_pri.bimg"
-#define NVLSI_WLAN_FW_UMAC_PATCH_LOC_SEC "img/wlan/wifi_nrf_wlan_umac_patch_sec.bin"
+#define NVLSI_WLAN_FW_LMAC_PATCH_LOC_PRI "img/wlan/wifi_nrf_lmac_patch_pri.bimg"
+#define NVLSI_WLAN_FW_LMAC_PATCH_LOC_SEC "img/wlan/wifi_nrf_lmac_patch_sec.bin"
+#define NVLSI_WLAN_FW_UMAC_PATCH_LOC_PRI "img/wlan/wifi_nrf_umac_patch_pri.bimg"
+#define NVLSI_WLAN_FW_UMAC_PATCH_LOC_SEC "img/wlan/wifi_nrf_umac_patch_sec.bin"
 
 
-enum wifi_nrf_wlan_fw_type {
+enum wifi_nrf_fw_type {
 	NVLSI_WLAN_FW_TYPE_LMAC_PATCH,
 	NVLSI_WLAN_FW_TYPE_UMAC_PATCH,
 	NVLSI_WLAN_FW_TYPE_MAX
 };
 
 
-enum wifi_nrf_wlan_fw_subtype {
+enum wifi_nrf_fw_subtype {
 	NVLSI_WLAN_FW_SUBTYPE_PRI,
 	NVLSI_WLAN_FW_SUBTYPE_SEC,
 	NVLSI_WLAN_FW_SUBTYPE_MAX
@@ -61,6 +61,6 @@ enum wifi_nrf_status pal_rpu_addr_offset_get(struct wifi_nrf_osal_priv *opriv,
 					      unsigned long *addr_offset);
 
 char *pal_ops_get_fw_loc(struct wifi_nrf_osal_priv *opriv,
-			 enum wifi_nrf_wlan_fw_type fw_type,
-			 enum wifi_nrf_wlan_fw_subtype fw_subtype);
+			 enum wifi_nrf_fw_type fw_type,
+			 enum wifi_nrf_fw_subtype fw_subtype);
 #endif /* __PAL_H__ */

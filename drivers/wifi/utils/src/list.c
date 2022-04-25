@@ -12,7 +12,7 @@
 
 #include "list.h"
 
-void *wifi_nrf_wlan_utils_list_alloc(struct wifi_nrf_osal_priv *opriv)
+void *wifi_nrf_utils_list_alloc(struct wifi_nrf_osal_priv *opriv)
 {
 	void *list = NULL;
 
@@ -34,7 +34,7 @@ out:
 }
 
 
-void wifi_nrf_wlan_utils_list_free(struct wifi_nrf_osal_priv *opriv,
+void wifi_nrf_utils_list_free(struct wifi_nrf_osal_priv *opriv,
 				void *list)
 {
 	wifi_nrf_osal_llist_free(opriv,
@@ -42,7 +42,7 @@ void wifi_nrf_wlan_utils_list_free(struct wifi_nrf_osal_priv *opriv,
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_utils_list_add_tail(struct wifi_nrf_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_utils_list_add_tail(struct wifi_nrf_osal_priv *opriv,
 						     void *list,
 						     void *data)
 {
@@ -68,7 +68,7 @@ enum wifi_nrf_status wifi_nrf_wlan_utils_list_add_tail(struct wifi_nrf_osal_priv
 	return NVLSI_RPU_STATUS_SUCCESS;
 }
 
-void wifi_nrf_wlan_utils_list_del_node(struct wifi_nrf_osal_priv *opriv,
+void wifi_nrf_utils_list_del_node(struct wifi_nrf_osal_priv *opriv,
 				    void *list,
 				    void *data)
 {
@@ -100,7 +100,7 @@ void wifi_nrf_wlan_utils_list_del_node(struct wifi_nrf_osal_priv *opriv,
 	}
 }
 
-void *wifi_nrf_wlan_utils_list_del_head(struct wifi_nrf_osal_priv *opriv,
+void *wifi_nrf_utils_list_del_head(struct wifi_nrf_osal_priv *opriv,
 				     void *list)
 {
 	void *list_node = NULL;
@@ -126,7 +126,7 @@ out:
 }
 
 
-void *wifi_nrf_wlan_utils_list_peek(struct wifi_nrf_osal_priv *opriv,
+void *wifi_nrf_utils_list_peek(struct wifi_nrf_osal_priv *opriv,
 				 void *list)
 {
 	void *list_node = NULL;
@@ -146,7 +146,7 @@ out:
 }
 
 
-unsigned int wifi_nrf_wlan_utils_list_len(struct wifi_nrf_osal_priv *opriv,
+unsigned int wifi_nrf_utils_list_len(struct wifi_nrf_osal_priv *opriv,
 				       void *list)
 {
 	return wifi_nrf_osal_llist_len(opriv,
@@ -154,7 +154,7 @@ unsigned int wifi_nrf_wlan_utils_list_len(struct wifi_nrf_osal_priv *opriv,
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_utils_list_traverse(struct wifi_nrf_osal_priv *opriv,
+enum wifi_nrf_status wifi_nrf_utils_list_traverse(struct wifi_nrf_osal_priv *opriv,
 						     void *list,
 						     void *callbk_data,
 						     enum wifi_nrf_status (*callbk_func)(void *callbk_data,

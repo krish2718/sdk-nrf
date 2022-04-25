@@ -65,7 +65,7 @@ int wifi_nrf_if_send(const struct device *dev,
 	}
 
 	/* TODO : net_pkt to nbuf ?? */
-	return wifi_nrf_wlan_fmac_start_xmit(rpu_ctx_zep->rpu_ctx,
+	return wifi_nrf_fmac_start_xmit(rpu_ctx_zep->rpu_ctx,
 					  vif_ctx_zep->vif_idx,
 					  net_pkt_to_nbuf(pkt));
 }

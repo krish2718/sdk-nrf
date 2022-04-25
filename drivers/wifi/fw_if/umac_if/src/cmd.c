@@ -13,7 +13,7 @@
 #include "hal_api.h"
 #include "fmac_structs.h"
 
-struct host_rpu_msg *umac_cmd_alloc(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+struct host_rpu_msg *umac_cmd_alloc(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				    int type,
 				    int len)
 {
@@ -37,7 +37,7 @@ out:
 }
 
 
-enum wifi_nrf_status umac_cmd_cfg(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status umac_cmd_cfg(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				   void *params,
 				   int len)
 {
@@ -80,7 +80,7 @@ out:
 }
 
 
-enum wifi_nrf_status umac_cmd_init(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status umac_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				    unsigned char *def_mac_addr,
 				    unsigned char def_vif_idx,
 				    unsigned char *rf_params,
@@ -154,7 +154,7 @@ out:
 }
 
 
-enum wifi_nrf_status umac_cmd_deinit(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+enum wifi_nrf_status umac_cmd_deinit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct host_rpu_msg *umac_cmd = NULL;
@@ -182,7 +182,7 @@ out:
 }
 
 
-enum wifi_nrf_status umac_cmd_btcoex(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status umac_cmd_btcoex(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				      struct rpu_btcoex *params)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -223,7 +223,7 @@ out:
 }
 
 
-enum wifi_nrf_status umac_cmd_prog_stats_get(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status umac_cmd_prog_stats_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					      enum rpu_stats_type stats_type)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;

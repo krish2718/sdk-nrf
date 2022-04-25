@@ -14,7 +14,7 @@
 #include "queue.h"
 #include "fmac_tx.h"
 
-enum wifi_nrf_status sap_client_ps_get_frames(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status sap_client_ps_get_frames(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       struct img_sap_ps_get_frames *config)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -34,7 +34,7 @@ enum wifi_nrf_status sap_client_ps_get_frames(struct wifi_nrf_wlan_fmac_dev_ctx 
 	wifi_nrf_osal_spinlock_take(fmac_dev_ctx->fpriv->opriv,
 				     fmac_dev_ctx->tx_config.tx_lock);
 
-	id = wifi_nrf_wlan_fmac_peer_get_id(fmac_dev_ctx, config->mac_addr);
+	id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx, config->mac_addr);
 
 	if (id == -1) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -53,7 +53,7 @@ enum wifi_nrf_status sap_client_ps_get_frames(struct wifi_nrf_wlan_fmac_dev_ctx 
 	wakeup_client_q = fmac_dev_ctx->tx_config.wakeup_client_q;
 
 	if (wakeup_client_q)
-		wifi_nrf_wlan_utils_q_enqueue(fmac_dev_ctx->fpriv->opriv,
+		wifi_nrf_utils_q_enqueue(fmac_dev_ctx->fpriv->opriv,
 					   wakeup_client_q,
 					   peer);
 
@@ -74,7 +74,7 @@ out:
 }
 
 
-enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       struct img_sap_client_pwrsave *config)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -94,7 +94,7 @@ enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_wlan_fmac_dev_ctx 
 	wifi_nrf_osal_spinlock_take(fmac_dev_ctx->fpriv->opriv,
 				     fmac_dev_ctx->tx_config.tx_lock);
 
-	id = wifi_nrf_wlan_fmac_peer_get_id(fmac_dev_ctx,
+	id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx,
 					 config->mac_addr);
 
 	if (id == -1) {
@@ -116,7 +116,7 @@ enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_wlan_fmac_dev_ctx 
 		wakeup_client_q = fmac_dev_ctx->tx_config.wakeup_client_q;
 
 		if (wakeup_client_q) {
-			wifi_nrf_wlan_utils_q_enqueue(fmac_dev_ctx->fpriv->opriv,
+			wifi_nrf_utils_q_enqueue(fmac_dev_ctx->fpriv->opriv,
 						   wakeup_client_q,
 						   peer);
 		}

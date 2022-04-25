@@ -41,12 +41,12 @@ int wifi_nrf_disp_scan_zep(const struct device *dev,
 	scan_info.scan_mode = AUTO_SCAN;
 	scan_info.scan_reason = SCAN_DISPLAY;
 
-	status = wifi_nrf_wlan_fmac_scan(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_scan(rpu_ctx_zep->rpu_ctx,
 				      vif_ctx_zep->vif_idx,
 				      &scan_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_wlan_fmac_scan failed\n", __func__);
+		printk("%s: wifi_nrf_fmac_scan failed\n", __func__);
 		goto out;
 	}
 
@@ -66,12 +66,12 @@ enum wifi_nrf_status wifi_nrf_disp_scan_res_get_zep(struct wifi_nrf_vif_ctx_zep 
 
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	status = wifi_nrf_wlan_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
 					      vif_ctx_zep->vif_idx,
 					      SCAN_DISPLAY);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_wlan_fmac_scan failed\n", __func__);
+		printk("%s: wifi_nrf_fmac_scan failed\n", __func__);
 		goto out;
 	}
 

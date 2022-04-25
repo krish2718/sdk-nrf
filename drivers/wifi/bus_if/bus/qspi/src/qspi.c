@@ -15,13 +15,13 @@
 
 #define NVLSI_WLAN_QSPI_DEV_NAME "wlan0"
 
-int wifi_nrf_wlan_bus_qspi_irq_handler(void *data)
+int wifi_nrf_bus_qspi_irq_handler(void *data)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *dev_ctx = NULL;
-	struct wifi_nrf_wlan_bus_qspi_priv *qspi_priv = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 	int ret = 0;
 
-	dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)data;
+	dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)data;
 	qspi_priv = dev_ctx->qspi_priv;
 
 	ret = qspi_priv->intr_callbk_fn(dev_ctx->bal_dev_ctx);
@@ -30,12 +30,12 @@ int wifi_nrf_wlan_bus_qspi_irq_handler(void *data)
 }
 
 
-void *wifi_nrf_wlan_bus_qspi_dev_add(void *bus_priv,
+void *wifi_nrf_bus_qspi_dev_add(void *bus_priv,
 				  void *bal_dev_ctx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_bus_qspi_priv *qspi_priv = NULL;
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	struct wifi_nrf_osal_host_map host_map;
 
 	qspi_priv = bus_priv;
@@ -81,7 +81,7 @@ void *wifi_nrf_wlan_bus_qspi_dev_add(void *bus_priv,
 	status = wifi_nrf_osal_bus_qspi_dev_intr_reg(qspi_dev_ctx->qspi_priv->opriv,
 						      qspi_dev_ctx->os_qspi_dev_ctx,
 						      qspi_dev_ctx,
-						      &wifi_nrf_wlan_bus_qspi_irq_handler);
+						      &wifi_nrf_bus_qspi_irq_handler);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(qspi_dev_ctx->qspi_priv->opriv,
@@ -107,9 +107,9 @@ out:
 }
 
 
-void wifi_nrf_wlan_bus_qspi_dev_rem(void *bus_dev_ctx)
+void wifi_nrf_bus_qspi_dev_rem(void *bus_dev_ctx)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
 	qspi_dev_ctx = bus_dev_ctx;
 
@@ -121,10 +121,10 @@ void wifi_nrf_wlan_bus_qspi_dev_rem(void *bus_dev_ctx)
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_bus_qspi_dev_init(void *bus_dev_ctx)
+enum wifi_nrf_status wifi_nrf_bus_qspi_dev_init(void *bus_dev_ctx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
 	qspi_dev_ctx = bus_dev_ctx;
 
@@ -142,9 +142,9 @@ out:
 }
 
 
-void wifi_nrf_wlan_bus_qspi_dev_deinit(void *bus_dev_ctx)
+void wifi_nrf_bus_qspi_dev_deinit(void *bus_dev_ctx)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
 	qspi_dev_ctx = bus_dev_ctx;
 
@@ -153,11 +153,11 @@ void wifi_nrf_wlan_bus_qspi_dev_deinit(void *bus_dev_ctx)
 }
 
 
-void *wifi_nrf_wlan_bus_qspi_init(struct wifi_nrf_osal_priv *opriv,
+void *wifi_nrf_bus_qspi_init(struct wifi_nrf_osal_priv *opriv,
 			       void *params,
 			       enum wifi_nrf_status (*intr_callbk_fn)(void *bal_dev_ctx))
 {
-	struct wifi_nrf_wlan_bus_qspi_priv *qspi_priv = NULL;
+	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 
 	qspi_priv = wifi_nrf_osal_mem_zalloc(opriv,
 					      sizeof(*qspi_priv));
@@ -197,9 +197,9 @@ out:
 }
 
 
-void wifi_nrf_wlan_bus_qspi_deinit(void *bus_priv)
+void wifi_nrf_bus_qspi_deinit(void *bus_priv)
 {
-	struct wifi_nrf_wlan_bus_qspi_priv *qspi_priv = NULL;
+	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 
 	qspi_priv = bus_priv;
 
@@ -211,13 +211,13 @@ void wifi_nrf_wlan_bus_qspi_deinit(void *bus_priv)
 }
 
 
-unsigned int wifi_nrf_wlan_bus_qspi_read_word(void *dev_ctx,
+unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx,
 					   unsigned long addr_offset)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned int val = 0;
 
-	qspi_dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)dev_ctx;
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	val = wifi_nrf_osal_qspi_read_reg32(qspi_dev_ctx->qspi_priv->opriv,
 					     qspi_dev_ctx->os_qspi_dev_ctx,
@@ -227,13 +227,13 @@ unsigned int wifi_nrf_wlan_bus_qspi_read_word(void *dev_ctx,
 }
 
 
-void wifi_nrf_wlan_bus_qspi_write_word(void *dev_ctx,
+void wifi_nrf_bus_qspi_write_word(void *dev_ctx,
 				    unsigned long addr_offset,
 				    unsigned int val)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
-	qspi_dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)dev_ctx;
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	wifi_nrf_osal_qspi_write_reg32(qspi_dev_ctx->qspi_priv->opriv,
 					qspi_dev_ctx->os_qspi_dev_ctx,
@@ -242,14 +242,14 @@ void wifi_nrf_wlan_bus_qspi_write_word(void *dev_ctx,
 }
 
 
-void wifi_nrf_wlan_bus_qspi_read_block(void *dev_ctx,
+void wifi_nrf_bus_qspi_read_block(void *dev_ctx,
 				    void *dest_addr,
 				    unsigned long src_addr_offset,
 				    size_t len)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
-	qspi_dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)dev_ctx;
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	wifi_nrf_osal_qspi_cpy_from(qspi_dev_ctx->qspi_priv->opriv,
 				     qspi_dev_ctx->os_qspi_dev_ctx,
@@ -259,14 +259,14 @@ void wifi_nrf_wlan_bus_qspi_read_block(void *dev_ctx,
 }
 
 
-void wifi_nrf_wlan_bus_qspi_write_block(void *dev_ctx,
+void wifi_nrf_bus_qspi_write_block(void *dev_ctx,
 				     unsigned long dest_addr_offset,
 				     const void *src_addr,
 				     size_t len)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
-	qspi_dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)dev_ctx;
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	wifi_nrf_osal_qspi_cpy_to(qspi_dev_ctx->qspi_priv->opriv,
 				   qspi_dev_ctx->os_qspi_dev_ctx,
@@ -276,15 +276,15 @@ void wifi_nrf_wlan_bus_qspi_write_block(void *dev_ctx,
 }
 
 
-unsigned long wifi_nrf_wlan_bus_qspi_dma_map(void *dev_ctx,
+unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx,
 					  unsigned long virt_addr,
 					  size_t len,
 					  enum wifi_nrf_osal_dma_dir dma_dir)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned long phy_addr = 0;
 
-	qspi_dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)dev_ctx;
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	phy_addr = qspi_dev_ctx->host_addr_base + (virt_addr - qspi_dev_ctx->addr_pktram_base);
 
@@ -292,15 +292,15 @@ unsigned long wifi_nrf_wlan_bus_qspi_dma_map(void *dev_ctx,
 }
 
 
-unsigned long wifi_nrf_wlan_bus_qspi_dma_unmap(void *dev_ctx,
+unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx,
 					    unsigned long phy_addr,
 					    size_t len,
 					    enum wifi_nrf_osal_dma_dir dma_dir)
 {
-	struct wifi_nrf_wlan_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned long virt_addr = 0;
 
-	qspi_dev_ctx = (struct wifi_nrf_wlan_bus_qspi_dev_ctx *)dev_ctx;
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	virt_addr = qspi_dev_ctx->addr_pktram_base + (phy_addr - qspi_dev_ctx->host_addr_base);
 
@@ -308,23 +308,23 @@ unsigned long wifi_nrf_wlan_bus_qspi_dma_unmap(void *dev_ctx,
 }
 
 
-struct wifi_nrf_bal_ops wifi_nrf_wlan_bus_qspi_ops = {
-	.init = &wifi_nrf_wlan_bus_qspi_init,
-	.deinit = &wifi_nrf_wlan_bus_qspi_deinit,
-	.dev_add = &wifi_nrf_wlan_bus_qspi_dev_add,
-	.dev_rem = &wifi_nrf_wlan_bus_qspi_dev_rem,
-	.dev_init = &wifi_nrf_wlan_bus_qspi_dev_init,
-	.dev_deinit = &wifi_nrf_wlan_bus_qspi_dev_deinit,
-	.read_word = &wifi_nrf_wlan_bus_qspi_read_word,
-	.write_word = &wifi_nrf_wlan_bus_qspi_write_word,
-	.read_block = &wifi_nrf_wlan_bus_qspi_read_block,
-	.write_block = &wifi_nrf_wlan_bus_qspi_write_block,
-	.dma_map = &wifi_nrf_wlan_bus_qspi_dma_map,
-	.dma_unmap = &wifi_nrf_wlan_bus_qspi_dma_unmap,
+struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
+	.init = &wifi_nrf_bus_qspi_init,
+	.deinit = &wifi_nrf_bus_qspi_deinit,
+	.dev_add = &wifi_nrf_bus_qspi_dev_add,
+	.dev_rem = &wifi_nrf_bus_qspi_dev_rem,
+	.dev_init = &wifi_nrf_bus_qspi_dev_init,
+	.dev_deinit = &wifi_nrf_bus_qspi_dev_deinit,
+	.read_word = &wifi_nrf_bus_qspi_read_word,
+	.write_word = &wifi_nrf_bus_qspi_write_word,
+	.read_block = &wifi_nrf_bus_qspi_read_block,
+	.write_block = &wifi_nrf_bus_qspi_write_block,
+	.dma_map = &wifi_nrf_bus_qspi_dma_map,
+	.dma_unmap = &wifi_nrf_bus_qspi_dma_unmap,
 };
 
 
 struct wifi_nrf_bal_ops *get_bus_ops(void)
 {
-	return &wifi_nrf_wlan_bus_qspi_ops;
+	return &wifi_nrf_bus_qspi_ops;
 }

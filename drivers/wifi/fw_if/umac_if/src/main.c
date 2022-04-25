@@ -21,7 +21,7 @@
 #include "fmac_event.h"
 #include "fmac_bb.h"
 
-static unsigned char wifi_nrf_wlan_fmac_vif_idx_get(struct wifi_nrf_wlan_fmac_dev_ctx *wifi_nrf_fmac_dev_ctx)
+static unsigned char wifi_nrf_fmac_vif_idx_get(struct wifi_nrf_fmac_dev_ctx *wifi_nrf_fmac_dev_ctx)
 {
 	unsigned char i = 0;
 
@@ -34,9 +34,9 @@ static unsigned char wifi_nrf_wlan_fmac_vif_idx_get(struct wifi_nrf_wlan_fmac_de
 }
 
 
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_init_tx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+static enum wifi_nrf_status wifi_nrf_fmac_init_tx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
-	struct wifi_nrf_wlan_fmac_priv *fpriv = NULL;
+	struct wifi_nrf_fmac_priv *fpriv = NULL;
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int size = 0;
 
@@ -44,9 +44,9 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_init_tx(struct wifi_nrf_wlan_fmac
 
 	size = (fpriv->num_tx_tokens *
 		fpriv->data_config.max_tx_aggregation *
-		sizeof(struct wifi_nrf_wlan_fmac_buf_map_info));
+		sizeof(struct wifi_nrf_fmac_buf_map_info));
 
-	fmac_dev_ctx->tx_buf_info = (struct wifi_nrf_wlan_fmac_buf_map_info *)wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
+	fmac_dev_ctx->tx_buf_info = (struct wifi_nrf_fmac_buf_map_info *)wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 												     size);
 
 	if (!fmac_dev_ctx->tx_buf_info) {
@@ -63,9 +63,9 @@ out:
 }
 
 
-static void wifi_nrf_wlan_fmac_deinit_tx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+static void wifi_nrf_fmac_deinit_tx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
-	struct wifi_nrf_wlan_fmac_priv *fpriv = NULL;
+	struct wifi_nrf_fmac_priv *fpriv = NULL;
 
 	fpriv = fmac_dev_ctx->fpriv;
 
@@ -76,18 +76,18 @@ static void wifi_nrf_wlan_fmac_deinit_tx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac
 }
 
 
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_init_rx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+static enum wifi_nrf_status wifi_nrf_fmac_init_rx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
-	struct wifi_nrf_wlan_fmac_priv *fpriv = NULL;
+	struct wifi_nrf_fmac_priv *fpriv = NULL;
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int size = 0;
 	unsigned int desc_id = 0;
 
 	fpriv = fmac_dev_ctx->fpriv;
 
-	size = (fpriv->num_rx_bufs * sizeof(struct wifi_nrf_wlan_fmac_buf_map_info));
+	size = (fpriv->num_rx_bufs * sizeof(struct wifi_nrf_fmac_buf_map_info));
 
-	fmac_dev_ctx->rx_buf_info = (struct wifi_nrf_wlan_fmac_buf_map_info *)wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
+	fmac_dev_ctx->rx_buf_info = (struct wifi_nrf_fmac_buf_map_info *)wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 												     size);
 
 	if (!fmac_dev_ctx->rx_buf_info) {
@@ -98,13 +98,13 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_init_rx(struct wifi_nrf_wlan_fmac
 	}
 
 	for (desc_id = 0; desc_id < fmac_dev_ctx->fpriv->num_rx_bufs; desc_id++) {
-		status = wifi_nrf_wlan_fmac_rx_cmd_send(fmac_dev_ctx,
+		status = wifi_nrf_fmac_rx_cmd_send(fmac_dev_ctx,
 						     NVLSI_WLAN_FMAC_RX_CMD_TYPE_INIT,
 						     desc_id);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
 			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					       "%s: wifi_nrf_wlan_fmac_rx_cmd_send(INIT) failed for desc_id = %d\n",
+					       "%s: wifi_nrf_fmac_rx_cmd_send(INIT) failed for desc_id = %d\n",
 					       __func__,
 					       desc_id);
 			goto out;
@@ -115,22 +115,22 @@ out:
 }
 
 
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_deinit_rx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+static enum wifi_nrf_status wifi_nrf_fmac_deinit_rx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
-	struct wifi_nrf_wlan_fmac_priv *fpriv = NULL;
+	struct wifi_nrf_fmac_priv *fpriv = NULL;
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int desc_id = 0;
 
 	fpriv = fmac_dev_ctx->fpriv;
 
 	for (desc_id = 0; desc_id < fpriv->num_rx_bufs; desc_id++) {
-		status = wifi_nrf_wlan_fmac_rx_cmd_send(fmac_dev_ctx,
+		status = wifi_nrf_fmac_rx_cmd_send(fmac_dev_ctx,
 						     NVLSI_WLAN_FMAC_RX_CMD_TYPE_DEINIT,
 						     desc_id);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
 			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					       "%s: wifi_nrf_wlan_fmac_rx_cmd_send(DEINIT) failed for desc_id = %d\n",
+					       "%s: wifi_nrf_fmac_rx_cmd_send(DEINIT) failed for desc_id = %d\n",
 					       __func__,
 					       desc_id);
 			goto out;
@@ -146,7 +146,7 @@ out:
 }
 
 
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_fw_init(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						     unsigned char *mac,
 						     unsigned char wifi_nrf_vif_idx,
 						     unsigned char *rf_params,
@@ -161,7 +161,7 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_fw_init(struct wifi_nrf_wlan_fmac
 			       mac,
 			       IMG_ETH_ALEN);
 
-	status = wifi_nrf_wlan_fmac_init_tx(fmac_dev_ctx);
+	status = wifi_nrf_fmac_init_tx(fmac_dev_ctx);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -170,13 +170,13 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_fw_init(struct wifi_nrf_wlan_fmac
 		goto out;
 	}
 
-	status = wifi_nrf_wlan_fmac_init_rx(fmac_dev_ctx);
+	status = wifi_nrf_fmac_init_rx(fmac_dev_ctx);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
 				       "%s: Init RX failed\n",
 				       __func__);
-		wifi_nrf_wlan_fmac_deinit_tx(fmac_dev_ctx);
+		wifi_nrf_fmac_deinit_tx(fmac_dev_ctx);
 		goto out;
 	}
 
@@ -193,8 +193,8 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_fw_init(struct wifi_nrf_wlan_fmac
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
 				       "%s: UMAC init failed\n",
 				       __func__);
-		wifi_nrf_wlan_fmac_deinit_rx(fmac_dev_ctx);
-		wifi_nrf_wlan_fmac_deinit_tx(fmac_dev_ctx);
+		wifi_nrf_fmac_deinit_rx(fmac_dev_ctx);
+		wifi_nrf_fmac_deinit_tx(fmac_dev_ctx);
 		goto out;
 	}
 
@@ -214,8 +214,8 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_fw_init(struct wifi_nrf_wlan_fmac
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
 				       "%s: UMAC init timed out\n",
 				       __func__);
-		wifi_nrf_wlan_fmac_deinit_rx(fmac_dev_ctx);
-		wifi_nrf_wlan_fmac_deinit_tx(fmac_dev_ctx);
+		wifi_nrf_fmac_deinit_rx(fmac_dev_ctx);
+		wifi_nrf_fmac_deinit_tx(fmac_dev_ctx);
 		status = NVLSI_RPU_STATUS_FAIL;
 		goto out;
 	}
@@ -226,7 +226,7 @@ out:
 	return status;
 }
 
-static void wifi_nrf_wlan_fmac_fw_deinit(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+static void wifi_nrf_fmac_fw_deinit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	unsigned long start_time_us = 0;
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -259,15 +259,15 @@ static void wifi_nrf_wlan_fmac_fw_deinit(struct wifi_nrf_wlan_fmac_dev_ctx *fmac
 	}
 out:
 
-	wifi_nrf_wlan_fmac_deinit_rx(fmac_dev_ctx);
-	wifi_nrf_wlan_fmac_deinit_tx(fmac_dev_ctx);
+	wifi_nrf_fmac_deinit_rx(fmac_dev_ctx);
+	wifi_nrf_fmac_deinit_tx(fmac_dev_ctx);
 }
 
 
-struct wifi_nrf_wlan_fmac_dev_ctx *wifi_nrf_wlan_fmac_dev_add(struct wifi_nrf_wlan_fmac_priv *fpriv,
+struct wifi_nrf_fmac_dev_ctx *wifi_nrf_fmac_dev_add(struct wifi_nrf_fmac_priv *fpriv,
 							void *os_dev_ctx)
 {
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
 	if (!fpriv || !os_dev_ctx)
 		return NULL;
@@ -303,7 +303,7 @@ out:
 }
 
 
-void wifi_nrf_wlan_fmac_dev_rem(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+void wifi_nrf_fmac_dev_rem(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	wifi_nrf_hal_dev_rem(fmac_dev_ctx->hal_dev_ctx);
 
@@ -312,8 +312,8 @@ void wifi_nrf_wlan_fmac_dev_rem(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_dev_init(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
-					       struct wifi_nrf_wlan_fmac_init_dev_params *params)
+enum wifi_nrf_status wifi_nrf_fmac_dev_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					       struct wifi_nrf_fmac_init_dev_params *params)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
@@ -326,7 +326,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_dev_init(struct wifi_nrf_wlan_fmac_dev_c
 		goto out;
 	}
 
-	status = wifi_nrf_wlan_fmac_fw_init(fmac_dev_ctx,
+	status = wifi_nrf_fmac_fw_init(fmac_dev_ctx,
 					 params->base_mac_addr,
 					 params->def_vif_idx,
 					 params->rf_params,
@@ -335,7 +335,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_dev_init(struct wifi_nrf_wlan_fmac_dev_c
 
 	if (status == NVLSI_RPU_STATUS_FAIL) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				       "%s: wifi_nrf_wlan_fmac_fw_init failed\n",
+				       "%s: wifi_nrf_fmac_fw_init failed\n",
 				       __func__);
 		goto out;
 	}
@@ -345,18 +345,18 @@ out:
 }
 
 
-void wifi_nrf_wlan_fmac_dev_deinit(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+void wifi_nrf_fmac_dev_deinit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
-	wifi_nrf_wlan_fmac_fw_deinit(fmac_dev_ctx);
+	wifi_nrf_fmac_fw_deinit(fmac_dev_ctx);
 }
 
 
-struct wifi_nrf_wlan_fmac_priv *wifi_nrf_wlan_fmac_init(struct img_data_config_params *data_config,
+struct wifi_nrf_fmac_priv *wifi_nrf_fmac_init(struct img_data_config_params *data_config,
 						  struct rx_buf_pool_params *rx_buf_pools,
-						  struct wifi_nrf_wlan_fmac_callbk_fns *callbk_fns)
+						  struct wifi_nrf_fmac_callbk_fns *callbk_fns)
 {
 	struct wifi_nrf_osal_priv *opriv = NULL;
-	struct wifi_nrf_wlan_fmac_priv *fpriv = NULL;
+	struct wifi_nrf_fmac_priv *fpriv = NULL;
 	struct wifi_nrf_hal_cfg_params hal_cfg_params;
 	unsigned int pool_idx = 0;
 	unsigned int desc = 0;
@@ -423,7 +423,7 @@ struct wifi_nrf_wlan_fmac_priv *wifi_nrf_wlan_fmac_init(struct img_data_config_p
 
 	fpriv->hpriv = wifi_nrf_hal_init(opriv,
 					  &hal_cfg_params,
-					  &wifi_nrf_wlan_fmac_event_callback);
+					  &wifi_nrf_fmac_event_callback);
 
 	if (!fpriv->hpriv) {
 		wifi_nrf_osal_log_err(opriv,
@@ -441,7 +441,7 @@ out:
 }
 
 
-void wifi_nrf_wlan_fmac_deinit(struct wifi_nrf_wlan_fmac_priv *fpriv)
+void wifi_nrf_fmac_deinit(struct wifi_nrf_fmac_priv *fpriv)
 {
 	struct wifi_nrf_osal_priv *opriv = NULL;
 
@@ -456,8 +456,8 @@ void wifi_nrf_wlan_fmac_deinit(struct wifi_nrf_wlan_fmac_priv *fpriv)
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_fw_load(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
-					      struct wifi_nrf_wlan_fmac_fw_info *fmac_fw)
+enum wifi_nrf_status wifi_nrf_fmac_fw_load(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					      struct wifi_nrf_fmac_fw_info *fmac_fw)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 
@@ -625,7 +625,7 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_stats_get(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_stats_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						struct rpu_op_stats *stats)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -680,7 +680,7 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_ver_get(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx)
+enum wifi_nrf_status wifi_nrf_fmac_ver_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int umac_ver_addr = 0;
@@ -718,17 +718,17 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_scan(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_scan(void *wifi_nrf_fmac_dev_ctx,
 					   unsigned char wifi_nrf_vif_idx,
 					   struct img_umac_scan_info *scan_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_scan *scan_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 	int channel_info_len = (sizeof(struct img_channel) *
 				scan_info->scan_params.num_scan_channels);
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	if (fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx]->if_type == IMG_IFTYPE_AP) {
 		wifi_nrf_osal_log_info(fmac_dev_ctx->fpriv->opriv,
@@ -775,16 +775,16 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_scan_res_get(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_scan_res_get(void *wifi_nrf_fmac_dev_ctx,
 						   unsigned char vif_idx,
 						   enum scan_reason scan_type)
 
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_get_scan_results *scan_res_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	if (fmac_dev_ctx->vif_ctx[vif_idx]->if_type == IMG_IFTYPE_AP) {
 		wifi_nrf_osal_log_info(fmac_dev_ctx->fpriv->opriv,
@@ -820,16 +820,16 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_auth(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_auth(void *wifi_nrf_fmac_dev_ctx,
 					   unsigned char wifi_nrf_vif_idx,
 					   struct img_umac_auth_info *auth_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_auth *auth_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
 	auth_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
@@ -880,15 +880,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_deauth(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_deauth(void *wifi_nrf_fmac_dev_ctx,
 					     unsigned char wifi_nrf_vif_idx,
 					     struct img_umac_disconn_info *deauth_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_disconn *deauth_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	deauth_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					       sizeof(*deauth_cmd));
@@ -908,7 +908,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_deauth(void *wifi_nrf_fmac_dev_ctx,
 			       deauth_info,
 			       sizeof(deauth_cmd->info));
 
-	if (!wifi_nrf_wlan_util_is_arr_zero(deauth_info->mac_addr,
+	if (!wifi_nrf_util_is_arr_zero(deauth_info->mac_addr,
 					 sizeof(deauth_info->mac_addr)))
 		deauth_cmd->valid_fields |= IMG_CMD_MLME_MAC_ADDR_VALID;
 
@@ -925,17 +925,17 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_assoc(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_assoc(void *wifi_nrf_fmac_dev_ctx,
 					    unsigned char wifi_nrf_vif_idx,
 					    struct img_umac_assoc_info *assoc_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_assoc *assoc_cmd = NULL;
 	struct img_connect_common_info *connect_common_info = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
@@ -965,7 +965,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_assoc(void *wifi_nrf_fmac_dev_ctx,
 			       assoc_info->img_bssid,
 			       IMG_ETH_ALEN);
 
-	if (!wifi_nrf_wlan_util_is_arr_zero(connect_common_info->mac_addr,
+	if (!wifi_nrf_util_is_arr_zero(connect_common_info->mac_addr,
 					 sizeof(connect_common_info->mac_addr)))
 		connect_common_info->valid_fields |=
 			IMG_CONNECT_COMMON_INFO_MAC_ADDR_VALID;
@@ -1013,15 +1013,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_disassoc(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_disassoc(void *wifi_nrf_fmac_dev_ctx,
 					       unsigned char wifi_nrf_vif_idx,
 					       struct img_umac_disconn_info *disassoc_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_disconn *disassoc_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	disassoc_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						 sizeof(*disassoc_cmd));
@@ -1042,7 +1042,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_disassoc(void *wifi_nrf_fmac_dev_ctx,
 			       disassoc_info,
 			       sizeof(disassoc_cmd->info));
 
-	if (!wifi_nrf_wlan_util_is_arr_zero(disassoc_info->mac_addr,
+	if (!wifi_nrf_util_is_arr_zero(disassoc_info->mac_addr,
 					 sizeof(disassoc_info->mac_addr)))
 		disassoc_cmd->valid_fields |= IMG_CMD_MLME_MAC_ADDR_VALID;
 
@@ -1059,18 +1059,18 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_add_key(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_add_key(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_key_info *key_info,
 					      const char *mac_addr)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_key *key_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	int peer_id = -1;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
 	key_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
@@ -1103,7 +1103,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_add_key(void *wifi_nrf_fmac_dev_ctx,
 	if (key_info->key_type == IMG_KEYTYPE_GROUP) {
 		vif_ctx->groupwise_cipher = key_info->cipher_suite;
 	} else if (key_info->key_type == IMG_KEYTYPE_PAIRWISE) {
-		peer_id = wifi_nrf_wlan_fmac_peer_get_id(fmac_dev_ctx,
+		peer_id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx,
 						      mac_addr);
 
 		if (peer_id == -1) {
@@ -1146,17 +1146,17 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_del_key(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_del_key(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_key_info *key_info,
 					      const char *mac_addr)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_key *key_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	key_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					    sizeof(*key_cmd));
@@ -1207,15 +1207,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_set_key(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_set_key(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_key_info *key_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_set_key *set_key_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_key_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*set_key_cmd));
@@ -1251,15 +1251,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_set_bss(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_set_bss(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_bss_info *bss_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_set_bss *set_bss_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_bss_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*set_bss_cmd));
@@ -1304,15 +1304,15 @@ out:
 	return status;
 }
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_chg_bcn(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_chg_bcn(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_set_beacon_info *data)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_set_beacon *set_bcn_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_bcn_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*set_bcn_cmd));
@@ -1350,16 +1350,16 @@ out:
 	return status;
 }
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
 						       unsigned char wifi_nrf_vif_idx,
 						       struct img_umac_set_wiphy_info *wiphy_info)
 {
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 	struct img_umac_cmd_set_wiphy *set_wiphy_cmd = NULL;
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	int freq_params_valid = 0;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_wiphy_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						  sizeof(*set_wiphy_cmd));
@@ -1437,16 +1437,16 @@ out:
 	return status;
 }
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_start_ap(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_start_ap(void *wifi_nrf_fmac_dev_ctx,
 					       unsigned char wifi_nrf_vif_idx,
 					       struct img_umac_start_ap_info *ap_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_start_ap *start_ap_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 	struct img_umac_set_wiphy_info *wiphy_info = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	start_ap_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						 sizeof(*start_ap_cmd));
@@ -1525,18 +1525,18 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_start_ap(void *wifi_nrf_fmac_dev_ctx,
 
 	wiphy_info->freq_params.channel_type = ap_info->freq_params.channel_type;
 
-	status = wifi_nrf_wlan_fmac_set_wiphy_params(fmac_dev_ctx,
+	status = wifi_nrf_fmac_set_wiphy_params(fmac_dev_ctx,
 						  wifi_nrf_vif_idx,
 						  wiphy_info);
 
 	if (status == NVLSI_RPU_STATUS_FAIL) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				       "%s: wifi_nrf_wlan_fmac_set_wiphy_params failes\n",
+				       "%s: wifi_nrf_fmac_set_wiphy_params failes\n",
 				       __func__);
 		goto out;
 	}
 
-	wifi_nrf_wlan_fmac_peers_flush(wifi_nrf_fmac_dev_ctx, wifi_nrf_vif_idx);
+	wifi_nrf_fmac_peers_flush(wifi_nrf_fmac_dev_ctx, wifi_nrf_vif_idx);
 
 	status = umac_cmd_cfg(fmac_dev_ctx,
 			      start_ap_cmd,
@@ -1555,14 +1555,14 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_stop_ap(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_stop_ap(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_stop_ap *stop_ap_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	stop_ap_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*stop_ap_cmd));
@@ -1578,7 +1578,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_stop_ap(void *wifi_nrf_fmac_dev_ctx,
 	stop_ap_cmd->umac_hdr.ids.wdev_id = wifi_nrf_vif_idx;
 	stop_ap_cmd->umac_hdr.ids.valid_fields |= IMG_INDEX_IDS_WDEV_ID_VALID;
 
-	wifi_nrf_wlan_fmac_peers_flush(fmac_dev_ctx, wifi_nrf_vif_idx);
+	wifi_nrf_fmac_peers_flush(fmac_dev_ctx, wifi_nrf_vif_idx);
 
 	status = umac_cmd_cfg(fmac_dev_ctx,
 			      stop_ap_cmd,
@@ -1593,15 +1593,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_p2p_dev_start(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_p2p_dev_start(void *wifi_nrf_fmac_dev_ctx,
 						    unsigned char wifi_nrf_vif_idx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_start_p2p_dev *start_p2p_dev_cmd = NULL;
 	struct wifi_nrf_osal_ops *osal_ops = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	osal_ops = fmac_dev_ctx->fpriv->opriv->ops;
 
@@ -1631,14 +1631,14 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_p2p_dev_stop(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_p2p_dev_stop(void *wifi_nrf_fmac_dev_ctx,
 						   unsigned char wifi_nrf_vif_idx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_stop_p2p_dev *stop_p2p_dev_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	stop_p2p_dev_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						     sizeof(*stop_p2p_dev_cmd));
@@ -1666,15 +1666,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_p2p_roc_start(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_p2p_roc_start(void *wifi_nrf_fmac_dev_ctx,
 						    unsigned char wifi_nrf_if_idx,
 						    struct remain_on_channel_info *roc_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_remain_on_channel *roc_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	roc_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					    sizeof(struct img_umac_cmd_remain_on_channel));
@@ -1714,15 +1714,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_p2p_roc_stop(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_p2p_roc_stop(void *wifi_nrf_fmac_dev_ctx,
 						   unsigned char wifi_nrf_if_idx,
 						   unsigned long long cookie)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_cancel_remain_on_channel *cancel_roc_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	cancel_roc_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						   sizeof(*cancel_roc_cmd));
@@ -1752,15 +1752,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_mgmt_tx(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_mgmt_tx(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_mgmt_tx_info *mgmt_tx_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_mgmt_tx *mgmt_tx_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	mgmt_tx_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*mgmt_tx_cmd));
@@ -1805,15 +1805,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_del_sta(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_del_sta(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_del_sta_info *del_sta_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_del_sta *del_sta_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	del_sta_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*del_sta_cmd));
@@ -1834,7 +1834,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_del_sta(void *wifi_nrf_fmac_dev_ctx,
 			       del_sta_info,
 			       sizeof(del_sta_cmd->info));
 
-	if (!wifi_nrf_wlan_util_is_arr_zero(del_sta_info->mac_addr,
+	if (!wifi_nrf_util_is_arr_zero(del_sta_info->mac_addr,
 					 sizeof(del_sta_info->mac_addr)))
 		del_sta_cmd->valid_fields |= IMG_CMD_DEL_STATION_MAC_ADDR_VALID;
 
@@ -1860,15 +1860,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_add_sta(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_add_sta(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_add_sta_info *add_sta_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_add_sta *add_sta_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	add_sta_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*add_sta_cmd));
@@ -1916,12 +1916,12 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_add_sta(void *wifi_nrf_fmac_dev_ctx,
 
 	add_sta_cmd->valid_fields |= IMG_CMD_NEW_STATION_STA_FLAGS2_VALID;
 
-	if (!wifi_nrf_wlan_util_is_arr_zero(add_sta_info->ht_capability,
+	if (!wifi_nrf_util_is_arr_zero(add_sta_info->ht_capability,
 					 sizeof(add_sta_info->ht_capability)))
 		add_sta_cmd->valid_fields |=
 			IMG_CMD_NEW_STATION_HT_CAPABILITY_VALID;
 
-	if (!wifi_nrf_wlan_util_is_arr_zero(add_sta_info->vht_capability,
+	if (!wifi_nrf_util_is_arr_zero(add_sta_info->vht_capability,
 					 sizeof(add_sta_info->vht_capability)))
 		add_sta_cmd->valid_fields |=
 			IMG_CMD_NEW_STATION_VHT_CAPABILITY_VALID;
@@ -1951,15 +1951,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_chg_sta(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_chg_sta(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_chg_sta_info *chg_sta_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_chg_sta *chg_sta_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	chg_sta_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*chg_sta_cmd));
@@ -2015,15 +2015,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_mgmt_frame_reg(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_mgmt_frame_reg(void *wifi_nrf_fmac_dev_ctx,
 						     unsigned char wifi_nrf_vif_idx,
 						     struct img_umac_mgmt_frame_info *frame_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_mgmt_frame_reg *frame_reg_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	frame_reg_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						  sizeof(*frame_reg_cmd));
@@ -2057,12 +2057,12 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_mac_addr(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_mac_addr(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       unsigned char *addr)
 {
 	unsigned char vif_idx = 0;
 
-	vif_idx = wifi_nrf_wlan_fmac_vif_idx_get(fmac_dev_ctx);
+	vif_idx = wifi_nrf_fmac_vif_idx_get(fmac_dev_ctx);
 
 	if (vif_idx == MAX_NUM_VIFS)
 		return NVLSI_RPU_STATUS_FAIL;
@@ -2084,17 +2084,17 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_mac_addr(struct wifi_nrf_wlan_fmac_dev_c
 }
 
 
-unsigned char wifi_nrf_wlan_fmac_add_vif(void *wifi_nrf_fmac_dev_ctx,
+unsigned char wifi_nrf_fmac_add_vif(void *wifi_nrf_fmac_dev_ctx,
 				      void *os_vif_ctx,
 				      struct img_umac_add_vif_info *vif_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_add_vif *add_vif_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	unsigned char vif_idx = 0;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	switch (vif_info->iftype) {
 	case IMG_IFTYPE_STATION:
@@ -2110,7 +2110,7 @@ unsigned char wifi_nrf_wlan_fmac_add_vif(void *wifi_nrf_fmac_dev_ctx,
 	}
 
 
-	if (wifi_nrf_wlan_fmac_vif_check_if_limit(fmac_dev_ctx,
+	if (wifi_nrf_fmac_vif_check_if_limit(fmac_dev_ctx,
 					       vif_info->iftype)) {
 		goto err;
 	}
@@ -2134,7 +2134,7 @@ unsigned char wifi_nrf_wlan_fmac_add_vif(void *wifi_nrf_fmac_dev_ctx,
 			       vif_info->mac_addr,
 			       sizeof(vif_ctx->mac_addr));
 
-	vif_idx = wifi_nrf_wlan_fmac_vif_idx_get(fmac_dev_ctx);
+	vif_idx = wifi_nrf_fmac_vif_idx_get(fmac_dev_ctx);
 
 	if (vif_idx == MAX_NUM_VIFS) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -2186,7 +2186,7 @@ unsigned char wifi_nrf_wlan_fmac_add_vif(void *wifi_nrf_fmac_dev_ctx,
 
 	fmac_dev_ctx->vif_ctx[vif_idx] = vif_ctx;
 
-	wifi_nrf_wlan_fmac_vif_incr_if_type(fmac_dev_ctx, vif_ctx->if_type);
+	wifi_nrf_fmac_vif_incr_if_type(fmac_dev_ctx, vif_ctx->if_type);
 
 	goto out;
 err:
@@ -2205,15 +2205,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_del_vif(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_del_vif(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	struct img_umac_cmd_del_vif *del_vif_cmd = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	switch (fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx]->if_type) {
 	case IMG_IFTYPE_STATION:
@@ -2268,7 +2268,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_del_vif(void *wifi_nrf_fmac_dev_ctx,
 		}
 	}
 
-	wifi_nrf_wlan_fmac_vif_decr_if_type(fmac_dev_ctx, vif_ctx->if_type);
+	wifi_nrf_fmac_vif_decr_if_type(fmac_dev_ctx, vif_ctx->if_type);
 
 out:
 	if (del_vif_cmd)
@@ -2279,15 +2279,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_chg_vif(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_chg_vif(void *wifi_nrf_fmac_dev_ctx,
 					      unsigned char wifi_nrf_vif_idx,
 					      struct img_umac_chg_vif_attr_info *vif_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_chg_vif_attr *chg_vif_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	switch (vif_info->iftype) {
 	case IMG_IFTYPE_STATION:
@@ -2301,7 +2301,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_chg_vif(void *wifi_nrf_fmac_dev_ctx,
 		goto out;
 	}
 
-	if (wifi_nrf_wlan_fmac_vif_check_if_limit(fmac_dev_ctx,
+	if (wifi_nrf_fmac_vif_check_if_limit(fmac_dev_ctx,
 					       vif_info->iftype)) {
 		goto out;
 	}
@@ -2340,17 +2340,17 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_chg_vif_state(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_chg_vif_state(void *wifi_nrf_fmac_dev_ctx,
 						    unsigned char wifi_nrf_vif_idx,
 						    struct img_umac_chg_vif_state_info *vif_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_chg_vif_state *chg_vif_state_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	unsigned int count = 100; /* used for handling timeout*/
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	chg_vif_state_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						      sizeof(*chg_vif_state_cmd));
@@ -2412,13 +2412,13 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_suspend(void *wifi_nrf_fmac_dev_ctx)
+enum wifi_nrf_status wifi_nrf_fmac_suspend(void *wifi_nrf_fmac_dev_ctx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_suspend *suspend_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	suspend_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*suspend_cmd));
@@ -2444,15 +2444,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_get_tx_power(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_get_tx_power(void *wifi_nrf_fmac_dev_ctx,
 						   unsigned int wifi_nrf_vif_idx)
 {
 
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_get_tx_power *cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					sizeof(*cmd));
@@ -2479,14 +2479,14 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_get_channel(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_get_channel(void *wifi_nrf_fmac_dev_ctx,
 						  unsigned int wifi_nrf_vif_idx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_get_channel *cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					sizeof(*cmd));
@@ -2514,15 +2514,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_get_station(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_get_station(void *wifi_nrf_fmac_dev_ctx,
 						  unsigned int wifi_nrf_vif_idx,
 						  unsigned char *mac)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_get_sta *cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					sizeof(*cmd));
@@ -2555,13 +2555,13 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_resume(void *wifi_nrf_fmac_dev_ctx)
+enum wifi_nrf_status wifi_nrf_fmac_resume(void *wifi_nrf_fmac_dev_ctx)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_resume *resume_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	resume_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					       sizeof(*resume_cmd));
@@ -2587,15 +2587,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_set_qos_map(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_set_qos_map(void *wifi_nrf_fmac_dev_ctx,
 						  unsigned char wifi_nrf_vif_idx,
 						  struct img_umac_qos_map_info *qos_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_set_qos_map *set_qos_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_qos_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 						sizeof(*set_qos_cmd));
@@ -2633,15 +2633,15 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_set_power_save(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_set_power_save(void *wifi_nrf_fmac_dev_ctx,
 						     unsigned char wifi_nrf_vif_idx,
 						     bool state)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_set_power_save *set_ps_cmd = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_ps_cmd = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					       sizeof(*set_ps_cmd));
@@ -2670,14 +2670,14 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_set_wowlan(void *wifi_nrf_fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_set_wowlan(void *wifi_nrf_fmac_dev_ctx,
 						 unsigned int var)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct img_umac_cmd_set_wowlan *set_wowlan = NULL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	set_wowlan = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
 					       sizeof(*set_wowlan));
@@ -2704,7 +2704,7 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_conf_btcoex(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_conf_btcoex(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						  struct rpu_btcoex *params)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;

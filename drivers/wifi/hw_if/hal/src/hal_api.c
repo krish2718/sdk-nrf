@@ -523,7 +523,7 @@ static enum wifi_nrf_status hal_rpu_cmd_process_queue(struct wifi_nrf_hal_dev_ct
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct wifi_nrf_hal_msg *cmd = NULL;
 
-	while ((cmd = wifi_nrf_wlan_utils_q_dequeue(hal_dev_ctx->hpriv->opriv,
+	while ((cmd = wifi_nrf_utils_q_dequeue(hal_dev_ctx->hpriv->opriv,
 						 hal_dev_ctx->cmd_q))) {
 		status = hal_rpu_ready_wait(hal_dev_ctx,
 					    NVLSI_RPU_HAL_MSG_TYPE_CMD_CTRL);
@@ -601,7 +601,7 @@ static enum wifi_nrf_status hal_rpu_cmd_queue(struct wifi_nrf_hal_dev_ctx *hal_d
 
 			hal_msg->len = size;
 
-			status = wifi_nrf_wlan_utils_q_enqueue(hal_dev_ctx->hpriv->opriv,
+			status = wifi_nrf_utils_q_enqueue(hal_dev_ctx->hpriv->opriv,
 							    hal_dev_ctx->cmd_q,
 							    hal_msg);
 
@@ -635,7 +635,7 @@ static enum wifi_nrf_status hal_rpu_cmd_queue(struct wifi_nrf_hal_dev_ctx *hal_d
 
 		hal_msg->len = len;
 
-		status = wifi_nrf_wlan_utils_q_enqueue(hal_dev_ctx->hpriv->opriv,
+		status = wifi_nrf_utils_q_enqueue(hal_dev_ctx->hpriv->opriv,
 						    hal_dev_ctx->cmd_q,
 						    hal_msg);
 
@@ -778,7 +778,7 @@ enum wifi_nrf_status hal_rpu_eventq_process(struct wifi_nrf_hal_dev_ctx *hal_dev
 						 hal_dev_ctx->lock_rx,
 						 &flags);
 
-		event = wifi_nrf_wlan_utils_q_dequeue(hal_dev_ctx->hpriv->opriv,
+		event = wifi_nrf_utils_q_dequeue(hal_dev_ctx->hpriv->opriv,
 						   hal_dev_ctx->event_q);
 
 		wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
@@ -844,7 +844,7 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 
 	hal_dev_ctx->num_cmds = RPU_CMD_START_MAGIC;
 
-	hal_dev_ctx->cmd_q = wifi_nrf_wlan_utils_q_alloc(hpriv->opriv);
+	hal_dev_ctx->cmd_q = wifi_nrf_utils_q_alloc(hpriv->opriv);
 
 	if (!hal_dev_ctx->cmd_q) {
 		wifi_nrf_osal_log_err(hpriv->opriv,
@@ -856,13 +856,13 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 		goto out;
 	}
 
-	hal_dev_ctx->event_q = wifi_nrf_wlan_utils_q_alloc(hpriv->opriv);
+	hal_dev_ctx->event_q = wifi_nrf_utils_q_alloc(hpriv->opriv);
 
 	if (!hal_dev_ctx->event_q) {
 		wifi_nrf_osal_log_err(hpriv->opriv,
 				       "%s: Unable to allocate event queue\n",
 				       __func__);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -875,9 +875,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 	if (!hal_dev_ctx->lock_hal) {
 		wifi_nrf_osal_log_err(hpriv->opriv,
 				       "%s: Unable to allocate HAL lock\n", __func__);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -896,9 +896,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 				       __func__);
 		wifi_nrf_osal_spinlock_free(hpriv->opriv,
 					     hal_dev_ctx->lock_hal);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -919,9 +919,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 					     hal_dev_ctx->lock_hal);
 		wifi_nrf_osal_spinlock_free(hpriv->opriv,
 					     hal_dev_ctx->lock_rx);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -948,9 +948,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 					     hal_dev_ctx->lock_hal);
 		wifi_nrf_osal_spinlock_free(hpriv->opriv,
 					     hal_dev_ctx->lock_rx);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -973,9 +973,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 					     hal_dev_ctx->lock_hal);
 		wifi_nrf_osal_spinlock_free(hpriv->opriv,
 					     hal_dev_ctx->lock_rx);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -1004,9 +1004,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 						     hal_dev_ctx->lock_hal);
 			wifi_nrf_osal_spinlock_free(hpriv->opriv,
 						     hal_dev_ctx->lock_rx);
-			wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+			wifi_nrf_utils_q_free(hpriv->opriv,
 						hal_dev_ctx->cmd_q);
-			wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+			wifi_nrf_utils_q_free(hpriv->opriv,
 						hal_dev_ctx->event_q);
 			wifi_nrf_osal_mem_free(hpriv->opriv,
 						hal_dev_ctx);
@@ -1040,9 +1040,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 					     hal_dev_ctx->lock_hal);
 		wifi_nrf_osal_spinlock_free(hpriv->opriv,
 					     hal_dev_ctx->lock_rx);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx);
@@ -1075,9 +1075,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 					     hal_dev_ctx->lock_hal);
 		wifi_nrf_osal_spinlock_free(hpriv->opriv,
 					     hal_dev_ctx->lock_rx);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->cmd_q);
-		wifi_nrf_wlan_utils_q_free(hpriv->opriv,
+		wifi_nrf_utils_q_free(hpriv->opriv,
 					hal_dev_ctx->event_q);
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 					hal_dev_ctx->rx_buf_info);
@@ -1119,10 +1119,10 @@ void wifi_nrf_hal_dev_rem(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	wifi_nrf_osal_spinlock_free(hal_dev_ctx->hpriv->opriv,
 				     hal_dev_ctx->lock_rx);
 
-	wifi_nrf_wlan_utils_q_free(hal_dev_ctx->hpriv->opriv,
+	wifi_nrf_utils_q_free(hal_dev_ctx->hpriv->opriv,
 				hal_dev_ctx->event_q);
 
-	wifi_nrf_wlan_utils_q_free(hal_dev_ctx->hpriv->opriv,
+	wifi_nrf_utils_q_free(hal_dev_ctx->hpriv->opriv,
 				hal_dev_ctx->cmd_q);
 
 	hal_dev_ctx->hpriv->num_devs--;

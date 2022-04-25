@@ -407,7 +407,7 @@ static enum wifi_nrf_status hal_rpu_event_get(struct wifi_nrf_hal_dev_ctx *hal_d
 
 		event->len = hal_dev_ctx->event_data_len;
 
-		status = wifi_nrf_wlan_utils_q_enqueue(hal_dev_ctx->hpriv->opriv,
+		status = wifi_nrf_utils_q_enqueue(hal_dev_ctx->hpriv->opriv,
 						    hal_dev_ctx->event_q,
 						    event);
 

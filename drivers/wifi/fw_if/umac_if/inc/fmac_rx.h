@@ -17,24 +17,24 @@
 
 #define RX_BUF_HEADROOM 4
 
-enum wifi_nrf_wlan_fmac_rx_cmd_type {
+enum wifi_nrf_fmac_rx_cmd_type {
 	NVLSI_WLAN_FMAC_RX_CMD_TYPE_INIT,
 	NVLSI_WLAN_FMAC_RX_CMD_TYPE_DEINIT,
 	NVLSI_WLAN_FMAC_RX_CMD_TYPE_MAX,
 };
 
 
-struct wifi_nrf_wlan_fmac_rx_pool_map_info {
+struct wifi_nrf_fmac_rx_pool_map_info {
 	unsigned int pool_id;
 	unsigned int buf_id;
 };
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_cmd_send(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
-						  enum wifi_nrf_wlan_fmac_rx_cmd_type cmd_type,
+enum wifi_nrf_status wifi_nrf_fmac_rx_cmd_send(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+						  enum wifi_nrf_fmac_rx_cmd_type cmd_type,
 						  unsigned int desc_id);
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_rx_event_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						       struct img_rx_buff *config);
 
 #endif /* __FMAC_RX_H__ */

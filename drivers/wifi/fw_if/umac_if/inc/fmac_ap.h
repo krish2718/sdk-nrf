@@ -16,9 +16,9 @@
 #include "fmac_structs.h"
 
 
-enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       struct img_sap_client_pwrsave *config);
 
-enum wifi_nrf_status sap_client_ps_get_frames(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status sap_client_ps_get_frames(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       struct img_sap_ps_get_frames *config);
 #endif /* __FMAC_AP_H__ */

@@ -14,7 +14,7 @@
 
 #include "hal_structs.h"
 
-enum wifi_nrf_wlan_fw_patch_type {
+enum wifi_nrf_fw_patch_type {
 	NVLSI_WLAN_FW_PATCH_TYPE_PRI,
 	NVLSI_WLAN_FW_PATCH_TYPE_SEC,
 	NVLSI_WLAN_FW_PATCH_TYPE_MAX

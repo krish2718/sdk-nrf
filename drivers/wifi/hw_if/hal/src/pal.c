@@ -46,8 +46,8 @@ out:
 
 
 char *pal_ops_get_fw_loc(struct wifi_nrf_osal_priv *opriv,
-			 enum wifi_nrf_wlan_fw_type fw_type,
-			 enum wifi_nrf_wlan_fw_subtype fw_subtype)
+			 enum wifi_nrf_fw_type fw_type,
+			 enum wifi_nrf_fw_subtype fw_subtype)
 {
 	char *fw_loc = NULL;
 

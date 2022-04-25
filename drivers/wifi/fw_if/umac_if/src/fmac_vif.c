@@ -13,7 +13,7 @@
 #include "host_rpu_umac_if.h"
 
 
-int wifi_nrf_wlan_fmac_vif_check_if_limit(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_fmac_vif_check_if_limit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				       int if_type)
 {
 	switch (if_type) {
@@ -46,7 +46,7 @@ int wifi_nrf_wlan_fmac_vif_check_if_limit(struct wifi_nrf_wlan_fmac_dev_ctx *fma
 }
 
 
-void wifi_nrf_wlan_fmac_vif_incr_if_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_fmac_vif_incr_if_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				      int if_type)
 {
 	switch (if_type) {
@@ -66,7 +66,7 @@ void wifi_nrf_wlan_fmac_vif_incr_if_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac
 }
 
 
-void wifi_nrf_wlan_fmac_vif_decr_if_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_fmac_vif_decr_if_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				      int if_type)
 {
 	switch (if_type) {
@@ -86,13 +86,13 @@ void wifi_nrf_wlan_fmac_vif_decr_if_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac
 }
 
 
-void wifi_nrf_wlan_fmac_vif_clear_ctx(void *wifi_nrf_fmac_dev_ctx,
+void wifi_nrf_fmac_vif_clear_ctx(void *wifi_nrf_fmac_dev_ctx,
 				   unsigned char wifi_nrf_vif_idx)
 {
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	vif_ctx =  fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
@@ -102,21 +102,21 @@ void wifi_nrf_wlan_fmac_vif_clear_ctx(void *wifi_nrf_fmac_dev_ctx,
 }
 
 
-void wifi_nrf_wlan_fmac_vif_update_if_type(void *wifi_nrf_fmac_dev_ctx,
+void wifi_nrf_fmac_vif_update_if_type(void *wifi_nrf_fmac_dev_ctx,
 					unsigned char wifi_nrf_vif_idx,
 					int if_type)
 {
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	vif_ctx  = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
-	wifi_nrf_wlan_fmac_vif_decr_if_type(fmac_dev_ctx,
+	wifi_nrf_fmac_vif_decr_if_type(fmac_dev_ctx,
 					 vif_ctx->if_type);
 
-	wifi_nrf_wlan_fmac_vif_incr_if_type(fmac_dev_ctx,
+	wifi_nrf_fmac_vif_incr_if_type(fmac_dev_ctx,
 					 if_type);
 
 	vif_ctx->if_type = if_type;

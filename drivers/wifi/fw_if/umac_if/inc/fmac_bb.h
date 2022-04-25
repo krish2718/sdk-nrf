@@ -21,6 +21,6 @@
 
 #define TX_MAX_DATA_SIZE (1600)
 
-void bb_init(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx);
+void bb_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx);
 
 #endif /* __FMAC_BB_H__ */

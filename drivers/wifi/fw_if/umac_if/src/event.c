@@ -17,12 +17,12 @@
 #include "fmac_ap.h"
 
 #ifdef notyet
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_if_state_chg_event_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status wifi_nrf_fmac_if_state_chg_event_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 									unsigned char *umac_head,
-									enum wifi_nrf_wlan_fmac_if_state if_state)
+									enum wifi_nrf_fmac_if_state if_state)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	unsigned char if_idx = 0;
 
 	if (!fmac_dev_ctx || !umac_head) {
@@ -69,10 +69,10 @@ out:
 }
 #endif /* notyet */
 
-static void umac_if_event(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static void umac_if_event(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			  void *event_data)
 {
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx;
 	unsigned int if_index = 0;
 
 	struct img_umac_event_vif_state *event = NULL;
@@ -93,12 +93,12 @@ static void umac_if_event(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-static void umac_event_connect(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static void umac_event_connect(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			       void *event_data)
 {
 	unsigned char if_index = 0;
 	int peer_id = -1;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	struct img_umac_event_new_station *event = NULL;
 
 	event = (struct img_umac_event_new_station *)event_data;
@@ -122,11 +122,11 @@ static void umac_event_connect(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 					       event->mac_addr,
 					       IMG_ETH_ALEN);
 
-		peer_id = wifi_nrf_wlan_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
+		peer_id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
 
 		if (peer_id == -1) {
 
-			peer_id = wifi_nrf_wlan_fmac_peer_add(fmac_dev_ctx,
+			peer_id = wifi_nrf_fmac_peer_add(fmac_dev_ctx,
 							   if_index,
 							   event->mac_addr,
 							   event->is_sta_legacy,
@@ -140,9 +140,9 @@ static void umac_event_connect(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 			}
 		}
 	} else if (event->umac_hdr.cmd_evnt == IMG_UMAC_EVENT_DEL_STATION) {
-		peer_id = wifi_nrf_wlan_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
+		peer_id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
 		if (peer_id != -1) {
-			wifi_nrf_wlan_fmac_peer_remove(fmac_dev_ctx,
+			wifi_nrf_fmac_peer_remove(fmac_dev_ctx,
 						    if_index,
 						    peer_id);
 		}
@@ -153,14 +153,14 @@ static void umac_event_connect(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-static enum wifi_nrf_status umac_event_ctrl_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status umac_event_ctrl_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						     void *event_data,
 						     unsigned int event_len)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_SUCCESS;
 	struct img_umac_hdr *umac_hdr = NULL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_callbk_fns *callbk_fns = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_callbk_fns *callbk_fns = NULL;
 	unsigned char if_id = 0;
 	unsigned int event_num = 0;
 	bool more_res = false;
@@ -283,7 +283,7 @@ out:
 
 
 #ifdef notyet
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_data_event_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status wifi_nrf_fmac_data_event_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 								void *umac_head)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -303,20 +303,20 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_data_event_process(struct wifi_nr
 
 	switch (event) {
 	case IMG_CMD_RX_BUFF:
-		status = wifi_nrf_wlan_fmac_rx_event_process(fmac_dev_ctx,
+		status = wifi_nrf_fmac_rx_event_process(fmac_dev_ctx,
 							  umac_head);
 		break;
 	case IMG_CMD_TX_BUFF_DONE:
-		status = wifi_nrf_wlan_fmac_tx_done_event_process(fmac_dev_ctx,
+		status = wifi_nrf_fmac_tx_done_event_process(fmac_dev_ctx,
 							       umac_head);
 		break;
 	case IMG_CMD_CARRIER_ON:
-		status = wifi_nrf_wlan_fmac_if_state_chg_event_process(fmac_dev_ctx,
+		status = wifi_nrf_fmac_if_state_chg_event_process(fmac_dev_ctx,
 								    umac_head,
 								    NVLSI_WLAN_FMAC_IF_STATE_UP);
 		break;
 	case IMG_CMD_CARRIER_OFF:
-		status = wifi_nrf_wlan_fmac_if_state_chg_event_process(fmac_dev_ctx,
+		status = wifi_nrf_fmac_if_state_chg_event_process(fmac_dev_ctx,
 								    umac_head,
 								    NVLSI_WLAN_FMAC_IF_STATE_DOWN);
 		break;
@@ -343,7 +343,7 @@ out:
 }
 
 
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_data_events_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status wifi_nrf_fmac_data_events_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 								 struct host_rpu_msg *rpu_msg)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -357,7 +357,7 @@ static enum wifi_nrf_status wifi_nrf_wlan_fmac_data_events_process(struct wifi_n
 	host_rpu_length_left = rpu_msg->hdr.len - sizeof(struct host_rpu_msg);
 
 	while (host_rpu_length_left > 0) {
-		status = wifi_nrf_wlan_fmac_data_event_process(fmac_dev_ctx,
+		status = wifi_nrf_fmac_data_event_process(fmac_dev_ctx,
 							    umac_head);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
@@ -375,7 +375,7 @@ out:
 }
 #endif /* notyet */
 
-static enum wifi_nrf_status umac_event_stats_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status umac_event_stats_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						      void *event)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -411,7 +411,7 @@ out:
 }
 
 
-static enum wifi_nrf_status umac_process_sys_events(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status umac_process_sys_events(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						     struct host_rpu_msg *rpu_msg)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -441,18 +441,18 @@ static enum wifi_nrf_status umac_process_sys_events(struct wifi_nrf_wlan_fmac_de
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_event_callback(void *mac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_event_callback(void *mac_dev_ctx,
 						     void *rpu_event_data,
 						     unsigned int rpu_event_len)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 	struct host_rpu_msg *rpu_msg = NULL;
 	struct img_umac_hdr *umac_hdr = NULL;
 	unsigned int umac_msg_len = 0;
 	enum img_umac_events umac_msg_type = IMG_UMAC_EVENT_UNSPECIFIED;
 
-	fmac_dev_ctx = (struct wifi_nrf_wlan_fmac_dev_ctx *)mac_dev_ctx;
+	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)mac_dev_ctx;
 
 	rpu_msg = (struct host_rpu_msg *)rpu_event_data;
 	umac_hdr = (struct img_umac_hdr *)rpu_msg->msg;
@@ -462,7 +462,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_event_callback(void *mac_dev_ctx,
 	switch (rpu_msg->type) {
 	case IMG_HOST_RPU_MSG_TYPE_DATA:
 #ifdef notyet
-		status = wifi_nrf_wlan_fmac_data_events_process(fmac_dev_ctx,
+		status = wifi_nrf_fmac_data_events_process(fmac_dev_ctx,
 							     rpu_msg);
 #else
 		status = NVLSI_RPU_STATUS_SUCCESS;

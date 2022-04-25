@@ -21,7 +21,7 @@
 #define MAX_SW_PEERS (MAX_PEERS+1)
 
 /**
- * enum wifi_nrf_wlan_fmac_ac - WLAN access categories.
+ * enum wifi_nrf_fmac_ac - WLAN access categories.
  * @NVLSI_WLAN_FMAC_AC_BK: Background access category.
  * @NVLSI_WLAN_FMAC_AC_BE: Best-effor access category.
  * @NVLSI_WLAN_FMAC_AC_VI: Video access category.
@@ -30,7 +30,7 @@
  *
  * This enum lists the possible WLAN access categories.
  */
-enum wifi_nrf_wlan_fmac_ac {
+enum wifi_nrf_fmac_ac {
 	NVLSI_WLAN_FMAC_AC_BK,
 	NVLSI_WLAN_FMAC_AC_BE,
 	NVLSI_WLAN_FMAC_AC_VI,
@@ -41,14 +41,14 @@ enum wifi_nrf_wlan_fmac_ac {
 
 
 /**
- * enum wifi_nrf_wlan_fmac_if_state - The operational state of an interface.
+ * enum wifi_nrf_fmac_if_state - The operational state of an interface.
  * @NVLSI_WLAN_FMAC_IF_STATE_INVALID: Invalid value. Used for error checks.
  * @NVLSI_WLAN_FMAC_IF_STATE_UP: The interface is operational.
  * @NVLSI_WLAN_FMAC_IF_STATE_DOWN: The interface is non-operational.
  *
  * This enum lists the possible operational states of an interface.
  */
-enum wifi_nrf_wlan_fmac_if_state {
+enum wifi_nrf_fmac_if_state {
 	NVLSI_WLAN_FMAC_IF_STATE_INVALID,
 	NVLSI_WLAN_FMAC_IF_STATE_UP,
 	NVLSI_WLAN_FMAC_IF_STATE_DOWN
@@ -56,7 +56,7 @@ enum wifi_nrf_wlan_fmac_if_state {
 
 
 /**
- * struct wifi_nrf_wlan_fmac_callbk_fns - Callback functions to be invoked by UMAC
+ * struct wifi_nrf_fmac_callbk_fns - Callback functions to be invoked by UMAC
  *				     IF layer when a paticular event occurs.
  * @if_state_chg_callbk_fn: Callback function to be called when an interface
  *                          state changes.
@@ -65,9 +65,9 @@ enum wifi_nrf_wlan_fmac_if_state {
  * This structure contains function pointers to all the callback functions that
  * the UMAC IF layer needs to invoked for various events.
  */
-struct wifi_nrf_wlan_fmac_callbk_fns {
+struct wifi_nrf_fmac_callbk_fns {
 	enum wifi_nrf_status (*if_state_chg_callbk_fn)(void *os_vif_ctx,
-							enum wifi_nrf_wlan_fmac_if_state if_state);
+							enum wifi_nrf_fmac_if_state if_state);
 
 	void (*rx_frm_callbk_fn)(void *os_vif_ctx,
 				 void *frm);
@@ -99,14 +99,14 @@ struct wifi_nrf_wlan_fmac_callbk_fns {
 };
 
 
-struct wifi_nrf_wlan_fmac_buf_map_info {
+struct wifi_nrf_fmac_buf_map_info {
 	bool mapped;
 	unsigned long nwb;
 };
 
 
 /**
- * struct wifi_nrf_wlan_fmac_init_dev_params - Structure to hold parameters for
+ * struct wifi_nrf_fmac_init_dev_params - Structure to hold parameters for
  *                                        initializing the RPU.
  * @base_mac_addr: The base mac address for the RPU.
  * @def_vif_idx: Index for the default VIF.
@@ -119,7 +119,7 @@ struct wifi_nrf_wlan_fmac_buf_map_info {
  *
  * This structure holds the parameters for initializing the RPU.
  */
-struct wifi_nrf_wlan_fmac_init_dev_params {
+struct wifi_nrf_fmac_init_dev_params {
 	unsigned char base_mac_addr[IMG_ETH_ADDR_LEN];
 	unsigned char def_vif_idx;
 	unsigned char rf_params[RF_PARAMS_SIZE];
@@ -234,7 +234,7 @@ struct tx_config {
 
 
 /**
- * struct wifi_nrf_wlan_fmac_priv - Structure to hold context information for the
+ * struct wifi_nrf_fmac_priv - Structure to hold context information for the
  *                             UMAC IF layer.
  * @opriv: Pointer to the OS abstraction layer.
  * @hpriv: Pointer to the HAL layer.
@@ -250,7 +250,7 @@ struct tx_config {
  * This structure maintains the context information necessary for the
  * operation of the UMAC IF layer.
  */
-struct wifi_nrf_wlan_fmac_priv {
+struct wifi_nrf_fmac_priv {
 	struct wifi_nrf_osal_priv *opriv;
 	struct wifi_nrf_hal_priv *hpriv;
 
@@ -262,12 +262,12 @@ struct wifi_nrf_wlan_fmac_priv {
 	unsigned int rx_desc[MAX_NUM_OF_RX_QUEUES];
 	unsigned int num_rx_bufs;
 
-	struct wifi_nrf_wlan_fmac_callbk_fns callbk_fns;
+	struct wifi_nrf_fmac_callbk_fns callbk_fns;
 };
 
 
 /**
- * struct wifi_nrf_wlan_fmac_dev_ctx - Structure to hold per device context information
+ * struct wifi_nrf_fmac_dev_ctx - Structure to hold per device context information
  *                                for the UMAC IF layer.
  * @fpriv: Pointer to the UMAC IF abstraction layer.
  * @os_fmac_dev_ctx: Pointer to the per device OS context which is using the
@@ -296,13 +296,13 @@ struct wifi_nrf_wlan_fmac_priv {
  * This structure maintains the context information necessary for the
  * a single instance of an FullMAC based RPU.
  */
-struct wifi_nrf_wlan_fmac_dev_ctx {
-	struct wifi_nrf_wlan_fmac_priv *fpriv;
+struct wifi_nrf_fmac_dev_ctx {
+	struct wifi_nrf_fmac_priv *fpriv;
 	void *os_dev_ctx;
 	void *hal_dev_ctx;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx[MAX_NUM_VIFS];
-	struct wifi_nrf_wlan_fmac_buf_map_info *tx_buf_info;
-	struct wifi_nrf_wlan_fmac_buf_map_info *rx_buf_info;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx[MAX_NUM_VIFS];
+	struct wifi_nrf_fmac_buf_map_info *tx_buf_info;
+	struct wifi_nrf_fmac_buf_map_info *rx_buf_info;
 	struct tx_config tx_config;
 	bool stats_req;
 	struct rpu_host_stats host_stats;
@@ -318,7 +318,7 @@ struct wifi_nrf_wlan_fmac_dev_ctx {
 
 
 /**
- * struct wifi_nrf_wlan_fmac_vif_ctx - Structure to hold per VIF context information
+ * struct wifi_nrf_fmac_vif_ctx - Structure to hold per VIF context information
  *                                for the UMAC IF layer.
  * @fmac_dev_ctx: Pointer to the device context at the UMAC IF layer.
  * @os_vif_ctx: Pointer to the per VIF OS context which is using the
@@ -333,8 +333,8 @@ struct wifi_nrf_wlan_fmac_dev_ctx {
  * This structure maintains the context information necessary for the
  * a single instance of an VIF.
  */
-struct wifi_nrf_wlan_fmac_vif_ctx {
-	struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx;
+struct wifi_nrf_fmac_vif_ctx {
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx;
 	void *os_vif_ctx;
 	char mac_addr[IMG_ETH_ADDR_LEN];
 	int groupwise_cipher;
@@ -344,14 +344,14 @@ struct wifi_nrf_wlan_fmac_vif_ctx {
 };
 
 
-struct wifi_nrf_wlan_fw_info {
+struct wifi_nrf_fw_info {
 	void *data;
 	unsigned int size;
 };
 
 
 /**
- * struct wifi_nrf_wlan_fmac_fw_info - Structure to hold firmware information
+ * struct wifi_nrf_fmac_fw_info - Structure to hold firmware information
  *                                for the UMAC IF layer.
  * @lmac_ram: Information related to the LMAC RAM binary.
  * @umac_ram: Information related to the UMAC RAM binary.
@@ -364,10 +364,10 @@ struct wifi_nrf_wlan_fw_info {
  *
  * This structure holds the UMAC and LMAC firmware information.
  */
-struct wifi_nrf_wlan_fmac_fw_info {
-	struct wifi_nrf_wlan_fw_info lmac_patch_pri;
-	struct wifi_nrf_wlan_fw_info lmac_patch_sec;
-	struct wifi_nrf_wlan_fw_info umac_patch_pri;
-	struct wifi_nrf_wlan_fw_info umac_patch_sec;
+struct wifi_nrf_fmac_fw_info {
+	struct wifi_nrf_fw_info lmac_patch_pri;
+	struct wifi_nrf_fw_info lmac_patch_sec;
+	struct wifi_nrf_fw_info umac_patch_pri;
+	struct wifi_nrf_fw_info umac_patch_sec;
 };
 #endif /* __FMAC_STRUCTS_H__ */

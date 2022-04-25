@@ -569,7 +569,7 @@ int wifi_nrf_wpa_supp_scan2(void *if_priv,
 	scan_info.scan_mode = 0;
 	scan_info.scan_reason = SCAN_CONNECT;
 
-	status = wifi_nrf_wlan_fmac_scan(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_scan(rpu_ctx_zep->rpu_ctx,
 				      vif_ctx_zep->vif_idx,
 				      &scan_info);
 
@@ -616,12 +616,12 @@ int wifi_nrf_wpa_supp_scan_results_get(void *if_priv)
 	vif_ctx_zep = if_priv;
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	status = wifi_nrf_wlan_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
 					      vif_ctx_zep->vif_idx,
 					      SCAN_CONNECT);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_wlan_fmac_scan_res_get failed\n", __func__);
+		printk("%s: wifi_nrf_fmac_scan_res_get failed\n", __func__);
 		goto out;
 	}
 
@@ -659,12 +659,12 @@ int wifi_nrf_wpa_supp_deauthenticate(void *if_priv,
 	       addr,
 	       sizeof(deauth_info.mac_addr));
 
-	status = wifi_nrf_wlan_fmac_deauth(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_deauth(rpu_ctx_zep->rpu_ctx,
 					vif_ctx_zep->vif_idx,
 					&deauth_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_wlan_fmac_scan_res_get failed\n", __func__);
+		printk("%s: wifi_nrf_fmac_scan_res_get failed\n", __func__);
 		goto out;
 	}
 
@@ -835,7 +835,7 @@ int wifi_nrf_wpa_supp_authenticate(void *if_priv,
 	if (params->local_state_change)
 		auth_info.img_flags |= IMG_CMD_AUTHENTICATE_LOCAL_STATE_CHANGE;
 
-	status = wifi_nrf_wlan_fmac_auth(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_auth(rpu_ctx_zep->rpu_ctx,
 				      vif_ctx_zep->vif_idx,
 				      &auth_info);
 
@@ -921,7 +921,7 @@ int wifi_nrf_wpa_supp_associate(void *if_priv,
 	if (params->mgmt_frame_protection == MGMT_FRAME_PROTECTION_REQUIRED)
 		assoc_info.use_mfp = IMG_MFP_REQUIRED;
 
-	status = wifi_nrf_wlan_fmac_assoc(rpu_ctx_zep->rpu_ctx,
+	status = wifi_nrf_fmac_assoc(rpu_ctx_zep->rpu_ctx,
 				       vif_ctx_zep->vif_idx,
 				       &assoc_info);
 
@@ -1019,23 +1019,23 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 	key_info.valid_fields |= IMG_KEY_IDX_VALID;
 
 	if (alg == WPA_ALG_NONE) {
-		status = wifi_nrf_wlan_fmac_del_key(rpu_ctx_zep,
+		status = wifi_nrf_fmac_del_key(rpu_ctx_zep,
 						 vif_ctx_zep->vif_idx,
 						 &key_info,
 						 mac_addr);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS)
-			printk("%s: wifi_nrf_wlan_fmac_del_key failed\n", __func__);
+			printk("%s: wifi_nrf_fmac_del_key failed\n", __func__);
 		else
 			ret = 0;
 	} else {
-		status = wifi_nrf_wlan_fmac_add_key(rpu_ctx_zep,
+		status = wifi_nrf_fmac_add_key(rpu_ctx_zep,
 						 vif_ctx_zep->vif_idx,
 						 &key_info,
 						 mac_addr);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS)
-			printk("%s: wifi_nrf_wlan_fmac_add_key failed\n", __func__);
+			printk("%s: wifi_nrf_fmac_add_key failed\n", __func__);
 		else
 			ret = 0;
 	}
@@ -1075,12 +1075,12 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 	else if (addr)
 		key_info.img_flags |= IMG_KEY_DEFAULT_TYPE_UNICAST;
 
-	status = wifi_nrf_wlan_fmac_set_key(rpu_ctx_zep,
+	status = wifi_nrf_fmac_set_key(rpu_ctx_zep,
 					 vif_ctx_zep->vif_idx,
 					 &key_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_wlan_fmac_set_key failed\n", __func__);
+		printk("%s: wifi_nrf_fmac_set_key failed\n", __func__);
 		ret = -1;
 	} else
 		ret = 0;

@@ -13,7 +13,7 @@
 #define __QSPI_H__
 
 /**
- * struct wifi_nrf_wlan_bus_qspi_priv - Structure to hold context information for the PCIe bus.
+ * struct wifi_nrf_bus_qspi_priv - Structure to hold context information for the PCIe bus.
  * @opriv: Pointer to the OSAL context.
  * @os_pcie_priv:
  * @intr_callbk_fn:
@@ -24,7 +24,7 @@
  * during the initialization of the PCIe bus while others need to be kept
  * updated over the duration of the PCIe bus operation.
  */
-struct wifi_nrf_wlan_bus_qspi_priv {
+struct wifi_nrf_bus_qspi_priv {
 	struct wifi_nrf_osal_priv *opriv;
 	void *os_qspi_priv;
 
@@ -35,8 +35,8 @@ struct wifi_nrf_wlan_bus_qspi_priv {
 };
 
 
-struct wifi_nrf_wlan_bus_qspi_dev_ctx {
-	struct wifi_nrf_wlan_bus_qspi_priv *qspi_priv;
+struct wifi_nrf_bus_qspi_dev_ctx {
+	struct wifi_nrf_bus_qspi_priv *qspi_priv;
 	void *bal_dev_ctx;
 	void *os_qspi_dev_ctx;
 

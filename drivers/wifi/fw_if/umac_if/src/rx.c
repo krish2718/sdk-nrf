@@ -14,14 +14,14 @@
 #include "fmac_util.h"
 
 #ifndef RPU_BSS_DB_SUPPORT
-void wifi_nrf_wlan_scan_result(struct wifi_nrf_wlan_fmac_vif_ctx *wifi_nrf_vif_ctx,
+void wifi_nrf_scan_result(struct wifi_nrf_fmac_vif_ctx *wifi_nrf_vif_ctx,
 			    void *nwb,
 			    struct wifi_nrf_rx_buff *config);
 #endif
 
-static enum wifi_nrf_status wifi_nrf_wlan_fmac_map_desc_to_pool(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+static enum wifi_nrf_status wifi_nrf_fmac_map_desc_to_pool(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 							      unsigned int desc_id,
-							      struct wifi_nrf_wlan_fmac_rx_pool_map_info *pool_info)
+							      struct wifi_nrf_fmac_rx_pool_map_info *pool_info)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned int pool_id = 0;
@@ -41,26 +41,26 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_cmd_send(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
-						  enum wifi_nrf_wlan_fmac_rx_cmd_type cmd_type,
+enum wifi_nrf_status wifi_nrf_fmac_rx_cmd_send(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+						  enum wifi_nrf_fmac_rx_cmd_type cmd_type,
 						  unsigned int desc_id)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_fmac_buf_map_info *rx_buf_info = NULL;
+	struct wifi_nrf_fmac_buf_map_info *rx_buf_info = NULL;
 	struct host_rpu_rx_buf_info rx_cmd;
-	struct wifi_nrf_wlan_fmac_rx_pool_map_info pool_info;
+	struct wifi_nrf_fmac_rx_pool_map_info pool_info;
 	unsigned long nwb = 0;
 	unsigned long nwb_data = 0;
 	unsigned long phy_addr = 0;
 	unsigned int buf_len = 0;
 
-	status = wifi_nrf_wlan_fmac_map_desc_to_pool(fmac_dev_ctx,
+	status = wifi_nrf_fmac_map_desc_to_pool(fmac_dev_ctx,
 						  desc_id,
 						  &pool_info);
 
 	if (status != NVLSI_RPU_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				       "%s: wifi_nrf_wlan_fmac_map_desc_to_pool failed\n",
+				       "%s: wifi_nrf_fmac_map_desc_to_pool failed\n",
 				       __func__);
 		goto out;
 	}
@@ -171,20 +171,20 @@ out:
 }
 
 
-enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+enum wifi_nrf_status wifi_nrf_fmac_rx_event_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						       struct img_rx_buff *config)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
-	struct wifi_nrf_wlan_fmac_buf_map_info *rx_buf_info = NULL;
-	struct wifi_nrf_wlan_fmac_rx_pool_map_info pool_info;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_buf_map_info *rx_buf_info = NULL;
+	struct wifi_nrf_fmac_rx_pool_map_info pool_info;
 	void *nwb = NULL;
 	void *nwb_data = NULL;
 	unsigned int num_pkts = 0;
 	unsigned int desc_id = 0;
 	unsigned int i = 0;
 	unsigned int pkt_len = 0;
-	struct wifi_nrf_wlan_fmac_ieee80211_hdr hdr;
+	struct wifi_nrf_fmac_ieee80211_hdr hdr;
 	unsigned short eth_type = 0;
 
 	vif_ctx = fmac_dev_ctx->vif_ctx[config->wdev_id];
@@ -206,13 +206,13 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fm
 			goto out;
 		}
 
-		status = wifi_nrf_wlan_fmac_map_desc_to_pool(fmac_dev_ctx,
+		status = wifi_nrf_fmac_map_desc_to_pool(fmac_dev_ctx,
 							  desc_id,
 							  &pool_info);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
 			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					       "%s: wifi_nrf_wlan_fmac_map_desc_to_pool failed\n",
+					       "%s: wifi_nrf_fmac_map_desc_to_pool failed\n",
 					       __func__);
 			goto out;
 		}
@@ -250,9 +250,9 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fm
 				wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 						       &hdr,
 						       nwb_data,
-						       sizeof(struct wifi_nrf_wlan_fmac_ieee80211_hdr));
+						       sizeof(struct wifi_nrf_fmac_ieee80211_hdr));
 
-				eth_type = wifi_nrf_wlan_util_rx_get_eth_type(fmac_dev_ctx,
+				eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
 									   (void *)((char *)nwb_data +
 										    config->mac_header_len));
 
@@ -260,9 +260,9 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fm
 				wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
 							      nwb,
 							      config->mac_header_len +
-							      wifi_nrf_wlan_util_get_skip_header_bytes(eth_type));
+							      wifi_nrf_util_get_skip_header_bytes(eth_type));
 
-				wifi_nrf_wlan_util_convert_to_eth(fmac_dev_ctx,
+				wifi_nrf_util_convert_to_eth(fmac_dev_ctx,
 							       nwb,
 							       &hdr,
 							       eth_type);
@@ -272,11 +272,11 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fm
 							      nwb,
 							      config->mac_header_len);
 
-				wifi_nrf_wlan_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
+				wifi_nrf_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
 									nwb);
 				break;
 			case PKT_TYPE_MSDU:
-				wifi_nrf_wlan_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
+				wifi_nrf_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
 									nwb);
 				break;
 			default:
@@ -292,7 +292,7 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fm
 									 nwb);
 		} else if (config->rx_pkt_type == IMG_RX_PKT_BCN_PRB_RSP) {
 #ifndef RPU_BSS_DB_SUPPORT
-			wifi_nrf_wlan_scan_result(vif_ctx,
+			wifi_nrf_scan_result(vif_ctx,
 					       nwb,
 					       config);
 #endif
@@ -308,13 +308,13 @@ enum wifi_nrf_status wifi_nrf_wlan_fmac_rx_event_process(struct wifi_nrf_wlan_fm
 			goto out;
 		}
 
-		status = wifi_nrf_wlan_fmac_rx_cmd_send(fmac_dev_ctx,
+		status = wifi_nrf_fmac_rx_cmd_send(fmac_dev_ctx,
 						     NVLSI_WLAN_FMAC_RX_CMD_TYPE_INIT,
 						     desc_id);
 
 		if (status != NVLSI_RPU_STATUS_SUCCESS) {
 			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					       "%s: wifi_nrf_wlan_fmac_rx_cmd_send failed\n",
+					       "%s: wifi_nrf_fmac_rx_cmd_send failed\n",
 					       __func__);
 			goto out;
 		}

@@ -14,20 +14,20 @@
 #include "host_rpu_umac_if.h"
 #include "fmac_util.h"
 
-int wifi_nrf_wlan_fmac_peer_get_id(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_fmac_peer_get_id(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				const unsigned char *mac_addr)
 {
 	int i;
 	struct peers_info *peer;
 
-	if (wifi_nrf_wlan_util_is_multicast_addr(mac_addr))
+	if (wifi_nrf_util_is_multicast_addr(mac_addr))
 		return MAX_PEERS;
 
 	for (i = 0; i < MAX_PEERS; i++) {
 		peer = &fmac_dev_ctx->tx_config.peers[i];
 		if (peer->peer_id == -1)
 			continue;
-		if ((wifi_nrf_wlan_util_ether_addr_equal(mac_addr,
+		if ((wifi_nrf_util_ether_addr_equal(mac_addr,
 						      (void *)peer->ra_addr))) {
 			return peer->peer_id;
 		}
@@ -35,7 +35,7 @@ int wifi_nrf_wlan_fmac_peer_get_id(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_c
 	return -1;
 }
 
-int wifi_nrf_wlan_fmac_peer_add(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_fmac_peer_add(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			     unsigned char wifi_nrf_vif_idx,
 			     const unsigned char *mac_addr,
 			     unsigned char is_legacy,
@@ -43,11 +43,11 @@ int wifi_nrf_wlan_fmac_peer_add(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 {
 	int i;
 	struct peers_info *peer;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
 	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 
-	if (wifi_nrf_wlan_util_is_multicast_addr(mac_addr)
+	if (wifi_nrf_util_is_multicast_addr(mac_addr)
 	    && (vif_ctx->if_type == IMG_IFTYPE_AP)) {
 
 		fmac_dev_ctx->tx_config.peers[MAX_PEERS].wifi_nrf_vif_idx = wifi_nrf_vif_idx;
@@ -89,12 +89,12 @@ int wifi_nrf_wlan_fmac_peer_add(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-void wifi_nrf_wlan_fmac_peer_remove(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_fmac_peer_remove(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				 unsigned char wifi_nrf_vif_idx,
 				 int peer_id)
 {
 	struct peers_info *peer;
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 
 	vif_ctx = fmac_dev_ctx->vif_ctx[wifi_nrf_vif_idx];
 	peer = &fmac_dev_ctx->tx_config.peers[peer_id];
@@ -116,10 +116,10 @@ void wifi_nrf_wlan_fmac_peer_remove(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_
 }
 
 
-void wifi_nrf_wlan_fmac_peers_flush(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_fmac_peers_flush(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				 unsigned char wifi_nrf_vif_idx)
 {
-	struct wifi_nrf_wlan_fmac_vif_ctx *vif_ctx = NULL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
 	unsigned int i = 0;
 	struct peers_info *peer = NULL;
 

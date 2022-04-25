@@ -44,7 +44,7 @@ struct wifi_nrf_ctx_zep {
 
 
 struct wifi_nrf_drv_priv_zep {
-	struct wifi_nrf_wlan_fmac_priv *fmac_priv;
+	struct wifi_nrf_fmac_priv *fmac_priv;
 	/* TODO: Replace with a linked list to handle unlimited RPUs */
 	struct wifi_nrf_ctx_zep rpu_ctx_zep;
 };

@@ -20,19 +20,19 @@ unsigned char llc_header[]  = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00 };
 unsigned char aarp_ipx_header[] = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0xf8 };
 
 
-bool wifi_nrf_wlan_util_is_multicast_addr(const unsigned char *addr)
+bool wifi_nrf_util_is_multicast_addr(const unsigned char *addr)
 {
 	return (0x01 & *addr);
 }
 
 
-bool wifi_nrf_wlan_util_is_unicast_addr(const unsigned char *addr)
+bool wifi_nrf_util_is_unicast_addr(const unsigned char *addr)
 {
-	return !wifi_nrf_wlan_util_is_multicast_addr(addr);
+	return !wifi_nrf_util_is_multicast_addr(addr);
 }
 
 
-bool wifi_nrf_wlan_util_ether_addr_equal(const unsigned char *addr_1,
+bool wifi_nrf_util_ether_addr_equal(const unsigned char *addr_1,
 				      const unsigned char *addr_2)
 {
 	const unsigned short *a = (const unsigned short *)addr_1;
@@ -42,7 +42,7 @@ bool wifi_nrf_wlan_util_ether_addr_equal(const unsigned char *addr_1,
 }
 
 
-unsigned short wifi_nrf_wlan_util_rx_get_eth_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned short wifi_nrf_util_rx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       void *nwb)
 {
 	unsigned  char *payload = NULL;
@@ -52,7 +52,7 @@ unsigned short wifi_nrf_wlan_util_rx_get_eth_type(struct wifi_nrf_wlan_fmac_dev_
 }
 
 
-unsigned short wifi_nrf_wlan_util_tx_get_eth_type(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned short wifi_nrf_util_tx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       void *nwb)
 {
 	unsigned  char *payload = NULL;
@@ -62,7 +62,7 @@ unsigned short wifi_nrf_wlan_util_tx_get_eth_type(struct wifi_nrf_wlan_fmac_dev_
 }
 
 
-int wifi_nrf_wlan_util_get_skip_header_bytes(unsigned short eth_type)
+int wifi_nrf_util_get_skip_header_bytes(unsigned short eth_type)
 {
 	int skip_header_bytes = sizeof(eth_type);
 
@@ -76,22 +76,22 @@ int wifi_nrf_wlan_util_get_skip_header_bytes(unsigned short eth_type)
 }
 
 
-void wifi_nrf_wlan_util_convert_to_eth(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				    void *nwb,
-				    struct wifi_nrf_wlan_fmac_ieee80211_hdr *hdr,
+				    struct wifi_nrf_fmac_ieee80211_hdr *hdr,
 				    unsigned short eth_type)
 {
 
-	struct wifi_nrf_wlan_fmac_eth_hdr *ehdr = NULL;
+	struct wifi_nrf_fmac_eth_hdr *ehdr = NULL;
 	unsigned int len = 0;
 
 	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
 					    nwb);
 
-	ehdr = (struct wifi_nrf_wlan_fmac_eth_hdr *)
+	ehdr = (struct wifi_nrf_fmac_eth_hdr *)
 		wifi_nrf_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
 					      nwb,
-					      sizeof(struct wifi_nrf_wlan_fmac_eth_hdr));
+					      sizeof(struct wifi_nrf_fmac_eth_hdr));
 
 	switch (hdr->fc & (NVLSI_WLAN_FCTL_TODS | NVLSI_WLAN_FCTL_FROMDS)) {
 	case (NVLSI_WLAN_FCTL_TODS | NVLSI_WLAN_FCTL_FROMDS):
@@ -144,14 +144,14 @@ void wifi_nrf_wlan_util_convert_to_eth(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_d
 		ehdr->proto = len;
 }
 
-void wifi_nrf_wlan_util_rx_convert_amsdu_to_eth(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					     void *nwb)
 {
-	struct wifi_nrf_wlan_fmac_eth_hdr *ehdr = NULL;
-	struct wifi_nrf_wlan_fmac_amsdu_hdr amsdu_hdr;
+	struct wifi_nrf_fmac_eth_hdr *ehdr = NULL;
+	struct wifi_nrf_fmac_amsdu_hdr amsdu_hdr;
 	unsigned int len = 0;
 	unsigned short eth_type = 0;
-	unsigned char amsdu_hdr_len = sizeof(struct wifi_nrf_wlan_fmac_amsdu_hdr);
+	unsigned char amsdu_hdr_len = sizeof(struct wifi_nrf_fmac_amsdu_hdr);
 
 	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 			       &amsdu_hdr,
@@ -159,22 +159,22 @@ void wifi_nrf_wlan_util_rx_convert_amsdu_to_eth(struct wifi_nrf_wlan_fmac_dev_ct
 							    nwb),
 			       amsdu_hdr_len);
 
-	eth_type = wifi_nrf_wlan_util_rx_get_eth_type(fmac_dev_ctx,
+	eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
 						   (void *)((char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 												 nwb) + amsdu_hdr_len));
 
 	wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
 				      nwb,
 				      (amsdu_hdr_len +
-				       wifi_nrf_wlan_util_get_skip_header_bytes(eth_type)));
+				       wifi_nrf_util_get_skip_header_bytes(eth_type)));
 
 	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
 					    nwb);
 
-	ehdr = (struct wifi_nrf_wlan_fmac_eth_hdr *)
+	ehdr = (struct wifi_nrf_fmac_eth_hdr *)
 		wifi_nrf_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
 					      nwb,
-					      sizeof(struct wifi_nrf_wlan_fmac_eth_hdr));
+					      sizeof(struct wifi_nrf_fmac_eth_hdr));
 
 	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 			       ehdr->src,
@@ -192,7 +192,7 @@ void wifi_nrf_wlan_util_rx_convert_amsdu_to_eth(struct wifi_nrf_wlan_fmac_dev_ct
 		ehdr->proto = len;
 }
 
-int wifi_nrf_wlan_util_get_tid(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			    void *nwb)
 {
 	unsigned short ether_type = 0;
@@ -206,7 +206,7 @@ int wifi_nrf_wlan_util_get_tid(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 	unsigned short ipv6_hdr = 0;
 	unsigned char *nwb_data = NULL;
 
-	ether_type = wifi_nrf_wlan_util_tx_get_eth_type(fmac_dev_ctx,
+	ether_type = wifi_nrf_util_tx_get_eth_type(fmac_dev_ctx,
 						     wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 										  nwb));
 	nwb_data = (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
@@ -269,14 +269,14 @@ int wifi_nrf_wlan_util_get_tid(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 
-int wifi_nrf_wlan_util_get_vif_indx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+int wifi_nrf_util_get_vif_indx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				 const unsigned char *mac_addr)
 {
 	int i = 0;
 	int vif_index = -1;
 
 	for (i = 0; i < MAX_PEERS; i++) {
-		if (!wifi_nrf_wlan_util_ether_addr_equal(
+		if (!wifi_nrf_util_ether_addr_equal(
 						      fmac_dev_ctx->tx_config.peers[i].ra_addr,
 						      mac_addr)) {
 			vif_index = fmac_dev_ctx->tx_config.peers[i].wifi_nrf_vif_idx;
@@ -293,7 +293,7 @@ int wifi_nrf_wlan_util_get_vif_indx(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_
 }
 
 
-unsigned char *wifi_nrf_wlan_util_get_dest(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned char *wifi_nrf_util_get_dest(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					void *nwb)
 {
 	return wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
@@ -301,7 +301,7 @@ unsigned char *wifi_nrf_wlan_util_get_dest(struct wifi_nrf_wlan_fmac_dev_ctx *fm
 }
 
 
-unsigned char *wifi_nrf_wlan_util_get_ra(struct wifi_nrf_wlan_fmac_vif_ctx *vif,
+unsigned char *wifi_nrf_util_get_ra(struct wifi_nrf_fmac_vif_ctx *vif,
 				      void *nwb)
 {
 	if (vif->if_type == IMG_IFTYPE_STATION)
@@ -312,7 +312,7 @@ unsigned char *wifi_nrf_wlan_util_get_ra(struct wifi_nrf_wlan_fmac_vif_ctx *vif,
 }
 
 
-unsigned char *wifi_nrf_wlan_util_get_src(struct wifi_nrf_wlan_fmac_dev_ctx *fmac_dev_ctx,
+unsigned char *wifi_nrf_util_get_src(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				       void *nwb)
 {
 	return (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
@@ -320,7 +320,7 @@ unsigned char *wifi_nrf_wlan_util_get_src(struct wifi_nrf_wlan_fmac_dev_ctx *fma
 }
 
 
-bool wifi_nrf_wlan_util_is_arr_zero(unsigned char *arr,
+bool wifi_nrf_util_is_arr_zero(unsigned char *arr,
 				 unsigned int arr_sz)
 {
 	unsigned int i = 0;
