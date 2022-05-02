@@ -262,6 +262,9 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init_zep(struct wifi_nrf_ctx_zep *rpu_ctx
 			     sizeof(params.base_mac_addr),
 			     base_mac_addr);
 
+	memcpy(rpu_ctx_zep->mac_addr, params.base_mac_addr, 
+			sizeof(rpu_ctx_zep->mac_addr));
+
 	if (ret == -1) {
 		printk("%s: hex_str_to_val failed\n", __func__);
 		goto out;
@@ -323,7 +326,6 @@ void wifi_nrf_fmac_dev_deinit_zep(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
 	wifi_nrf_fmac_dev_deinit(rpu_ctx_zep->rpu_ctx);
 }
 
-
 static int wifi_nrf_drv_main_zep(const struct device *dev)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
@@ -361,8 +363,8 @@ static int wifi_nrf_drv_main_zep(const struct device *dev)
 	rx_buf_pools[1].buf_sz = rx2_buf_sz;
 	rx_buf_pools[2].buf_sz = rx3_buf_sz;
 
-	callbk_fns.if_state_chg_callbk_fn = NULL;
-	callbk_fns.rx_frm_callbk_fn = NULL;
+	callbk_fns.if_state_chg_callbk_fn = wifi_nrf_if_state_chg;
+	callbk_fns.rx_frm_callbk_fn = wifi_nrf_if_rx_frm;
 	callbk_fns.scan_start_callbk_fn = wifi_nrf_event_proc_scan_start_zep;
 	callbk_fns.scan_done_callbk_fn = wifi_nrf_event_proc_scan_done_zep;
 	callbk_fns.scan_res_callbk_fn = wifi_nrf_wpa_supp_event_proc_scan_res;
@@ -445,6 +447,7 @@ static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
 	.deauthenticate = wifi_nrf_wpa_supp_deauthenticate,
 	.authenticate = wifi_nrf_wpa_supp_authenticate,
 	.associate = wifi_nrf_wpa_supp_associate,
+	.set_supp_port = wifi_nrf_wpa_set_supp_port,
 #ifdef notyet
 	.set_key = wifi_nrf_wpa_supp_set_key,
 #endif

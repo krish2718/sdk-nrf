@@ -1313,7 +1313,6 @@ enum wifi_nrf_status wifi_nrf_fmac_start_xmit(void *wifi_nrf_fmac_dev_ctx,
 	int tid = 0;
 	int ac = 0;
 	int peer_id = -1;
-	return NVLSI_RPU_STATUS_SUCCESS;
 
 	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 

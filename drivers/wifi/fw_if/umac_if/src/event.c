@@ -16,7 +16,6 @@
 #include "fmac_cmd.h"
 #include "fmac_ap.h"
 
-#ifdef notyet
 static enum wifi_nrf_status wifi_nrf_fmac_if_state_chg_event_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 									unsigned char *umac_head,
 									enum wifi_nrf_fmac_if_state if_state)
@@ -67,7 +66,6 @@ static enum wifi_nrf_status wifi_nrf_fmac_if_state_chg_event_process(struct wifi
 out:
 	return status;
 }
-#endif /* notyet */
 
 static void umac_if_event(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			  void *event_data)
@@ -282,7 +280,6 @@ out:
 }
 
 
-#ifdef notyet
 static enum wifi_nrf_status wifi_nrf_fmac_data_event_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 								void *umac_head)
 {
@@ -373,7 +370,6 @@ static enum wifi_nrf_status wifi_nrf_fmac_data_events_process(struct wifi_nrf_fm
 out:
 	return status;
 }
-#endif /* notyet */
 
 static enum wifi_nrf_status umac_event_stats_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 						      void *event)
@@ -461,12 +457,8 @@ enum wifi_nrf_status wifi_nrf_fmac_event_callback(void *mac_dev_ctx,
 
 	switch (rpu_msg->type) {
 	case IMG_HOST_RPU_MSG_TYPE_DATA:
-#ifdef notyet
 		status = wifi_nrf_fmac_data_events_process(fmac_dev_ctx,
 							     rpu_msg);
-#else
-		status = NVLSI_RPU_STATUS_SUCCESS;
-#endif /* notyet */
 		break;
 	case IMG_HOST_RPU_MSG_TYPE_UMAC:
 		status = umac_event_ctrl_process(fmac_dev_ctx,

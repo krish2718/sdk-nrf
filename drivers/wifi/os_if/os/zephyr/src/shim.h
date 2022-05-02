@@ -58,5 +58,6 @@ struct zep_shim_llist {
 };
 
 void *net_pkt_to_nbuf(struct net_pkt *pkt);
+void *net_pkt_from_nbuf(void *iface, void *frm);
 
 #endif /* __SHIM_H__ */

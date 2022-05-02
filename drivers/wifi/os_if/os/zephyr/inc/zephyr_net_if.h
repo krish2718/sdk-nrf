@@ -21,4 +21,11 @@ void wifi_nrf_if_init(struct net_if *iface);
 enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev);
 int wifi_nrf_if_send(const struct device *dev,
 		  struct net_pkt *pkt);
+
+void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm);
+
+enum wifi_nrf_status wifi_nrf_if_state_chg(
+		void *os_vif_ctx,
+		enum wifi_nrf_fmac_if_state if_state);
+
 #endif /* __ZEPHYR_NET_IF_H__ */

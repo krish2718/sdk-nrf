@@ -187,16 +187,7 @@ int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv,
 			   const char *fmt,
 			   ...)
 {
-	va_list args;
-	int ret = -1;
-
-	va_start(args, fmt);
-
-	ret = opriv->ops->log_dbg(fmt, args);
-
-	va_end(args);
-
-	return ret;
+	return 0;
 }
 
 
@@ -204,17 +195,7 @@ int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv,
 			    const char *fmt,
 			    ...)
 {
-	va_list args;
-	int ret = -1;
-
-	va_start(args, fmt);
-
-	ret = opriv->ops->log_info(fmt, args);
-
-	va_end(args);
-
-
-	return ret;
+	return 0;
 }
 
 
@@ -222,16 +203,7 @@ int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv,
 			   const char *fmt,
 			   ...)
 {
-	va_list args;
-	int ret = -1;
-
-	va_start(args, fmt);
-
-	ret = opriv->ops->log_err(fmt, args);
-
-	va_end(args);
-
-	return ret;
+	return 0;
 }
 
 

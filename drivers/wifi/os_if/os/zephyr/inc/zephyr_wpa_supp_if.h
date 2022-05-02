@@ -34,6 +34,9 @@ int wifi_nrf_wpa_supp_authenticate(void *if_priv,
 
 int wifi_nrf_wpa_supp_associate(void *if_priv,
 			     struct wpa_driver_associate_params *params);
+
+int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid);
+
 #ifdef notyet
 int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			   const unsigned char *ifname,

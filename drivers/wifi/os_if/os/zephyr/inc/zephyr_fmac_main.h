@@ -33,6 +33,7 @@ struct wifi_nrf_vif_ctx_zep {
 	enum scan_reason scan_type;
 
 	unsigned int assoc_freq;
+	enum wifi_nrf_fmac_if_state if_state;
 };
 
 
@@ -40,6 +41,7 @@ struct wifi_nrf_ctx_zep {
 	void *drv_priv_zep;
 	void *rpu_ctx;
 	struct wifi_nrf_vif_ctx_zep vif_ctx_zep[MAX_NUM_VIFS];
+	char mac_addr[6];
 };
 
 

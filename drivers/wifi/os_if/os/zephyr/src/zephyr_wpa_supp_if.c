@@ -1088,3 +1088,24 @@ out:
 	return ret;
 }
 #endif /* notyet */
+
+int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct img_umac_chg_sta_info chg_sta_info;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
+
+	vif_ctx_zep = if_priv;
+	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
+
+	os_memset(&chg_sta_info, 0x0, sizeof(chg_sta_info));
+
+	os_memcpy(chg_sta_info.mac_addr, bssid, ETH_ALEN);
+
+	if(authorized){
+		chg_sta_info.sta_flags2.img_mask = 1 << 1; // BIT(NL80211_STA_FLAG_AUTHORIZED)
+		chg_sta_info.sta_flags2.img_set  = 1 << 1; // BIT(NL80211_STA_FLAG_AUTHORIZED)
+	}
+
+	return  wifi_nrf_fmac_chg_sta(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &chg_sta_info);
+}

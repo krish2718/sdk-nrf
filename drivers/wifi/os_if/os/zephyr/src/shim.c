@@ -344,11 +344,12 @@ void *net_pkt_to_nbuf(struct net_pkt *pkt)
 	return nwb;
 }
 
-void *net_pkt_from_nbuf(void *iface, struct nwb *nwb)
+void *net_pkt_from_nbuf(void *iface, void *frm)
 {
 	struct net_pkt *pkt;
 	unsigned char *data;
 	unsigned int len;
+	struct nwb *nwb = frm;
 
 	len = zep_shim_nbuf_data_size(nwb);
 

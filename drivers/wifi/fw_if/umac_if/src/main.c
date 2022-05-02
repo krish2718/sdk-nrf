@@ -1992,6 +1992,8 @@ enum wifi_nrf_status wifi_nrf_fmac_chg_sta(void *wifi_nrf_fmac_dev_ctx,
 		chg_sta_cmd->valid_fields |=
 			IMG_CMD_SET_STATION_SUPPORTED_OPER_CLASSES_VALID;
 
+	chg_sta_cmd->info = *chg_sta_info;
+
 	chg_sta_cmd->valid_fields |= IMG_CMD_SET_STATION_STA_FLAGS2_VALID;
 
 	if (chg_sta_info->opmode_notif)
