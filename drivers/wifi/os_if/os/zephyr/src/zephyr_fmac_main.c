@@ -448,9 +448,7 @@ static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
 	.authenticate = wifi_nrf_wpa_supp_authenticate,
 	.associate = wifi_nrf_wpa_supp_associate,
 	.set_supp_port = wifi_nrf_wpa_set_supp_port,
-#ifdef notyet
 	.set_key = wifi_nrf_wpa_supp_set_key,
-#endif
 };
 
 

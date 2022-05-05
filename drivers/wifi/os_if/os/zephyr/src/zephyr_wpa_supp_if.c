@@ -36,7 +36,6 @@ static int get_wifi_nrf_auth_type(int wpa_auth_alg)
 }
 
 
-#ifdef notyet
 static unsigned int wpa_alg_to_cipher_suite(enum wpa_alg alg, size_t key_len)
 {
 	switch (alg) {
@@ -78,7 +77,6 @@ static unsigned int wpa_alg_to_cipher_suite(enum wpa_alg alg, size_t key_len)
 	       alg);
 	return 0;
 }
-#endif /* notyet */
 
 void wifi_nrf_wpa_supp_event_proc_scan_start(void *if_priv)
 {
@@ -674,7 +672,6 @@ out:
 }
 
 
-#ifdef notyet
 int wifi_nrf_wpa_supp_add_key(struct img_umac_key_info *key_info,
 			   enum wpa_alg alg,
 			   int key_idx,
@@ -714,7 +711,6 @@ int wifi_nrf_wpa_supp_add_key(struct img_umac_key_info *key_info,
 
 	return 0;
 }
-#endif /* notyet */
 
 
 int wifi_nrf_wpa_supp_authenticate(void *if_priv,
@@ -939,7 +935,6 @@ out:
 }
 
 
-#ifdef notyet
 int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			   const unsigned char *ifname,
 			   enum wpa_alg alg,
@@ -965,7 +960,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 		return 0;
 #endif /* notyet */
 
-	if ((!if_priv) || (!ifname) || (!addr) || (!key)) {
+	if ((!if_priv) || (!ifname)) {
 		printk("%s: Invalid params\n", __func__);
 		goto out;
 	}
@@ -1003,15 +998,15 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 	}
 
 
+	// TODO: Implement/check set_tx
 	if (addr && !is_broadcast_ether_addr(addr)) {
 		mac_addr = addr;
-
-		if (alg != WPA_ALG_WEP && key_idx && !set_tx) {
-			key_info.key_type = IMG_KEYTYPE_GROUP;
-			key_info.valid_fields |= IMG_KEY_TYPE_VALID;
-		}
+		key_info.key_type = IMG_KEYTYPE_PAIRWISE;
+		key_info.valid_fields |= IMG_KEY_TYPE_VALID;
 	} else if (addr && is_broadcast_ether_addr(addr)) {
 		mac_addr = NULL;
+		key_info.key_type = IMG_KEYTYPE_GROUP;
+		key_info.valid_fields |= IMG_KEY_TYPE_VALID;
 		key_info.img_flags |= IMG_KEY_DEFAULT_TYPE_MULTICAST;
 	}
 
@@ -1019,7 +1014,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 	key_info.valid_fields |= IMG_KEY_IDX_VALID;
 
 	if (alg == WPA_ALG_NONE) {
-		status = wifi_nrf_fmac_del_key(rpu_ctx_zep,
+		status = wifi_nrf_fmac_del_key(rpu_ctx_zep->rpu_ctx,
 						 vif_ctx_zep->vif_idx,
 						 &key_info,
 						 mac_addr);
@@ -1029,7 +1024,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 		else
 			ret = 0;
 	} else {
-		status = wifi_nrf_fmac_add_key(rpu_ctx_zep,
+		status = wifi_nrf_fmac_add_key(rpu_ctx_zep->rpu_ctx,
 						 vif_ctx_zep->vif_idx,
 						 &key_info,
 						 mac_addr);
@@ -1075,7 +1070,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 	else if (addr)
 		key_info.img_flags |= IMG_KEY_DEFAULT_TYPE_UNICAST;
 
-	status = wifi_nrf_fmac_set_key(rpu_ctx_zep,
+	status = wifi_nrf_fmac_set_key(rpu_ctx_zep->rpu_ctx,
 					 vif_ctx_zep->vif_idx,
 					 &key_info);
 
@@ -1087,7 +1082,6 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 out:
 	return ret;
 }
-#endif /* notyet */
 
 int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid)
 {

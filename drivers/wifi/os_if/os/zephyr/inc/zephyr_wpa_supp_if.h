@@ -37,7 +37,6 @@ int wifi_nrf_wpa_supp_associate(void *if_priv,
 
 int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid);
 
-#ifdef notyet
 int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			   const unsigned char *ifname,
 			   enum wpa_alg alg,
@@ -48,7 +47,6 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			   size_t seq_len,
 			   const unsigned char *key,
 			   size_t key_len);
-#endif /* notyet */
 
 void wifi_nrf_wpa_supp_event_proc_scan_start(void *if_priv);
 
