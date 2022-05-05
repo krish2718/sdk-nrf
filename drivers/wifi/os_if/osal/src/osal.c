@@ -9,7 +9,7 @@
 struct wifi_nrf_osal_priv *wifi_nrf_osal_init(void)
 {
 	struct wifi_nrf_osal_priv *opriv = NULL;
-	struct wifi_nrf_osal_ops *ops = NULL;
+	const struct wifi_nrf_osal_ops *ops = NULL;
 
 	ops = get_os_ops();
 

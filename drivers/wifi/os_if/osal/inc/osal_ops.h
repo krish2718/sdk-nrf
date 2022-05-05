@@ -286,5 +286,5 @@ struct wifi_nrf_osal_ops {
  *
  * Returns: Pointer to instance of OS specific Ops.
  */
-struct wifi_nrf_osal_ops *get_os_ops(void);
+const struct wifi_nrf_osal_ops *get_os_ops(void);
 #endif /* __OSAL_OPS_H__ */
