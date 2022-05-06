@@ -19,7 +19,7 @@
 /* TODO: Move this to driver_zephyr.c */
 extern struct wpa_supplicant *wpa_s_0;
 
-static enum img_auth_type get_wifi_nrf_auth_type(int wpa_auth_alg)
+static int get_wifi_nrf_auth_type(int wpa_auth_alg)
 {
 	if (wpa_auth_alg & WPA_AUTH_ALG_OPEN)
 		return IMG_AUTHTYPE_OPEN_SYSTEM;
@@ -729,7 +729,7 @@ int wifi_nrf_wpa_supp_authenticate(void *if_priv,
 #ifdef notyet
 	int i = 0;
 #endif /* notyet */
-	enum img_auth_type type;
+	int type;
 	int count = 0;
 
 	if ((!if_priv) || (!params)) {

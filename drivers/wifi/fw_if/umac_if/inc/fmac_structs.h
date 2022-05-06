@@ -339,7 +339,7 @@ struct wifi_nrf_fmac_vif_ctx {
 	char mac_addr[IMG_ETH_ADDR_LEN];
 	int groupwise_cipher;
 	bool ifflags;
-	enum img_iftype if_type;
+	int if_type;
 	unsigned char bssid[IMG_ETH_ADDR_LEN];
 };
 

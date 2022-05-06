@@ -36,7 +36,7 @@ enum wifi_nrf_status umac_cmd_btcoex(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				      struct rpu_btcoex *params);
 
 enum wifi_nrf_status umac_cmd_prog_stats_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-					      enum rpu_stats_type stat_type);
+					      int stat_type);
 
 int umac_event_cfg(void *rpu_ctx_lnx,
 		   void *vif_ctx_lnx,

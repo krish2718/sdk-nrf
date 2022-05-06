@@ -4,13 +4,16 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+/**
+ * @brief Common structures and definations.
+ */
+
 #ifndef __LMAC_IF_COMMON__
 #define __LMAC_IF_COMMON__
 
 #include "rpu_if.h"
 #include "phy_rf_params.h"
-
-#define __IMG_PKD __attribute__((__packed__))
+#include "pack_def.h"
 
 #define RPU_MEM_LMAC_BOOT_SIG 0xB7000D50
 #define RPU_MEM_LMAC_VER 0xB7000D54
@@ -49,17 +52,13 @@
 #define WORKING_CH_SCAN_DURATION 50
 #define CHNL_PROBE_CNT 2
 
-enum PKT_TYPE {
-	PKT_TYPE_MPDU = 0,
-	PKT_TYPE_MSDU_WITH_MAC,
-	PKT_TYPE_MSDU,
-};
+#define		PKT_TYPE_MPDU				0
+#define		PKT_TYPE_MSDU_WITH_MAC		1
+#define		PKT_TYPE_MSDU				2
 
 
-enum img_rpu_pwr_status {
-	IMG_RPU_PWR_STATUS_SUCCESS,
-	IMG_RPU_PWR_STATUS_FAIL = -1
-};
+#define			IMG_RPU_PWR_STATUS_SUCCESS	0
+#define			IMG_RPU_PWR_STATUS_FAIL		-1
 
 /**
  * struct lmac_prod_stats : used to get the production mode stats
@@ -69,7 +68,6 @@ enum img_rpu_pwr_status {
 #define MAX_RSSI_SAMPLES 10
 struct lmac_prod_stats {
 	/*Structure that holds all the debug information in LMAC*/
-
 	unsigned int  resetCmdCnt;
 	unsigned int  resetCompleteEventCnt;
 	unsigned int  unableGenEvent;
@@ -135,10 +133,10 @@ struct hpqmQueue {
 
 struct INT_HPQ {
 	unsigned int  id;
-	/* The head and tail values are relative
-	 * to the start of the
-	 * HWQM register block.
-	 */
+       /* The head and tail values are relative
+	* to the start of the
+	* HWQM register block.
+	*/
 	unsigned int head;
 	unsigned int tail;
 } __IMG_PKD;
@@ -176,8 +174,8 @@ struct lmac_fw_config_params {
 	unsigned char rpu_config_number[8];
 	unsigned int numRX;
 	unsigned int numTX;
-#define FREQ_2_4_GHZ 1
-#define FREQ_5_GHZ  2
+	#define FREQ_2_4_GHZ 1
+	#define FREQ_5_GHZ  2
 	unsigned int bands;
 	unsigned int sysFrequencyInMhz;
 	struct hpqmQueue FreeCmdPtrQ;
@@ -191,7 +189,7 @@ struct lmac_fw_config_params {
 	unsigned int HP_lmac_to_host_isr_clear;
 	unsigned int HP_set_lmac_isr;
 
-#define NUM_32_QUEUES 4
+	#define NUM_32_QUEUES 4
 	struct INT_HPQ hpq32[NUM_32_QUEUES];
 
 } __IMG_PKD;
@@ -209,6 +207,7 @@ struct temp_vbat_config {
 	unsigned int temp_calib_bitmap;
 	unsigned int vbat_calibp_bitmap;
 	unsigned int temp_vbat_mon_period;
+	int VthVeryLow;
 	int VthLow;
 	int VthHi;
 	int temp_threshold;

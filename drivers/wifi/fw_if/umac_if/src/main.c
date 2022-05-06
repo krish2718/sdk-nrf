@@ -630,7 +630,7 @@ enum wifi_nrf_status wifi_nrf_fmac_stats_get(struct wifi_nrf_fmac_dev_ctx *fmac_
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	unsigned char count = 0;
-	enum rpu_stats_type stats_type = RPU_STATS_TYPE_ALL;
+	int stats_type = RPU_STATS_TYPE_ALL;
 
 	if ((stats_type == RPU_STATS_TYPE_ALL) ||
 	    (stats_type == RPU_STATS_TYPE_UMAC) ||
@@ -777,7 +777,7 @@ out:
 
 enum wifi_nrf_status wifi_nrf_fmac_scan_res_get(void *wifi_nrf_fmac_dev_ctx,
 						   unsigned char vif_idx,
-						   enum scan_reason scan_type)
+						   int scan_type)
 
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;

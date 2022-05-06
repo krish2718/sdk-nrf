@@ -1,9 +1,15 @@
 /*
- * Copyright (c) 2022 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ *Copyright (c) 2022 Nordic Semiconductor ASA
+ *
+ *SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+
+/**
+ *
+ *@brief <System interface between host and RPU>
+ */
 
 #ifndef __HOST_RPU_SYS_IF_H__
 #define __HOST_RPU_SYS_IF_H__
@@ -11,9 +17,7 @@
 #include "host_rpu_common_if.h"
 #include "lmac_if_common.h"
 
-#ifndef PACK
-#define PACK(__Declaration__) __Declaration__ __attribute__((__packed__))
-#endif
+#include "pack_def.h"
 
 #define USE_PROTECTION_NONE 0
 #define USE_PROTECTION_RTS 1
@@ -37,12 +41,12 @@
 #define MAX_RX_BUFS_PER_EVNT 64
 #define MAX_MGMT_BUFS 16
 
-/* #define ETH_ADDR_LEN		6 */
+/*#define ETH_ADDR_LEN		6*/
 #define MAX_RF_CALIB_DATA	900
 
 #define IMG_ETH_ADDR_LEN	6
 
-#define PHY_THRESHOLD_NORMAL    (-65)
+#define PHY_THRESHOLD_NORMAL	(-65)
 #define PHY_THRESHOLD_PROD_MODE (-93)
 
 #define MAX_TX_STREAMS 1
@@ -52,12 +56,12 @@
 #define MAX_NUM_STAS 2
 #define MAX_NUM_APS 1
 
-/* #define IMG_WLAN_PHY_CALIB_FLAG_RXDC 1 */
-/* #define IMG_WLAN_PHY_CALIB_FLAG_TXDC 2 */
-/* #define IMG_WLAN_PHY_CALIB_FLAG_TXPOW 4 */
-/* #define IMG_WLAN_PHY_CALIB_FLAG_TXIQ 8 */
-/* #define IMG_WLAN_PHY_CALIB_FLAG_RXIQ 16 */
-/* #define IMG_WLAN_PHY_CALIB_FLAG_DPD 32 */
+/*#define IMG_WLAN_PHY_CALIB_FLAG_RXDC 1*/
+/*#define IMG_WLAN_PHY_CALIB_FLAG_TXDC 2*/
+/*#define IMG_WLAN_PHY_CALIB_FLAG_TXPOW 4*/
+/*#define IMG_WLAN_PHY_CALIB_FLAG_TXIQ 8*/
+/*#define IMG_WLAN_PHY_CALIB_FLAG_RXIQ 16*/
+/*#define IMG_WLAN_PHY_CALIB_FLAG_DPD 32*/
 
 /**
  * enum img_sys_iftype - Interface types based on functionality.
@@ -67,43 +71,42 @@
  * @IMG_UMAC_IFTYPE_STATION: Managed BSS member.
  * @IMG_UMAC_IFTYPE_AP: Access point.
  * @IMG_UMAC_IFTYPE_AP_VLAN: VLAN interface for access points; VLAN interfaces
- *      are a bit special in that they must always be tied to a pre-existing
- *      AP type interface.
+ *	are a bit special in that they must always be tied to a pre-existing
+ *	AP type interface.
  * @IMG_UMAC_IFTYPE_WDS: Wireless Distribution System.
  * @IMG_UMAC_IFTYPE_MONITOR: Monitor interface receiving all frames.
  * @IMG_UMAC_IFTYPE_MESH_POINT: Mesh point.
  * @IMG_UMAC_IFTYPE_P2P_CLIENT: P2P client.
  * @IMG_UMAC_IFTYPE_P2P_GO: P2P group owner.
  * @IMG_UMAC_IFTYPE_P2P_DEVICE: P2P device interface type, this is not a netdev
- *      and therefore can't be created in the normal ways, use the
- *      %IMG_UMAC_CMD_START_P2P_DEVICE and %IMG_UMAC_CMD_STOP_P2P_DEVICE
- *      commands (Refer &enum img_umac_commands) to create and destroy one.
+ *	and therefore can't be created in the normal ways, use the
+ *	%IMG_UMAC_CMD_START_P2P_DEVICE and %IMG_UMAC_CMD_STOP_P2P_DEVICE
+ *	commands (Refer &enum img_umac_commands) to create and destroy one.
  * @IMG_UMAC_IFTYPE_OCB: Outside Context of a BSS.
- *      This mode corresponds to the MIB variable dot11OCBActivated=true.
+ *	This mode corresponds to the MIB variable dot11OCBActivated=true.
  * @IMG_UMAC_IFTYPE_MAX: Highest interface type number currently defined.
  * @IMG_UMAC_IFTYPES: Number of defined interface types.
  *
  * Lists the different interface types based on how they are configured
  * functionally.
  */
-enum img_sys_iftype {
-	IMG_UMAC_IFTYPE_UNSPECIFIED,
-	IMG_UMAC_IFTYPE_ADHOC,
-	IMG_UMAC_IFTYPE_STATION,
-	IMG_UMAC_IFTYPE_AP,
-	IMG_UMAC_IFTYPE_AP_VLAN,
-	IMG_UMAC_IFTYPE_WDS,
-	IMG_UMAC_IFTYPE_MONITOR,
-	IMG_UMAC_IFTYPE_MESH_POINT,
-	IMG_UMAC_IFTYPE_P2P_CLIENT,
-	IMG_UMAC_IFTYPE_P2P_GO,
-	IMG_UMAC_IFTYPE_P2P_DEVICE,
-	IMG_UMAC_IFTYPE_OCB,
+#define	IMG_UMAC_IFTYPE_UNSPECIFIED	0
+#define	IMG_UMAC_IFTYPE_ADHOC		1
+#define	IMG_UMAC_IFTYPE_STATION		2
+#define	IMG_UMAC_IFTYPE_AP			3
+#define	IMG_UMAC_IFTYPE_AP_VLAN		4
+#define	IMG_UMAC_IFTYPE_WDS			5
+#define	IMG_UMAC_IFTYPE_MONITOR		6
+#define	IMG_UMAC_IFTYPE_MESH_POINT	7
+#define	IMG_UMAC_IFTYPE_P2P_CLIENT	8
+#define	IMG_UMAC_IFTYPE_P2P_GO		9
+#define	IMG_UMAC_IFTYPE_P2P_DEVICE	10
+#define	IMG_UMAC_IFTYPE_OCB			11
 
 	/* keep last */
-	IMG_UMAC_IFTYPES,
-	IMG_UMAC_IFTYPE_MAX = IMG_UMAC_IFTYPES - 1
-};
+#define	IMG_UMAC_IFTYPES			12
+#define	IMG_UMAC_IFTYPE_MAX			(IMG_UMAC_IFTYPES - 1)
+
 
 /**
  * enum rpu_op_mode - operating modes.
@@ -119,13 +122,11 @@ enum img_sys_iftype {
  *
  * Lists the different types of operating modes.
  */
-enum rpu_op_mode {
-	RPU_OP_MODE_PROD,
-	RPU_OP_MODE_FCM,
-	RPU_OP_MODE_REG,
-	RPU_OP_MODE_DBG,
-	RPU_OP_MODE_MAX
-};
+#define	RPU_OP_MODE_PROD	0
+#define	RPU_OP_MODE_FCM		1
+#define	RPU_OP_MODE_REG		2
+#define	RPU_OP_MODE_DBG		3
+#define	RPU_OP_MODE_MAX		4
 
 /**
  * enum rpu_stats_type - statistics type.
@@ -135,26 +136,24 @@ enum rpu_op_mode {
  * Statistics will be updated in: /sys/kernel/debug/img/wlan/stats
  */
 
-enum rpu_stats_type {
-	RPU_STATS_TYPE_ALL,
-	RPU_STATS_TYPE_HOST,
-	RPU_STATS_TYPE_UMAC,
-	RPU_STATS_TYPE_LMAC,
-	RPU_STATS_TYPE_PHY,
-	RPU_STATS_TYPE_MAX
-};
-
+#define	RPU_STATS_TYPE_ALL	0
+#define	RPU_STATS_TYPE_HOST	1
+#define	RPU_STATS_TYPE_UMAC	2
+#define	RPU_STATS_TYPE_LMAC	3
+#define	RPU_STATS_TYPE_PHY	4
+#define	RPU_STATS_TYPE_MAX	5
 
 /**
  * enum rpu_tput_mode - Throughput mode
  *
  * Throughput mode to be used for transmitting the packet.
  */
-enum rpu_tput_mode {
-	RPU_TPUT_MODE_LEGACY,
-	RPU_TPUT_MODE_HT,
-	RPU_TPUT_MODE_MAX
-};
+#define	RPU_TPUT_MODE_LEGACY	0
+#define	RPU_TPUT_MODE_HT		1
+#define	RPU_TPUT_MODE_VHT		2
+#define	RPU_TPUT_MODE_HE_SU		3
+#define	RPU_TPUT_MODE_HE_ER_SU	4
+#define	RPU_TPUT_MODE_MAX		5
 
 /**
  * enum img_sys_commands - system commands
@@ -169,21 +168,21 @@ enum rpu_tput_mode {
  * @IMG_CMD_CLEAR_STATS: command to clear statistics
  * @IMG_CMD_RX: command to ENABLE/DISABLE receiving packets in production mode
  * @IMG_CMD_DEINIT: RPU De-initialization
+ * @IMG_CMD_HE_GI_LTF_CONFIG: Configure HE_GI & HE_LTF.
  *
  */
-enum img_sys_commands {
-	IMG_CMD_INIT,
-	IMG_CMD_TX,
-	IMG_CMD_IF_TYPE,
-	IMG_CMD_MODE,
-	IMG_CMD_GET_STATS,
-	IMG_CMD_CLEAR_STATS,
-	IMG_CMD_RX,
-	IMG_CMD_PWR,
-	IMG_CMD_DEINIT,
-	IMG_CMD_BTCOEX,
-	IMG_CMD_RF_TEST,
-};
+#define	IMG_CMD_INIT				0
+#define	IMG_CMD_TX					1
+#define	IMG_CMD_IF_TYPE				2
+#define	IMG_CMD_MODE				3
+#define	IMG_CMD_GET_STATS			4
+#define	IMG_CMD_CLEAR_STATS			5
+#define	IMG_CMD_RX					6
+#define	IMG_CMD_PWR					7
+#define	IMG_CMD_DEINIT				8
+#define	IMG_CMD_BTCOEX				9
+#define	IMG_CMD_RF_TEST				10
+#define	IMG_CMD_HE_GI_LTF_CONFIG	11
 
 /**
  * enum img_sys_events -
@@ -195,29 +194,27 @@ enum img_sys_commands {
  *
  * Events from the RPU for different commands.
  */
-enum img_sys_events {
-	IMG_EVENT_PWR_DATA,
-	IMG_EVENT_INIT_DONE,
-	IMG_EVENT_STATS,
-	IMG_EVENT_DEINIT_DONE,
-	IMG_EVENT_RF_TEST,
-};
+#define	IMG_EVENT_PWR_DATA		0
 
-enum rpu_ch_bw {
-	RPU_CH_BW_20,
-	RPU_CH_BW_40,
-	RPU_CH_BW_MAX
-};
+#define	IMG_EVENT_INIT_DONE		1
+#define	IMG_EVENT_STATS			2
+#define	IMG_EVENT_DEINIT_DONE	3
+#define	IMG_EVENT_RF_TEST		4
+#define	IMG_EVENT_COEX_CONFIG	5
 
-PACK(
+#define	RPU_CH_BW_20	0
+#define	RPU_CH_BW_40	1
+#define	RPU_CH_BW_MAX	2
+
+
 struct chan_params {
 	unsigned int primary_num;
 	unsigned char bw;
 	int sec_20_offset;
 	int sec_40_offset;
-});
+} __IMG_PKD;
 
-PACK(
+
 struct rpu_conf_rx_prod_mode_params {
 	unsigned char nss;
 	/* Input to the RF for operation */
@@ -226,10 +223,10 @@ struct rpu_conf_rx_prod_mode_params {
 	char phy_threshold;
 	unsigned int phy_calib;
 	unsigned char rx;
-});
+} __IMG_PKD;
 
 
-PACK(
+
 struct umac_tx_dbg_params {
 	unsigned int tx_cmd;
 	unsigned int tx_non_coalescing_pkts_rcvd_from_host;
@@ -268,9 +265,9 @@ struct umac_tx_dbg_params {
 	unsigned int tx_packet_other_mgmt_count;
 	unsigned int tx_packet_non_mgmt_data_count;
 
-});
+} __IMG_PKD;
 
-PACK(
+
 struct umac_rx_dbg_params {
 	unsigned int lmac_events;
 	unsigned int rx_events;
@@ -317,9 +314,9 @@ struct umac_rx_dbg_params {
 	unsigned int null_skb_pointer_from_lmac;
 	unsigned int unexpected_mgmt_pkt;
 
-});
+} __IMG_PKD;
 
-PACK(
+
 struct umac_cmd_evnt_dbg_params {
 	unsigned char cmd_init;
 	unsigned char event_init_done;
@@ -358,62 +355,62 @@ struct umac_cmd_evnt_dbg_params {
 	unsigned char cmd_rf_test;
 	unsigned int LMAC_CMD_PS;
 	unsigned int CURR_STATE;
-});
+} __IMG_PKD;
 
 
 #ifdef REG_DEBUG_MODE_SUPPORT
-PACK(
+
 struct rpu_umac_stats {
-	struct umac_tx_dbg_params  tx_dbg_params;
-	struct umac_rx_dbg_params  rx_dbg_params;
-	struct umac_cmd_evnt_dbg_params   cmd_evnt_dbg_params;
-});
+			struct umac_tx_dbg_params tx_dbg_params;
+			struct umac_rx_dbg_params rx_dbg_params;
+			struct umac_cmd_evnt_dbg_params cmd_evnt_dbg_params;
+} __IMG_PKD;
 
 
-PACK(
+
 struct rpu_lmac_stats {
-	/*LMAC DEBUG Stats*/
-	unsigned int  resetCmdCnt;
-	unsigned int  resetCompleteEventCnt;
-	unsigned int  unableGenEvent;
-	unsigned int  chProgCmdCnt;
-	unsigned int  channelProgDone;
-	unsigned int  txPktCnt;
-	unsigned int  txPktDoneCnt;
-	unsigned int  scanPktCnt;
-	unsigned int  internalPktCnt;
-	unsigned int  internalPktDoneCnt;
-	unsigned int  ackRespCnt;
-	unsigned int  txTimeout;
-	unsigned int  deaggIsr;
-	unsigned int  deaggInptrDescEmpty;
-	unsigned int  deaggCircularBufferFull;
-	unsigned int  lmacRxisrCnt;
-	unsigned int  rxDecryptcnt;
-	unsigned int  processDecryptFail;
-	unsigned int  prepaRxEventFail;
-	unsigned int  rxCorePoolFullCnt;
-	unsigned int  rxMpduCrcSuccessCnt;
-	unsigned int  rxMpduCrcFailCnt;
-	unsigned int  rxOfdmCrcSuccessCnt;
-	unsigned int  rxOfdmCrcFailCnt;
-	unsigned int  rxDSSSCrcSuccessCnt;
-	unsigned int  rxDSSSCrcFailCnt;
-	unsigned int  rxCryptoStartCnt;
-	unsigned int  rxCryptoDoneCnt;
-	unsigned int  rxEventBufFull;
-	unsigned int  rxExtramBufFull;
-	unsigned int  scanReq;
-	unsigned int  scanComplete;
-	unsigned int  scanAbortReq;
-	unsigned int  scanAbortComplete;
-	unsigned int  internalBufPoolNull;
-	/*END:LMAC DEBUG Stats*/
-});
+		/*LMAC DEBUG Stats*/
+	unsigned int	resetCmdCnt;
+	unsigned int	resetCompleteEventCnt;
+	unsigned int	unableGenEvent;
+	unsigned int	chProgCmdCnt;
+	unsigned int	channelProgDone;
+	unsigned int	txPktCnt;
+	unsigned int	txPktDoneCnt;
+	unsigned int	scanPktCnt;
+	unsigned int	internalPktCnt;
+	unsigned int	internalPktDoneCnt;
+	unsigned int	ackRespCnt;
+	unsigned int	txTimeout;
+	unsigned int	deaggIsr;
+	unsigned int	deaggInptrDescEmpty;
+	unsigned int	deaggCircularBufferFull;
+	unsigned int	lmacRxisrCnt;
+	unsigned int	rxDecryptcnt;
+	unsigned int	processDecryptFail;
+	unsigned int	prepaRxEventFail;
+	unsigned int	rxCorePoolFullCnt;
+	unsigned int	rxMpduCrcSuccessCnt;
+	unsigned int	rxMpduCrcFailCnt;
+	unsigned int	rxOfdmCrcSuccessCnt;
+	unsigned int	rxOfdmCrcFailCnt;
+	unsigned int	rxDSSSCrcSuccessCnt;
+	unsigned int	rxDSSSCrcFailCnt;
+	unsigned int	rxCryptoStartCnt;
+	unsigned int	rxCryptoDoneCnt;
+	unsigned int	rxEventBufFull;
+	unsigned int	rxExtramBufFull;
+	unsigned int	scanReq;
+	unsigned int	scanComplete;
+	unsigned int	scanAbortReq;
+	unsigned int	scanAbortComplete;
+	unsigned int	internalBufPoolNull;
+		/*END:LMAC DEBUG Stats*/
+} __IMG_PKD;
 
 #endif /* REG_DEBUG_MODE_SUPPORT */
 
-PACK(
+
 struct rpu_phy_stats {
 	char rssi_avg;
 	unsigned char pdout_val;
@@ -421,7 +418,7 @@ struct rpu_phy_stats {
 	unsigned int ofdm_crc32_fail_cnt;
 	unsigned int dsss_crc32_pass_cnt;
 	unsigned int dsss_crc32_fail_cnt;
-});
+} __IMG_PKD;
 
 
 /**
@@ -432,13 +429,13 @@ struct rpu_phy_stats {
  * This header needs to be initialized in every command and has the event
  * id info in case of events.
  */
-PACK(
+
 struct img_sys_head {
 
-	unsigned int                cmd_event;
-	unsigned int                len;
+	unsigned int	cmd_event;
+	unsigned int	len;
 
-});
+} __IMG_PKD;
 
 
 
@@ -447,20 +444,20 @@ struct img_sys_head {
  * @enabled: Enable/Disable background scan.
  * @channel_list: List of channels to scan.
  * @channel_flags: Channel flags for each of the channels which are to be
- *                 scanned.
+ *	scanned.
  * @scan_intval: Back ground scan is done at regular intervals. This
- *               value is set to the interval value (in ms).
+ *	value is set to the interval value (in ms).
  * @channel_dur: Time to be spent on each channel (in ms).
  * @serv_channel_dur: In "Connected State" scanning, we need to share the time
- *                    between operating channel and non-operating channels.
- *                    After scanning each channel, the firmware spends
- *                    "serv_channel_dur" (in ms) on the operating channel.
+ *	between operating channel and non-operating channels.
+ *	After scanning each channel, the firmware spends
+ *	"serv_channel_dur" (in ms) on the operating channel.
  * @num_channels: Number of channels to be scanned.
  *
  * This structure specifies the parameters which will be used during a
  * Background Scan.
  */
-PACK(
+
 struct img_bgscan_params {
 	unsigned int enabled;
 	unsigned char channel_list[50];
@@ -469,7 +466,7 @@ struct img_bgscan_params {
 	unsigned int channel_dur;
 	unsigned int serv_channel_dur;
 	unsigned int num_channels;
-});
+} __IMG_PKD;
 
 
 
@@ -486,13 +483,10 @@ struct img_bgscan_params {
  *
  * Max Rx AMPDU Size
  */
-enum max_rx_ampdu_size {
-	MAX_RX_AMPDU_SIZE_8KB,
-	MAX_RX_AMPDU_SIZE_16KB,
-	MAX_RX_AMPDU_SIZE_32KB,
-	MAX_RX_AMPDU_SIZE_64KB,
-	MAX_ALIGN_INT = 0xffffffff
-};
+#define	MAX_RX_AMPDU_SIZE_8KB	0
+#define	MAX_RX_AMPDU_SIZE_16KB	1
+#define	MAX_RX_AMPDU_SIZE_32KB	2
+#define	MAX_RX_AMPDU_SIZE_64KB	3
 
 /**
  * struct img_data_config_params - Data config parameters
@@ -506,7 +500,7 @@ enum max_rx_ampdu_size {
  *
  * Data configuration parameters provided in command IMG_CMD_INIT
  */
-PACK(
+
 struct img_data_config_params {
 	unsigned char rate_protection_type;
 	unsigned char aggregation;
@@ -515,8 +509,8 @@ struct img_data_config_params {
 	unsigned char max_num_rx_agg_sessions;
 	unsigned char max_tx_aggregation;
 	unsigned char reorder_buf_size;
-	unsigned int max_rxampdu_size;
-});
+	int max_rxampdu_size;
+} __IMG_PKD;
 
 
 /**
@@ -533,7 +527,7 @@ struct img_data_config_params {
  *
  * System parameters provided for command IMG_CMD_INIT
  */
-PACK(
+
 struct img_sys_params {
 	unsigned int sleepEnable;
 	unsigned int hw_bringup_time;
@@ -546,7 +540,7 @@ struct img_sys_params {
 	unsigned char rf_params[RF_PARAMS_SIZE];
 	unsigned char rf_params_valid;
 #endif /* REG_DEBUG_MODE_SUPPORT */
-});
+} __IMG_PKD;
 
 
 
@@ -561,7 +555,7 @@ struct img_sys_params {
  * After host driver bringup host sends the IMG_CMD_INIT to the RPU.
  * then RPU initializes and responds with IMG_EVENT_BUFF_CONFIG.
  */
-PACK(
+
 struct img_cmd_sys_init {
 	struct img_sys_head sys_head;
 	unsigned int wdev_id;
@@ -569,7 +563,7 @@ struct img_cmd_sys_init {
 	struct rx_buf_pool_params rx_buf_pools[MAX_NUM_OF_RX_QUEUES];
 	struct img_data_config_params data_config_params;
 	struct temp_vbat_config  temp_vbat_config_params;
-});
+} __IMG_PKD;
 
 
 
@@ -579,10 +573,42 @@ struct img_cmd_sys_init {
  *
  * De-initializes the RPU.
  */
-PACK(
+
 struct img_cmd_sys_deinit {
 	struct img_sys_head sys_head;
-});
+} __IMG_PKD;
+
+
+
+#define IMG_HE_GI_800NS		0
+#define IMG_HE_GI_1600NS	1
+#define IMG_HE_GI_3200NS	2
+
+#define IMG_HE_LTF_3200NS	0
+#define IMG_HE_LTF_6400NS	1
+#define IMG_HE_LTF_12800NS	2
+
+/**
+ * struct img_cmd_he_gi_ltf_config - Confure HE-GI and HE-LTF.
+ * @sys_head: umac header, see &img_sys_head
+ * @wdev_id: wdev interface id.
+ * @he_gi_type: HE GI type(IMG_HE_GI_800NS/IMG_HE_GI_1600NS/IMG_HE_GI_3200NS).
+ * @he_ltf: HE LTF(IMG_HE_LTF_3200NS/IMG_HE_LTF_6400NS/IMG_HE_LTF_12800NS).
+ * @enable: Fixed HE GI & LTF values can be enabled and disabled
+ * Host configures the HE-GI & HE-LTF for testing purpose
+ * need to use this values in Tx command sending to LMAC.
+ */
+
+struct img_cmd_he_gi_ltf_config {
+	struct img_sys_head sys_head;
+	unsigned char	wdev_id;
+#define IMG_HE_GI_800NS 0
+#define IMG_HE_GI_1600NS 1
+#define IMG_HE_GI_3200NS 2
+	unsigned char he_gi_type;
+	unsigned char he_ltf;
+	unsigned char enable;
+} __IMG_PKD;
 
 
 
@@ -590,33 +616,31 @@ struct img_cmd_sys_deinit {
  * completin of buffers configuraton. fill IMG_CMD_BUFF_CONFIG_COMPLETE in cmd
  * field.
  */
-PACK(
+
 struct img_cmd_buff_config_complete {
-	struct img_sys_head        sys_head;
-});
+	struct img_sys_head	sys_head;
+} __IMG_PKD;
 
 
 enum opt {
-	DISABLE,
-	ENABLE
+    DISABLE,
+    ENABLE
 };
 
-enum rpu_pkt_preamble {
-	RPU_PKT_PREAMBLE_SHORT,
-	RPU_PKT_PREAMBLE_LONG,
-	RPU_PKT_PREAMBLE_MIXED,
-	RPU_PKT_PREAMBLE_MAX,
-};
+#define	RPU_PKT_PREAMBLE_SHORT	0
+#define	RPU_PKT_PREAMBLE_LONG	1
+#define	RPU_PKT_PREAMBLE_MIXED	2
+#define	RPU_PKT_PREAMBLE_MAX	3
 
-PACK(
+
 struct img_cmd_mode {
 	struct img_sys_head	sys_head;
-	enum rpu_op_mode mode;
+	int mode;
 
-});
+} __IMG_PKD;
 
 #ifdef CONF_SUPPORT
-PACK(
+
 struct rpu_conf_params {
 	unsigned char nss;
 	unsigned char antenna_sel;
@@ -624,6 +648,7 @@ struct rpu_conf_params {
 	unsigned char tx_pkt_chnl_bw;
 	unsigned char tx_pkt_tput_mode;
 	unsigned char tx_pkt_sgi;
+
 	unsigned char tx_pkt_nss;
 	unsigned char tx_pkt_preamble;
 	unsigned char tx_pkt_stbc;
@@ -633,7 +658,7 @@ struct rpu_conf_params {
 	char phy_threshold;
 	unsigned int phy_calib;
 #ifdef DEBUG_MODE_SUPPORT
-	enum rpu_stats_type stats_type;
+	int stats_type;
 	unsigned char max_agg_limit;
 	unsigned char max_agg;
 	unsigned char mimo_ps;
@@ -643,16 +668,22 @@ struct rpu_conf_params {
 	unsigned short active_scan_dur;
 	unsigned short passive_scan_dur;
 #endif /* DEBUG_MODE_SUPPORT */
-	unsigned int op_mode;
+	int op_mode;
 	struct chan_params chan;
 	unsigned char tx_mode;
 	int tx_pkt_num;
-	unsigned int tx_pkt_len;
+	unsigned short tx_pkt_len;
 	unsigned int tx_power;
 	unsigned char tx;
 	unsigned char rx;
 	unsigned char aux_adc_input_chain_id;
-});
+	unsigned char agg;
+	unsigned char he_ltf;
+	unsigned char he_gi;
+	unsigned char set_he_ltf_gi;
+	unsigned char power_save;
+	unsigned int rts_threshold;
+} __IMG_PKD;
 
 
 
@@ -663,13 +694,13 @@ struct rpu_conf_params {
  *
  * configures the RPU with config parameters provided in this command
  */
-PACK(
+
 struct img_cmd_mode_params {
-	struct img_sys_head        sys_head;
-	rpu_conf_params_t     conf;
-	unsigned int pkt_length[MAX_TX_AGG_SIZE];
+	struct img_sys_head	sys_head;
+	struct rpu_conf_params conf;
+	unsigned short pkt_length[MAX_TX_AGG_SIZE];
 	unsigned int ddr_ptrs[MAX_TX_AGG_SIZE];
-});
+} __IMG_PKD;
 
 #endif /* CONF_SUPPORT */
 
@@ -678,15 +709,15 @@ struct img_cmd_mode_params {
  * @sys_head: UMAC header, See &struct img_sys_head
  * @conf: rx configuration parameters see &struct rpu_conf_rx_prod_mode_params
  * @:rx_enable: 1-Enable Rx to receive packets contineously on specified channel
- *              0-Disable Rx stop receiving packets and clear statistics
+ *	0-Disable Rx stop receiving packets and clear statistics
  *
  * Command RPU to Enable/Disable Rx
  */
-PACK(
+
 struct img_cmd_rx {
 	struct img_sys_head	sys_head;
 	struct rpu_conf_rx_prod_mode_params conf;
-});
+} __IMG_PKD;
 
 
 /**
@@ -699,12 +730,12 @@ struct img_cmd_rx {
  * selected
  *
  */
-PACK(
+
 struct img_cmd_get_stats {
-	struct img_sys_head        sys_head;
-	enum rpu_stats_type	   stats_type;
-	enum rpu_op_mode	   op_mode;
-});
+	struct img_sys_head		sys_head;
+	int	stats_type;
+	int	op_mode;
+} __IMG_PKD;
 
 /**
  * struct img_cmd_clear_stats - clear statistics
@@ -713,68 +744,96 @@ struct img_cmd_get_stats {
  *
  * This command is to clear the statistics corresponding to stats_type selected
  */
-PACK(
+
 struct img_cmd_clear_stats {
 	struct img_sys_head        sys_head;
-	enum rpu_stats_type	   stats_type;
-});
+	int stats_type;
+} __IMG_PKD;
 
 
-PACK(
+
 struct img_cmd_pwr {
 	struct img_sys_head	sys_head;
-	struct img_rpu_pwr_data data_type;
-});
+	int data_type;
+} __IMG_PKD;
 
-PACK(
+
 struct rpu_btcoex {
 	int coex_cmd_ctrl;
-	enum ext_bt_mode bt_mode;
-	enum bt_coex_module_en_dis bt_ctrl;
+	int bt_mode;
+	int bt_ctrl;
 	struct ptaExtParams pta_params;
-});
+} __IMG_PKD;
 
-PACK(
+
 struct img_cmd_btcoex {
 	struct img_sys_head sys_head;
 	struct rpu_btcoex conf;
-});
+} __IMG_PKD;
 
 
-PACK(
+
+
+struct rpu_cmd_coex_config_info {
+	unsigned int len;
+	unsigned char coex_cmd[0];
+} __IMG_PKD;
+
+
+struct img_cmd_coex_config {
+	struct img_sys_head sys_head;
+	struct rpu_cmd_coex_config_info coex_config_info;
+} __IMG_PKD;
+
+
+struct rpu_evnt_coex_config_info {
+	unsigned int len;
+	unsigned char coex_event[0];
+} __IMG_PKD;
+
+
+struct img_event_coex_config {
+	struct img_sys_head sys_head;
+	struct rpu_evnt_coex_config_info coex_config_info;
+} __IMG_PKD;
+
+
+
 struct rpu_cmd_rftest_info {
-	unsigned char ptr[128];
-});
+	unsigned int len;
+	unsigned char rfcmd[0];
+} __IMG_PKD;
 
 
-PACK(
+
 struct img_cmd_rftest {
 	struct img_sys_head sys_head;
 	struct rpu_cmd_rftest_info rf_test_info;
-});
+} __IMG_PKD;
 
 
-PACK(
+
 struct rpu_evnt_rftest_info {
-	unsigned char ptr[16];
-});
+	unsigned int len;
+	unsigned char rfevent[0];
+} __IMG_PKD;
 
 
-PACK(
+
 struct img_event_rftest {
 	struct img_sys_head sys_head;
 	struct rpu_evnt_rftest_info rf_test_info;
-});
+} __IMG_PKD;
 
 
 
-PACK(
+
 struct img_event_pwr_data {
-	struct img_sys_head  sys_head;
-	enum img_rpu_pwr_status mon_status;
-	struct img_rpu_pwr_data data_type;
+	struct img_sys_head	sys_head;
+	int mon_status;
+	int data_type;
 	struct img_rpu_pwr_data data;
-	});
+} __IMG_PKD;
 
 /**
  * struct rpu_fw_stats - FW statistics
@@ -786,14 +845,14 @@ struct img_event_pwr_data {
  * can provide
  *
  */
-PACK(
+
 struct rpu_fw_stats {
-	struct rpu_phy_stats	phy;
+	struct rpu_phy_stats phy;
 #ifdef REG_DEBUG_MODE_SUPPORT
 	struct rpu_lmac_stats lmac;
 	struct rpu_umac_stats umac;
 #endif /* REG_DEBUG_MODE_SUPPORT */
-});
+} __IMG_PKD;
 
 
 /**
@@ -804,11 +863,11 @@ struct rpu_fw_stats {
  * This event is the response to command IMG_CMD_GET_STATS.
  *
  */
-PACK(
+
 struct img_umac_event_stats {
 	struct img_sys_head sys_head;
 	struct rpu_fw_stats fw;
-});
+} __IMG_PKD;
 
 
 
@@ -821,12 +880,13 @@ struct img_umac_event_stats {
  * RPU sends this event in response to IMG_CMD_BUFF_CONFIG_COMPLETE informing
  * RPU is initialized
  */
-PACK(
-struct img_event_buff_config_done {
-	struct img_sys_head        sys_head;
-	unsigned char              mac_addr[IMG_ETH_ADDR_LEN];
 
-});
+struct img_event_buff_config_done {
+
+	struct img_sys_head	sys_head;
+	unsigned char	mac_addr[IMG_ETH_ADDR_LEN];
+
+} __IMG_PKD;
 
 
 
@@ -844,15 +904,15 @@ struct img_event_buff_config_done {
  * submits the 8K buffer and UMAC uses buffers to configure LMAC
  * for receiving AMSDU packets.
  */
-PACK(
-struct img_event_buffs_config {
-	struct img_sys_head         sys_head;
-	unsigned int                max_tx_descs;
-	unsigned int                max_2k_rx_descs;
-	unsigned int                num_8k_rx_descs;
-	unsigned int                num_mgmt_descs;
 
-});
+struct img_event_buffs_config {
+	struct img_sys_head	sys_head;
+	unsigned int	max_tx_descs;
+	unsigned int	max_2k_rx_descs;
+	unsigned int	num_8k_rx_descs;
+	unsigned int	num_mgmt_descs;
+
+} __IMG_PKD;
 
 #endif /* REG_DEBUG_MODE_SUPPORT */
 
@@ -864,10 +924,10 @@ struct img_event_buffs_config {
  * RPU sends this event in response to IMG_CMD_INIT indicating that the RPU is
  * initialized
  */
-PACK(
+
 struct img_event_init_done {
-	struct img_sys_head        sys_head;
-});
+	struct img_sys_head	sys_head;
+} __IMG_PKD;
 
 
 /**
@@ -877,9 +937,9 @@ struct img_event_init_done {
  * RPU sends this event in response to IMG_CMD_DEINIT indicating that the RPU is
  * deinitialized
  */
-PACK(
+
 struct img_event_deinit_done {
-	struct img_sys_head        sys_head;
-});
+	struct img_sys_head	sys_head;
+} __IMG_PKD;
 
 #endif /* __HOST_RPU_SYS_IF_H__ */

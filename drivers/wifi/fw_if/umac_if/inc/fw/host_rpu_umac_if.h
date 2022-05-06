@@ -1,18 +1,22 @@
 /*
- * Copyright (c) 2022 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ *Copyright (c) 2022 Nordic Semiconductor ASA
+ *
+ *SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+
+/**
+ *
+ *@brief <Control interface between host and RPU>
+ */
 #ifndef __HOST_RPU_UMAC_IF_H
 #define __HOST_RPU_UMAC_IF_H
 
 #include "host_rpu_data_if.h"
 #include "host_rpu_sys_if.h"
 
-#ifndef PACK
-#define PACK(__Declaration__) __Declaration__ __attribute__((__packed__))
-#endif
+#include "pack_def.h"
 
 #define MAX_IMG_UMAC_CMD_SIZE 400
 
@@ -43,17 +47,17 @@
  * @IMG_UMAC_CMD_SET_BEACON: Set the beacon fields in AP mode.
  *	See &struct img_umac_cmd_set_beacon
  * @IMG_UMAC_CMD_SET_BSS: Set the BSS.
- *      See &struct img_umac_cmd_set_bss
+ *	See &struct img_umac_cmd_set_bss
  * @IMG_UMAC_CMD_START_AP: Start the device as Soft AP.
  *	See &struct img_umac_cmd_start_ap
  * @IMG_UMAC_CMD_STOP_AP: Stop the AP mode.
  *	See &struct img_umac_cmd_stop_ap
  * @IMG_UMAC_CMD_NEW_INTERFACE: Adding interface.
- *      See &struct img_umac_cmd_add_vif
+ *	See &struct img_umac_cmd_add_vif
  * @IMG_UMAC_CMD_SET_INTERFACE: Change interface configuration.
  *	See &struct img_umac_cmd_chg_vif_attr
  * @IMG_UMAC_CMD_DEL_INTERFACE: Delete interface.
- *  See &struct img_umac_cmd_del_vif
+ *	See &struct img_umac_cmd_del_vif
  * @IMG_UMAC_CMD_SET_IFFLAGS: Change interface flags.
  *	See &struct img_umac_cmd_chg_vif_state
  * @IMG_UMAC_CMD_NEW_STATION: Add a new station.
@@ -80,89 +84,76 @@
  * @IMG_UMAC_CMD_WIN_STA_CONNECT: Connect to AP.
  *	See &struct img_umac_cmd_win_sta_connect
  * @IMG_UMAC_CMD_SET_POWER_SAVE: Power save Enable/Disable
- *      See &struct img_umac_cmd_set_power_save
+ *	See &struct img_umac_cmd_set_power_save
  * @IMG_UMAC_CMD_SET_WOWLAN: Set the WoWLAN trigger configs
- *      See &struct img_umac_cmd_set_wowlan
+ *	See &struct img_umac_cmd_set_wowlan
  * @IMG_UMAC_CMD_SUSPEND: Suspend the bus after WoWLAN configurations
- *      See &struct img_umac_cmd_suspend
+ *	See &struct img_umac_cmd_suspend
  * @IMG_UMAC_CMD_RESUME: Resume the bus activity before wakeup
- *      See &struct img_umac_cmd_resume
+ *	See &struct img_umac_cmd_resume
  * @IMG_UMAC_CMD_GET_CHANNEL: Get Channel info
- *  *      See &struct img_umac_cmd_get_channel
+ *		See &struct img_umac_cmd_get_channel
  * @IMG_UMAC_CMD_GET_TX_POWER: Get Tx power level
- *  *      See &struct img_umac_cmd_get_tx_power
+ *		See &struct img_umac_cmd_get_tx_power
  * @IMG_UMAC_CMD_GET_REG : Get Regulatory info
- *  *      See &struct img_reg_t
+ *		See &struct img_reg_t
  * @IMG_UMAC_CMD_SET_REG : Set Regulatory info
- *  *      See &struct img_reg_t
+ *		See &struct img_reg_t
  *
  * Lists the different ID's to be used to when sending a command to the RPU.
  * All the commands are to be encapsulated using struct host_rpu_msg.
  */
-enum img_umac_commands {
-
-	IMG_UMAC_CMD_TRIGGER_SCAN,
-	IMG_UMAC_CMD_GET_SCAN_RESULTS,
-	IMG_UMAC_CMD_AUTHENTICATE,
-	IMG_UMAC_CMD_ASSOCIATE,
-	IMG_UMAC_CMD_DEAUTHENTICATE,
-
-	IMG_UMAC_CMD_SET_WIPHY,
-
-	IMG_UMAC_CMD_NEW_KEY,
-	IMG_UMAC_CMD_DEL_KEY,
-	IMG_UMAC_CMD_SET_KEY,
-	IMG_UMAC_CMD_GET_KEY,
-
-	IMG_UMAC_CMD_NEW_BEACON,
-	IMG_UMAC_CMD_SET_BEACON,
-	IMG_UMAC_CMD_SET_BSS,
-	IMG_UMAC_CMD_START_AP,
-	IMG_UMAC_CMD_STOP_AP,
-
-	IMG_UMAC_CMD_NEW_INTERFACE,
-	IMG_UMAC_CMD_SET_INTERFACE,
-	IMG_UMAC_CMD_DEL_INTERFACE,
-
-	IMG_UMAC_CMD_SET_IFFLAGS,
-
-	IMG_UMAC_CMD_NEW_STATION,/*Add a STA in SoftAP mode*/
-	IMG_UMAC_CMD_DEL_STATION,
-	IMG_UMAC_CMD_SET_STATION,
-	IMG_UMAC_CMD_GET_STATION,
-
-	IMG_UMAC_CMD_START_P2P_DEVICE,
-	IMG_UMAC_CMD_STOP_P2P_DEVICE,
-
-	IMG_UMAC_CMD_REMAIN_ON_CHANNEL,
-	IMG_UMAC_CMD_CANCEL_REMAIN_ON_CHANNEL,
-	IMG_UMAC_CMD_SET_CHANNEL,
-
-	IMG_UMAC_CMD_RADAR_DETECT,
-	IMG_UMAC_CMD_REGISTER_FRAME,
-	IMG_UMAC_CMD_FRAME,
-
-	IMG_UMAC_CMD_JOIN_IBSS,
-	IMG_UMAC_CMD_WIN_STA_CONNECT,
-	IMG_UMAC_CMD_SET_POWER_SAVE,
-	IMG_UMAC_CMD_SET_WOWLAN,
-	IMG_UMAC_CMD_SUSPEND,
-	IMG_UMAC_CMD_RESUME,
-	IMG_UMAC_CMD_SET_QOS_MAP,
-	IMG_UMAC_CMD_GET_CHANNEL,
-	IMG_UMAC_CMD_GET_TX_POWER,
-	IMG_UMAC_CMD_GET_INTERFACE,
-	IMG_UMAC_CMD_GET_WIPHY,
-	IMG_UMAC_CMD_GET_IFHWADDR,
-	IMG_UMAC_CMD_SET_IFHWADDR,
-	IMG_UMAC_CMD_GET_REG,
-	IMG_UMAC_CMD_SET_REG,
-	IMG_UMAC_CMD_REQ_SET_REG,
+#define	IMG_UMAC_CMD_TRIGGER_SCAN				0
+#define	IMG_UMAC_CMD_GET_SCAN_RESULTS			1
+#define	IMG_UMAC_CMD_AUTHENTICATE				2
+#define	IMG_UMAC_CMD_ASSOCIATE					3
+#define	IMG_UMAC_CMD_DEAUTHENTICATE				4
+#define	IMG_UMAC_CMD_SET_WIPHY					5
+#define	IMG_UMAC_CMD_NEW_KEY					6
+#define	IMG_UMAC_CMD_DEL_KEY					7
+#define	IMG_UMAC_CMD_SET_KEY					8
+#define	IMG_UMAC_CMD_GET_KEY					9
+#define	IMG_UMAC_CMD_NEW_BEACON					10
+#define	IMG_UMAC_CMD_SET_BEACON					11
+#define	IMG_UMAC_CMD_SET_BSS					12
+#define	IMG_UMAC_CMD_START_AP					13
+#define	IMG_UMAC_CMD_STOP_AP					14
+#define	IMG_UMAC_CMD_NEW_INTERFACE				15
+#define	IMG_UMAC_CMD_SET_INTERFACE				16
+#define	IMG_UMAC_CMD_DEL_INTERFACE				17
+#define	IMG_UMAC_CMD_SET_IFFLAGS				18
+#define	IMG_UMAC_CMD_NEW_STATION				19		/*Add a STA in SoftAP mode*/
+#define	IMG_UMAC_CMD_DEL_STATION				20
+#define	IMG_UMAC_CMD_SET_STATION				21
+#define	IMG_UMAC_CMD_GET_STATION				22
+#define	IMG_UMAC_CMD_START_P2P_DEVICE			23
+#define	IMG_UMAC_CMD_STOP_P2P_DEVICE			24
+#define	IMG_UMAC_CMD_REMAIN_ON_CHANNEL			25
+#define	IMG_UMAC_CMD_CANCEL_REMAIN_ON_CHANNEL	26
+#define	IMG_UMAC_CMD_SET_CHANNEL				27
+#define	IMG_UMAC_CMD_RADAR_DETECT				28
+#define	IMG_UMAC_CMD_REGISTER_FRAME				29
+#define	IMG_UMAC_CMD_FRAME						30
+#define	IMG_UMAC_CMD_JOIN_IBSS					31
+#define	IMG_UMAC_CMD_WIN_STA_CONNECT			32
+#define	IMG_UMAC_CMD_SET_POWER_SAVE				33
+#define	IMG_UMAC_CMD_SET_WOWLAN					34
+#define	IMG_UMAC_CMD_SUSPEND					35
+#define	IMG_UMAC_CMD_RESUME						36
+#define	IMG_UMAC_CMD_SET_QOS_MAP				37
+#define	IMG_UMAC_CMD_GET_CHANNEL				38
+#define	IMG_UMAC_CMD_GET_TX_POWER				39
+#define	IMG_UMAC_CMD_GET_INTERFACE				40
+#define	IMG_UMAC_CMD_GET_WIPHY					41
+#define	IMG_UMAC_CMD_GET_IFHWADDR				42
+#define	IMG_UMAC_CMD_SET_IFHWADDR				43
+#define	IMG_UMAC_CMD_GET_REG					44
+#define	IMG_UMAC_CMD_SET_REG					45
+#define	IMG_UMAC_CMD_REQ_SET_REG				46
 #ifdef TWT_SUPPORT
-	IMG_UMAC_CMD_CONFIG_TWT,
-	IMG_UMAC_CMD_TEARDOWN_TWT,
+#define	IMG_UMAC_CMD_CONFIG_TWT					47
+#define	IMG_UMAC_CMD_TEARDOWN_TWT				48
 #endif
-};
 
 
 /**
@@ -170,26 +161,26 @@ enum img_umac_commands {
  *
  * @IMG_UMAC_EVENT_TRIGGER_SCAN_START: Unused.
  * @IMG_UMAC_EVENT_SCAN_ABORTED: Indicate scan has been cancelled.
- *      See &struct img_umac_event_trigger_scan
+ *	See &struct img_umac_event_trigger_scan
  * @IMG_UMAC_EVENT_SCAN_DONE: Indicate scan results are available.
- *      See &struct img_umac_event_trigger_scan
+ *	See &struct img_umac_event_trigger_scan
  * @IMG_UMAC_EVENT_SCAN_RESULT: Scan result. We will receive one event for all
- *      the scan results until umac_hdr->seq == 0.
- *      See &struct img_umac_event_new_scan_results
+ *	the scan results until umac_hdr->seq == 0.
+ *	See &struct img_umac_event_new_scan_results
  * @IMG_UMAC_EVENT_AUTHENTICATE: Authentication status.
- *      See &struct img_umac_event_mlme
+ *	See &struct img_umac_event_mlme
  * @IMG_UMAC_EVENT_ASSOCIATE: Association status.
- *      See &struct img_umac_event_mlme
+ *	See &struct img_umac_event_mlme
  * @IMG_UMAC_EVENT_CONNECT: Connection complete event.
- *      See &struct img_umac_event_connect
+ *	See &struct img_umac_event_connect
  * @IMG_UMAC_EVENT_DEAUTHENTICATE: Station deauth event.
  *	See &struct img_umac_event_mlme
  * @IMG_UMAC_EVENT_NEW_STATION: Station added indication.
- *      See &struct img_umac_event_new_station
+ *	See &struct img_umac_event_new_station
  * @IMG_UMAC_EVENT_DEL_STATION: Station deleted indication.
- *      See &struct img_umac_event_new_station
+ *	See &struct img_umac_event_new_station
  * @IMG_UMAC_EVENT_GET_STATION: Station info indication.
- *      See &img_umac_event_station_t
+ *	See &img_umac_event_station_t
  * @IMG_UMAC_EVENT_REMAIN_ON_CHANNEL: Unused.
  * @IMG_UMAC_EVENT_CANCEL_REMAIN_ON_CHANNEL: Unused.
  * @IMG_UMAC_EVENT_DISCONNECT: Unused.
@@ -206,61 +197,58 @@ enum img_umac_commands {
  * @IMG_UMAC_EVENT_SET_INTERFACE: IMG_UMAC_CMD_SET_INTERFACE status.
  *	See &struct img_umac_event_set_interface
  * @IMG_UMAC_EVENT_GET_REG: IMG_UMAC_CMD_GET_REG status
- *       See &struct img_reg_t
+ *	See &struct img_reg_t
  * @IMG_UMAC_EVENT_SET_REG: IMG_UMAC_CMD_SET_REG status
- *       See &struct img_reg_t
+ *	See &struct img_reg_t
  * @IMG_UMAC_EVENT_REQ_SET_REG: IMG_UMAC_CMD_REQ_SET_REG status
- *       See &struct img_reg_t
+ *	See &struct img_reg_t
  * @IMG_UMAC_EVENT_SCAN_DISPLAY_RESULT: Scan display result. We will receive one event for all
- *      the scan results until umac_hdr->seq == 0
+ *	the scan results until umac_hdr->seq == 0
  * Lists the ID's to used by the RPU when sending a Event to the Host. All the
  * events are encapsulated using struct host_rpu_msg.
  */
-
-enum img_umac_events {
-	IMG_UMAC_EVENT_UNSPECIFIED = 256,
-	IMG_UMAC_EVENT_TRIGGER_SCAN_START,
-	IMG_UMAC_EVENT_SCAN_ABORTED,
-	IMG_UMAC_EVENT_SCAN_DONE,
-	IMG_UMAC_EVENT_SCAN_RESULT,
-	IMG_UMAC_EVENT_AUTHENTICATE,
-	IMG_UMAC_EVENT_ASSOCIATE,
-	IMG_UMAC_EVENT_CONNECT,
-	IMG_UMAC_EVENT_DEAUTHENTICATE,
-/* pmf5331 */
-	IMG_UMAC_EVENT_DISASSOCIATE,
-	IMG_UMAC_EVENT_NEW_STATION,
-	IMG_UMAC_EVENT_DEL_STATION,
-	IMG_UMAC_EVENT_GET_STATION,
-	IMG_UMAC_EVENT_REMAIN_ON_CHANNEL,
-	IMG_UMAC_EVENT_CANCEL_REMAIN_ON_CHANNEL,
-	IMG_UMAC_EVENT_DISCONNECT,
-	IMG_UMAC_EVENT_FRAME,
-	IMG_UMAC_EVENT_COOKIE_RESP,
-	IMG_UMAC_EVENT_FRAME_TX_STATUS,
-	IMG_UMAC_EVENT_IFFLAGS_STATUS,
-	IMG_UMAC_EVENT_GET_TX_POWER,
-	IMG_UMAC_EVENT_GET_CHANNEL,
-	IMG_UMAC_EVENT_SET_INTERFACE,
-
-	IMG_UMAC_EVENT_UNPROT_DEAUTHENTICATE,
-	IMG_UMAC_EVENT_UNPROT_DISASSOCIATE,
-	IMG_UMAC_EVENT_NEW_INTERFACE,
-	IMG_UMAC_EVENT_NEW_WIPHY,
-	IMG_UMAC_EVENT_GET_IFHWADDR,
-	IMG_UMAC_EVENT_GET_REG,
-	IMG_UMAC_EVENT_SET_REG,
-	IMG_UMAC_EVENT_REQ_SET_REG,
-	IMG_UMAC_EVENT_GET_KEY,
-	IMG_UMAC_EVENT_BEACON_HINT,
-	IMG_UMAC_EVENT_REG_CHANGE,
-	IMG_UMAC_EVENT_WIPHY_REG_CHANGE,
-	IMG_UMAC_EVENT_SCAN_DISPLAY_RESULT,
+#define	IMG_UMAC_EVENT_UNSPECIFIED					256
+#define	IMG_UMAC_EVENT_TRIGGER_SCAN_START			257
+#define	IMG_UMAC_EVENT_SCAN_ABORTED					258
+#define	IMG_UMAC_EVENT_SCAN_DONE					259
+#define	IMG_UMAC_EVENT_SCAN_RESULT					260
+#define	IMG_UMAC_EVENT_AUTHENTICATE					261
+#define	IMG_UMAC_EVENT_ASSOCIATE					262
+#define	IMG_UMAC_EVENT_CONNECT						263
+#define	IMG_UMAC_EVENT_DEAUTHENTICATE				264
+#define	IMG_UMAC_EVENT_DISASSOCIATE					265
+#define	IMG_UMAC_EVENT_NEW_STATION					266
+#define	IMG_UMAC_EVENT_DEL_STATION					267
+#define	IMG_UMAC_EVENT_GET_STATION					268
+#define	IMG_UMAC_EVENT_REMAIN_ON_CHANNEL			269
+#define	IMG_UMAC_EVENT_CANCEL_REMAIN_ON_CHANNEL		270
+#define	IMG_UMAC_EVENT_DISCONNECT					271
+#define	IMG_UMAC_EVENT_FRAME						272
+#define	IMG_UMAC_EVENT_COOKIE_RESP					273
+#define	IMG_UMAC_EVENT_FRAME_TX_STATUS				274
+#define	IMG_UMAC_EVENT_IFFLAGS_STATUS				275
+#define	IMG_UMAC_EVENT_GET_TX_POWER					276
+#define	IMG_UMAC_EVENT_GET_CHANNEL					277
+#define	IMG_UMAC_EVENT_SET_INTERFACE				278
+#define	IMG_UMAC_EVENT_UNPROT_DEAUTHENTICATE		279
+#define	IMG_UMAC_EVENT_UNPROT_DISASSOCIATE			280
+#define	IMG_UMAC_EVENT_NEW_INTERFACE				281
+#define	IMG_UMAC_EVENT_NEW_WIPHY					282
+#define	IMG_UMAC_EVENT_GET_IFHWADDR					283
+#define	IMG_UMAC_EVENT_GET_REG						284
+#define	IMG_UMAC_EVENT_SET_REG						285
+#define	IMG_UMAC_EVENT_REQ_SET_REG					286
+#define	IMG_UMAC_EVENT_GET_KEY						287
+#define	IMG_UMAC_EVENT_BEACON_HINT					288
+#define	IMG_UMAC_EVENT_REG_CHANGE					289
+#define	IMG_UMAC_EVENT_WIPHY_REG_CHANGE				290
+#define	IMG_UMAC_EVENT_SCAN_DISPLAY_RESULT			291
+#define	IMG_UMAC_EVENT_CMD_STATUS					292
 #ifdef TWT_SUPPORT
-	IMG_UMAC_EVENT_CONFIG_TWT,
-	IMG_UMAC_EVENT_TEARDOWN_TWT,
+#define	IMG_UMAC_EVENT_CONFIG_TWT					293
+#define	IMG_UMAC_EVENT_TEARDOWN_TWT					294
 #endif
-};
+
 
 /**
  * enum img_band - Frequency band.
@@ -272,11 +260,9 @@ enum img_umac_events {
  * This enum represents the values that can be used to specify which frequency
  * band is used.
  */
-enum img_band {
-	IMG_BAND_2GHZ,
-	IMG_BAND_5GHZ,
-	IMG_BAND_60GHZ,
-};
+#define	IMG_BAND_2GHZ	0
+#define	IMG_BAND_5GHZ	1
+#define	IMG_BAND_60GHZ	2
 
 /**
  * enum img_mfp - Management frame protection state.
@@ -286,10 +272,8 @@ enum img_band {
  *
  * Enabling/Disabling of Management Frame Protection.
  */
-enum img_mfp {
-	IMG_MFP_NO,
-	IMG_MFP_REQUIRED,
-};
+#define	IMG_MFP_NO			0
+#define	IMG_MFP_REQUIRED	1
 
 /**
  * enum img_key_type - Key Type
@@ -301,13 +285,11 @@ enum img_mfp {
  *
  * Lists the different categories of security keys.
  */
-enum img_key_type {
-	IMG_KEYTYPE_GROUP,
-	IMG_KEYTYPE_PAIRWISE,
-	IMG_KEYTYPE_PEERKEY,
+#define	IMG_KEYTYPE_GROUP		0
+#define	IMG_KEYTYPE_PAIRWISE	1
+#define	IMG_KEYTYPE_PEERKEY		2
 
-	NUM_IMG_KEYTYPES
-};
+#define	NUM_IMG_KEYTYPES		3
 
 /**
  * enum img_auth_type - Authentication Type.
@@ -325,36 +307,32 @@ enum img_key_type {
  *
  * Lists the different types of authentication mechanisms.
  */
-enum img_auth_type {
-	IMG_AUTHTYPE_OPEN_SYSTEM,
-	IMG_AUTHTYPE_SHARED_KEY,
-	IMG_AUTHTYPE_FT,
-	IMG_AUTHTYPE_NETWORK_EAP,
-	IMG_AUTHTYPE_SAE,
+#define	IMG_AUTHTYPE_OPEN_SYSTEM	0
+#define	IMG_AUTHTYPE_SHARED_KEY		1
+#define	IMG_AUTHTYPE_FT				2
+#define	IMG_AUTHTYPE_NETWORK_EAP	3
+#define	IMG_AUTHTYPE_SAE			4
 
 	/* keep last */
-	__IMG_AUTHTYPE_NUM,
-	IMG_AUTHTYPE_MAX = __IMG_AUTHTYPE_NUM - 1,
-	IMG_AUTHTYPE_AUTOMATIC
-};
+#define	__IMG_AUTHTYPE_NUM			5
+#define	IMG_AUTHTYPE_MAX			(__IMG_AUTHTYPE_NUM - 1)
+#define	IMG_AUTHTYPE_AUTOMATIC		6
 
 /**
  * enum img_hidden_ssid - Hidden SSID usage.
  * @IMG_HIDDEN_SSID_NOT_IN_USE: Do not hide SSID (i.e., broadcast it in
- *      Beacon frames).
+ *	Beacon frames).
  * @IMG_HIDDEN_SSID_ZERO_LEN: Hide SSID by using zero-length SSID element
- *      in Beacon frames.
+ *	in Beacon frames.
  * @IMG_HIDDEN_SSID_ZERO_CONTENTS: Hide SSID by using correct length of SSID
- *      element in Beacon frames but zero out each byte in the SSID.
+ *	element in Beacon frames but zero out each byte in the SSID.
  *
  * Enable/Disable Hidden SSID feature and also lists the different mechanisms of
  * hiding the SSIDs.
  */
-enum img_hidden_ssid {
-	IMG_HIDDEN_SSID_NOT_IN_USE,
-	IMG_HIDDEN_SSID_ZERO_LEN,
-	IMG_HIDDEN_SSID_ZERO_CONTENTS
-};
+#define	IMG_HIDDEN_SSID_NOT_IN_USE		0
+#define	IMG_HIDDEN_SSID_ZERO_LEN		1
+#define	IMG_HIDDEN_SSID_ZERO_CONTENTS	2
 
 /**
  * enum img_smps_mode - SMPS mode.
@@ -365,14 +343,12 @@ enum img_hidden_ssid {
  *
  * Requested SMPS mode (for AP mode).
  */
-enum img_smps_mode {
-	IMG_SMPS_OFF,
-	IMG_SMPS_STATIC,
-	IMG_SMPS_DYNAMIC,
+#define	IMG_SMPS_OFF			0
+#define	IMG_SMPS_STATIC			1
+#define	IMG_SMPS_DYNAMIC		2
 
-	__IMG_SMPS_AFTER_LAST,
-	IMG_SMPS_MAX = __IMG_SMPS_AFTER_LAST - 1
-};
+#define	__IMG_SMPS_AFTER_LAST	3
+#define	IMG_SMPS_MAX			(__IMG_SMPS_AFTER_LAST - 1)
 
 /**
  * enum img_bss_status - BSS status.
@@ -386,11 +362,9 @@ enum img_smps_mode {
  * The BSS status is a BSS attribute in scan dumps, which
  * indicates the status the interface has with respect to this BSS.
  */
-enum img_bss_status {
-	IMG_BSS_STATUS_AUTHENTICATED,
-	IMG_BSS_STATUS_ASSOCIATED,
-	IMG_BSS_STATUS_IBSS_JOINED,
-};
+#define	IMG_BSS_STATUS_AUTHENTICATED	0
+#define	IMG_BSS_STATUS_ASSOCIATED		1
+#define	IMG_BSS_STATUS_IBSS_JOINED		2
 
 /**
  * enum img_channel_type - Channel type.
@@ -403,12 +377,10 @@ enum img_bss_status {
  *
  * Lists the different categories of channels.
  */
-enum img_channel_type {
-	IMG_CHAN_NO_HT,
-	IMG_CHAN_HT20,
-	IMG_CHAN_HT40MINUS,
-	IMG_CHAN_HT40PLUS
-};
+#define	IMG_CHAN_NO_HT		0
+#define IMG_CHAN_HT20		1
+#define IMG_CHAN_HT40MINUS	2
+#define IMG_CHAN_HT40PLUS	3
 
 /**
  * enum img_chan_width - Channel width definitions.
@@ -417,28 +389,26 @@ enum img_channel_type {
  * @IMG_CHAN_WIDTH_20_NOHT: 20 MHz, non-HT channel.
  * @IMG_CHAN_WIDTH_20: 20 MHz HT channel.
  * @IMG_CHAN_WIDTH_40: 40 MHz channel, the %IMG_ATTR_CENTER_FREQ1
- *      attribute must be provided as well.
+ *	attribute must be provided as well.
  * @IMG_CHAN_WIDTH_80: 80 MHz channel, the %IMG_ATTR_CENTER_FREQ1
- *      attribute must be provided as well.
+ *	attribute must be provided as well.
  * @IMG_CHAN_WIDTH_80P80: 80+80 MHz channel, the %IMG_ATTR_CENTER_FREQ1
- *      and %IMG_ATTR_CENTER_FREQ2 attributes must be provided as well.
+ *	and %IMG_ATTR_CENTER_FREQ2 attributes must be provided as well.
  * @IMG_CHAN_WIDTH_160: 160 MHz channel, the %IMG_ATTR_CENTER_FREQ1
- *      attribute must be provided as well.
+ *	attribute must be provided as well.
  * @IMG_CHAN_WIDTH_5: 5 MHz OFDM channel.
  * @IMG_CHAN_WIDTH_10: 10 MHz OFDM channel.
  *
  * Lists the different channel widths.
  */
-enum img_chan_width {
-	IMG_CHAN_WIDTH_20_NOHT,
-	IMG_CHAN_WIDTH_20,
-	IMG_CHAN_WIDTH_40,
-	IMG_CHAN_WIDTH_80,
-	IMG_CHAN_WIDTH_80P80,
-	IMG_CHAN_WIDTH_160,
-	IMG_CHAN_WIDTH_5,
-	IMG_CHAN_WIDTH_10,
-};
+#define	IMG_CHAN_WIDTH_20_NOHT	0
+#define IMG_CHAN_WIDTH_20		1
+#define IMG_CHAN_WIDTH_40		2
+#define IMG_CHAN_WIDTH_80		3
+#define	IMG_CHAN_WIDTH_80P80	4
+#define IMG_CHAN_WIDTH_160		5
+#define IMG_CHAN_WIDTH_5		6
+#define IMG_CHAN_WIDTH_10		7
 
 /**
  * enum img_iftype - Interface types based on functionality.
@@ -456,65 +426,43 @@ enum img_chan_width {
  * @IMG_IFTYPE_P2P_CLIENT: P2P client.
  * @IMG_IFTYPE_P2P_GO: P2P group owner.
  * @IMG_IFTYPE_P2P_DEVICE: P2P device interface type, this is not a netdev
- *      and therefore can't be created in the normal ways, use the
- *      %IMG_UMAC_CMD_START_P2P_DEVICE and %IMG_UMAC_CMD_STOP_P2P_DEVICE
- *      commands (Refer &enum img_umac_commands) to create and destroy one.
+ *	and therefore can't be created in the normal ways, use the
+ *	%IMG_UMAC_CMD_START_P2P_DEVICE and %IMG_UMAC_CMD_STOP_P2P_DEVICE
+ *	commands (Refer &enum img_umac_commands) to create and destroy one.
  * @IMG_IFTYPE_OCB: Outside Context of a BSS.
- *      This mode corresponds to the MIB variable dot11OCBActivated=true.
+ *	This mode corresponds to the MIB variable dot11OCBActivated=true.
  * @IMG_IFTYPE_MAX: Highest interface type number currently defined.
  * @NUM_IMG_IFTYPES: Number of defined interface types.
  *
  * Lists the different interface types based on how they are configured
  * functionally.
  */
-enum img_iftype {
-	IMG_IFTYPE_UNSPECIFIED,
-	IMG_IFTYPE_ADHOC,
-	IMG_IFTYPE_STATION,
-	IMG_IFTYPE_AP,
-	IMG_IFTYPE_AP_VLAN,
-	IMG_IFTYPE_WDS,
-	IMG_IFTYPE_MONITOR,
-	IMG_IFTYPE_MESH_POINT,
-	IMG_IFTYPE_P2P_CLIENT,
-	IMG_IFTYPE_P2P_GO,
-	IMG_IFTYPE_P2P_DEVICE,
-	IMG_IFTYPE_OCB,
+#define	IMG_IFTYPE_UNSPECIFIED		0
+#define IMG_IFTYPE_ADHOC			1
+#define IMG_IFTYPE_STATION			2
+#define IMG_IFTYPE_AP				3
+#define	IMG_IFTYPE_AP_VLAN			4
+#define IMG_IFTYPE_WDS				5
+#define IMG_IFTYPE_MONITOR			6
+#define IMG_IFTYPE_MESH_POINT		7
+#define	IMG_IFTYPE_P2P_CLIENT		8
+#define IMG_IFTYPE_P2P_GO			9
+#define IMG_IFTYPE_P2P_DEVICE		10
+#define IMG_IFTYPE_OCB				11
 
-	/* keep last */
-	NUM_IMG_IFTYPES,
-	IMG_IFTYPE_MAX = NUM_IMG_IFTYPES - 1
-};
+/* keep last */
+#define	NUM_IMG_IFTYPES				12
+#define	IMG_IFTYPE_MAX				(NUM_IMG_IFTYPES - 1)
 
 /**
  * enum img_ps_state - powersave state
  * @IMG_PS_DISABLED: powersave is disabled
  * @IMG_PS_ENABLED: powersave is enabled
  */
-enum img_ps_state {
-	IMG_PS_DISABLED,
-	IMG_PS_ENABLED,
-};
+#define IMG_PS_DISABLED	0
+#define IMG_PS_ENABLED	1
 
-/**
- * enum img_wlan_protocol - WLAN protocol type
- * @IMG_802_11A: 11a
- * @IMG_802_11B: 11b
- * @IMG_802_11G: 11g
- * @IMG_802_11N: 11n
- * @IMG_802_11AC: 11ac
- * @IMG_802_11AX: 11ax
- */
-enum img_wlan_protocol {
-	IMG_802_11A,
-	IMG_802_11B,
-	IMG_802_11G,
-	IMG_802_11N,
-	IMG_802_11AC,
-	IMG_802_11AX,
-};
-
-/* Will add additional info if required */
+/*Will add additional info if required*/
 /**
  * enum img_security_type - WLAN security type
  * @IMG_WEP: WEP
@@ -523,37 +471,34 @@ enum img_wlan_protocol {
  * @IMG_WPA3: WPA3
  * @IMG_WAPI: WAPI
  */
-enum img_security_type {
-	IMG_OPEN,
-	IMG_WEP,
-	IMG_WPA,
-	IMG_WPA2,
-	IMG_WPA3,
-	IMG_WAPI,
-};
+#define IMG_OPEN	0
+#define IMG_WEP		1
+#define IMG_WPA		2
+#define IMG_WPA2	3
+#define IMG_WPA3	4
+#define IMG_WAPI	5
+#define IMG_EAP		6
 
 /**
  * enum img_reg_initiator - Indicates the initiator of a reg domain request
  * @NL80211_REGDOM_SET_BY_CORE: Core queried CRDA for a dynamic world
- *	regulatory domain.
+ * regulatory domain.
  * @NL80211_REGDOM_SET_BY_USER: User asked the wireless core to set the
- *	regulatory domain.
+ * regulatory domain.
  * @NL80211_REGDOM_SET_BY_DRIVER: a wireless drivers has hinted to the
- *	wireless core it thinks its knows the regulatory domain we should be in.
+ * wireless core it thinks its knows the regulatory domain we should be in.
  * @NL80211_REGDOM_SET_BY_COUNTRY_IE: the wireless core has received an
- *	802.11 country information element with regulatory information it
- *	thinks we should consider. cfg80211 only processes the country
+ * 802.11 country information element with regulatory information it
+ * thinks we should consider. cfg80211 only processes the country
  *	code from the IE, and relies on the regulatory domain information
  *	structure passed by userspace (CRDA) from our wireless-regdb.
  *	If a channel is enabled but the country code indicates it should
  *	be disabled we disable the channel and re-enable it upon disassociation.
  */
-enum img_regulatory_initiator {
-	IMG_REGDOM_SET_BY_CORE,
-	IMG_REGDOM_SET_BY_USER,
-	IMG_REGDOM_SET_BY_DRIVER,
-	IMG_REGDOM_SET_BY_COUNTRY_IE,
-};
+#define IMG_REGDOM_SET_BY_CORE			0
+#define IMG_REGDOM_SET_BY_USER			1
+#define IMG_REGDOM_SET_BY_DRIVER		2
+#define IMG_REGDOM_SET_BY_COUNTRY_IE	3
 
 /**
  * enum img_reg_type - specifies the type of regulatory domain
@@ -561,22 +506,20 @@ enum img_regulatory_initiator {
  *	to a specific country. When this is set you can count on the
  *	ISO / IEC 3166 alpha2 country code being valid.
  * @NL80211_REGDOM_TYPE_WORLD: the regulatory set domain is the world regulatory
- *	domain.
+ * domain.
  * @NL80211_REGDOM_TYPE_CUSTOM_WORLD: the regulatory domain set is a custom
- *	driver specific world regulatory domain. These do not apply system-wide
- *	and are only applicable to the individual devices which have requested
- *	them to be applied.
+ * driver specific world regulatory domain. These do not apply system-wide
+ * and are only applicable to the individual devices which have requested
+ * them to be applied.
  * @NL80211_REGDOM_TYPE_INTERSECTION: the regulatory domain set is the product
  *	of an intersection between two regulatory domains -- the previously
  *	set regulatory domain on the system and the last accepted regulatory
  *	domain request to be processed.
  */
-enum img_reg_type {
-	IMG_REGDOM_TYPE_COUNTRY,
-	IMG_REGDOM_TYPE_WORLD,
-	IMG_REGDOM_TYPE_CUSTOM_WORLD,
-	IMG_REGDOM_TYPE_INTERSECTION,
-};
+#define IMG_REGDOM_TYPE_COUNTRY			0
+#define IMG_REGDOM_TYPE_WORLD			1
+#define IMG_REGDOM_TYPE_CUSTOM_WORLD	2
+#define IMG_REGDOM_TYPE_INTERSECTION	3
 
 
 #define IMG_MAX_SSID_LEN 32
@@ -590,11 +533,11 @@ enum img_reg_type {
  * used by the @scan_common parameter in &struct img_umac_cmd_scan.
  */
 
-PACK(
+
 struct img_ssid {
 	unsigned char	img_ssid_len;
 	unsigned char	img_ssid[IMG_MAX_SSID_LEN];
-});
+} __IMG_PKD;
 
 #define IMG_MAX_IE_LEN	400
 
@@ -605,12 +548,12 @@ struct img_ssid {
  *
  * This structure describes the Information element(s) data being passed.
  */
-PACK(
+
 struct img_ie {
 
 	unsigned short ie_len;
 	char	ie[IMG_MAX_IE_LEN];
-});
+} __IMG_PKD;
 
 
 #define IMG_MAX_SEQ_LENGTH 256
@@ -624,12 +567,12 @@ struct img_ie {
  * in little endian.
  */
 
-PACK(
+
 struct img_seq {
 
 	int		img_seq_len;
 	unsigned char	img_seq[IMG_MAX_SEQ_LENGTH];
-});
+} __IMG_PKD;
 
 #define IMG_MAX_KEY_LENGTH 256
 
@@ -641,11 +584,11 @@ struct img_seq {
  *
  * This structure represents a security key data.
  */
-PACK(
+
 struct img_key {
 	unsigned int		img_key_len;
 	unsigned char	img_key[IMG_MAX_KEY_LENGTH];
-});
+} __IMG_PKD;
 
 #define IMG_MAX_SAE_DATA_LENGTH	256
 
@@ -658,11 +601,11 @@ struct img_key {
  * This structure represents SAE elements in Authentication frames.
  *
  */
-PACK(
+
 struct img_sae {
 	int		sae_data_len;
 	unsigned char	sae_data[IMG_MAX_SAE_DATA_LENGTH];
-});
+} __IMG_PKD;
 
 #define IMG_MAX_FRAME_LEN 400
 
@@ -674,11 +617,11 @@ struct img_sae {
  *
  * This structure describes a frame being passed.
  */
-PACK(
+
 struct img_frame {
 	int	frame_len;
 	char	frame[IMG_MAX_FRAME_LEN];
-});
+} __IMG_PKD;
 
 
 #define IMG_INDEX_IDS_WDEV_ID_VALID	(1 << 0)
@@ -696,13 +639,13 @@ struct img_frame {
  * Command header expected by UMAC. Legacy header in place to handle requests
  * from supplicant in RPU.
  */
-PACK(
+
 struct img_index_ids {
 	unsigned int valid_fields;
 	int ifaceindex;
 	int img_wiphy_idx;
 	unsigned long long wdev_id;
-});
+} __IMG_PKD;
 
 #define IMG_SUPP_RATES_BAND_VALID	(1 << 0)
 #define IMG_MAX_SUPP_RATES		60
@@ -723,13 +666,13 @@ struct img_index_ids {
  * %IMG_UMAC_CMD_TRIGGER_SCAN command (Refer &enum img_umac_commands).
  *
  */
-PACK(
+
 struct img_supp_rates {
 	unsigned int valid_fields;
-	unsigned int band;
+	int band;
 	int img_num_rates;
 	unsigned char rates[IMG_MAX_SUPP_RATES];
-});
+} __IMG_PKD;
 
 /**
  * struct img_channel - channel definition
@@ -752,9 +695,9 @@ struct img_supp_rates {
  * @img_orig_mpwr: internal use
  */
 
-PACK(
+
 struct img_channel {
-	unsigned int band;
+	int band;
 	unsigned short center_frequency;
 	unsigned short hw_value;
 	unsigned short img_flags;
@@ -765,7 +708,7 @@ struct img_channel {
 	unsigned int img_orig_flags;
 	int img_orig_mag;
 	int img_orig_mpwr;
-});
+} __IMG_PKD;
 
 
 #define IMG_SCAN_PARAMS_2GHZ_BAND_VALID		(1 << 0)
@@ -776,9 +719,58 @@ struct img_channel {
 #define IMG_SCAN_PARAMS_SCAN_FLAGS_VALID	(1 << 5)
 #define IMG_SCAN_PARAMS_SUPPORTED_RATES_VALID	(1 << 6)
 
-#define IMG_SCAN_MAX_NUM_SSIDS			16
+#define IMG_SCAN_MAX_NUM_SSIDS			2
 #define IMG_SCAN_MAX_NUM_FREQUENCIES		64
 #define MAX_NUM_CHANNELS			39
+
+/**
+ * scan_flags -	scan request control flags
+ *
+ * Scan request control flags are used to control the handling
+ * of CMD_TRIGGER_SCAN request.
+ *
+ * @#define IMG_SCAN_FLAG_LOW_PRIORITY: scan request has low priority
+ * @#define IMG_SCAN_FLAG_FLUSH: flush cache before scanning
+ * @#define IMG_SCAN_FLAG_AP: force a scan even if the interface is configured
+ *	as AP and the beaconing has already been configured. This attribute is
+ *	dangerous because will destroy stations performance as a lot of frames
+ *	will be lost while scanning off-channel, therefore it must be used only
+ *	when really needed
+ * @#define IMG_SCAN_FLAG_RANDOM_ADDR: use a random MAC address for this scan (or
+ *	for scheduled scan: a different one for every scan iteration). When the
+ *	flag is set, depending on device capabilities the @MAC and
+ *	@MAC_MASK attributes may also be given in which case only
+ *	the masked bits will be preserved from the MAC address and the remainder
+ *	randomised. If the attributes are not given full randomisation (46 bits,
+ *	locally administered 1, multicast 0) is assumed.
+ *	This flag must not be requested when the feature isn't supported, check
+ *	the nl80211 feature flags for the device.
+ * @#define IMG_SCAN_FLAG_FILS_MAX_CHANNEL_TIME: fill the dwell time in the FILS
+ *	request parameters IE in the probe request
+ * @#define IMG_SCAN_FLAG_ACCEPT_BCAST_PROBE_RESP: accept broadcast probe responses
+ * @#define IMG_SCAN_FLAG_OCE_PROBE_REQ_HIGH_TX_RATE: send probe request frames at
+ *	rate of at least 5.5M. In case non OCE AP is dicovered in the channel,
+ *	only the first probe req in the channel will be sent in high rate.
+ * @#define IMG_SCAN_FLAG_OCE_PROBE_REQ_DEFERRAL_SUPPRESSION: allow probe request
+ *	tx deferral (dot11FILSProbeDelay shall be set to 15ms)
+ *	and suppression (if it has received a broadcast Probe Response frame,
+ *	Beacon frame or FILS Discovery frame from an AP that the STA considers
+ *	a suitable candidate for (re-)association - suitable in terms of
+ *	SSID and/or RSSI
+ */
+#define	IMG_SCAN_FLAG_LOW_PRIORITY							(1<<0)
+#define IMG_SCAN_FLAG_FLUSH									(1<<1)
+#define IMG_SCAN_FLAG_AP									(1<<2)
+#define IMG_SCAN_FLAG_RANDOM_ADDR							(1<<3)
+#define IMG_SCAN_FLAG_FILS_MAX_CHANNEL_TIME					(1<<4)
+#define IMG_SCAN_FLAG_ACCEPT_BCAST_PROBE_RESP				(1<<5)
+#define IMG_SCAN_FLAG_OCE_PROBE_REQ_HIGH_TX_RATE			(1<<6)
+#define IMG_SCAN_FLAG_OCE_PROBE_REQ_DEFERRAL_SUPPRESSION	(1<<7)
+#define IMG_SCAN_FLAG_LOW_SPAN								(1<<8)
+#define IMG_SCAN_FLAG_LOW_POWER								(1<<9)
+#define IMG_SCAN_FLAG_HIGH_ACCURACY							(1<<10)
+#define IMG_SCAN_FLAG_RANDOM_SN								(1<<11)
+#define IMG_SCAN_FLAG_MIN_PREQ_CONTENT						(1<<12)
 
 /**
  * struct img_scan_params - Scan request parameters.
@@ -792,7 +784,7 @@ struct img_channel {
  * @scan_frequencies: Channel information.
  * @mac_addr: MAC address (various uses).
  * @mac_addr_mask: MAC address mask.
- * @scan_flags: Scan request control flags (u32).
+ * @scan_flags: Scan request control flags (u32). Bit values(IMG_SCAN_FLAG_LOW_PRIORITY/IMG_SCAN_FLAG_RANDOM_ADDR...)
  * @supp_rates: Supported rates.
  * @no_cck: used to send probe requests at non CCK rate in 2GHz band
  * @oper_ch__duration: Operating channel duration when STA is connected to AP
@@ -802,7 +794,7 @@ struct img_channel {
  * This structure specifies the parameters to be used when sending
  * %IMG_UMAC_CMD_TRIGGER_SCAN command (Refer &enum img_umac_commands).
  */
-PACK(
+
 struct img_scan_params {
 	unsigned int valid_fields;
 	unsigned char num_scan_ssids;
@@ -814,11 +806,11 @@ struct img_scan_params {
 	unsigned char mac_addr[IMG_ETH_ALEN];
 	unsigned char mac_addr_mask[IMG_ETH_ALEN];
 	unsigned char no_cck;
-	unsigned short  oper_ch_duration;
-	unsigned short  scan_duration[MAX_NUM_CHANNELS];
-	unsigned char  probe_cnt[MAX_NUM_CHANNELS];
+	unsigned short	oper_ch_duration;
+	unsigned short	scan_duration[MAX_NUM_CHANNELS];
+	unsigned char	probe_cnt[MAX_NUM_CHANNELS];
 	struct img_channel channels[0];
-});
+} __IMG_PKD;
 
 #define IMG_HT_CAPABILITY_VALID			(1 << 0)
 #define IMG_HT_CAPABILITY_MASK_VALID		(1 << 1)
@@ -849,15 +841,16 @@ struct img_scan_params {
  *
  * This structure encapsulates the VHT capability information.
  */
-PACK(
+
 struct img_ht_vht_capabilities {
+
 	unsigned int valid_fields;
 	unsigned short img_flags;
 	unsigned char ht_capability[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
 	unsigned char ht_capability_mask[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
 	unsigned char vht_capability[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
 	unsigned char vht_capability_mask[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
-});
+} __IMG_PKD;
 
 #define IMG_SIGNAL_TYPE_NONE	1
 #define IMG_SIGNAL_TYPE_MBM	2
@@ -875,35 +868,37 @@ struct img_ht_vht_capabilities {
  *
  * This structure represents signal information.
  */
-PACK(
+
 struct img_signal {
 	unsigned int		signal_type;
 
-	PACK(
 	union {
 		unsigned int	mbm_signal;
 		unsigned char	unspec_signal;
-	}) signal;
-});
+	} __IMG_PKD signal;
+} __IMG_PKD;
+#define IMG_WPA_VERSION_1	(1 << 0)
+#define IMG_WPA_VERSION_2	(1 << 1)
 
-#define IMG_CONNECT_COMMON_INFO_MAC_ADDR_VALID		(1 << 0)
-#define IMG_CONNECT_COMMON_INFO_MAC_ADDR_HINT_VALID	(1 << 1)
-#define IMG_CONNECT_COMMON_INFO_FREQ_VALID		(1 << 2)
-#define IMG_CONNECT_COMMON_INFO_FREQ_HINT_VALID		(1 << 3)
-#define IMG_CONNECT_COMMON_INFO_BG_SCAN_PERIOD_VALID	(1 << 4)
-#define IMG_CONNECT_COMMON_INFO_SSID_VALID		(1 << 5)
-#define IMG_CONNECT_COMMON_INFO_WPA_IE_VALID		(1 << 6)
-#define IMG_CONNECT_COMMON_INFO_WPA_VERSIONS_VALID	(1 << 7)
+
+#define IMG_CONNECT_COMMON_INFO_MAC_ADDR_VALID					(1 << 0)
+#define IMG_CONNECT_COMMON_INFO_MAC_ADDR_HINT_VALID				(1 << 1)
+#define IMG_CONNECT_COMMON_INFO_FREQ_VALID						(1 << 2)
+#define IMG_CONNECT_COMMON_INFO_FREQ_HINT_VALID					(1 << 3)
+#define IMG_CONNECT_COMMON_INFO_BG_SCAN_PERIOD_VALID			(1 << 4)
+#define IMG_CONNECT_COMMON_INFO_SSID_VALID						(1 << 5)
+#define IMG_CONNECT_COMMON_INFO_WPA_IE_VALID					(1 << 6)
+#define IMG_CONNECT_COMMON_INFO_WPA_VERSIONS_VALID				(1 << 7)
 #define IMG_CONNECT_COMMON_INFO_CIPHER_SUITES_PAIRWISE_VALID	(1 << 8)
-#define IMG_CONNECT_COMMON_INFO_CIPHER_SUITE_GROUP_VALID	(1 << 9)
-#define IMG_CONNECT_COMMON_INFO_AKM_SUITES_VALID	(1 << 10)
-#define IMG_CONNECT_COMMON_INFO_USE_MFP_VALID		(1 << 11)
-#define IMG_CONNECT_COMMON_INFO_CONTROL_PORT_ETHER_TYPE  (1 << 12)
-#define IMG_CONNECT_COMMON_INFO_CONTROL_PORT_NO_ENCRYPT  (1 << 13)
+#define IMG_CONNECT_COMMON_INFO_CIPHER_SUITE_GROUP_VALID		(1 << 9)
+#define IMG_CONNECT_COMMON_INFO_AKM_SUITES_VALID				(1 << 10)
+#define IMG_CONNECT_COMMON_INFO_USE_MFP_VALID					(1 << 11)
+#define IMG_CONNECT_COMMON_INFO_CONTROL_PORT_ETHER_TYPE			(1 << 12)
+#define IMG_CONNECT_COMMON_INFO_CONTROL_PORT_NO_ENCRYPT			(1 << 13)
 
-#define IMG_MAX_NR_AKM_SUITES 2
+#define IMG_MAX_NR_AKM_SUITES	2
 
-#define IMG_CMD_CONNECT_COMMON_INFO_USE_RRM		(0 << 1)
+#define IMG_CMD_CONNECT_COMMON_INFO_USE_RRM						(0 << 1)
 
 /**
  * struct img_connect_common_info - Connection properties.
@@ -959,8 +954,9 @@ struct img_signal {
  * connect_common_info when sending %IMG_UMAC_CMD_ASSOCIATE command (Refer
  * &enum img_umac_commands).
  */
-PACK(
+
 struct img_connect_common_info {
+
 	unsigned int			valid_fields;
 	unsigned int			frequency;
 	unsigned int			freq_hint;
@@ -970,7 +966,7 @@ struct img_connect_common_info {
 	unsigned int			cipher_suite_group;
 	unsigned int			num_akm_suites;
 	unsigned int			akm_suites[IMG_MAX_NR_AKM_SUITES];
-	unsigned int			use_mfp;
+	int use_mfp;
 
 	unsigned int			img_flags;
 	unsigned short			bg_scan_period;
@@ -981,13 +977,13 @@ struct img_connect_common_info {
 	struct img_ht_vht_capabilities	ht_vht_capabilities;
 	unsigned short			control_port_ether_type;
 	unsigned char			control_port_no_encrypt;
-	char				control_port;
+	char					control_port;
 
-});
+} __IMG_PKD;
 
-#define IMG_BEACON_DATA_MAX_HEAD_LEN                    256
-#define IMG_BEACON_DATA_MAX_TAIL_LEN                    512
-#define IMG_BEACON_DATA_MAX_PROBE_RESP_LEN              400
+#define IMG_BEACON_DATA_MAX_HEAD_LEN			256
+#define IMG_BEACON_DATA_MAX_TAIL_LEN			512
+#define IMG_BEACON_DATA_MAX_PROBE_RESP_LEN		400
 
 /**
  * struct img_beacon_data - beacon & probe data
@@ -998,15 +994,16 @@ struct img_connect_common_info {
  * @tail: tail portion of beacon (after TIM IE) or %NULL if not changed
  * @probe_resp: probe response template
  */
-PACK(
+
 struct img_beacon_data {
+
 	unsigned int	head_len;
 	unsigned int	tail_len;
 	unsigned int	probe_resp_len;
 	unsigned char	head[IMG_BEACON_DATA_MAX_HEAD_LEN];
 	unsigned char	tail[IMG_BEACON_DATA_MAX_TAIL_LEN];
 	unsigned char	probe_resp[IMG_BEACON_DATA_MAX_PROBE_RESP_LEN];
-});
+} __IMG_PKD;
 
 /*
  * struct img_sta_flag_update - Station flags mask/set.
@@ -1015,25 +1012,26 @@ struct img_beacon_data {
  *
  * Both mask and set contain bits as per &enum img_sta_flags.
  */
-PACK(
+
 struct img_sta_flag_update {
+
 	unsigned int img_mask;
 	unsigned int img_set;
-});
+} __IMG_PKD;
 
-#define IMG_IMG_RATE_INFO_BITRATE_VALID			(1 << 0)
-#define IMG_IMG_RATE_INFO_BITRATE_COMPAT_VALID		(1 << 1)
-#define IMG_IMG_RATE_INFO_BITRATE_MCS_VALID			(1 << 2)
-#define IMG_IMG_RATE_INFO_BITRATE_VHT_MCS_VALID		(1 << 3)
-#define IMG_IMG_RATE_INFO_BITRATE_VHT_NSS_VALID		(1 << 4)
-#define IMG_IMG_RATE_INFO_0_MHZ_WIDTH                           (1 << 0)
-#define IMG_IMG_RATE_INFO_5_MHZ_WIDTH                           (1 << 1)
-#define IMG_IMG_RATE_INFO_10_MHZ_WIDTH                          (1 << 2)
-#define IMG_IMG_RATE_INFO_40_MHZ_WIDTH                          (1 << 3)
-#define IMG_IMG_RATE_INFO_80_MHZ_WIDTH                          (1 << 4)
-#define IMG_IMG_RATE_INFO_160_MHZ_WIDTH                         (1 << 5)
-#define IMG_IMG_RATE_INFO_SHORT_GI                              (1 << 6)
-#define IMG_IMG_RATE_INFO_80P80_MHZ_WIDTH                       (1 << 7)
+#define IMG_IMG_RATE_INFO_BITRATE_VALID							(1 << 0)
+#define IMG_IMG_RATE_INFO_BITRATE_COMPAT_VALID					(1 << 1)
+#define IMG_IMG_RATE_INFO_BITRATE_MCS_VALID						(1 << 2)
+#define IMG_IMG_RATE_INFO_BITRATE_VHT_MCS_VALID					(1 << 3)
+#define IMG_IMG_RATE_INFO_BITRATE_VHT_NSS_VALID					(1 << 4)
+#define IMG_IMG_RATE_INFO_0_MHZ_WIDTH							(1 << 0)
+#define IMG_IMG_RATE_INFO_5_MHZ_WIDTH							(1 << 1)
+#define IMG_IMG_RATE_INFO_10_MHZ_WIDTH							(1 << 2)
+#define IMG_IMG_RATE_INFO_40_MHZ_WIDTH							(1 << 3)
+#define IMG_IMG_RATE_INFO_80_MHZ_WIDTH							(1 << 4)
+#define IMG_IMG_RATE_INFO_160_MHZ_WIDTH							(1 << 5)
+#define IMG_IMG_RATE_INFO_SHORT_GI								(1 << 6)
+#define IMG_IMG_RATE_INFO_80P80_MHZ_WIDTH						(1 << 7)
 
 /*
  * struct img_rate_info - Rate information.
@@ -1047,8 +1045,9 @@ struct img_sta_flag_update {
  *
  * Both mask and set contain bits as per &enum img_sta_flags.
  */
-PACK(
+
 struct img_rate_info {
+
 	unsigned int	valid_fields;
 	unsigned int	bitrate;
 	unsigned short	bitrate_compat;
@@ -1057,7 +1056,7 @@ struct img_rate_info {
 	unsigned char	vht_nss;
 	unsigned int	img_flags;
 
-});
+} __IMG_PKD;
 
 /*
  * struct img_sta_bss_parameters - BSS parameters for the attached station
@@ -1066,43 +1065,43 @@ struct img_rate_info {
  * @dtim_period: DTIM period for the BSS
  * @beacon_interval: beacon interval
  */
-PACK(
+
 struct img_sta_bss_parameters {
 	unsigned char	img_flags;
 	unsigned char	dtim_period;
 	unsigned short	beacon_interval;
-});
+} __IMG_PKD;
 
-#define IMG_STA_INFO_CONNECTED_TIME_VALID                   (1 << 0)
-#define IMG_STA_INFO_INACTIVE_TIME_VALID                    (1 << 1)
-#define IMG_STA_INFO_RX_BYTES_VALID                         (1 << 2)
-#define IMG_STA_INFO_TX_BYTES_VALID			(1 << 3)
-#define IMG_STA_INFO_CHAIN_SIGNAL_VALID                     (1 << 4)
-#define IMG_STA_INFO_CHAIN_SIGNAL_AVG_VALID                 (1 << 5)
-#define IMG_STA_INFO_TX_BITRATE_VALID                       (1 << 6)
-#define IMG_STA_INFO_RX_BITRATE_VALID                       (1 << 7)
-#define IMG_STA_INFO_STA_FLAGS_VALID                        (1 << 8)
+#define IMG_STA_INFO_CONNECTED_TIME_VALID					(1 << 0)
+#define IMG_STA_INFO_INACTIVE_TIME_VALID					(1 << 1)
+#define IMG_STA_INFO_RX_BYTES_VALID							(1 << 2)
+#define IMG_STA_INFO_TX_BYTES_VALID							(1 << 3)
+#define IMG_STA_INFO_CHAIN_SIGNAL_VALID						(1 << 4)
+#define IMG_STA_INFO_CHAIN_SIGNAL_AVG_VALID					(1 << 5)
+#define IMG_STA_INFO_TX_BITRATE_VALID						(1 << 6)
+#define IMG_STA_INFO_RX_BITRATE_VALID						(1 << 7)
+#define IMG_STA_INFO_STA_FLAGS_VALID						(1 << 8)
 
-#define IMG_STA_INFO_LLID_VALID                             (1 << 9)
-#define IMG_STA_INFO_PLID_VALID                             (1 << 10)
-#define IMG_STA_INFO_PLINK_STATE_VALID                      (1 << 11)
-#define IMG_STA_INFO_SIGNAL_VALID                           (1 << 12)
-#define IMG_STA_INFO_SIGNAL_AVG_VALID                       (1 << 13)
-#define IMG_STA_INFO_RX_PACKETS_VALID                       (1 << 14)
-#define IMG_STA_INFO_TX_PACKETS_VALID                       (1 << 15)
-#define IMG_STA_INFO_TX_RETRIES_VALID                       (1 << 16)
-#define IMG_STA_INFO_TX_FAILED_VALID                        (1 << 17)
-#define IMG_STA_INFO_EXPECTED_THROUGHPUT_VALID              (1 << 18)
-#define IMG_STA_INFO_BEACON_LOSS_COUNT_VALID                (1 << 19)
-#define IMG_STA_INFO_LOCAL_PM_VALID                         (1 << 20)
-#define IMG_STA_INFO_PEER_PM_VALID                          (1 << 21)
-#define IMG_STA_INFO_NONPEER_PM_VALID                       (1 << 22)
-#define IMG_STA_INFO_T_OFFSET_VALID                         (1 << 23)
-#define IMG_STA_INFO_RX_DROPPED_MISC_VALID                  (1 << 24)
-#define IMG_STA_INFO_RX_BEACON_VALID                        (1 << 25)
-#define IMG_STA_INFO_RX_BEACON_SIGNAL_AVG_VALID             (1 << 26)
-#define IMG_STA_INFO_STA_BSS_PARAMS_VALID				(1 << 27)
-#define IMG_IEEE80211_MAX_CHAINS    4
+#define IMG_STA_INFO_LLID_VALID								(1 << 9)
+#define IMG_STA_INFO_PLID_VALID								(1 << 10)
+#define IMG_STA_INFO_PLINK_STATE_VALID						(1 << 11)
+#define IMG_STA_INFO_SIGNAL_VALID							(1 << 12)
+#define IMG_STA_INFO_SIGNAL_AVG_VALID						(1 << 13)
+#define IMG_STA_INFO_RX_PACKETS_VALID						(1 << 14)
+#define IMG_STA_INFO_TX_PACKETS_VALID						(1 << 15)
+#define IMG_STA_INFO_TX_RETRIES_VALID						(1 << 16)
+#define IMG_STA_INFO_TX_FAILED_VALID						(1 << 17)
+#define IMG_STA_INFO_EXPECTED_THROUGHPUT_VALID				(1 << 18)
+#define IMG_STA_INFO_BEACON_LOSS_COUNT_VALID				(1 << 19)
+#define IMG_STA_INFO_LOCAL_PM_VALID							(1 << 20)
+#define IMG_STA_INFO_PEER_PM_VALID							(1 << 21)
+#define IMG_STA_INFO_NONPEER_PM_VALID						(1 << 22)
+#define IMG_STA_INFO_T_OFFSET_VALID							(1 << 23)
+#define IMG_STA_INFO_RX_DROPPED_MISC_VALID					(1 << 24)
+#define IMG_STA_INFO_RX_BEACON_VALID						(1 << 25)
+#define IMG_STA_INFO_RX_BEACON_SIGNAL_AVG_VALID				(1 << 26)
+#define IMG_STA_INFO_STA_BSS_PARAMS_VALID					(1 << 27)
+#define IMG_IEEE80211_MAX_CHAINS	4
 
 /*
  * struct img_sta_info - STA information.
@@ -1127,7 +1126,7 @@ struct img_sta_bss_parameters {
  * @tx_retries: total retries to this station.
  * @tx_failed: total failed packets to this station.
  * @expected_throughput: expected throughput considering also the mac80211
- *                       header, in kbps.
+ *	header, in kbps.
  * @beacon_loss_count: count of times beacon loss was detected.
  * @local_pm: Not used.
  * @peer_pm: Not used.
@@ -1139,7 +1138,7 @@ struct img_sta_bss_parameters {
  * @rx_beacon_signal_avg: average of beacon signal.
  * @bss_param: Station connected BSS params
  */
-PACK(
+
 struct img_sta_info {
 	unsigned int	valid_fields;
 	unsigned int	connected_time;
@@ -1155,8 +1154,8 @@ struct img_sta_info {
 	unsigned short	llid;
 	unsigned short	plid;
 	unsigned char	plink_state;
-	unsigned char	signal;
-	unsigned char	signal_avg;
+	int	signal;
+	int	signal_avg;
 	unsigned int	rx_packets;
 	unsigned int	tx_packets;
 	unsigned int	tx_retries;
@@ -1170,20 +1169,20 @@ struct img_sta_info {
 	unsigned long long	t_offset;
 	unsigned long long	rx_dropped_misc;
 	unsigned long long	rx_beacon;
-	unsigned long long	rx_beacon_signal_avg;
+	long long	rx_beacon_signal_avg;
 	struct img_sta_bss_parameters	bss_param;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_hdr - Common command/event header.
  *
- * @cmd_evnt: UMAC command/event value. (Refer  &enum img_umac_commands).
+ * @cmd_evnt: UMAC command/event value. (Refer	&enum img_umac_commands).
  * @ids: Interface properties.
  *
  * Command header expected by UMAC. Legacy header in place to handle requests
  * from supplicant in RPU.
  */
-PACK(
+
 struct img_umac_hdr {
 	/* private: presently unused */
 	unsigned int		portid;
@@ -1195,7 +1194,7 @@ struct img_umac_hdr {
 	int			rpu_ret_val;
 	/* public: */
 	struct img_index_ids	ids;
-});
+} __IMG_PKD;
 
 
 #define IMG_KEY_VALID			(1 << 0)
@@ -1215,7 +1214,7 @@ struct img_umac_hdr {
  *
  * @valid_fields: Indicate which of the following parameters are valid.
  * @key: Key data, see &struct img_key.
- * @key_type: Key Type,  see &enum img_key_type
+ * @key_type: Key Type,	see &enum img_key_type
  * @key_idx: Key ID (0-3).
  * @seq: Transmit key sequence number (IV/PN) for TKIP and
  *	CCMP keys, each six bytes in little endian.
@@ -1226,35 +1225,35 @@ struct img_umac_hdr {
  *
  * This structure represents a security key.
  */
-PACK(
+
 struct img_umac_key_info {
 	unsigned int valid_fields;
 	unsigned int cipher_suite;
 	unsigned short img_flags;
-	unsigned int key_type;
+	int key_type;
 	struct img_key key;
 	struct img_seq seq;
 	unsigned char key_idx;
-});
+} __IMG_PKD;
 
-#define IMG_CMD_GET_KEY_MAC_ADDR_VALID                  (1 << 0)
-#define IMG_CMD_GET_KEY_KEY_IDX_VALID                   (1 << 1)
-PACK(
+#define IMG_CMD_GET_KEY_MAC_ADDR_VALID	(1 << 0)
+#define IMG_CMD_GET_KEY_KEY_IDX_VALID	(1 << 1)
+
 struct img_umac_cmd_get_key {
 	struct img_umac_hdr		umac_hdr;
 	unsigned int		valid_fields;
 	unsigned char		mac_addr[IMG_ETH_ALEN];
 	unsigned char		key_idx;
-});
+} __IMG_PKD;
 
-#define IMG_EVENT_GET_KEY_MAC_ADDR_VALID               (1 << 0)
-PACK(
+#define IMG_EVENT_GET_KEY_MAC_ADDR_VALID	(1 << 0)
+
 struct img_umac_event_get_key {
-	struct img_umac_hdr		umac_hdr;
-	unsigned int                valid_fields;
+	struct img_umac_hdr			umac_hdr;
+	unsigned int				valid_fields;
 	struct img_umac_key_info	key_info;
-	unsigned char               mac_addr[IMG_ETH_ALEN];
-});
+	unsigned char				mac_addr[IMG_ETH_ALEN];
+} __IMG_PKD;
 
 
 /**
@@ -1264,10 +1263,8 @@ struct img_umac_event_get_key {
  *
  * This enum represents the different types of scanning operations.
  */
-enum scan_mode {
-	AUTO_SCAN = 0,
-	CHANNEL_MAPPING_SCAN
-};
+#define AUTO_SCAN				0
+#define	CHANNEL_MAPPING_SCAN	1
 
 /**
  * enum scan_reason - scan reason
@@ -1276,10 +1273,8 @@ enum scan_mode {
  *
  * This enum represents the different types of scan reasons.
  */
-enum scan_reason {
-	SCAN_DISPLAY = 0,
-	SCAN_CONNECT
-};
+#define SCAN_DISPLAY	0
+#define	SCAN_CONNECT	1
 
 /**
  * struct img_umac_scan_info - Scan related information.
@@ -1290,12 +1285,12 @@ enum scan_reason {
  *
  * Properties to be used when triggering a new scan request
  */
-PACK(
+
 struct img_umac_scan_info {
-	unsigned int scan_mode;
-	unsigned int scan_reason;
+	int scan_mode;
+	int scan_reason;
 	struct img_scan_params	scan_params;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_scan - Scan request properties.
@@ -1305,12 +1300,12 @@ struct img_umac_scan_info {
  *
  * Properties to be used when triggering a new scan request
  */
-PACK(
+
 struct img_umac_cmd_scan {
 	/* public: */
 	struct img_umac_hdr	umac_hdr;
 	struct img_umac_scan_info info;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_get_scan_results - Get scan results.
@@ -1322,17 +1317,17 @@ struct img_umac_cmd_scan {
  * allowed only if we received a %IMG_UMAC_EVENT_SCAN_DONE for a
  * %IMG_UMAC_CMD_TRIGGER_SCAN earlier.
  */
-PACK(
+
 struct img_umac_cmd_get_scan_results {
 	struct img_umac_hdr	umac_hdr;
-	unsigned int scan_reason;
-});
+	int scan_reason;
+} __IMG_PKD;
 
-PACK(
+
 struct img_umac_event_scan_done {
-	struct img_umac_hdr     umac_hdr;
-	int  status;
-});
+		struct img_umac_hdr     umac_hdr;
+		int  status;
+} __IMG_PKD;
 
 #define IMG_CMD_AUTHENTICATE_KEY_INFO_VALID	(1 << 0)
 #define IMG_CMD_AUTHENTICATE_BSSID_VALID	(1 << 1)
@@ -1366,11 +1361,11 @@ struct img_umac_event_scan_done {
  *
  * This structure specifies the parameters to be used when sending auth request.
  */
-PACK(
+
 struct img_umac_auth_info {
 	unsigned int frequency;
 	unsigned short img_flags;
-	unsigned int auth_type;
+	int auth_type;
 	struct img_umac_key_info key_info;
 	struct img_ssid ssid;
 	struct img_ie ie;
@@ -1383,7 +1378,7 @@ struct img_umac_auth_info {
 	unsigned short capability;
 	unsigned short beacon_interval;
 	unsigned long long tsf;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_auth - Authentication command structure.
@@ -1391,16 +1386,16 @@ struct img_umac_auth_info {
  * @umac_hdr: UMAC command header. See &struct img_umac_hdr.
  * @valid_fields: Indicate which of the following parameters are valid.
  * @info: Information to be passed along with the authentication command.
- *        See &struct img_umac_auth_info.
+ *	See &struct img_umac_auth_info.
  *
  * This structure specifies the format to be used when sending an auth request.
  */
-PACK(
+
 struct img_umac_cmd_auth {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_auth_info info;
-});
+} __IMG_PKD;
 
 
 
@@ -1410,10 +1405,10 @@ struct img_umac_cmd_auth {
  * struct img_umac_assoc_info - Association command parameters.
  *
  * @center_frequency: Frequency of the selected channel in MHz, defines the channel
- *               together with the (deprecated)
- *               %IMG_UMAC_ATTR_WIPHY_CHANNEL_TYPE attribute or the attributes
- *	         %IMG_UMAC_ATTR_CHANNEL_WIDTH and if needed
- *	         %IMG_UMAC_ATTR_CENTER_FREQ1 and %IMG_UMAC_ATTR_CENTER_FREQ2.
+ *	together with the (deprecated)
+ *	%IMG_UMAC_ATTR_WIPHY_CHANNEL_TYPE attribute or the attributes
+ *	%IMG_UMAC_ATTR_CHANNEL_WIDTH and if needed
+ *	%IMG_UMAC_ATTR_CENTER_FREQ1 and %IMG_UMAC_ATTR_CENTER_FREQ2.
  * @ssid: SSID (binary attribute, 0..32 octets).
  * @wpa_ie: WPA information element data.
  * @img_bssid: MAC address (various uses).
@@ -1421,7 +1416,7 @@ struct img_umac_cmd_auth {
  * This structure specifies the parameters to be used when sending an assoc
  * request.
  */
-PACK(
+
 struct img_umac_assoc_info {
 	unsigned int center_frequency;
 	struct img_ssid ssid;
@@ -1429,7 +1424,7 @@ struct img_umac_assoc_info {
 	struct img_ie wpa_ie;
 	unsigned char use_mfp;
 	char control_port;
-});
+} __IMG_PKD;
 
 
 /**
@@ -1444,13 +1439,13 @@ struct img_umac_assoc_info {
  * This structure specifies the parameters to be used when sending
  * %IMG_UMAC_CMD_ASSOCIATE command.
  */
-PACK(
+
 struct img_umac_cmd_assoc {
 	struct img_umac_hdr		umac_hdr;
 	unsigned int			valid_fields;
 	struct img_connect_common_info	connect_common_info;
 	unsigned char			mac_addr[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
 #define IMG_CMD_MLME_MAC_ADDR_VALID	(1 << 0)
 #define IMG_CMD_MLME_LOCAL_STATE_CHANGE	(1 << 0)
@@ -1458,13 +1453,13 @@ struct img_umac_cmd_assoc {
 
 /**
  * struct img_umac_disconn_info - Parameters to be used along with any of the
- *                                disconnection commands.
+ *	disconnection commands.
  *
  * @img_flags: Flag attribute to indicate that a command is requesting a local
- *         deauthentication/disassociation state change without invoking
- *         actual management frame exchange. This can be used with
- *         %IMG_UMAC_CMD_DISASSOCIATE, %IMG_UMAC_CMD_DEAUTHENTICATE
- *         (Refer &enum img_umac_commands).
+ *	deauthentication/disassociation state change without invoking
+ *	actual management frame exchange. This can be used with
+ *	%IMG_UMAC_CMD_DISASSOCIATE, %IMG_UMAC_CMD_DEAUTHENTICATE
+ *	(Refer &enum img_umac_commands).
  * @reason_code: ReasonCode for disassociation or deauthentication.
  * @mac_addr: MAC address (various uses).
  *
@@ -1472,12 +1467,12 @@ struct img_umac_cmd_assoc {
  * disconnection commands i.e. %IMG_UMAC_CMD_DISCONNECT (or)
  * %IMG_UMAC_CMD_DISASSOCIATE (or) %IMG_UMAC_CMD_DEAUTHENTICATE.
  */
-PACK(
+
 struct img_umac_disconn_info {
 	unsigned short img_flags;
 	unsigned short reason_code;
 	unsigned char mac_addr[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
 
 /**
@@ -1490,23 +1485,23 @@ struct img_umac_disconn_info {
  * %IMG_UMAC_CMD_DISCONNECT (or) %IMG_UMAC_CMD_DISASSOCIATE (or)
  * %IMG_UMAC_CMD_DEAUTHENTICATE.
  */
-PACK(
+
 struct img_umac_cmd_disconn {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_disconn_info info;
-});
+} __IMG_PKD;
 
 
-#define IMG_CMD_NEW_INTERFACE_USE_4ADDR_VALID   (1 << 0)
-#define IMG_CMD_NEW_INTERFACE_MAC_ADDR_VALID    (1 << 1)
-#define IMG_CMD_NEW_INTERFACE_IFTYPE_VALID	(1 << 2)
-#define IMG_CMD_NEW_INTERFACE_IFNAME_VALID	(1 << 3)
+#define IMG_CMD_NEW_INTERFACE_USE_4ADDR_VALID	(1 << 0)
+#define IMG_CMD_NEW_INTERFACE_MAC_ADDR_VALID	(1 << 1)
+#define IMG_CMD_NEW_INTERFACE_IFTYPE_VALID		(1 << 2)
+#define IMG_CMD_NEW_INTERFACE_IFNAME_VALID		(1 << 3)
 
 
 /**
  * struct img_umac_add_vif_info - Information for creating a new virtual
- *                                interface.
+ *	interface.
  *
  * @iftype: Interface type, see enum img_sys_iftype.
  * @img_use_4addr: Use 4-address frames on a virtual interface.
@@ -1518,14 +1513,14 @@ struct img_umac_cmd_disconn {
  * create a new virtual interface using the %IMG_UMAC_CMD_NEW_INTERFACE
  * command.
  */
-PACK(
+
 struct img_umac_add_vif_info {
-	enum img_sys_iftype iftype;
+	int iftype;
 	int img_use_4addr;
-	unsigned int mon_flags; /*  || (1 << enum img_mntr_flags) */
+	unsigned int mon_flags; /*	|| (1 << enum img_mntr_flags) */
 	unsigned char mac_addr[IMG_ETH_ALEN];
 	char ifacename[16];
-});
+} __IMG_PKD;
 
 
 /**
@@ -1538,13 +1533,13 @@ struct img_umac_add_vif_info {
  * This structure represents a command to be passed to inform the RPU to
  * create a new virtual interface.
  */
-PACK(
+
 struct img_umac_cmd_add_vif {
 
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_add_vif_info info;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_del_vif - Delete a virtual interface
@@ -1554,10 +1549,11 @@ struct img_umac_cmd_add_vif {
  * This structure represents a command to be passed to inform the RPU to
  * delete a virtual interface. This cmd is not allowed on default interface.
  */
-PACK(
+
 struct img_umac_cmd_del_vif {
+
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 #define IMG_FRAME_MATCH_MAX_LEN 8
 
@@ -1569,33 +1565,33 @@ struct img_umac_cmd_del_vif {
  * This structure represents the frame data to match so that the RPU RX filter
  * can pass up the matching frames.
  */
-PACK(
+
 struct img_umac_frame_match {
 	unsigned int frame_match_len;
 	unsigned char frame_match[IMG_FRAME_MATCH_MAX_LEN];
-});
+} __IMG_PKD;
 
 
 /**
  * struct img_umac_mgmt_frame_info - Information regarding management frame to
- *                                   be registerd to be received.
+ *	be registerd to be received.
  * @frame_type: Frame type/subtype.
  * @frame_match: A binary attribute which typically must contain at least one
- *               byte.
+ *	byte.
  *
  * This structure represents information regarding a management frame which
  * should not be filtered by the RPU and passed up.
  */
-PACK(
+
 struct img_umac_mgmt_frame_info {
 	unsigned short frame_type;
 	struct img_umac_frame_match frame_match;
-});
+} __IMG_PKD;
 
 
 /**
  * struct img_umac_cmd_mgmt_frame_reg - Register management frame type to be
- *                                      received.
+ *	received.
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr
  * @info: Management frame specific information to be passed to the RPU.
  *
@@ -1603,11 +1599,11 @@ struct img_umac_mgmt_frame_info {
  * register a management frame which should not be filtered by the RPU and
  * passed up.
  */
-PACK(
+
 struct img_umac_cmd_mgmt_frame_reg {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_mgmt_frame_info info;
-});
+} __IMG_PKD;
 
 
 #define IMG_CMD_KEY_MAC_ADDR_VALID	(1 << 0)
@@ -1619,33 +1615,33 @@ struct img_umac_cmd_mgmt_frame_reg {
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @valid_fields: Indicate which of the following parameters are valid.
  * @key_info: Key information in a nested attribute with
- *	   %IMG_UMAC_KEY_* sub-attributes.
+ *	%IMG_UMAC_KEY_* sub-attributes.
  * @mac_addr: MAC address associated with the key.
  *
  * This structure represents a command to add a new key.
  */
-PACK(
+
 struct img_umac_cmd_key {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_key_info key_info;
 	unsigned char mac_addr[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_set_key - Parameters when setting default key.
  *
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @key_info: Key information in a nested attribute with
- *	   %IMG_UMAC_KEY_* sub-attributes.
+ *	%IMG_UMAC_KEY_* sub-attributes.
  *
  * This structure represents a command to set a default key.
  */
-PACK(
+
 struct img_umac_cmd_set_key {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_key_info key_info;
-});
+} __IMG_PKD;
 
 #define IMG_CMD_SET_BSS_CTS_VALID		(1 << 0)
 #define IMG_CMD_SET_BSS_PREAMBLE_VALID		(1 << 1)
@@ -1660,25 +1656,25 @@ struct img_umac_cmd_set_key {
 /**
  * struct img_umac_bss_info - BSS attributes.
  * @p2p_go_ctwindow: P2P GO Client Traffic Window, used with
- *                   the START_AP and SET_BSS commands.
+ *	the START_AP and SET_BSS commands.
  * @p2p_opp_ps: P2P GO opportunistic PS, used with the
- *	        START_AP and SET_BSS commands. This can have the values 0 or 1;
- *	        if not given in START_AP 0 is assumed, if not given in SET_BSS
- *	        no change is made.
+ *	START_AP and SET_BSS commands. This can have the values 0 or 1;
+ *	if not given in START_AP 0 is assumed, if not given in SET_BSS
+ *	no change is made.
  * @num_basic_rates: Number of basic rate elements.
  * @ht_opmode: HT operation mode.
  * @cts: Whether CTS protection is enabled (0 or 1).
  * @preamble: Whether short preamble is enabled (0 or 1).
  * @slot: Whether short slot time enabled (0 or 1).
  * @ap_isolate: (AP mode) Do not forward traffic between stations connected to
- *              this BSS.
+ *	this BSS.
  * @basic_rates: Basic rates, array of basic rates in format defined by
- *               IEEE 802.11 7.3.2.2 but without the length restriction
- *               (at most %IMG_MAX_SUPP_RATES).
+ *	IEEE 802.11 7.3.2.2 but without the length restriction
+ *	(at most %IMG_MAX_SUPP_RATES).
  *
  * This structure represents the BSS attributes.
  */
-PACK(
+
 struct img_umac_bss_info {
 	unsigned int		p2p_go_ctwindow;
 	unsigned int		p2p_opp_ps;
@@ -1689,7 +1685,7 @@ struct img_umac_bss_info {
 	unsigned char		img_slot;
 	unsigned char		ap_isolate;
 	unsigned char		basic_rates[IMG_BASIC_MAX_SUPP_RATES];
-});
+} __IMG_PKD;
 
 
 /**
@@ -1700,19 +1696,19 @@ struct img_umac_bss_info {
  *
  * This structure represents a command to set BSS attributes.
  */
-PACK(
+
 struct img_umac_cmd_set_bss {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_bss_info bss_info;
-});
+} __IMG_PKD;
 
 
-#define IMG_SET_FREQ_PARAMS_FREQ_VALID                      (1 << 0)
-#define IMG_SET_FREQ_PARAMS_CHANNEL_WIDTH_VALID             (1 << 1)
-#define IMG_SET_FREQ_PARAMS_CENTER_FREQ1_VALID              (1 << 2)
-#define IMG_SET_FREQ_PARAMS_CENTER_FREQ2_VALID              (1 << 3)
-#define IMG_SET_FREQ_PARAMS_CHANNEL_TYPE_VALID              (1 << 4)
+#define IMG_SET_FREQ_PARAMS_FREQ_VALID					(1 << 0)
+#define IMG_SET_FREQ_PARAMS_CHANNEL_WIDTH_VALID			(1 << 1)
+#define IMG_SET_FREQ_PARAMS_CENTER_FREQ1_VALID			(1 << 2)
+#define IMG_SET_FREQ_PARAMS_CENTER_FREQ2_VALID			(1 << 3)
+#define IMG_SET_FREQ_PARAMS_CHANNEL_TYPE_VALID			(1 << 4)
 
 /**
  * struct freq_params - Frequency configuration.
@@ -1723,19 +1719,20 @@ struct img_umac_cmd_set_bss {
  *
  * This structure represents a frequency parameters to be set.
  */
-PACK(
+
 struct freq_params {
+
 	unsigned int		valid_fields;
 	int			frequency;
-	enum img_chan_width	channel_width;
+	int channel_width;
 	/* private : presently unused */
 	int			center_frequency1;
 	/* private : presently unused */
 	int			center_frequency2;
 	/* public: */
-	enum img_channel_type	channel_type;
+	int channel_type;
 
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_set_channel - Set channel configuration.
@@ -1745,13 +1742,13 @@ struct freq_params {
  *
  * This structure represents the command to set the wireless channel configuration.
  */
-PACK(
+
 struct img_umac_cmd_set_channel {
-	struct img_umac_hdr      umac_hdr;
-#define IMG_CMD_SET_CHANNEL_FREQ_PARAMS_VALID               (1 << 0)
-	unsigned int            valid_fields;
-	struct freq_params      freq_params;
-});
+	struct img_umac_hdr		umac_hdr;
+#define IMG_CMD_SET_CHANNEL_FREQ_PARAMS_VALID		(1 << 0)
+	unsigned int			valid_fields;
+	struct freq_params		freq_params;
+} __IMG_PKD;
 /**
  * struct img_txq_params - TX queue parameter attributes.
  * @txop: Transmit oppurtunity.
@@ -1762,15 +1759,16 @@ struct img_umac_cmd_set_channel {
  *
  * This structure represents transmit queue parameters.
  */
-PACK(
+
 struct img_txq_params {
+
 	unsigned short	txop;
 	unsigned short	cwmin;
 	unsigned short	cwmax;
 	unsigned char	aifs;
 	unsigned char	ac;
 
-});
+} __IMG_PKD;
 
 /**
  * enum img_tx_power_setting - TX power adjustment.
@@ -1780,15 +1778,12 @@ struct img_txq_params {
  *
  * Types of transmit power settings.
  */
-enum img_tx_power_type {
+#define IMG_TX_POWER_AUTOMATIC	0
+#define	IMG_TX_POWER_LIMITED	1
+#define	IMG_TX_POWER_FIXED		2
 
-	IMG_TX_POWER_AUTOMATIC,
-	IMG_TX_POWER_LIMITED,
-	IMG_TX_POWER_FIXED,
-};
-
-#define IMG_TX_POWER_SETTING_TYPE_VALID                     (1 << 0)
-#define IMG_TX_POWER_SETTING_TX_POWER_LEVEL_VALID           (1 << 1)
+#define IMG_TX_POWER_SETTING_TYPE_VALID					(1 << 0)
+#define IMG_TX_POWER_SETTING_TX_POWER_LEVEL_VALID		(1 << 1)
 
 /**
  * struct img_tx_power_setting - TX power configuration.
@@ -1798,24 +1793,26 @@ enum img_tx_power_type {
  *
  * This structure represents the transmit power setting parameters.
  */
-PACK(
-struct img_tx_power_setting {
-	unsigned int		valid_fields;
-	enum img_tx_power_type	type;
-	unsigned int		tx_power_level;
-});
 
-#define IMG_CMD_SET_WIPHY_FREQ_PARAMS_VALID                 (1 << 0)
-#define IMG_CMD_SET_WIPHY_TXQ_PARAMS_VALID                  (1 << 1)
-#define IMG_CMD_SET_WIPHY_RTS_THRESHOLD_VALID               (1 << 2)
-#define IMG_CMD_SET_WIPHY_FRAG_THRESHOLD_VALID              (1 << 3)
-#define IMG_CMD_SET_WIPHY_TX_POWER_SETTING_VALID            (1 << 4)
-#define IMG_CMD_SET_WIPHY_ANTENNA_TX_VALID                  (1 << 5)
-#define IMG_CMD_SET_WIPHY_ANTENNA_RX_VALID                  (1 << 6)
-#define IMG_CMD_SET_WIPHY_RETRY_SHORT_VALID                 (1 << 7)
-#define IMG_CMD_SET_WIPHY_RETRY_LONG_VALID                  (1 << 8)
-#define IMG_CMD_SET_WIPHY_COVERAGE_CLASS_VALID              (1 << 9)
-#define IMG_CMD_SET_WIPHY_WIPHY_NAME_VALID                  (1 << 10)
+struct img_tx_power_setting {
+
+	unsigned int		valid_fields;
+	int type;
+	unsigned int		tx_power_level;
+
+} __IMG_PKD;
+
+#define IMG_CMD_SET_WIPHY_FREQ_PARAMS_VALID				(1 << 0)
+#define IMG_CMD_SET_WIPHY_TXQ_PARAMS_VALID				(1 << 1)
+#define IMG_CMD_SET_WIPHY_RTS_THRESHOLD_VALID			(1 << 2)
+#define IMG_CMD_SET_WIPHY_FRAG_THRESHOLD_VALID			(1 << 3)
+#define IMG_CMD_SET_WIPHY_TX_POWER_SETTING_VALID		(1 << 4)
+#define IMG_CMD_SET_WIPHY_ANTENNA_TX_VALID				(1 << 5)
+#define IMG_CMD_SET_WIPHY_ANTENNA_RX_VALID				(1 << 6)
+#define IMG_CMD_SET_WIPHY_RETRY_SHORT_VALID				(1 << 7)
+#define IMG_CMD_SET_WIPHY_RETRY_LONG_VALID				(1 << 8)
+#define IMG_CMD_SET_WIPHY_COVERAGE_CLASS_VALID			(1 << 9)
+#define IMG_CMD_SET_WIPHY_WIPHY_NAME_VALID				(1 << 10)
 
 /**
  * struct img_umac_set_wiphy_info - wiphy configuration.
@@ -1851,8 +1848,9 @@ struct img_tx_power_setting {
  *
  * This structure represents the wireless PHY configuration.
  */
-PACK(
+
 struct img_umac_set_wiphy_info {
+
 	unsigned int			rts_threshold;
 	unsigned int			frag_threshold;
 	unsigned int			antenna_tx;
@@ -1864,7 +1862,7 @@ struct img_umac_set_wiphy_info {
 	unsigned char			retry_long;
 	unsigned char			coverage_class;
 	char				wiphy_name[32];
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_set_wiphy - Set wiphy configuration.
@@ -1874,20 +1872,21 @@ struct img_umac_set_wiphy_info {
  *
  * This structure represents the command to set the wireless PHY configuration.
  */
-PACK(
+
 struct img_umac_cmd_set_wiphy {
+
 	struct img_umac_hdr		umac_hdr;
 	unsigned int			valid_fields;
 	struct img_umac_set_wiphy_info	info;
-});
+} __IMG_PKD;
 
-#define IMG_CMD_DEL_STATION_MAC_ADDR_VALID                  (1 << 0)
-#define IMG_CMD_DEL_STATION_MGMT_SUBTYPE_VALID              (1 << 1)
-#define IMG_CMD_DEL_STATION_REASON_CODE_VALID               (1 << 2)
+#define IMG_CMD_DEL_STATION_MAC_ADDR_VALID					(1 << 0)
+#define IMG_CMD_DEL_STATION_MGMT_SUBTYPE_VALID				(1 << 1)
+#define IMG_CMD_DEL_STATION_REASON_CODE_VALID				(1 << 2)
 
 /**
  * struct img_umac_del_sta_info - Information regarding a station to be
- *                                deleted.
+ *	deleted.
  * @mac_addr: MAC address of the station.
  * @mgmt_subtype: Management frame subtype.
  * @reason_code: Reason code for DEAUTHENTICATION and DISASSOCIATION.
@@ -1895,12 +1894,12 @@ struct img_umac_cmd_set_wiphy {
  * This structure represents the information regarding a station to be deleted
  * from the RPU.
  */
-PACK(
+
 struct img_umac_del_sta_info {
 	unsigned char mac_addr[IMG_ETH_ALEN];
 	unsigned char mgmt_subtype;
 	unsigned short reason_code;
-});
+} __IMG_PKD;
 
 
 /**
@@ -1911,12 +1910,12 @@ struct img_umac_del_sta_info {
  *
  * This structure represents the command to delete a station.
  */
-PACK(
+
 struct img_umac_cmd_del_sta {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_del_sta_info info;
-});
+} __IMG_PKD;
 
 
 /**
@@ -1924,10 +1923,10 @@ struct img_umac_cmd_del_sta {
  * @mac_addr: MAC address of the station.
  * This structure represents the information regarding a station info to be get.
  */
-PACK(
+
 struct img_umac_get_sta_info {
 	unsigned char mac_addr[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
 
 /**
@@ -1937,64 +1936,68 @@ struct img_umac_get_sta_info {
  *
  * This structure represents the command to get station info.
  */
-PACK(
+
 struct img_umac_cmd_get_sta {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_get_sta_info info;
-});
+} __IMG_PKD;
 
 
 #define IMG_EXT_CAPABILITY_MAX_LEN 32
 
-PACK(
+
 struct img_ext_capability {
+
 	unsigned int	ext_capability_len;
 	unsigned char	ext_capability[IMG_EXT_CAPABILITY_MAX_LEN];
 
-});
+} __IMG_PKD;
 
 #define IMG_SUPPORTED_CHANNELS_MAX_LEN 64
 
-PACK(
+
 struct img_supported_channels {
+
 	unsigned int	supported_channels_len;
 	unsigned char	supported_channels[IMG_SUPPORTED_CHANNELS_MAX_LEN];
 
-});
+} __IMG_PKD;
 
 #define IMG_SUPPORTED_OPER_CLASSES_MAX_LEN 64
 
-PACK(
+
 struct img_supported_oper_classes {
+
 	unsigned int	supported_oper_classes_len;
 	unsigned char	supported_oper_classes[IMG_SUPPORTED_OPER_CLASSES_MAX_LEN];
 
-});
+} __IMG_PKD;
 
 #define IMG_STA_FLAGS2_MAX_LEN 64
 
-PACK(
+
 struct img_sta_flags2 {
+
 	unsigned int	sta_flags2_len;
 	unsigned char	sta_flags2[IMG_STA_FLAGS2_MAX_LEN];
 
-});
+} __IMG_PKD;
 
-#define IMG_CMD_SET_STATION_SUPP_RATES_VALID                (1 << 0)
-#define IMG_CMD_SET_STATION_AID_VALID                       (1 << 1)
-#define IMG_CMD_SET_STATION_PEER_AID_VALID                  (1 << 2)
-#define IMG_CMD_SET_STATION_STA_CAPABILITY_VALID            (1 << 3)
-#define IMG_CMD_SET_STATION_EXT_CAPABILITY_VALID            (1 << 4)
-#define IMG_CMD_SET_STATION_STA_VLAN_VALID                  (1 << 5)
-#define IMG_CMD_SET_STATION_HT_CAPABILITY_VALID            (1 << 6)
-#define IMG_CMD_SET_STATION_VHT_CAPABILITY_VALID           (1 << 7)
-#define IMG_CMD_SET_STATION_OPMODE_NOTIF_VALID             (1 << 9)
-#define IMG_CMD_SET_STATION_SUPPORTED_CHANNELS_VALID       (1 << 10)
-#define IMG_CMD_SET_STATION_SUPPORTED_OPER_CLASSES_VALID   (1 << 11)
-#define IMG_CMD_SET_STATION_STA_FLAGS2_VALID               (1 << 12)
-#define IMG_CMD_SET_STATION_STA_WME_UAPSD_QUEUES_VALID     (1 << 13)
-#define IMG_CMD_SET_STATION_STA_WME_MAX_SP_VALID           (1 << 14)
-#define IMG_CMD_SET_STATION_LISTEN_INTERVAL_VALID          (1 << 15)
+#define IMG_CMD_SET_STATION_SUPP_RATES_VALID				(1 << 0)
+#define IMG_CMD_SET_STATION_AID_VALID						(1 << 1)
+#define IMG_CMD_SET_STATION_PEER_AID_VALID					(1 << 2)
+#define IMG_CMD_SET_STATION_STA_CAPABILITY_VALID			(1 << 3)
+#define IMG_CMD_SET_STATION_EXT_CAPABILITY_VALID			(1 << 4)
+#define IMG_CMD_SET_STATION_STA_VLAN_VALID					(1 << 5)
+#define IMG_CMD_SET_STATION_HT_CAPABILITY_VALID				(1 << 6)
+#define IMG_CMD_SET_STATION_VHT_CAPABILITY_VALID			(1 << 7)
+#define IMG_CMD_SET_STATION_OPMODE_NOTIF_VALID				(1 << 9)
+#define IMG_CMD_SET_STATION_SUPPORTED_CHANNELS_VALID		(1 << 10)
+#define IMG_CMD_SET_STATION_SUPPORTED_OPER_CLASSES_VALID	(1 << 11)
+#define IMG_CMD_SET_STATION_STA_FLAGS2_VALID				(1 << 12)
+#define IMG_CMD_SET_STATION_STA_WME_UAPSD_QUEUES_VALID		(1 << 13)
+#define IMG_CMD_SET_STATION_STA_WME_MAX_SP_VALID			(1 << 14)
+#define IMG_CMD_SET_STATION_LISTEN_INTERVAL_VALID			(1 << 15)
 
 /**
  * struct img_umac_chg_sta_info - Information about station entry to be updated.
@@ -2014,14 +2017,14 @@ struct img_sta_flags2 {
  * @mac_addr: Station mac address.
  * @opmode_notif: Information if operating mode field is used.
  * @wme_uapsd_queues: Bitmap of queues configured for uapsd. Same format
- *      as the AC bitmap in the QoS info field.
+ *	as the AC bitmap in the QoS info field.
  * @wme_max_sp: Max Service Period. same format as the MAX_SP in the
- *      QoS info field (but already shifted down).
+ *	QoS info field (but already shifted down).
  *
  * This structure represents the information needed to update a station entry
  * in the RPU.
  */
-PACK(
+
 struct img_umac_chg_sta_info {
 	int img_listen_interval;
 	unsigned int sta_vlan;
@@ -2033,7 +2036,7 @@ struct img_umac_chg_sta_info {
 	struct img_ext_capability ext_capability;
 	struct img_supported_channels supported_channels;
 	struct img_supported_oper_classes supported_oper_classes;
-	/* struct img_sta_flags2 sta_flags2; */
+	/*struct img_sta_flags2 sta_flags2;*/
 	struct img_sta_flag_update sta_flags2;
 	unsigned char ht_capability[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
 	unsigned char vht_capability[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
@@ -2041,7 +2044,7 @@ struct img_umac_chg_sta_info {
 	unsigned char opmode_notif;
 	unsigned char wme_uapsd_queues;
 	unsigned char wme_max_sp;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2053,28 +2056,28 @@ struct img_umac_chg_sta_info {
  * This structure represents the command to update the parameters of a
  * station entry.
  */
-PACK(
+
 struct img_umac_cmd_chg_sta {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_chg_sta_info info;
-});
+} __IMG_PKD;
 
-#define IMG_CMD_NEW_STATION_SUPP_RATES_VALID                (1 << 0)
-#define IMG_CMD_NEW_STATION_AID_VALID                       (1 << 1)
-#define IMG_CMD_NEW_STATION_PEER_AID_VALID                  (1 << 2)
-#define IMG_CMD_NEW_STATION_STA_CAPABILITY_VALID            (1 << 3)
-#define IMG_CMD_NEW_STATION_EXT_CAPABILITY_VALID            (1 << 4)
-#define IMG_CMD_NEW_STATION_STA_VLAN_VALID                  (1 << 5)
-#define IMG_CMD_NEW_STATION_HT_CAPABILITY_VALID            (1 << 6)
-#define IMG_CMD_NEW_STATION_VHT_CAPABILITY_VALID           (1 << 7)
-#define IMG_CMD_NEW_STATION_OPMODE_NOTIF_VALID             (1 << 9)
-#define IMG_CMD_NEW_STATION_SUPPORTED_CHANNELS_VALID       (1 << 10)
-#define IMG_CMD_NEW_STATION_SUPPORTED_OPER_CLASSES_VALID   (1 << 11)
-#define IMG_CMD_NEW_STATION_STA_FLAGS2_VALID               (1 << 12)
-#define IMG_CMD_NEW_STATION_STA_WME_UAPSD_QUEUES_VALID     (1 << 13)
-#define IMG_CMD_NEW_STATION_STA_WME_MAX_SP_VALID           (1 << 14)
-#define IMG_CMD_NEW_STATION_LISTEN_INTERVAL_VALID          (1 << 15)
+#define IMG_CMD_NEW_STATION_SUPP_RATES_VALID				(1 << 0)
+#define IMG_CMD_NEW_STATION_AID_VALID						(1 << 1)
+#define IMG_CMD_NEW_STATION_PEER_AID_VALID					(1 << 2)
+#define IMG_CMD_NEW_STATION_STA_CAPABILITY_VALID			(1 << 3)
+#define IMG_CMD_NEW_STATION_EXT_CAPABILITY_VALID			(1 << 4)
+#define IMG_CMD_NEW_STATION_STA_VLAN_VALID					(1 << 5)
+#define IMG_CMD_NEW_STATION_HT_CAPABILITY_VALID				(1 << 6)
+#define IMG_CMD_NEW_STATION_VHT_CAPABILITY_VALID			(1 << 7)
+#define IMG_CMD_NEW_STATION_OPMODE_NOTIF_VALID				(1 << 9)
+#define IMG_CMD_NEW_STATION_SUPPORTED_CHANNELS_VALID		(1 << 10)
+#define IMG_CMD_NEW_STATION_SUPPORTED_OPER_CLASSES_VALID	(1 << 11)
+#define IMG_CMD_NEW_STATION_STA_FLAGS2_VALID				(1 << 12)
+#define IMG_CMD_NEW_STATION_STA_WME_UAPSD_QUEUES_VALID		(1 << 13)
+#define IMG_CMD_NEW_STATION_STA_WME_MAX_SP_VALID			(1 << 14)
+#define IMG_CMD_NEW_STATION_LISTEN_INTERVAL_VALID			(1 << 15)
 
 
 /**
@@ -2102,7 +2105,7 @@ struct img_umac_cmd_chg_sta {
  * This structure represents the information about a new station entry to be
  * added to the RPU.
  */
-PACK(
+
 struct img_umac_add_sta_info {
 	int img_listen_interval;
 	unsigned int sta_vlan;
@@ -2114,7 +2117,7 @@ struct img_umac_add_sta_info {
 	struct img_ext_capability ext_capability;
 	struct img_supported_channels supported_channels;
 	struct img_supported_oper_classes supported_oper_classes;
-	/* struct img_sta_flags2 sta_flags2; */
+	/*struct img_sta_flags2 sta_flags2;*/
 	struct img_sta_flag_update sta_flags2;
 	unsigned char ht_capability[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
 	unsigned char vht_capability[IMG_HT_VHT_CAPABILITY_MAX_SIZE];
@@ -2122,7 +2125,7 @@ struct img_umac_add_sta_info {
 	unsigned char opmode_notif;
 	unsigned char wme_uapsd_queues;
 	unsigned char wme_max_sp;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_add_sta - Add station entry
@@ -2131,24 +2134,24 @@ struct img_umac_add_sta_info {
  *
  * This structure represents the commands to add a new station entry.
  */
-PACK(
+
 struct img_umac_cmd_add_sta {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_add_sta_info info;
-});
+} __IMG_PKD;
 
 
-#define IMG_CMD_BEACON_INFO_BEACON_INTERVAL_VALID          (1 << 0)
-#define IMG_CMD_BEACON_INFO_AUTH_TYPE_VALID                (1 << 1)
-#define IMG_CMD_BEACON_INFO_VERSIONS_VALID                 (1 << 2)
-#define IMG_CMD_BEACON_INFO_CIPHER_SUITE_GROUP_VALID       (1 << 3)
-#define IMG_CMD_BEACON_INFO_INACTIVITY_TIMEOUT_VALID       (1 << 4)
-#define IMG_CMD_BEACON_INFO_FREQ_PARAMS_VALID              (1 << 5)
-#define IMG_CMD_BEACON_INFO_PRIVACY                        (1 << 0)
-#define IMG_CMD_BEACON_INFO_CONTROL_PORT_NO_ENCRYPT        (1 << 1)
-#define IMG_CMD_BEACON_INFO_P2P_CTWINDOW_VALID             (1 << 6)
-#define IMG_CMD_BEACON_INFO_P2P_OPPPS_VALID                (1 << 7)
+#define IMG_CMD_BEACON_INFO_BEACON_INTERVAL_VALID			(1 << 0)
+#define IMG_CMD_BEACON_INFO_AUTH_TYPE_VALID					(1 << 1)
+#define IMG_CMD_BEACON_INFO_VERSIONS_VALID					(1 << 2)
+#define IMG_CMD_BEACON_INFO_CIPHER_SUITE_GROUP_VALID		(1 << 3)
+#define IMG_CMD_BEACON_INFO_INACTIVITY_TIMEOUT_VALID		(1 << 4)
+#define IMG_CMD_BEACON_INFO_FREQ_PARAMS_VALID				(1 << 5)
+#define IMG_CMD_BEACON_INFO_PRIVACY							(1 << 0)
+#define IMG_CMD_BEACON_INFO_CONTROL_PORT_NO_ENCRYPT			(1 << 1)
+#define IMG_CMD_BEACON_INFO_P2P_CTWINDOW_VALID				(1 << 6)
+#define IMG_CMD_BEACON_INFO_P2P_OPPPS_VALID					(1 << 7)
 
 
 /**
@@ -2166,18 +2169,18 @@ struct img_umac_cmd_add_sta {
  * @inactivity_timeout: Time to stop ap after inactivity period.
  * @p2p_go_ctwindow: P2P GO Client Traffic Window.
  * @p2p_opp_ps: Opportunistic power save allows P2P Group Owner to save power
- *	        when all its associated clients are sleeping.
+ *	when all its associated clients are sleeping.
  *
  * This structure represents the attributes that need to be passed to the RPU
  * when starting a SoftAP.
  */
-PACK(
+
 struct img_umac_start_ap_info {
 	unsigned short				beacon_interval;
 	unsigned char				dtim_period;
-	enum img_hidden_ssid		hidden_ssid;
-	enum img_auth_type		auth_type;
-	enum img_smps_mode		smps_mode;
+	int hidden_ssid;
+	int auth_type;
+	int smps_mode;
 	unsigned int			img_flags;
 	struct img_beacon_data		beacon_data;
 	struct img_ssid			ssid;
@@ -2186,7 +2189,7 @@ struct img_umac_start_ap_info {
 	unsigned short			inactivity_timeout;
 	unsigned char			p2p_go_ctwindow;
 	unsigned char			p2p_opp_ps;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2194,19 +2197,19 @@ struct img_umac_start_ap_info {
  * @umac_hdr: UMAC command header. Refer &struct img_umac_hdr.
  * @valid_fields: Indicate which of the following parameters are valid.
  * @info: Attributes that need to be passed to the RPU when starting a SoftAP.
- *        *See &struct img_umac_start_ap_info)
+ *	*See &struct img_umac_start_ap_info)
  *
  * The struct img_umac_cmd_start_ap is same for the following message types
  * %IMG_UMAC_CMD_NEW_BEACON
  * %IMG_UMAC_CMD_START_AP
  * (Refer &enum img_umac_commands).
  */
-PACK(
+
 struct img_umac_cmd_start_ap {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_start_ap_info info;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2215,10 +2218,10 @@ struct img_umac_cmd_start_ap {
  *
  * This structure represents the command to stop the operation of a Soft AP.
  */
-PACK(
+
 struct img_umac_cmd_stop_ap {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2228,26 +2231,26 @@ struct img_umac_cmd_stop_ap {
  * This structure represents the attributes that need to be passed to the RPU
  * when Beacon & Probe Rsp data settings.
  */
-PACK(
+
 struct img_umac_set_beacon_info {
 	struct img_beacon_data		beacon_data;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_set_beacon - Set beacon data
  * @umac_hdr: UMAC command header. Refer &struct img_umac_hdr.
  * @info: Attributes that need to be passed to the RPU when Beacon &
- *        Probe response data to set.
- *        See &struct img_umac_set_beacon_info)
+ *	Probe response data to set.
+ *	See &struct img_umac_set_beacon_info)
  *
  * %IMG_UMAC_CMD_SET_BEACON
  * (Refer &enum img_umac_commands).
  */
-PACK(
+
 struct img_umac_cmd_set_beacon {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_set_beacon_info info;
-});
+} __IMG_PKD;
 
 #define IMG_SET_INTERFACE_IFTYPE_VALID		(1 << 0)
 #define IMG_SET_INTERFACE_USE_4ADDR_VALID	(1 << 1)
@@ -2261,11 +2264,11 @@ struct img_umac_cmd_set_beacon {
  * This structure represents the information to be passed to the RPU when
  * changing the attributes of a virtual interface.
  */
-PACK(
+
 struct img_umac_chg_vif_attr_info {
-	enum img_iftype iftype;
+	int iftype;
 	int img_use_4addr;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2276,12 +2279,12 @@ struct img_umac_chg_vif_attr_info {
  *
  * This structure represents the command to change interface attributes.
  */
-PACK(
+
 struct img_umac_cmd_chg_vif_attr {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_chg_vif_attr_info info;
-});
+} __IMG_PKD;
 
 #define IFACENAMSIZ 16
 
@@ -2294,11 +2297,11 @@ struct img_umac_cmd_chg_vif_attr {
  * This structure represents the information to be passed the RPU when changing
  * the state (up/down) of a virtual interface.
  */
-PACK(
+
 struct img_umac_chg_vif_state_info {
 	int state;
 	char ifacename[IFACENAMSIZ];
-});
+} __IMG_PKD;
 
 
 /**
@@ -2308,17 +2311,17 @@ struct img_umac_chg_vif_state_info {
  *
  * This structure represents the command to change interface state.
  */
-PACK(
+
 struct img_umac_cmd_chg_vif_state {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_chg_vif_state_info info;
-});
+} __IMG_PKD;
 
-PACK(
+
 struct img_umac_event_vif_state {
-	struct img_umac_hdr     umac_hdr;
-	int  status;
-});
+		struct img_umac_hdr		umac_hdr;
+		int		status;
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_start_p2p_dev - Start P2P mode on an interface
@@ -2326,10 +2329,10 @@ struct img_umac_event_vif_state {
  *
  * This structure represents the command to start P2P mode on an interface.
  */
-PACK(
+
 struct img_umac_cmd_start_p2p_dev {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2338,36 +2341,36 @@ struct img_umac_cmd_start_p2p_dev {
  *
  * This structure represents the command to stop P2P mode on an interface.
  */
-PACK(
+
 struct img_umac_cmd_stop_p2p_dev {
 
 	struct img_umac_hdr	umac_hdr;
-});
+} __IMG_PKD;
 
-#define IMG_CMD_FRAME_FREQ_VALID                (1 << 0)
-#define IMG_CMD_FRAME_DURATION_VALID            (1 << 1)
-#define IMG_CMD_SET_FRAME_FREQ_PARAMS_VALID	(1 << 2)
+#define IMG_CMD_FRAME_FREQ_VALID				(1 << 0)
+#define IMG_CMD_FRAME_DURATION_VALID			(1 << 1)
+#define IMG_CMD_SET_FRAME_FREQ_PARAMS_VALID		(1 << 2)
 
-#define IMG_CMD_FRAME_OFFCHANNEL_TX_OK          (1 << 0)
-#define IMG_CMD_FRAME_TX_NO_CCK_RATE            (1 << 1)
-#define IMG_CMD_FRAME_DONT_WAIT_FOR_ACK         (1 << 2)
+#define IMG_CMD_FRAME_OFFCHANNEL_TX_OK			(1 << 0)
+#define IMG_CMD_FRAME_TX_NO_CCK_RATE			(1 << 1)
+#define IMG_CMD_FRAME_DONT_WAIT_FOR_ACK			(1 << 2)
 
 
 /**
  * struct img_umac_mgmt_tx_info - Information about a management frame to be
- *                                transmitted.
+ *	transmitted.
  * @flags: OFFCHANNEL_TX_OK, NO_CCK_RATE, DONT_WAIT_FOR_ACK.
  * @dur: Duration field value.
  * @frame: Management frame to transmit.
  * @frequency: Channel.
  * @freq_params: Frequency configuration, See &struct freq_params.
  * @host_cookie: Identifier to be used for processing done event,
- *	         see %IMG_UMAC_EVENT_FRAME_TX_STATUS.
+ *	see %IMG_UMAC_EVENT_FRAME_TX_STATUS.
  *
  * This structure represents the information about a management frame to be
  * transmitted.
  */
-PACK(
+
 struct img_umac_mgmt_tx_info {
 	unsigned int		img_flags;
 	unsigned int		frequency;
@@ -2375,7 +2378,7 @@ struct img_umac_mgmt_tx_info {
 	struct img_frame	frame;
 	struct freq_params	freq_params;
 	unsigned long long	host_cookie;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_mgmt_tx - Tranmit a management frame.
@@ -2385,24 +2388,24 @@ struct img_umac_mgmt_tx_info {
  *
  * This structure represents the command to transmit a management frame.
  */
-PACK(
+
 struct img_umac_cmd_mgmt_tx {
 	struct img_umac_hdr umac_hdr;
 	unsigned int valid_fields;
 	struct img_umac_mgmt_tx_info info;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_set_power_save_info - Information about power save
- *                                       settings.
+ *	settings.
  * @ps_state: power save is disabled or enabled, see enum img_ps_state.
  *
  * This structure represents the information about power save state
  */
-PACK(
+
 struct img_umac_set_power_save_info {
-	enum img_ps_state ps_state;
-});
+	int ps_state;
+} __IMG_PKD;
 
 
 /**
@@ -2413,11 +2416,13 @@ struct img_umac_set_power_save_info {
  * This structure represents the command to enable or disable the power
  * save functionality.
  */
-PACK(
+
+
+
 struct img_umac_cmd_set_power_save {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_set_power_save_info info;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_qos_map_info - qos map info.
@@ -2426,11 +2431,11 @@ struct img_umac_cmd_set_power_save {
  *
  * This structure represents the information of qos_map.
  */
-PACK(
+
 struct img_umac_qos_map_info {
 	unsigned int qos_map_info_len;
 	unsigned char qos_map_info[256];
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_set_qos_map - Set qos map info.
@@ -2439,31 +2444,31 @@ struct img_umac_qos_map_info {
  *
  * This structure represents the command to pass qos_map info.
  */
-PACK(
+
 struct img_umac_cmd_set_qos_map {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_qos_map_info info;
-});
+} __IMG_PKD;
 
-#define IMG_SET_WOWLAN_FLAG_TRIG_ANY                    (1 << 0)
-#define IMG_SET_WOWLAN_FLAG_TRIG_DISCONNECT             (1 << 1)
-#define IMG_SET_WOWLAN_FLAG_TRIG_MAGIC_PKT              (1 << 2)
-#define IMG_SET_WOWLAN_FLAG_TRIG_GTK_REKEY_FAILURE      (1 << 3)
-#define IMG_SET_WOWLAN_FLAG_TRIG_EAP_IDENT_REQUEST      (1 << 4)
-#define IMG_SET_WOWLAN_FLAG_TRIG_4WAY_HANDSHAKE         (1 << 5)
+#define IMG_SET_WOWLAN_FLAG_TRIG_ANY					(1 << 0)
+#define IMG_SET_WOWLAN_FLAG_TRIG_DISCONNECT				(1 << 1)
+#define IMG_SET_WOWLAN_FLAG_TRIG_MAGIC_PKT				(1 << 2)
+#define IMG_SET_WOWLAN_FLAG_TRIG_GTK_REKEY_FAILURE		(1 << 3)
+#define IMG_SET_WOWLAN_FLAG_TRIG_EAP_IDENT_REQUEST		(1 << 4)
+#define IMG_SET_WOWLAN_FLAG_TRIG_4WAY_HANDSHAKE			(1 << 5)
 
 /**
  * struct img_umac_set_wowlan_info - Information about wowlan
- *                                   trigger settings.
+ *	trigger settings.
  * @img_flags: Wakeup trigger conditions. IMG_SET_WOWLAN_FLAG_TRIG_ANY,
  * IMG_SET_WOWLAN_FLAG_TRIG_DISCONNECT and etc.
  *
  * This structure represents the information about wowlan settings.
  */
-PACK(
+
 struct img_umac_set_wowlan_info {
 	unsigned short img_flags;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2475,11 +2480,11 @@ struct img_umac_set_wowlan_info {
  * configs before going to sleep(Host).
  */
 
-PACK(
+
 struct img_umac_cmd_set_wowlan {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_set_wowlan_info info;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_suspend - suspend the bus transactions.
@@ -2488,10 +2493,10 @@ struct img_umac_cmd_set_wowlan {
  * This structure represents the command to suspend the bus transactions.
  */
 
-PACK(
+
 struct img_umac_cmd_suspend {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_resume - resume the bus transactions.
@@ -2500,10 +2505,10 @@ struct img_umac_cmd_suspend {
  * This structure represents the command to resumes the bus transactions.
  */
 
-PACK(
+
 struct img_umac_cmd_resume {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_get_tx_power - get tx power.
@@ -2512,10 +2517,10 @@ struct img_umac_cmd_resume {
  * This structure represents the command to get tx power.
  */
 
-PACK(
+
 struct img_umac_cmd_get_tx_power {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_get_channel - get channel info.
@@ -2524,14 +2529,14 @@ struct img_umac_cmd_get_tx_power {
  * This structure represents the command to get channel information.
  */
 
-PACK(
+
 struct img_umac_cmd_get_channel {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 #ifdef TWT_SUPPORT
 #define IMG_TWT_NEGOTIATION_TYPE_INDIVIDUAL		0
-#define IMG_TWT_NEGOTIATION_TYPE_BROADCAST	    2
+#define IMG_TWT_NEGOTIATION_TYPE_BROADCAST		2
 
 /**
  * enum img_twt_setup_cmd_type - TWT Setup command/Response type.
@@ -2548,18 +2553,14 @@ struct img_umac_cmd_get_channel {
  *
  * Types of TWT setup command/events.
  */
-
-enum img_twt_setup_cmd_type {
-	IMG_REQUEST_TWT,
-	IMG_SUGGEST_TWT,
-	IMG_DEMAND_TWT,
-	IMG_GROUPING_TWT,
-	IMG_ACCEPT_TWT,
-	IMG_ALTERNATE_TWT,
-	IMG_DICTATE_TWT,
-	IMG_REJECT_TWT,
-};
-
+#define IMG_REQUEST_TWT				0
+#define	IMG_SUGGEST_TWT				1
+#define IMG_DEMAND_TWT				2
+#define	IMG_GROUPING_TWT			3
+#define IMG_ACCEPT_TWT				4
+#define	IMG_ALTERNATE_TWT			5
+#define IMG_DICTATE_TWT				6
+#define	IMG_REJECT_TWT				7
 
 #define IMG_TWT_FLOW_TYPE_ANNOUNCED		0
 #define IMG_TWT_FLOW_TYPE_UNANNOUNCED   1
@@ -2579,20 +2580,20 @@ enum img_twt_setup_cmd_type {
  * @nominal_min_twt_wake_duration: min TWT wake duration
  * This structure represents the command provides TWT information.
  */
-PACK(
+
 struct img_umac_config_twt_info {
 	unsigned char twt_flow_id;
 	unsigned char neg_type;
-	enum img_twt_setup_cmd_type setup_cmd;
+	int setup_cmd;
 	unsigned char ap_trigger_frame;
 	unsigned char is_implicit;
 	unsigned char twt_flow_type;
 	unsigned char twt_target_wake_interval_exponent;
-	unsigned short  twt_target_wake_interval_mantissa;
-	/* unsigned char target_wake_time[8]; */
+	unsigned short	twt_target_wake_interval_mantissa;
+	/*unsigned char target_wake_time[8];*/
 	unsigned long long target_wake_time;
 	unsigned short nominal_min_twt_wake_duration;
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_cmd_config_twt - configuring TWT params.
@@ -2601,11 +2602,11 @@ struct img_umac_config_twt_info {
  * This structure represents the command provides TWT information.
  */
 
-PACK(
+
 struct img_umac_cmd_config_twt {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_config_twt_info info;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2613,10 +2614,10 @@ struct img_umac_cmd_config_twt {
  * @twt_flow_id: TWT flow Id.
  * This structure represents the command provides TWT delete information.
  */
-PACK(
+
 struct img_umac_teardown_twt_info {
 	unsigned char twt_flow_id;
-});
+} __IMG_PKD;
 
 
 /**
@@ -2626,11 +2627,11 @@ struct img_umac_teardown_twt_info {
  * This structure represents the command provides TWT delete establishment.
  */
 
-PACK(
+
 struct img_umac_cmd_teardown_twt {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_teardown_twt_info info;
-});
+} __IMG_PKD;
 #endif
 /**
  * struct img_umac_event_trigger_scan - Scan complete event
@@ -2640,18 +2641,18 @@ struct img_umac_cmd_teardown_twt {
  * This structure represents the event to indicate a scan complete and includes
  * the scan complete information.
  */
-PACK(
+
 struct img_umac_event_trigger_scan {
 
 	struct img_umac_hdr	umac_hdr;
 	unsigned int	valid_fields;
 	unsigned int	img_scan_flags;
-	unsigned char   num_scan_ssid;
-	unsigned char   num_scan_frequencies;
+	unsigned char	num_scan_ssid;
+	unsigned char	num_scan_frequencies;
 	unsigned short	scan_frequencies[IMG_SCAN_MAX_NUM_FREQUENCIES];
 	struct img_ssid	scan_ssid[IMG_SCAN_MAX_NUM_SSIDS];
 	struct img_ie	ie;
-});
+} __IMG_PKD;
 
 #define IMG_EVENT_NEW_SCAN_RESULTS_MAC_ADDR_VALID		(1 << 0)
 #define IMG_EVENT_NEW_SCAN_RESULTS_IES_TSF_VALID		(1 << 1)
@@ -2708,7 +2709,7 @@ struct img_umac_event_trigger_scan {
  * This structure is returned as a response for %IMG_UMAC_CMD_GET_SCAN_RESULTS. It
  * contains a scan result entry.
  */
-PACK(
+
 struct img_umac_event_new_scan_results {
 
 	struct img_umac_hdr	umac_hdr;
@@ -2718,7 +2719,7 @@ struct img_umac_event_new_scan_results {
 	unsigned int		chan_width;
 	unsigned int		seen_ms_ago;
 	unsigned int		img_flags;
-	unsigned int		status;
+	int status;
 	unsigned long long	ies_tsf;
 	unsigned long long	beacon_ies_tsf;
 	unsigned short		beacon_interval;
@@ -2727,7 +2728,7 @@ struct img_umac_event_new_scan_results {
 	struct img_ie		beacon_ies;
 	struct img_signal	signal;
 	unsigned char		mac_addr[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
 /**
  * struct img_umac_event_new_scan_display_results - Scan result for dispaly purpose
@@ -2754,27 +2755,31 @@ struct img_umac_event_new_scan_results {
 #define IMG_802_11N  (1 << 3)
 #define IMG_802_11AC  (1 << 4)
 #define IMG_802_11AX  (1 << 5)
-PACK(
+
 struct umac_display_results {
-	struct img_ssid     ssid;
+	struct img_ssid		ssid;
 	unsigned char		mac_addr[IMG_ETH_ALEN];
-	unsigned int		nwk_band;
+	int nwk_band;
 	unsigned int		nwk_channel;
 	unsigned char protocol_flags;
-	unsigned int      security_type;
+	int security_type;
 	unsigned short		beacon_interval;
 	unsigned short		capability;
 	struct img_signal	signal;
-});
+	unsigned char reserved1;
+	unsigned char reserved2;
+	unsigned char reserved3;
+	unsigned char reserved4;
+} __IMG_PKD;
 
-PACK(
+
 struct img_umac_event_new_scan_display_results {
 
 	struct img_umac_hdr	umac_hdr;
 	/*Number of scan results in the current event*/
 	unsigned char event_bss_count;
 	struct umac_display_results display_results[10];
-});
+} __IMG_PKD;
 
 #define IMG_EVENT_MLME_FRAME_VALID		(1 << 0)
 #define IMG_EVENT_MLME_MAC_ADDR_VALID		(1 << 1)
@@ -2792,14 +2797,14 @@ struct img_umac_event_new_scan_display_results {
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @valid_fields: Indicate which of the following parameters are valid
  * @frame: Frame data (binary attribute), including frame header
- *	  and body, but not FCS; used, e.g., with IMG_UMAC_CMD_AUTHENTICATE and
- *	  %IMG_UMAC_CMD_ASSOCIATE events.
+ *	and body, but not FCS; used, e.g., with IMG_UMAC_CMD_AUTHENTICATE and
+ *	%IMG_UMAC_CMD_ASSOCIATE events.
  * @mac_addr: BSSID of the BSS (6 octets)
  * @frequency: Frequency of the selected channel in MHz
  * @cookie: Generic 64-bit cookie to identify objects.
  * @rx_signal_dbm: Signal strength in dBm (as a 32-bit int);
- *	  this attribute is (depending on the driver capabilities) added to
- *	  received frames indicated with %IMG_CMD_FRAME.
+ *	this attribute is (depending on the driver capabilities) added to
+ *	received frames indicated with %IMG_CMD_FRAME.
  * @wme_uapsd_queues: Bitmap of uapsd queues.
  * @img_flags: Indicate whether the frame was acked or timed out.
  *
@@ -2807,7 +2812,7 @@ struct img_umac_event_new_scan_display_results {
  * Response received, Association Response received etc.
  *
  */
-PACK(
+
 struct img_umac_event_mlme {
 
 	struct img_umac_hdr	umac_hdr;
@@ -2819,7 +2824,7 @@ struct img_umac_event_mlme {
 	struct img_frame	frame;
 	unsigned char		mac_addr[IMG_ETH_ALEN];
 	unsigned char		wme_uapsd_queues;
-});
+} __IMG_PKD;
 
 #define IMG_EVENT_CONNECT_STATUS_CODE_VALID	(1 << 0)
 #define IMG_EVENT_CONNECT_MAC_ADDR_VALID	(1 << 1)
@@ -2842,18 +2847,18 @@ struct img_umac_event_mlme {
  *	for ROAM and successful CONNECT events.
  *
  */
-PACK(
+
 struct img_umac_event_connect {
 
 	struct img_umac_hdr	umac_hdr;
 	unsigned int		valid_fields;
 	unsigned short		status_code;
 	unsigned char		mac_addr[IMG_ETH_ALEN];
-	unsigned char           req_ie;
-	unsigned char           resp_ie;
+	unsigned char		req_ie;
+	unsigned char		resp_ie;
 	struct img_ie		connect_ie;
 
-});
+} __IMG_PKD;
 
 #define IMG_CMD_SEND_STATION_ASSOC_REQ_IES_VALID (1 << 0)
 
@@ -2871,8 +2876,9 @@ struct img_umac_event_connect {
  * This structure represents an event which is generated when a station is
  * added or deleted.
  */
-PACK(
+
 struct img_umac_event_new_station {
+
 	struct img_umac_hdr	umac_hdr;
 	unsigned int	valid_fields;
 	unsigned char	wme;
@@ -2881,13 +2887,14 @@ struct img_umac_event_new_station {
 	unsigned int	generation;
 	struct img_sta_info	sta_info;
 	struct img_ie	assoc_req_ies;
-});
+
+} __IMG_PKD;
 
 #define IMG_CMD_COOKIE_RSP_COOKIE_VALID		(1 << 0)
 #define IMG_CMD_COOKIE_RSP_MAC_ADDR_VALID	(1 << 1)
 
 /**
- * struct  img_umac_event_cookie_rsp - Cookie for management frame.
+ * struct	img_umac_event_cookie_rsp - Cookie for management frame.
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @valid_fields: Indicate if assoc_req ies is valid.
  * @host_cookie: Identifier passed during %IMG_UMAC_CMD_FRAME.
@@ -2896,41 +2903,44 @@ struct img_umac_event_new_station {
  * We receive an RPU cookie that is associated with the host cookie
  * passed during IMG_UMAC_CMD_FRAME
  */
-PACK(
+
 struct img_umac_event_cookie_rsp {
+
 	struct img_umac_hdr	umac_hdr;
 	unsigned int		valid_fields;
 	unsigned long long	host_cookie;
 	unsigned long long	cookie;
 	unsigned char		mac_addr[IMG_ETH_ALEN];
 
-});
+} __IMG_PKD;
 
 /**
- * struct  img_umac_event_get_txpwr - Tx power.
+ * struct	img_umac_event_get_txpwr - Tx power.
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @txpwr_level: Tx power level
  *
  * Tx power information in dbm
  */
-PACK(
+
 struct img_umac_event_get_tx_power {
-	struct img_umac_hdr umac_hdr;
-	int	   txpwr_level;
-});
+
+	struct	img_umac_hdr umac_hdr;
+	int		txpwr_level;
+
+} __IMG_PKD;
 
 /**
- * struct  img_umac_event_set_interface - set interface status.
+ * struct	img_umac_event_set_interface - set interface status.
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @return_value: return value
  *
  * IMG_UMAC_CMD_SET_INTERFACE status
  */
-PACK(
+
 struct img_umac_event_set_interface {
 	struct img_umac_hdr umac_hdr;
 	int return_value;
-});
+} __IMG_PKD;
 
 /**
  * enum img_channel_flags - channel flags
@@ -2942,44 +2952,44 @@ struct img_umac_event_set_interface {
  * sending probe requests or beaconing.
  * @CHAN_RADAR: Radar detection is required on this channel.
  * @CHAN_NO_HT40PLUS: extension channel above this channel
- *   is not permitted.
+ *	is not permitted.
  * @CHAN_NO_HT40MINUS: extension channel below this channel
- *   is not permitted.
+ *	is not permitted.
  * @CHAN_NO_OFDM: OFDM is not allowed on this channel.
  * @CHAN_NO_80MHZ: If the driver supports 80 MHz on the band,
- *   this flag indicates that an 80 MHz channel cannot use this
- *   channel as the control or any of the secondary channels.
- *   This may be due to the driver or due to regulatory bandwidth
- *   restrictions.
+ *	this flag indicates that an 80 MHz channel cannot use this
+ *	channel as the control or any of the secondary channels.
+ *	This may be due to the driver or due to regulatory bandwidth
+ *	restrictions.
  * @CHAN_NO_160MHZ: If the driver supports 160 MHz on the band,
- *   this flag indicates that an 160 MHz channel cannot use this
- *   channel as the control or any of the secondary channels.
- *   This may be due to the driver or due to regulatory bandwidth
- *   restrictions.
+ *	this flag indicates that an 160 MHz channel cannot use this
+ *	channel as the control or any of the secondary channels.
+ *	This may be due to the driver or due to regulatory bandwidth
+ *	restrictions.
  * @CHAN_INDOOR_ONLY: see %NL80211_FREQUENCY_ATTR_INDOOR_ONLY
  * @CHAN_GO_CONCURRENT: see %NL80211_FREQUENCY_ATTR_GO_CONCURRENT
  * @CHAN_NO_20MHZ: 20 MHz bandwidth is not permitted
- *   on this channel.
+ *	on this channel.
  * @CHAN_NO_10MHZ: 10 MHz bandwidth is not permitted
- *  on this channel.
+ *	on this channel.
  *
  */
+#define	CHAN_DISABLED			(1<<0)
+#define CHAN_NO_IR				(1<<1)
+/* hole at 1<<2 */
+#define CHAN_RADAR				(1<<3)
+#define CHAN_NO_HT40PLUS		(1<<4)
+#define CHAN_NO_HT40MINUS		(1<<5)
+#define CHAN_NO_OFDM			(1<<6)
+#define CHAN_NO_80MHZ			(1<<7)
+#define CHAN_NO_160MHZ			(1<<8)
+#define CHAN_INDOOR_ONLY		(1<<9)
+#define CHAN_GO_CONCURRENT		(1<<10)
+#define CHAN_NO_20MHZ			(1<<11)
+#define CHAN_NO_10MHZ			(1<<12)
 
-enum img_channel_flags {
-	CHAN_DISABLED     = 1<<0,
-	CHAN_NO_IR        = 1<<1,
-	/* hole at 1<<2 */
-	CHAN_RADAR        = 1<<3,
-	CHAN_NO_HT40PLUS  = 1<<4,
-	CHAN_NO_HT40MINUS = 1<<5,
-	CHAN_NO_OFDM      = 1<<6,
-	CHAN_NO_80MHZ     = 1<<7,
-	CHAN_NO_160MHZ    = 1<<8,
-	CHAN_INDOOR_ONLY  = 1<<9,
-	CHAN_GO_CONCURRENT    = 1<<10,
-	CHAN_NO_20MHZ     = 1<<11,
-	CHAN_NO_10MHZ     = 1<<12,
-};
+
+
 
 
 /**
@@ -2990,69 +3000,75 @@ enum img_channel_flags {
  * @center_frequency2: center frequency of second segment
  * (only with 80+80 MHz)
  */
-PACK(
+
 struct img_chan_definition {
 	struct img_channel  chan;
-	enum img_chan_width width;
+	int width;
 	unsigned int center_frequency1;
 	unsigned int center_frequency2;
-});
+} __IMG_PKD;
 
 /**
- * struct  img_umac_event_get_channel - Get channel info.
+ * struct	img_umac_event_get_channel - Get channel info.
  * @umac_hdr: UMAC event header. Refer &struct img_umac_hdr.
  * @chan_def: Channel definition.
  *
  * The structure gives Channel information.
  */
-PACK(
+
 struct img_umac_event_get_channel {
 	struct img_umac_hdr umac_hdr;
 	struct img_chan_definition chan_def;
-});
+} __IMG_PKD;
 
-PACK(
+
 struct umac_cmd_ibss_join {
+
 	struct img_umac_hdr	umac_hdr;
 	struct img_ssid		ssid;
-	struct freq_params		freq_params;
+	struct freq_params	freq_params;
 	unsigned char		img_bssid[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
-PACK(
+
 struct img_cmd_leave_ibss {
-	struct img_umac_hdr		umac_hdr;
-});
 
-PACK(
+	struct img_umac_hdr		umac_hdr;
+
+} __IMG_PKD;
+
+
 struct img_umac_cmd_win_sta_connect {
+
 	struct img_umac_hdr	umac_hdr;
 	unsigned int		center_frequency;
-	unsigned int	auth_type;
+	int auth_type;
 	struct img_ie		wpa_ie;
 	struct img_ssid		ssid;
 	unsigned char		img_bssid[IMG_ETH_ALEN];
-});
+} __IMG_PKD;
 
 /* CMD_START_P2P_DEVICE */
-PACK(
-struct img_cmd_start_p2p {
-	struct img_umac_hdr         umac_hdr;
-});
 
-PACK(
+struct img_cmd_start_p2p {
+	struct img_umac_hdr	umac_hdr;
+} __IMG_PKD;
+
+
 struct img_cmd_get_ifindex {
+
 	struct img_umac_hdr	umac_hdr;
 	char			ifacename[IFACENAMSIZ];
-});
+} __IMG_PKD;
 
 
 #define IMG_TX_BITRATE_MASK_LEGACY_MAX_LEN	8
 #define IMG_IEEE80211_HT_MCS_MASK_LEN		10
 #define IMG_VHT_NSS_MAX 8
 
-PACK(
+
 struct tx_rates {
+
 	unsigned int	legacy_len;
 	unsigned int	ht_mcs_len;
 	unsigned int	vht_mcs_len;
@@ -3060,106 +3076,116 @@ struct tx_rates {
 	unsigned char	ht_mcs[IMG_IEEE80211_HT_MCS_MASK_LEN];
 	unsigned short	vht_mcs[IMG_VHT_NSS_MAX];
 
-});
+} __IMG_PKD;
 
-#define IMG_SET_TX_BITRATE_MASK_BAND_2GHZ_VALID  (1 << 0)
-#define IMG_SET_TX_BITRATE_MASK_BAND_5GHZ_VALID  (1 << 1)
-#define IMG_SET_TX_BITRATE_MASK_BAND_60GHZ_VALID (1 << 2)
+#define IMG_SET_TX_BITRATE_MASK_BAND_2GHZ_VALID		(1 << 0)
+#define IMG_SET_TX_BITRATE_MASK_BAND_5GHZ_VALID		(1 << 1)
+#define IMG_SET_TX_BITRATE_MASK_BAND_60GHZ_VALID	(1 << 2)
 
-PACK(
+
 struct img_set_tx_bitrate_mask {
+
 	struct img_umac_hdr	umac_hdr;
 	unsigned int		valid_fields;
 	struct tx_rates		control[3];
-});
+
+} __IMG_PKD;
 
 #define IMG_EVENT_TRIGGER_SCAN_IE_VALID	(1 << 0)
 #define IMG_EVENT_TRIGGER_SCAN_SCAN_FLAGS_VALID (1 << 1)
 
 
-PACK(
+
 struct remain_on_channel_info {
-	unsigned int                dur;
-	struct freq_params          img_freq_params;
-	unsigned long long          host_cookie;
-	unsigned long long          cookie;
-});
 
-#define IMG_CMD_ROC_FREQ_PARAMS_VALID   (1 << 0)
-#define IMG_CMD_ROC_DURATION_VALID      (1 << 1)
+	unsigned int				dur;
+	struct freq_params			img_freq_params;
+	unsigned long long			host_cookie;
+	unsigned long long			cookie;
 
-PACK(
+} __IMG_PKD;
+
+#define IMG_CMD_ROC_FREQ_PARAMS_VALID	(1 << 0)
+#define IMG_CMD_ROC_DURATION_VALID		(1 << 1)
+
+
 struct img_umac_cmd_remain_on_channel {
-	struct img_umac_hdr           umac_hdr;
-	unsigned int                  valid_fields;
-	struct remain_on_channel_info info;
-});
+
+		struct img_umac_hdr				umac_hdr;
+		unsigned int					valid_fields;
+		struct remain_on_channel_info	info;
+
+} __IMG_PKD;
 
 #define IMG_CMD_CANCEL_ROC_COOKIE_VALID (1 << 0)
 
-PACK(
+
 struct img_umac_cmd_cancel_remain_on_channel {
-	struct img_umac_hdr         umac_hdr;
-	unsigned int                valid_fields;
-	unsigned long long          cookie;
-});
+
+		struct img_umac_hdr			umac_hdr;
+		unsigned int				valid_fields;
+		unsigned long long			cookie;
+
+} __IMG_PKD;
 
 
-#define IMG_EVENT_ROC_FREQ_VALID        (1 << 0)
-#define IMG_EVENT_ROC_COOKIE_VALID      (1 << 1)
-#define IMG_EVENT_ROC_DURATION_VALID    (1 << 2)
-#define IMG_EVENT_ROC_CH_TYPE_VALID     (1 << 3)
+#define IMG_EVENT_ROC_FREQ_VALID		(1 << 0)
+#define IMG_EVENT_ROC_COOKIE_VALID		(1 << 1)
+#define IMG_EVENT_ROC_DURATION_VALID	(1 << 2)
+#define IMG_EVENT_ROC_CH_TYPE_VALID		(1 << 3)
 
-PACK(
+
 struct img_event_remain_on_channel {
-	struct img_umac_hdr     umac_hdr;
-	unsigned int            valid_fields;
-	unsigned int            frequency;
-	unsigned int            dur;
-	unsigned int            ch_type;
-	unsigned long long      cookie;
-});
 
-PACK(
+struct img_umac_hdr		umac_hdr;
+unsigned int			valid_fields;
+unsigned int			frequency;
+unsigned int			dur;
+unsigned int			ch_type;
+unsigned long long		cookie;
+
+} __IMG_PKD;
+
+
 struct img_cmd_get_interface {
 	struct img_umac_hdr umac_hdr;
-});
+} __IMG_PKD;
 
 
-PACK(
+
 struct img_interface_info {
-	struct img_umac_hdr              umac_hdr;
-#define IMG_INTERFACE_INFO_CHAN_DEF_VALID                   (1 << 0)
-#define IMG_INTERFACE_INFO_SSID_VALID                       (1 << 1)
-#define IMG_INTERFACE_INFO_IFNAME_VALID                     (1 << 2)
-	unsigned int                    valid_fields;
-	enum img_iftype                 img_iftype;
-	char                            ifacename[IFACENAMSIZ];
-	unsigned char                   img_eth_addr[IMG_ETH_ALEN];
-	struct img_chan_definition      chan_def;
-	struct img_ssid                 ssid;
-});
+		struct img_umac_hdr				umac_hdr;
+#define IMG_INTERFACE_INFO_CHAN_DEF_VALID				(1 << 0)
+#define IMG_INTERFACE_INFO_SSID_VALID					(1 << 1)
+#define IMG_INTERFACE_INFO_IFNAME_VALID					(1 << 2)
+		unsigned int					valid_fields;
+		int								img_iftype;
+		char							ifacename[IFACENAMSIZ];
+		unsigned char					img_eth_addr[IMG_ETH_ALEN];
+		struct img_chan_definition		chan_def;
+		struct img_ssid					ssid;
+} __IMG_PKD;
 
 
-PACK(
+
 struct img_event_mcs_info {
 #define IMG_HT_MCS_MASK_LEN	10
-	unsigned short img_rx_highest;
-	unsigned char img_rx_mask[IMG_HT_MCS_MASK_LEN];
-	unsigned char img_tx_params;
-	unsigned char img_reserved[3];
-});
+		unsigned short img_rx_highest;
+		unsigned char img_rx_mask[IMG_HT_MCS_MASK_LEN];
+		unsigned char img_tx_params;
+		unsigned char img_reserved[3];
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_sta_ht_cap {
-	int img_ht_supported;
-	unsigned short img_cap;
-	struct img_event_mcs_info mcs;
-	unsigned char img_ampdu_factor;
-	unsigned char img_ampdu_density;
-});
+		int img_ht_supported;
+		unsigned short img_cap;
+		struct img_event_mcs_info mcs;
+		unsigned char img_ampdu_factor;
+		unsigned char img_ampdu_density;
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_channel {
 #define IMG_CHAN_FLAG_FREQUENCY_ATTR_NO_IR		(1 << 0)
 #define IMG_CHAN_FLAG_FREQUENCY_ATTR_NO_IBSS		(1 << 1)
@@ -3183,67 +3209,67 @@ struct img_event_channel {
 	char ch_valid;
 	unsigned short center_frequency;
 	char dfs_state;
-});
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_rate {
 #define IMG_EVENT_GET_WIPHY_FLAG_RATE_SHORT_PREAMBLE (1 << 0)
-	unsigned short img_flags;
-	unsigned short img_bitrate;
-});
+		unsigned short img_flags;
+		unsigned short img_bitrate;
+} __IMG_PKD;
 
 
-PACK(
+
 struct img_event_vht_mcs_info {
-	unsigned short rx_mcs_map;
-	unsigned short rx_highest;
-	unsigned short tx_mcs_map;
-	unsigned short tx_highest;
-});
+		unsigned short rx_mcs_map;
+		unsigned short rx_highest;
+		unsigned short tx_mcs_map;
+		unsigned short tx_highest;
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_sta_vht_cap {
-	char img_vht_supported;
-	unsigned int img_cap;
-	struct img_event_vht_mcs_info vht_mcs;
-});
+		char img_vht_supported;
+		unsigned int img_cap;
+		struct img_event_vht_mcs_info vht_mcs;
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_supported_band {
-	unsigned short img_n_channels;
-	unsigned short img_n_bitrates;
-	struct img_event_channel channels[26];
-	struct img_event_rate bitrates[13];
-	struct img_event_sta_ht_cap ht_cap;
-	struct img_event_sta_vht_cap vht_cap;
-	char band;
-});
+		unsigned short img_n_channels;
+		unsigned short img_n_bitrates;
+		struct img_event_channel channels[26];
+		struct img_event_rate bitrates[13];
+		struct img_event_sta_ht_cap ht_cap;
+		struct img_event_sta_vht_cap vht_cap;
+		char band;
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_iface_limit {
-	unsigned short img_max;
-	unsigned short img_types;
-});
+		unsigned short img_max;
+		unsigned short img_types;
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_iface_combination {
-	unsigned int img_num_different_channels;
-	int beacon_int_infra_match;
-	struct img_event_iface_limit limits[2];
-	unsigned short img_max_interfaces;
-	unsigned char img_radar_detect_widths;
-	unsigned char img_n_limits;
-	unsigned char img_radar_detect_regions;
+		unsigned int img_num_different_channels;
+		int beacon_int_infra_match;
+		struct img_event_iface_limit limits[2];
+		unsigned short img_max_interfaces;
+		unsigned char img_radar_detect_widths;
+		unsigned char img_n_limits;
+		unsigned char img_radar_detect_regions;
 
 #define IMG_EVENT_GET_WIPHY_VALID_RADAR_DETECT_WIDTHS	(1 << 0)
 #define IMG_EVENT_GET_WIPHY_VALID_RADAR_DETECT_REGIONS	(1 << 1)
 #define IMG_EVENT_GET_WIPHY_VALID_			(1 << 2)
 	unsigned char comb_valid;
-});
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_get_wiphy {
-	struct img_umac_hdr                  umac_hdr;
+	struct img_umac_hdr		umac_hdr;
 
 	unsigned int img_frag_threshold;
 	unsigned int img_rts_threshold;
@@ -3272,8 +3298,8 @@ struct img_event_get_wiphy {
 	unsigned int get_wiphy_flags;
 
 #define IMG_GET_WIPHY_VALID_PROBE_RESP_OFFLOAD		(1 << 0)
-#define IMG_GET_WIPHY_VALID_TX_ANT				    (1 << 1)
-#define IMG_GET_WIPHY_VALID_RX_ANT				    (1 << 2)
+#define IMG_GET_WIPHY_VALID_TX_ANT					(1 << 1)
+#define IMG_GET_WIPHY_VALID_RX_ANT					(1 << 2)
 #define IMG_GET_WIPHY_VALID_MAX_NUM_SCAN_SSIDS		(1 << 3)
 #define IMG_GET_WIPHY_VALID_NUM_SCHED_SCAN_SSIDS	(1 << 4)
 #define IMG_GET_WIPHY_VALID_MAX_MATCH_SETS			(1 << 5)
@@ -3282,6 +3308,7 @@ struct img_event_get_wiphy {
 #define IMG_GET_WIPHY_VALID_EXTENDED_CAPABILITIES	(1 << 8)
 #define IMG_GET_WIPHY_VALID_MAX_AP_ASSOC_STA		(1 << 9)
 #define IMG_GET_WIPHY_VALID_WIPHY_NAME				(1 << 10)
+#define IMG_GET_WIPHY_VALID_EXTENDED_FEATURES		(1 << 11)
 	unsigned int params_valid;
 
 	unsigned short int max_scan_ie_len;
@@ -3299,97 +3326,111 @@ struct img_event_get_wiphy {
 	unsigned char n_cipher_suites;
 	unsigned char max_num_pmkids;
 	unsigned char extended_capabilities_len;
-	unsigned char extended_capabilities[8];
-	unsigned char extended_capabilities_mask[8];
+	unsigned char extended_capabilities[10];
+	unsigned char extended_capabilities_mask[10];
+#define EXTENDED_FEATURE_LEN	60
+#define DIV_ROUND_UP_NL(n, d) (((n) + (d) - 1) / (d))
+
+	unsigned char ext_features[DIV_ROUND_UP_NL(EXTENDED_FEATURE_LEN, 8)];
+	unsigned char ext_features_len;
 	char num_iface_com;
-#define IMG_INDEX_IDS_WIPHY_NAME                        32
-	char            wiphy_name[IMG_INDEX_IDS_WIPHY_NAME];
+#define IMG_INDEX_IDS_WIPHY_NAME	32
+	char			wiphy_name[IMG_INDEX_IDS_WIPHY_NAME];
 
 #define IMG_EVENT_GET_WIPHY_NUM_BANDS 3
 	struct img_event_supported_band sband[IMG_EVENT_GET_WIPHY_NUM_BANDS];
-});
+} __IMG_PKD;
 
 
 /* NL80211_CMD_GET_WIPHY */
-PACK(
-struct img_cmd_get_wiphy {
-	struct img_umac_hdr          umac_hdr;
-});
 
-PACK(
+struct img_cmd_get_wiphy {
+	struct img_umac_hdr			umac_hdr;
+} __IMG_PKD;
+
+
 struct img_cmd_get_ifhwaddr {
 	struct img_umac_hdr umac_hdr;
-	char                ifacename[IFACENAMSIZ];
-});
+	char				ifacename[IFACENAMSIZ];
+} __IMG_PKD;
 
-PACK(
+
 struct img_cmd_set_ifhwaddr {
-	struct img_umac_hdr umac_hdr;
-	char                ifacename[IFACENAMSIZ];
-	unsigned char           img_hwaddr[IMG_ETH_ALEN];
-});
+	struct img_umac_hdr	umac_hdr;
+	char				ifacename[IFACENAMSIZ];
+	unsigned char		img_hwaddr[IMG_ETH_ALEN];
+} __IMG_PKD;
 
-PACK(
+
 struct img_reg_rules {
+
 #define REG_RULE_FLAGS_VALID		(1 << 0)
 #define FREQ_RANGE_START_VALID		(1 << 1)
 #define FREQ_RANGE_END_VALID		(1 << 2)
 #define FREQ_RANGE_MAX_BW_VALID		(1 << 3)
 #define POWER_RULE_MAX_EIRP_VALID	(1 << 4)
-	unsigned int                valid_fields;
+	unsigned int				valid_fields;
 
-	unsigned int                rule_flags;
-	unsigned int                freq_range_start;
-	unsigned int                freq_range_end;
-	unsigned int                freq_range_max_bw;
-	unsigned int                pwr_max_eirp;
+	unsigned int				rule_flags;
+	unsigned int				freq_range_start;
+	unsigned int				freq_range_end;
+	unsigned int				freq_range_max_bw;
+	unsigned int				pwr_max_eirp;
 
-});
+} __IMG_PKD;
 
 /* NL80211_CMD_SET_REG , NL80211_CMD_GET_REG*/
-PACK(
-struct img_reg {
-	struct img_umac_hdr          umac_hdr;
 
-#define IMG_CMD_SET_REG_ALPHA2_VALID      (1 << 0)
-#define IMG_CMD_SET_REG_RULES_VALID       (1 << 1)
-#define IMG_CMD_SET_REG_DFS_REGION_VALID  (1 << 2)
-	unsigned int                valid_fields;
-	unsigned int		dfs_region;
+struct img_reg {
+	struct img_umac_hdr			umac_hdr;
+
+#define IMG_CMD_SET_REG_ALPHA2_VALID		(1 << 0)
+#define IMG_CMD_SET_REG_RULES_VALID			(1 << 1)
+#define IMG_CMD_SET_REG_DFS_REGION_VALID	(1 << 2)
+	unsigned int				valid_fields;
+	unsigned int				dfs_region;
 #define MAX_NUM_REG_RULES	32
-	unsigned int                num_reg_rules;
-	struct img_reg_rules        img_reg_rules[MAX_NUM_REG_RULES];
-	unsigned char               img_alpha2[3];
-});
+	unsigned int				num_reg_rules;
+	struct img_reg_rules		img_reg_rules[MAX_NUM_REG_RULES];
+	unsigned char				img_alpha2[3];
+} __IMG_PKD;
 
 /* NL80211_CMD_REQ_SET_REG */
-PACK(
+
 struct img_cmd_req_set_reg {
-	struct img_umac_hdr          umac_hdr;
+	struct img_umac_hdr			umac_hdr;
 
-#define IMG_CMD_REQ_SET_REG_ALPHA2_VALID		   (1 << 0)
-#define IMG_CMD_REQ_SET_REG_USER_REG_HINT_TYPE_VALID       (1 << 1)
-	unsigned int                valid_fields;
-	unsigned int                img_user_reg_hint_type;
-	unsigned char               img_alpha2[3];
-});
+#define IMG_CMD_REQ_SET_REG_ALPHA2_VALID					(1 << 0)
+#define IMG_CMD_REQ_SET_REG_USER_REG_HINT_TYPE_VALID		(1 << 1)
+	unsigned int				valid_fields;
+	unsigned int				img_user_reg_hint_type;
+	unsigned char				img_alpha2[3];
+} __IMG_PKD;
 
-PACK(
+
 struct img_event_send_beacon_hint {
-	struct img_umac_hdr    umac_hdr;
+	struct img_umac_hdr	umac_hdr;
 	struct img_event_channel channel_before;
 	struct img_event_channel channel_after;
-});
 
-#define IMG_EVNT_WIPHY_SELF_MANAGED			   (1 << 0)
+} __IMG_PKD;
 
-PACK(
+#define IMG_EVNT_WIPHY_SELF_MANAGED					(1 << 0)
+
+
 struct img_event_regulatory_change {
 	struct img_umac_hdr    umac_hdr;
 	unsigned short img_flags;
-	enum img_regulatory_initiator intr;
+	int intr;
 	char regulatory_type;
 	unsigned char img_alpha2[2];
-});
 
+} __IMG_PKD;
+
+
+struct img_umac_event_cmd_status {
+		struct img_umac_hdr	umac_hdr;
+		unsigned int	cmd_id;
+		unsigned int	cmd_status;
+} __IMG_PKD;
 #endif /* __HOST_RPU_UMAC_IF_H */

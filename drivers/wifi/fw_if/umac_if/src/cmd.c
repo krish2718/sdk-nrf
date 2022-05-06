@@ -224,7 +224,7 @@ out:
 
 
 enum wifi_nrf_status umac_cmd_prog_stats_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-					      enum rpu_stats_type stats_type)
+					      int stats_type)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
 	struct host_rpu_msg *umac_cmd = NULL;

@@ -214,7 +214,7 @@ enum wifi_nrf_status wifi_nrf_fmac_scan(void *wifi_nrf_fmac_dev_ctx,
  */
 enum wifi_nrf_status wifi_nrf_fmac_scan_res_get(void *wifi_nrf_fmac_dev_ctx,
 						   unsigned char vif_idx,
-						   enum scan_reason scan_type);
+						   int scan_type);
 
 
 /**

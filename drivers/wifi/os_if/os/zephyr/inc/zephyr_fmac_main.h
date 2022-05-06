@@ -30,7 +30,7 @@ struct wifi_nrf_vif_ctx_zep {
 	struct zep_wpa_supp_dev_callbk_fns supp_callbk_fns;
 	scan_result_cb_t disp_scan_cb;
 	bool scan_in_progress;
-	enum scan_reason scan_type;
+	int scan_type;
 
 	unsigned int assoc_freq;
 	enum wifi_nrf_fmac_if_state if_state;

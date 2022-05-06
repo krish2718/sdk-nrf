@@ -284,7 +284,7 @@ static enum wifi_nrf_status wifi_nrf_fmac_data_event_process(struct wifi_nrf_fma
 								void *umac_head)
 {
 	enum wifi_nrf_status status = NVLSI_RPU_STATUS_FAIL;
-	enum img_umac_data_commands event = -1;
+	int event = -1;
 
 	if (!fmac_dev_ctx)
 		goto out;
@@ -446,7 +446,7 @@ enum wifi_nrf_status wifi_nrf_fmac_event_callback(void *mac_dev_ctx,
 	struct host_rpu_msg *rpu_msg = NULL;
 	struct img_umac_hdr *umac_hdr = NULL;
 	unsigned int umac_msg_len = 0;
-	enum img_umac_events umac_msg_type = IMG_UMAC_EVENT_UNSPECIFIED;
+	int umac_msg_type = IMG_UMAC_EVENT_UNSPECIFIED;
 
 	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)mac_dev_ctx;
 
