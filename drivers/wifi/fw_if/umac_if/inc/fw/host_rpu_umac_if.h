@@ -315,7 +315,7 @@
 
 	/* keep last */
 #define	__IMG_AUTHTYPE_NUM			5
-#define	IMG_AUTHTYPE_MAX			(__IMG_AUTHTYPE_NUM - 1)
+#define	IMG_AUTHTYPE_MAX			(__IMG_AUTHTYPE_NUM)
 #define	IMG_AUTHTYPE_AUTOMATIC		6
 
 /**
