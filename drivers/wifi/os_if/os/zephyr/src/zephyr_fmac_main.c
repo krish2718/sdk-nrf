@@ -452,11 +452,12 @@ static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
 };
 
 
-ETH_NET_DEVICE_DT_INST_DEFINE(0, /* inst */
-			      wifi_nrf_drv_main_zep, /* init_fn */
-			      NULL, /* pm_action_cb */
-			      &rpu_drv_priv_zep.rpu_ctx_zep.vif_ctx_zep[0], /* data */
-			      NULL, /* cfg */
-			      CONFIG_WIFI_INIT_PRIORITY, /* prio */
-			      &wifi_nrf_dev_ops, /* api */
-			      1500); /*mtu */
+ETH_NET_DEVICE_INIT(wlan0, /* name - token */
+                    "wlan0", /* driver name - dev->name */
+                    wifi_nrf_drv_main_zep, /* init_fn */
+                    NULL, /* pm_action_cb */
+                    &rpu_drv_priv_zep.rpu_ctx_zep.vif_ctx_zep[0], /* data */
+                    NULL, /* cfg */
+                    CONFIG_WIFI_INIT_PRIORITY, /* prio */
+                    &wifi_nrf_dev_ops, /* api */
+                    1500); /*mtu */

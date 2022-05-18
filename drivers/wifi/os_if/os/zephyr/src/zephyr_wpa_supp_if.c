@@ -412,21 +412,32 @@ void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv,
 	printk("%s: To be implemented\n", __func__);
 }
 
+static void iface_cb(struct net_if *iface, void *user_data)
+{
+    struct wifi_nrf_vif_ctx_map *vif_ctx_map = user_data;
+
+	if (strncmp(iface->if_dev->dev->name, vif_ctx_map->ifname, IFNAMSIZ) == 0) {
+		vif_ctx_map->vif_ctx = net_if_get_device(iface)->data;
+	}
+}
 
 void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx,
 			      const char *iface_name,
 			      struct zep_wpa_supp_dev_callbk_fns *supp_callbk_fns)
 {
-	const struct device *dev = NULL;
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_map vif_ctx_map = {0};
 
-	/* TODO: Need to figure out what needs to be done here */
-#ifdef notyet
-	dev = DEVICE_GET(iface_name);
-#endif /* notyet */
+	vif_ctx_map.ifname = iface_name;
 
-	dev = net_if_get_device(net_if_get_default());
-	vif_ctx_zep = dev->data;
+	net_if_foreach(iface_cb, &vif_ctx_map);
+
+	vif_ctx_zep = vif_ctx_map.vif_ctx;
+
+	if (!vif_ctx_zep) {
+		printk("%s: Interface %s not found\n", __func__, iface_name);
+		return NULL;
+	}
 
 	vif_ctx_zep->supp_drv_if_ctx = supp_drv_if_ctx;
 

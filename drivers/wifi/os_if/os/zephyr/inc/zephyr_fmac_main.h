@@ -19,7 +19,6 @@
 #include "fmac_api.h"
 #include "host_rpu_umac_if.h"
 
-
 struct wifi_nrf_vif_ctx_zep {
 	const struct device *zep_dev_ctx;
 	struct net_if *zep_net_if_ctx;
@@ -36,6 +35,11 @@ struct wifi_nrf_vif_ctx_zep {
 	enum wifi_nrf_fmac_if_state if_state;
 };
 
+
+struct wifi_nrf_vif_ctx_map {
+        const char *ifname;
+        struct wifi_nrf_vif_ctx_zep *vif_ctx;
+};
 
 struct wifi_nrf_ctx_zep {
 	void *drv_priv_zep;
