@@ -1375,7 +1375,7 @@ enum wifi_nrf_status wifi_nrf_fmac_p2p_dev_start(void *wifi_nrf_fmac_dev_ctx,
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct img_umac_cmd_start_p2p_dev *start_p2p_dev_cmd = NULL;
-	struct wifi_nrf_osal_ops *osal_ops = NULL;
+	const struct wifi_nrf_osal_ops *osal_ops = NULL;
 	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 
 	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;

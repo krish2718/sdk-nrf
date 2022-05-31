@@ -709,7 +709,8 @@ void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
 #endif
 }
 
-struct wifi_nrf_osal_ops wifi_nrf_os_zep_ops = {
+
+static const struct wifi_nrf_osal_ops wifi_nrf_os_zep_ops = {
 	.mem_alloc = zep_shim_mem_alloc,
 	.mem_zalloc = zep_shim_mem_zalloc,
 	.mem_free = k_free,
@@ -780,7 +781,7 @@ struct wifi_nrf_osal_ops wifi_nrf_os_zep_ops = {
 	.bus_qspi_dev_host_map_get = zep_shim_bus_qspi_dev_host_map_get,
 };
 
-struct wifi_nrf_osal_ops *get_os_ops(void)
+const struct wifi_nrf_osal_ops *get_os_ops(void)
 {
 	return &wifi_nrf_os_zep_ops;
 }

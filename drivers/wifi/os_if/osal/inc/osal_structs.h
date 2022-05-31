@@ -44,6 +44,6 @@ struct wifi_nrf_osal_host_map {
 };
 
 struct wifi_nrf_osal_priv {
-	struct wifi_nrf_osal_ops *ops;
+	const struct wifi_nrf_osal_ops *ops;
 };
 #endif /* __OSAL_STRUCTS_H__ */
