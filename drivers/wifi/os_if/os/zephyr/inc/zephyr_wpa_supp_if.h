@@ -69,4 +69,9 @@ void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv,
 
 void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv,
 					struct img_umac_event_mlme *disassoc);
+
+int wifi_nrf_wpa_supp_set_ap(void *if_priv, struct wpa_driver_ap_params *params);
+
+int wifi_nrf_wpa_supp_stop_ap(void *if_priv);
+
 #endif /*  __ZEPHYR_WPA_SUPP_IF_H__ */

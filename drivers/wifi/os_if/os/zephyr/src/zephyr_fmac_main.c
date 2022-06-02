@@ -431,7 +431,6 @@ out:
 	return ret;
 }
 
-
 static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
 	.if_api.iface_api.init = wifi_nrf_if_init,
 	.if_api.get_capabilities = wifi_nrf_if_caps_get,
@@ -449,6 +448,8 @@ static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
 	.associate = wifi_nrf_wpa_supp_associate,
 	.set_supp_port = wifi_nrf_wpa_set_supp_port,
 	.set_key = wifi_nrf_wpa_supp_set_key,
+	.set_ap = wifi_nrf_wpa_supp_set_ap,
+	.stop_ap = wifi_nrf_wpa_supp_stop_ap,
 };
 
 

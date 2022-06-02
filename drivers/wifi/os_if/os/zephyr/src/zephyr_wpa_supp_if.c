@@ -1114,3 +1114,57 @@ int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid)
 
 	return  wifi_nrf_fmac_chg_sta(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &chg_sta_info);
 }
+
+
+int wifi_nrf_wpa_supp_set_ap(void *if_priv, struct wpa_driver_ap_params *params)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
+
+	vif_ctx_zep = if_priv;
+	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
+	struct img_umac_start_ap_info ap_info;
+
+	ap_info.beacon_interval = params->beacon_int;
+	ap_info.dtim_period = params->dtim_period;
+	ap_info.ssid.img_ssid_len = params->ssid_len;
+	os_memcpy(ap_info.ssid.img_ssid, params->ssid, params->ssid_len);
+	ap_info.auth_type = get_wifi_nrf_auth_type(params->auth_algs);
+	
+
+	ap_info.beacon_data.head_len = params->head_len;
+	ap_info.beacon_data.tail_len = params->tail_len;
+	ap_info.beacon_data.probe_resp_len = params->proberesp_len;
+	os_memcpy(ap_info.beacon_data.head, params->head, params->head_len);
+	os_memcpy(ap_info.beacon_data.tail, params->tail, params->tail_len);	
+	os_memcpy(ap_info.beacon_data.probe_resp, params->proberesp, params->proberesp_len);
+
+	ap_info.freq_params.frequency = params->freq->freq;
+	ap_info.freq_params.channel_width = params->freq->bandwidth;
+	ap_info.freq_params.center_frequency1 = params->freq->center_freq1;
+	ap_info.freq_params.center_frequency2 = params->freq->center_freq2;
+	if (params->freq->ht_enabled) {
+		if (params->freq->sec_channel_offset == -1) {
+			ap_info.freq_params.channel_type = IMG_CHAN_HT40MINUS;
+		} else if (params->freq->sec_channel_offset == 1) {
+			ap_info.freq_params.channel_type = IMG_CHAN_HT40PLUS;
+		} else {
+			ap_info.freq_params.channel_type = IMG_CHAN_HT20;
+		}
+	} else {
+		ap_info.freq_params.channel_type = IMG_CHAN_NO_HT;
+	}
+
+	return wifi_nrf_fmac_start_ap(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &ap_info);
+}
+
+int wifi_nrf_wpa_supp_stop_ap(void *if_priv)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
+
+	vif_ctx_zep = if_priv;
+	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
+
+	return wifi_nrf_fmac_stop_ap(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx);
+}
