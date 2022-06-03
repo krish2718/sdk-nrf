@@ -277,6 +277,13 @@ void wifi_nrf_fmac_dev_rem(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 	wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv, fmac_dev_ctx);
 }
 
+struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(
+		struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+		struct wifi_nrf_fmac_init_dev_params *params)
+{
+	return wifi_nrf_hal_umac_info(fmac_dev_ctx->hal_dev_ctx);
+}
+
 enum wifi_nrf_status wifi_nrf_fmac_dev_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					    struct wifi_nrf_fmac_init_dev_params *params)
 {

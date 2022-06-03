@@ -155,6 +155,7 @@ struct wifi_nrf_hal_dev_ctx {
 	unsigned char idx;
 
 	struct wifi_nrf_hal_info rpu_info;
+	struct host_rpu_umac_info umac_info;
 
 	unsigned int num_cmds;
 

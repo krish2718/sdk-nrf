@@ -921,6 +921,16 @@ void wifi_nrf_hal_dev_rem(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	wifi_nrf_osal_mem_free(hal_dev_ctx->hpriv->opriv, hal_dev_ctx);
 }
 
+struct host_rpu_umac_info *
+wifi_nrf_hal_umac_info(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx){
+
+	hal_rpu_mem_read(hal_dev_ctx, &hal_dev_ctx->umac_info, 
+			RPU_MEM_UMAC_BOOT_SIG,
+			sizeof(hal_dev_ctx->umac_info));
+
+	return &hal_dev_ctx->umac_info;
+}
+
 enum wifi_nrf_status wifi_nrf_hal_dev_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;

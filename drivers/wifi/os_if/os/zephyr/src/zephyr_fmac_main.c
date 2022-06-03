@@ -19,7 +19,6 @@
 #include "zephyr_net_if.h"
 #include "zephyr_disp_scan.h"
 
-char *base_mac_addr = "0019F5331179";
 char *rf_params = "0000000000002C00000000000000003020302020203030300000000050EC000000000000000000000000214365003F0324240010000028003235000000F6080A7D8105010071630300EED501001F6F00003B350100F52E0000E35E0000B7B6000066EFFEFFB5F60000896200007A840200E28FFCFF08080808040A120100000000A1A101780000002C01500035020726181818181A120A140E0600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 
 unsigned char aggregation = 1;
@@ -86,6 +85,29 @@ void wifi_nrf_event_proc_scan_done_zep(void *vif_ctx,
 	status = WIFI_NRF_STATUS_SUCCESS;
 }
 
+static int wifi_nrf_umac_info(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
+{
+	struct host_rpu_umac_info *umac_info;
+
+	umac_info = wifi_nrf_fmac_umac_info(rpu_ctx_zep->rpu_ctx);
+
+	if(umac_info->mac_address0[0] == 0xffffffff &&
+	   umac_info->mac_address0[1] == 0xffffffff){
+		printk("Invalid MAC address0 \n");
+		return -1;
+	}
+
+	if(umac_info->mac_address1[0] == 0xffffffff &&
+	   umac_info->mac_address1[1] == 0xffffffff){
+		printk("Invalid MAC address1 \n");
+		return -1;
+	}
+
+	memcpy(rpu_ctx_zep->mac_addr, umac_info->mac_address0, IMG_ETH_ALEN);
+
+	return 0;
+}
+
 enum wifi_nrf_status wifi_nrf_fmac_dev_add_zep(struct wifi_nrf_drv_priv_zep *drv_priv_zep)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
@@ -137,6 +159,16 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_add_zep(struct wifi_nrf_drv_priv_zep *drv
 		goto out;
 	}
 
+	status = wifi_nrf_umac_info(&rpu_drv_priv_zep.rpu_ctx_zep);
+
+	if (status != WIFI_NRF_STATUS_SUCCESS) {
+		printk("%s: wifi_nrf_umac_info failed\n", __func__);
+		wifi_nrf_fmac_dev_rem(rpu_ctx);
+		k_free(rpu_ctx_zep);
+		rpu_ctx_zep = NULL;
+		goto out;
+	}
+
 out:
 	return status;
 }
@@ -166,7 +198,7 @@ enum wifi_nrf_status wifi_nrf_fmac_def_vif_add_zep(struct wifi_nrf_ctx_zep *rpu_
 
 	memcpy(add_vif_info.ifacename, "wlan0", strlen("wlan0"));
 
-	memcpy(add_vif_info.mac_addr, base_mac_addr, sizeof(add_vif_info.mac_addr));
+	memcpy(add_vif_info.mac_addr, rpu_ctx_zep->mac_addr, sizeof(add_vif_info.mac_addr));
 
 	vif_ctx_zep->vif_idx =
 		wifi_nrf_fmac_add_vif(rpu_ctx_zep->rpu_ctx, vif_ctx_zep, &add_vif_info);
@@ -226,14 +258,7 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init_zep(struct wifi_nrf_ctx_zep *rpu_ctx
 
 	memset(&params, 0, sizeof(params));
 
-	ret = hex_str_to_val(params.base_mac_addr, sizeof(params.base_mac_addr), base_mac_addr);
-
-	memcpy(rpu_ctx_zep->mac_addr, params.base_mac_addr, sizeof(rpu_ctx_zep->mac_addr));
-
-	if (ret == -1) {
-		printk("%s: hex_str_to_val failed\n", __func__);
-		goto out;
-	}
+	memcpy(params.base_mac_addr, rpu_ctx_zep->mac_addr, sizeof(rpu_ctx_zep->mac_addr));
 
 	if (rf_params) {
 		memset(params.rf_params, 0xFF, sizeof(params.rf_params));

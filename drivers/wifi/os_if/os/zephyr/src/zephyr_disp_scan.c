@@ -101,6 +101,13 @@ void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 
 		memcpy(res.ssid, r->ssid.img_ssid, res.ssid_length);
 
+		if (r->signal.signal_type == IMG_SIGNAL_TYPE_MBM) {
+			int val = (r->signal.signal.mbm_signal);
+			res.rssi = (val / 100);
+		} else if (r->signal.signal_type == IMG_SIGNAL_TYPE_UNSPEC) {
+			res.rssi = (r->signal.signal.unspec_signal);
+		}
+
 		vif_ctx_zep->disp_scan_cb(vif_ctx_zep->zep_net_if_ctx, 0, &res);
 
 		/* NET_MGMT dropping events if too many are queued */
