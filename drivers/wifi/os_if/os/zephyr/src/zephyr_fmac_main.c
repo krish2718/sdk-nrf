@@ -19,8 +19,6 @@
 #include "zephyr_net_if.h"
 #include "zephyr_disp_scan.h"
 
-char *rf_params = "0000000000002C00000000000000003020302020203030300000000050EC000000000000000000000000214365003F0324240010000028003235000000F6080A7D8105010071630300EED501001F6F00003B350100F52E0000E35E0000B7B6000066EFFEFFB5F60000896200007A840200E28FFCFF08080808040A120100000000A1A101780000002C01500035020726181818181A120A140E0600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
 unsigned char aggregation = 1;
 unsigned char wmm = 1;
 unsigned char max_num_tx_agg_sessions = 4;
@@ -255,6 +253,8 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init_zep(struct wifi_nrf_ctx_zep *rpu_ctx
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_fmac_init_dev_params params;
 	int ret = -1;
+	char *rf_params = DEF_RF_PARAMS;
+	struct host_rpu_umac_info *umac_info;
 
 	memset(&params, 0, sizeof(params));
 
@@ -276,6 +276,13 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init_zep(struct wifi_nrf_ctx_zep *rpu_ctx
 	}
 
 	params.phy_calib = DEF_PHY_CALIB;
+
+	umac_info = wifi_nrf_fmac_umac_info(rpu_ctx_zep->rpu_ctx);
+
+	if(umac_info->calib[0] != 0xffffffff &&
+	   umac_info->calib[1] != 0xffffffff){
+		// override rf_params with calib data
+	}
 
 	status = wifi_nrf_fmac_dev_init(rpu_ctx_zep->rpu_ctx, &params);
 
@@ -319,15 +326,6 @@ static int wifi_nrf_drv_main_zep(const struct device *dev)
 	struct rx_buf_pool_params rx_buf_pools[MAX_NUM_OF_RX_QUEUES];
 
 	vif_ctx_zep = dev->data;
-
-	if (rf_params) {
-		if (strlen(rf_params) != (RF_PARAMS_SIZE * 2)) {
-			printk("%s: Invalid length of rf_params. Should consist of %d hex characters\n",
-			       __func__, (RF_PARAMS_SIZE * 2));
-
-			goto out;
-		}
-	}
 
 	data_config.aggregation = aggregation;
 	data_config.wmm = wmm;
