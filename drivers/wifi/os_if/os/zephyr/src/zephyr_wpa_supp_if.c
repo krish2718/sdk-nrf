@@ -382,8 +382,33 @@ void wifi_nrf_wpa_supp_event_proc_assoc_resp(void *if_priv, struct img_umac_even
 
 void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv, struct img_umac_event_mlme *deauth)
 {
-	/* TODO */
-	printk("%s: To be implemented\n", __func__);
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	union wpa_event_data event;
+	const struct ieee80211_mgmt *mgmt = NULL;
+	const unsigned char *frame = NULL;
+	unsigned int frame_len = 0;
+
+	vif_ctx_zep = if_priv;
+
+	frame = deauth->frame.frame;
+	frame_len = deauth->frame.frame_len;
+	mgmt = (const struct ieee80211_mgmt *)frame;
+
+	if (frame_len < 24 + sizeof(mgmt->u.deauth)) {
+		printk("%s: Association response frame too short\n", __func__);
+		return;
+	}
+
+	memset(&event, 0, sizeof(event));
+
+	event.deauth_info.addr = &mgmt->sa;
+	event.deauth_info.reason_code = le_to_host16(mgmt->u.deauth.reason_code);
+	if (frame + frame_len > mgmt->u.deauth.variable) {
+		event.deauth_info.ie = mgmt->u.deauth.variable;
+		event.deauth_info.ie_len = (frame + frame_len - mgmt->u.deauth.variable);
+	}
+
+	return vif_ctx_zep->supp_callbk_fns.deauth(vif_ctx_zep->supp_drv_if_ctx, &event);
 }
 
 void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv, struct img_umac_event_mlme *disassoc)
