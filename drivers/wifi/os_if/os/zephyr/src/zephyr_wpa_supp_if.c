@@ -413,8 +413,33 @@ void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv, struct img_umac_event_ml
 
 void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv, struct img_umac_event_mlme *disassoc)
 {
-	/* TODO */
-	printk("%s: To be implemented\n", __func__);
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	union wpa_event_data event;
+	const struct ieee80211_mgmt *mgmt = NULL;
+	const unsigned char *frame = NULL;
+	unsigned int frame_len = 0;
+
+	vif_ctx_zep = if_priv;
+
+	frame = disassoc->frame.frame;
+	frame_len = disassoc->frame.frame_len;
+	mgmt = (const struct ieee80211_mgmt *)frame;
+
+	if (frame_len < 24 + sizeof(mgmt->u.disassoc)) {
+		printk("%s: Association response frame too short\n", __func__);
+		return;
+	}
+
+	memset(&event, 0, sizeof(event));
+
+	event.disassoc_info.addr = &mgmt->sa;
+	event.disassoc_info.reason_code = le_to_host16(mgmt->u.disassoc.reason_code);
+	if (frame + frame_len > mgmt->u.disassoc.variable) {
+		event.disassoc_info.ie = mgmt->u.disassoc.variable;
+		event.disassoc_info.ie_len = (frame + frame_len - mgmt->u.disassoc.variable);
+	}
+
+	return vif_ctx_zep->supp_callbk_fns.disassoc(vif_ctx_zep->supp_drv_if_ctx, &event);
 }
 
 static void iface_cb(struct net_if *iface, void *user_data)
