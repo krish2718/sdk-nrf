@@ -223,6 +223,9 @@ static void *zep_shim_nbuf_alloc(unsigned int size)
 
 	nwb = (struct nwb *)k_calloc(sizeof(struct nwb), sizeof(char));
 
+	if (!nwb)
+		return NULL;
+
 	nwb->priv = k_calloc(size, sizeof(char));
 
 	if (!nwb->priv) {
@@ -323,6 +326,11 @@ void *net_pkt_to_nbuf(struct net_pkt *pkt)
 	/* printk("Tx : %d\n", len); */
 
 	nwb = zep_shim_nbuf_alloc(len + 100);
+
+	if (!nwb) {
+		printk("Out of memory for sending frame\n");
+		return NULL;
+	}
 
 	zep_shim_nbuf_headroom_res(nwb, 100);
 

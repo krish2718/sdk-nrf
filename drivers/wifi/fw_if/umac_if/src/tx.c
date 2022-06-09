@@ -1196,6 +1196,10 @@ enum wifi_nrf_status wifi_nrf_fmac_start_xmit(void *wifi_nrf_fmac_dev_ctx,
 	int ac = 0;
 	int peer_id = -1;
 
+	if (!nbuf) {
+		goto out;
+	}
+
 	fmac_dev_ctx = (struct wifi_nrf_fmac_dev_ctx *)wifi_nrf_fmac_dev_ctx;
 
 	if (wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv, nbuf) <
