@@ -91,7 +91,7 @@ static int wifi_nrf_umac_info(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
 
 	if(umac_info->mac_address0[0] == 0xffffffff &&
 	   umac_info->mac_address0[1] == 0xffffffff){
-		printk("Invalid MAC address0 \n");
+		printk("Invalid MAC address0. OTP uninitialized !\n");
 		return -1;
 	}
 
@@ -162,7 +162,6 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_add_zep(struct wifi_nrf_drv_priv_zep *drv
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		printk("%s: wifi_nrf_umac_info failed\n", __func__);
 		wifi_nrf_fmac_dev_rem(rpu_ctx);
-		k_free(rpu_ctx_zep);
 		rpu_ctx_zep = NULL;
 		goto out;
 	}

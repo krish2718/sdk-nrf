@@ -49,7 +49,7 @@ void wifi_nrf_if_init(struct net_if *iface)
 	vif_ctx_zep = dev->data;
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	if (!vif_ctx_zep) {
+	if (!rpu_ctx_zep || !vif_ctx_zep) {
 		printk("%s: vif_ctx_zep is NULL\n", __func__);
 		return;
 	}
