@@ -377,6 +377,7 @@ static void *zep_shim_llist_node_alloc(void)
 
 	if (!llist_node) {
 		printk("%s: Unable to allocate memory for linked list node\n", __func__);
+		return NULL;
 	}
 
 	sys_dnode_init(&llist_node->head);
