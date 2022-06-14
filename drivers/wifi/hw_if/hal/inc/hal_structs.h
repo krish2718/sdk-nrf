@@ -20,6 +20,12 @@
 
 #define MAX_HAL_RPU_READY_WAIT (1 * 1000 * 1000) /* 1 sec */
 
+#ifdef RPU_SLEEP_SUPPORT
+#define RPU_PS_IDLE_TIMEOUT 10  /* msecs */
+#define RPU_PS_POLL_IDLE_TIMEOUT 10  /* msecs */
+#define RPU_PS_WAKE_TIMEOUT 1  /* secs */
+#endif
+
 enum RPU_PROC_TYPE { RPU_PROC_TYPE_MCU_LMAC, RPU_PROC_TYPE_MCU_UMAC, RPU_PROC_TYPE_MAX };
 
 enum WIFI_NRF_REGION_TYPE {
@@ -44,6 +50,14 @@ enum WIFI_NRF_HAL_MSG_TYPE {
 	WIFI_NRF_HAL_MSG_TYPE_CMD_DATA_TX,
 	WIFI_NRF_HAL_MSG_TYPE_MAX,
 };
+
+#ifdef RPU_SLEEP_SUPPORT
+enum RPU_PS_STATE {
+	RPU_PS_STATE_ASLEEP,
+	RPU_PS_STATE_AWAKE,
+	RPU_PS_STATE_MAX
+};
+#endif
 
 struct wifi_nrf_hal_cfg_params {
 	unsigned int max_cmd_size;
@@ -187,6 +201,13 @@ struct wifi_nrf_hal_dev_ctx {
 	unsigned int event_data_len;
 	unsigned int event_data_pending;
 	unsigned int event_resubmit;
+
+#ifdef RPU_SLEEP_SUPPORT
+	enum RPU_PS_STATE rpu_ps_state;
+	void *rpu_ps_timer;
+	void *rpu_ps_lock;
+	bool dbg_enable;
+#endif
 };
 
 /**

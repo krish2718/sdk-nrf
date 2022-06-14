@@ -260,6 +260,20 @@ struct wifi_nrf_osal_ops {
 	void (*bus_qspi_dev_intr_unreg)(void *os_qspi_dev_ctx);
 	void (*bus_qspi_dev_host_map_get)(void *os_qspi_dev_ctx,
 					  struct wifi_nrf_osal_host_map *host_map);
+
+#ifdef RPU_SLEEP_SUPPORT
+	void * (*timer_alloc)(void);
+	void (*timer_free)(void *timer);
+	void (*timer_init)(void *timer,
+			void (*callback)(unsigned long),
+			unsigned long data);
+	void (*timer_schedule)(void *timer, unsigned long duration);
+	void (*timer_kill)(void *timer);
+
+	int (*bus_qspi_ps_sleep)(void *os_qspi_priv);
+	int (*bus_qspi_ps_wake)(void *os_qspi_priv);
+	int (*bus_qspi_ps_status)(void *os_qspi_priv);
+#endif
 };
 
 /**

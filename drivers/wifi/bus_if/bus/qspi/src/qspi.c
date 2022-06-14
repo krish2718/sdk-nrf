@@ -257,6 +257,38 @@ unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx, unsigned long phy_addr,
 	return virt_addr;
 }
 
+#ifdef RPU_SLEEP_SUPPORT
+int wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
+{
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
+
+	return wifi_nrf_osal_bus_qspi_ps_sleep(qspi_dev_ctx->qspi_priv->opriv,
+			qspi_dev_ctx->os_qspi_dev_ctx);
+}
+
+int wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
+{
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
+
+	return wifi_nrf_osal_bus_qspi_ps_wake(qspi_dev_ctx->qspi_priv->opriv,
+			qspi_dev_ctx->os_qspi_dev_ctx);
+}
+
+int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
+{
+	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
+
+	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
+
+	return wifi_nrf_osal_bus_qspi_ps_status(qspi_dev_ctx->qspi_priv->opriv,
+			qspi_dev_ctx->os_qspi_dev_ctx);
+}
+#endif
+
 struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
 	.init = &wifi_nrf_bus_qspi_init,
 	.deinit = &wifi_nrf_bus_qspi_deinit,
@@ -270,6 +302,11 @@ struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
 	.write_block = &wifi_nrf_bus_qspi_write_block,
 	.dma_map = &wifi_nrf_bus_qspi_dma_map,
 	.dma_unmap = &wifi_nrf_bus_qspi_dma_unmap,
+#ifdef RPU_SLEEP_SUPPORT
+	.ps_sleep = &wifi_nrf_bus_qspi_ps_sleep,
+	.ps_wake = &wifi_nrf_bus_qspi_ps_wake,
+	.ps_status = &wifi_nrf_bus_qspi_ps_status,
+#endif
 };
 
 struct wifi_nrf_bal_ops *get_bus_ops(void)

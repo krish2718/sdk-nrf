@@ -139,6 +139,9 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 						  unsigned char *mac,
 						  unsigned char wifi_nrf_vif_idx,
 						  unsigned char *rf_params, bool rf_params_valid,
+#ifdef RPU_SLEEP_SUPPORT
+					    	  int sleep_type,
+#endif
 						  unsigned int phy_calib)
 {
 	unsigned long start_time_us = 0;
@@ -163,6 +166,9 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 	}
 
 	status = umac_cmd_init(fmac_dev_ctx, mac, wifi_nrf_vif_idx, rf_params, rf_params_valid,
+#ifdef RPU_SLEEP_SUPPORT
+			       sleep_type,
+#endif
 			       fmac_dev_ctx->fpriv->data_config, phy_calib);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
@@ -299,6 +305,9 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init(struct wifi_nrf_fmac_dev_ctx *fmac_d
 
 	status = wifi_nrf_fmac_fw_init(fmac_dev_ctx, params->base_mac_addr, params->def_vif_idx,
 				       params->rf_params, params->rf_params_valid,
+#ifdef RPU_SLEEP_SUPPORT
+				       params->sleep_type,
+#endif
 				       params->phy_calib);
 
 	if (status == WIFI_NRF_STATUS_FAIL) {

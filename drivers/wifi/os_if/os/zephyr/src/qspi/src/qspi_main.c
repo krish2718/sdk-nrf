@@ -533,10 +533,25 @@ static int cmd_qspi_init(const struct shell *shell, size_t argc, char **argv)
 	return 0;
 }
 
+int func_rpu_sleep(void){
+
+	return qspi_cmd_sleep_rpu(&qspi_perip);
+}
+
+int func_rpu_wake(void){
+
+	return qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
+}
+
+int func_rpu_sleep_status(void){
+
+	return RDSR1(&qspi_perip);
+}
+
 /* -------------------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------------------- */
 
-static int func_rpuwake(void)
+int func_rpuwake(void)
 {
 #if QSPI_IF
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);

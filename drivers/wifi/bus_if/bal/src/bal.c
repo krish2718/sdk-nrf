@@ -192,3 +192,32 @@ unsigned long wifi_nrf_bal_dma_unmap(void *ctx, unsigned long phy_addr, size_t l
 
 	return virt_addr;
 }
+
+#ifdef RPU_SLEEP_SUPPORT
+int wifi_nrf_bal_rpu_ps_sleep(void *ctx)
+{
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
+
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
+
+	return bal_dev_ctx->bpriv->ops->ps_sleep(bal_dev_ctx->bus_dev_ctx);
+}
+
+int wifi_nrf_bal_rpu_ps_wake(void *ctx)
+{
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
+
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
+
+	return bal_dev_ctx->bpriv->ops->ps_wake(bal_dev_ctx->bus_dev_ctx);
+}
+
+int wifi_nrf_bal_rpu_ps_status(void *ctx)
+{
+	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
+
+	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
+
+	return bal_dev_ctx->bpriv->ops->ps_status(bal_dev_ctx->bus_dev_ctx);
+}
+#endif

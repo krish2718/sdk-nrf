@@ -146,4 +146,10 @@ enum wifi_nrf_status wifi_nrf_hal_proc_reset(struct wifi_nrf_hal_dev_ctx *hal_ct
 
 enum wifi_nrf_status wifi_nrf_hal_fw_chk_boot(struct wifi_nrf_hal_dev_ctx *hal_ctx,
 					      enum RPU_PROC_TYPE rpu_proc);
+
+#ifdef RPU_SLEEP_SUPPORT
+enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
+
+void hal_rpu_ps_sleep(unsigned long data);
+#endif
 #endif /* __HAL_API_H__ */

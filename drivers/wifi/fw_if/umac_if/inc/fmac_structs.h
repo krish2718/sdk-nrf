@@ -114,6 +114,9 @@ struct wifi_nrf_fmac_init_dev_params {
 	unsigned char base_mac_addr[IMG_ETH_ADDR_LEN];
 	unsigned char def_vif_idx;
 	unsigned char rf_params[RF_PARAMS_SIZE];
+#ifdef RPU_SLEEP_SUPPORT
+	int sleep_type;
+#endif
 	bool rf_params_valid;
 	unsigned int phy_calib;
 };

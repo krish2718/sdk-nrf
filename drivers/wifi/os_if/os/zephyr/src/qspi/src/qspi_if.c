@@ -1192,8 +1192,7 @@ int qspi_validate_rpu_wake_writecmd(const struct device *dev)
 	return ret;
 }
 
-/* Wait until RDSR1 confirms RPU_AWAKE/RPU_READY */
-int qspi_wait_while_rpu_awake(const struct device *dev)
+int RDSR1(const struct device *dev)
 {
 	int ret = 0;
 	uint8_t sr = 0;
@@ -1207,20 +1206,31 @@ int qspi_wait_while_rpu_awake(const struct device *dev)
 		.rx_buf = &sr_buf,
 	};
 
+	ret = ANOMALY_122_INIT(dev);
+
+	ret = qspi_send_cmd(dev, &cmd, false);
+
+	ANOMALY_122_UNINIT(dev);
+
+	if (ret == 0)
+		return sr;
+
+	return ret;
+}
+
+/* Wait until RDSR1 confirms RPU_AWAKE/RPU_READY */
+int qspi_wait_while_rpu_awake(const struct device *dev)
+{
+	int ret;
+
 	for (int ii = 0; ii < 1; ii++) {
-		int ret;
 
-		ret = ANOMALY_122_INIT(dev);
+		ret = RDSR1(dev);
 
-		if (ret == 0)
-			ret = qspi_send_cmd(dev, &cmd, false);
-
-		ANOMALY_122_UNINIT(dev);
-
-		if ((ret < 0) || ((sr & RPU_AWAKE_BIT) == 0)) {
-			printk("ret val = 0x%x\t RDSR1 = 0x%x\n", ret, sr);
+		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
+			printk("RDSR1 = 0x%x\t \n", ret);
 		} else {
-			printk("RDSR1 = 0x%x\n", sr);
+			printk("RDSR1 = 0x%x\n", ret);
 			break;
 		}
 		k_msleep(1);

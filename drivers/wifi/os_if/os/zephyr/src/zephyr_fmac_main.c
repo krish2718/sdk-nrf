@@ -283,6 +283,10 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init_zep(struct wifi_nrf_ctx_zep *rpu_ctx
 		// override rf_params with calib data
 	}
 
+#ifdef RPU_SLEEP_SUPPORT
+	params.sleep_type = HW_SLEEP_ENABLE;
+#endif
+
 	status = wifi_nrf_fmac_dev_init(rpu_ctx_zep->rpu_ctx, &params);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {

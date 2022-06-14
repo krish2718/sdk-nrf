@@ -23,6 +23,7 @@ zephyr_library_compile_definitions(
 	ASICBUILD	# SOC
 	C0_CHIP
 	QSPI_IF
+	#RPU_SLEEP_SUPPORT
 )
 
 zephyr_library_include_directories(

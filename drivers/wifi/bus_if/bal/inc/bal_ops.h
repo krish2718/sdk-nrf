@@ -47,6 +47,11 @@ struct wifi_nrf_bal_ops {
 				 enum wifi_nrf_osal_dma_dir dma_dir);
 	unsigned long (*dma_unmap)(void *bus_dev_ctx, unsigned long phy_addr, size_t len,
 				   enum wifi_nrf_osal_dma_dir dma_dir);
+#ifdef RPU_SLEEP_SUPPORT
+	int (*ps_sleep)(void *bus_dev_ctx);
+	int (*ps_wake)(void *bus_dev_ctx);
+	int (*ps_status)(void *bus_dev_ctx);
+#endif
 };
 
 /**

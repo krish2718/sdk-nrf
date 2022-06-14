@@ -67,6 +67,9 @@ out:
 enum wifi_nrf_status umac_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				   unsigned char *def_mac_addr, unsigned char def_vif_idx,
 				   unsigned char *rf_params, bool rf_params_valid,
+#ifdef RPU_SLEEP_SUPPORT
+			      	   int sleep_type,
+#endif
 				   struct img_data_config_params config, unsigned int phy_calib)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
@@ -106,7 +109,9 @@ enum wifi_nrf_status umac_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	umac_cmd_data->sys_params.sw_bringup_time = SW_DELAY;
 	umac_cmd_data->sys_params.bcn_time_out = BCN_TIMEOUT;
 	umac_cmd_data->sys_params.calib_sleep_clk = CALIB_SLEEP_CLOCK_ENABLE;
-
+#ifdef RPU_SLEEP_SUPPORT
+	umac_cmd_data->sys_params.sleep_enable = sleep_type;
+#endif
 	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, umac_cmd_data->rx_buf_pools,
 			      fmac_dev_ctx->fpriv->rx_buf_pools,
 			      sizeof(umac_cmd_data->rx_buf_pools));

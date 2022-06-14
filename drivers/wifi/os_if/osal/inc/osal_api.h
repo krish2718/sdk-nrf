@@ -1050,4 +1050,86 @@ void wifi_nrf_osal_qspi_cpy_from(struct wifi_nrf_osal_priv *opriv, void *priv, v
  */
 void wifi_nrf_osal_qspi_cpy_to(struct wifi_nrf_osal_priv *opriv, void *priv, unsigned long addr,
 			       const void *src, size_t count);
+
+#ifdef RPU_SLEEP_SUPPORT
+/**
+ * wifi_nrf_osal_timer_alloc() - Allocate a timer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
+ *
+ * Allocates a timer instance.
+ *
+ * Return: Pointer to the allocated timer instance.
+ */
+void *wifi_nrf_osal_timer_alloc(struct wifi_nrf_osal_priv *opriv);
+
+
+/**
+ * wifi_nrf_osal_timer_free() - Free a timer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
+ * @timer: Pointer to a timer instance.
+ *
+ * Frees/Deallocates a timer that has been allocated using
+ * @wifi_nrf_osal_timer_alloc.
+ *
+ * Return: None.
+ */
+void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv,
+			     void *timer);
+
+
+/**
+ * wifi_nrf_osal_timer_init() - Initialize a timer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
+ * @timer: Pointer to a timer instance.
+ * @callbk_fn: Callback function to be invoked when the timer expires.
+ * @data: Data to be passed to the callback function.
+ *
+ * Initializes a timer that has been allocated using @wifi_nrf_osal_timer_alloc
+ * Need to pass (@callbk_fn) callback function with the data(@data) to be
+ * passed to the callback function, whenever the timer expires.
+ *
+ * Return: None.
+ */
+void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv,
+			     void *timer,
+			     void (*callbk_fn)(unsigned long),
+			     unsigned long data);
+
+
+/**
+ * wifi_nrf_osal_timer_schedule() - Schedule a timer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
+ * @timer: Pointer to a timer instance.
+ * @duration: Duration of the timer in seconds.
+ *
+ * Schedules a timer with a @duration seconds that has been allocated using
+ * @wifi_nrf_osal_timer_alloc and initalized with @wifi_nrf_osal_timer_init.
+ *
+ * Return: None.
+ */
+void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv,
+				 void *timer,
+				 unsigned long duration);
+
+
+/**
+ * wifi_nrf_osal_timer_kill() - Kill a timer.
+ * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
+ * @timer: Pointer to a timer instance.
+ *
+ * Kills a timer that has been scheduled using @wifi_nrf_osal_timer_schedule.
+ *
+ * Return: None.
+ */
+void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv,
+			     void *timer);
+
+
+int wifi_nrf_osal_bus_qspi_ps_sleep(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
+
+int wifi_nrf_osal_bus_qspi_ps_wake(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
+
+int wifi_nrf_osal_bus_qspi_ps_status(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
+#endif
+
 #endif /* __OSAL_API_H__ */
