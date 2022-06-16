@@ -40,22 +40,39 @@ zephyr_library_include_directories(
 	os_if/os/zephyr/src/qspi/src/
 )
 
-file(GLOB OSAL_IF_SRC "os_if/osal/src/*.c")
-file(GLOB UTILS_IF_SRC "utils/src/*.c")
-file(GLOB HW_IF_SRC "hw_if/hal/src/*.c")
-file(GLOB BUS_IF_BAL "bus_if/bal/src/*.c")
-file(GLOB BUS_IF_SRC "bus_if/bus/qspi/src/*.c")
-file(GLOB FW_IF_SRC "fw_if/umac_if/src/*.c")
-file(GLOB OS_IF_SRC "os_if/os/zephyr/src/*.c")
-file(GLOB QSPI_IF_SRC "os_if/os/zephyr/src/qspi/src/*.c")
-
 zephyr_library_sources(
-	${OSAL_IF_SRC}
-	${UTILS_IF_SRC}
-	${HW_IF_SRC}
-	${BUS_IF_BAL}
-	${BUS_IF_SRC}
-	${FW_IF_SRC}
-	${OS_IF_SRC}
-	${QSPI_IF_SRC}
+	os_if/osal/src/osal.c
+	utils/src/list.c
+	utils/src/queue.c
+	hw_if/hal/src/hal_api.c
+	hw_if/hal/src/hal_fw_patch_loader.c
+	hw_if/hal/src/hal_interrupt.c
+	hw_if/hal/src/hal_mem.c
+	hw_if/hal/src/hal_reg.c
+	hw_if/hal/src/hpqm.c
+	hw_if/hal/src/pal.c
+	bus_if/bal/src/bal.c
+	bus_if/bus/qspi/src/qspi.c
+	fw_if/umac_if/src/cmd.c
+	fw_if/umac_if/src/event.c
+	fw_if/umac_if/src/fmac_ap.c
+	fw_if/umac_if/src/fmac_peer.c
+	fw_if/umac_if/src/fmac_util.c
+	fw_if/umac_if/src/fmac_vif.c
+	fw_if/umac_if/src/main.c
+	fw_if/umac_if/src/rx.c
+	fw_if/umac_if/src/tx.c
+	os_if/os/zephyr/src/shim.c
+	os_if/os/zephyr/src/tasklet.c
+	os_if/os/zephyr/src/timer.c
+	os_if/os/zephyr/src/util.c
+	os_if/os/zephyr/src/zephyr_disp_scan.c
+	os_if/os/zephyr/src/zephyr_fmac_main.c
+	os_if/os/zephyr/src/zephyr_net_if.c
+	os_if/os/zephyr/src/zephyr_wpa_supp_if.c
+	os_if/os/zephyr/src/qspi/src/device.c
+	os_if/os/zephyr/src/qspi/src/interrupts.c
+	os_if/os/zephyr/src/qspi/src/qspi_if.c
+	os_if/os/zephyr/src/qspi/src/qspi_main.c
+	os_if/os/zephyr/src/qspi/src/spi_if.c
 )
