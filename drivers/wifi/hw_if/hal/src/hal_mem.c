@@ -117,8 +117,8 @@ static enum wifi_nrf_status rpu_mem_read_ram(struct wifi_nrf_hal_dev_ctx *hal_de
 	wifi_nrf_bal_read_block(hal_dev_ctx->bal_dev_ctx, src_addr, addr_offset, len);
 
 	status = WIFI_NRF_STATUS_SUCCESS;
-out:
 #ifdef RPU_SLEEP_SUPPORT
+out:
 	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
 				      hal_dev_ctx->rpu_ps_lock,
 				      &flags);
@@ -164,8 +164,8 @@ static enum wifi_nrf_status rpu_mem_write_ram(struct wifi_nrf_hal_dev_ctx *hal_d
 
 	status = WIFI_NRF_STATUS_SUCCESS;
 
-out:
 #ifdef RPU_SLEEP_SUPPORT
+out:
 	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
 				      hal_dev_ctx->rpu_ps_lock,
 				      &flags);

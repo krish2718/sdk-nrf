@@ -134,8 +134,8 @@ enum wifi_nrf_status hal_rpu_reg_write(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 
 	status = WIFI_NRF_STATUS_SUCCESS;
 
-out:
 #ifdef RPU_SLEEP_SUPPORT
+out:
 	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
 				      hal_dev_ctx->rpu_ps_lock,
 				      &flags);

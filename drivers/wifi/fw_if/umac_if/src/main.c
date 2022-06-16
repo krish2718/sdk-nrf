@@ -284,8 +284,7 @@ void wifi_nrf_fmac_dev_rem(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 }
 
 struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(
-		struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-		struct wifi_nrf_fmac_init_dev_params *params)
+		struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	return wifi_nrf_hal_umac_info(fmac_dev_ctx->hal_dev_ctx);
 }
@@ -1172,7 +1171,7 @@ out:
 	return status;
 }
 
-enum wifi_nrf_status wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
+static enum wifi_nrf_status wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
 						    unsigned char wifi_nrf_vif_idx,
 						    struct img_umac_set_wiphy_info *wiphy_info)
 {

@@ -25,8 +25,6 @@
 #include "fmac_vif.h"
 #include "fmac_bb.h"
 
-#define WIFI_NRF_FMAC_DRV_VER "1.3.5.1"
-
 /**
  * wifi_nrf_fmac_init() - Initializes the UMAC IF layer of the RPU WLAN FullMAC
  *                        driver.
@@ -115,9 +113,9 @@ void wifi_nrf_fmac_dev_deinit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx);
  * @fmac_dev_ctx: Pointer to the UMAC IF context for a RPU WLAN device, which was
  *            passed as @wifi_nrf_fmac_dev_ctx parameter via the @add_dev_callbk_fn
  *            callback function.
- * @fmac_fw: Information about the FullMAC firmwares to be loaded.
+ * @fmac_fw: Information about the FullMAC firmware(s) to be loaded.
  *
- * This function loads the FullMAC firmwares to the RPU WLAN device.
+ * This function loads the FullMAC firmware(s) to the RPU WLAN device.
  *
  * Returns: Status
  *		Pass: %WIFI_NRF_STATUS_SUCCESS
@@ -659,7 +657,7 @@ enum wifi_nrf_status wifi_nrf_fmac_chg_vif_state(void *wifi_nrf_fmac_dev_ctx,
 						 struct img_umac_chg_vif_state_info *vif_info);
 
 /**
- * wifi_nrf_fmac_start_xmit() - Trasmit a frame to the RPU.
+ * wifi_nrf_fmac_start_xmit() - Transmit a frame to the RPU.
  * @wifi_nrf_fmac_dev_ctx: Pointer to the UMAC IF context for a RPU WLAN device.
  * @wifi_nrf_if_idx: Index of the interface on which the frame is to be
  *              transmitted.
@@ -672,8 +670,8 @@ enum wifi_nrf_status wifi_nrf_fmac_chg_vif_state(void *wifi_nrf_fmac_dev_ctx,
  *     - Based on token availability sends one or more frames to the RPU using
  *       the command WIFI_NRF_CMD_TX_BUFF for transmission.
  *     - The firmware sends an WIFI_NRF_CMD_TX_BUFF_DONE event once the command has
- *       been processed send to indicate whether the frame(s) have been
- *       transmited/aborted.
+ *       been processed to indicate whether the frame(s) have been
+ *       transmitted/aborted.
  *     - The diver can cleanup the frame buffers after receiving this event.
  *
  * Returns: Status
@@ -698,7 +696,7 @@ enum wifi_nrf_status wifi_nrf_fmac_start_xmit(void *wifi_nrf_fmac_dev_ctx,
 enum wifi_nrf_status wifi_nrf_fmac_suspend(void *wifi_nrf_fmac_dev_ctx);
 
 /**
- * wifi_nrf_fmac_resume() - Nofity RPU that host has resumed from a suspended
+ * wifi_nrf_fmac_resume() - Notify RPU that host has resumed from a suspended
  *                          state.
  * @wifi_nrf_fmac_dev_ctx: Pointer to the UMAC IF context for a RPU WLAN device.
  *
@@ -728,7 +726,7 @@ enum wifi_nrf_status wifi_nrf_fmac_get_tx_power(void *wifi_nrf_fmac_dev_ctx,
 						unsigned int wifi_nrf_vif_idx);
 
 /**
- * wifi_nrf_fmac_get_channel() - Get chandef
+ * wifi_nrf_fmac_get_channel() - Get channel definition
  *
  * @wifi_nrf_fmac_dev_ctx: Pointer to the UMAC IF context for a RPU WLAN device.
  * @wifi_nrf_vif_idx: VIF index.
@@ -838,4 +836,8 @@ enum wifi_nrf_status wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
  */
 enum wifi_nrf_status wifi_nrf_fmac_conf_btcoex(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       struct rpu_btcoex *params);
+
+struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(
+		struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx);
+
 #endif /* __FMAC_API_H__ */

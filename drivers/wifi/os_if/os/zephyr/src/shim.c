@@ -242,7 +242,7 @@ static void *zep_shim_nbuf_alloc(unsigned int size)
 	return nwb;
 }
 
-void zep_shim_nbuf_free(void *nbuf)
+static void zep_shim_nbuf_free(void *nbuf)
 {
 	struct nwb *nwb;
 
@@ -613,7 +613,7 @@ static void zep_shim_bus_qspi_dev_rem(void *os_qspi_dev_ctx)
 	/* TODO: Make qspi_dev a dynamic instance and remove it here */
 }
 
-void *zep_shim_bus_qspi_init(void)
+static void *zep_shim_bus_qspi_init(void)
 {
 	struct zep_shim_bus_qspi_priv *qspi_priv = NULL;
 
@@ -627,7 +627,7 @@ out:
 	return qspi_priv;
 }
 
-void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
+static void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
 {
 	struct zep_shim_bus_qspi_priv *qspi_priv = NULL;
 
@@ -637,7 +637,7 @@ void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
 }
 
 #ifdef RPU_SLEEP_SUPPORT
-int zep_shim_bus_qspi_ps_sleep(void *os_qspi_priv)
+static int zep_shim_bus_qspi_ps_sleep(void *os_qspi_priv)
 {
 	struct zep_shim_bus_qspi_priv *qspi_priv = os_qspi_priv;
 
@@ -646,7 +646,7 @@ int zep_shim_bus_qspi_ps_sleep(void *os_qspi_priv)
 	return 0;
 }
 
-int zep_shim_bus_qspi_ps_wake(void *os_qspi_priv)
+static int zep_shim_bus_qspi_ps_wake(void *os_qspi_priv)
 {
 	struct zep_shim_bus_qspi_priv *qspi_priv = os_qspi_priv;
 
@@ -655,7 +655,7 @@ int zep_shim_bus_qspi_ps_wake(void *os_qspi_priv)
 	return 0;
 }
 
-int zep_shim_bus_qspi_ps_status(void *os_qspi_priv)
+static int zep_shim_bus_qspi_ps_status(void *os_qspi_priv)
 {
 	struct zep_shim_bus_qspi_priv *qspi_priv = os_qspi_priv;
 
@@ -689,7 +689,7 @@ static void irq_work_handler(struct k_work *work)
 	}
 }
 
-void zep_shim_irq_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+static void zep_shim_irq_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	struct zep_shim_intr_priv *intr_priv = NULL;
 
@@ -698,7 +698,7 @@ void zep_shim_irq_handler(const struct device *dev, struct gpio_callback *cb, ui
 	k_work_schedule(&intr_priv->work, K_NO_WAIT);
 }
 
-enum wifi_nrf_status zep_shim_bus_qspi_intr_reg(void *os_dev_ctx, void *callbk_data,
+static enum wifi_nrf_status zep_shim_bus_qspi_intr_reg(void *os_dev_ctx, void *callbk_data,
 						int (*callbk_fn)(void *callbk_data))
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
@@ -732,7 +732,7 @@ out:
 	return status;
 }
 
-void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
+static void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
 {
 #ifdef notyet
 	struct zep_shim_intr_priv *intr_priv = NULL;

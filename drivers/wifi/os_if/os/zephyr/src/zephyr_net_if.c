@@ -19,12 +19,21 @@ void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep;
 	struct net_if *iface;
+	struct net_pkt *pkt;
+	uint8_t status;
 
 	vif_ctx_zep = os_vif_ctx;
 
 	iface = vif_ctx_zep->zep_net_if_ctx;
+	
+	pkt = net_pkt_from_nbuf(iface, frm);
 
-	net_recv_data(iface, net_pkt_from_nbuf(iface, frm));
+	status = net_recv_data(iface, pkt);
+
+	if (status < 0) {
+		printk("RCV Packet dropped by NET stack: %d", status);
+		net_pkt_unref(pkt);
+	}
 }
 
 enum wifi_nrf_status wifi_nrf_if_state_chg(void *os_vif_ctx, enum wifi_nrf_fmac_if_state if_state)
@@ -58,8 +67,8 @@ void wifi_nrf_if_init(struct net_if *iface)
 
 	ethernet_init(iface);
 
-	net_if_set_link_addr(iface, rpu_ctx_zep->mac_addr, sizeof(rpu_ctx_zep->mac_addr),
-			     NET_LINK_ETHERNET);
+	net_if_set_link_addr(iface, (unsigned char*)&rpu_ctx_zep->mac_addr, 
+			sizeof(rpu_ctx_zep->mac_addr), NET_LINK_ETHERNET);
 }
 
 enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev)

@@ -111,22 +111,6 @@ enum wifi_nrf_status wifi_nrf_hal_data_cmd_send(struct wifi_nrf_hal_dev_ctx *hal
 						unsigned int data_cmd_size, unsigned int desc_id,
 						unsigned int pool_id);
 
-/**
- * hal_rpu_eventq_process() - Process events from the RPU.
- * @hpriv: Pointer to HAL context.
- *
- * This function processes the events which have been queued into the event
- * queue by an ISR. It does the following:
- *
- *     - Dequeues an event from the event queue.
- *     - Calls hal_event_process to further process the event.
- *
- * Return: Status
- *		Pass: %WIFI_NRF_STATUS_SUCCESS
- *		Fail: %WIFI_NRF_STATUS_FAIL
- */
-enum wifi_nrf_status hal_rpu_eventq_process(struct wifi_nrf_hal_dev_ctx *hal_ctx);
-
 unsigned long wifi_nrf_hal_buf_map_rx(struct wifi_nrf_hal_dev_ctx *hal_ctx, unsigned long buf,
 				      unsigned int buf_len, unsigned int pool_id,
 				      unsigned int buf_id);

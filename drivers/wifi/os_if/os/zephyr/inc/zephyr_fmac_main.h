@@ -45,7 +45,7 @@ struct wifi_nrf_ctx_zep {
 	void *drv_priv_zep;
 	void *rpu_ctx;
 	struct wifi_nrf_vif_ctx_zep vif_ctx_zep[MAX_NUM_VIFS];
-	char mac_addr[6];
+	struct net_eth_addr mac_addr;
 };
 
 struct wifi_nrf_drv_priv_zep {

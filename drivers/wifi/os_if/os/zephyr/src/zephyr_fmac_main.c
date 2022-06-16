@@ -101,7 +101,7 @@ static int wifi_nrf_umac_info(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
 		return -1;
 	}
 
-	memcpy(rpu_ctx_zep->mac_addr, umac_info->mac_address0, IMG_ETH_ALEN);
+	memcpy(&rpu_ctx_zep->mac_addr, umac_info->mac_address0, IMG_ETH_ALEN);
 
 	return 0;
 }
@@ -195,7 +195,7 @@ enum wifi_nrf_status wifi_nrf_fmac_def_vif_add_zep(struct wifi_nrf_ctx_zep *rpu_
 
 	memcpy(add_vif_info.ifacename, "wlan0", strlen("wlan0"));
 
-	memcpy(add_vif_info.mac_addr, rpu_ctx_zep->mac_addr, sizeof(add_vif_info.mac_addr));
+	memcpy(add_vif_info.mac_addr, &rpu_ctx_zep->mac_addr, sizeof(add_vif_info.mac_addr));
 
 	vif_ctx_zep->vif_idx =
 		wifi_nrf_fmac_add_vif(rpu_ctx_zep->rpu_ctx, vif_ctx_zep, &add_vif_info);
@@ -257,7 +257,7 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init_zep(struct wifi_nrf_ctx_zep *rpu_ctx
 
 	memset(&params, 0, sizeof(params));
 
-	memcpy(params.base_mac_addr, rpu_ctx_zep->mac_addr, sizeof(rpu_ctx_zep->mac_addr));
+	memcpy(params.base_mac_addr, &rpu_ctx_zep->mac_addr, sizeof(rpu_ctx_zep->mac_addr));
 
 	if (rf_params) {
 		memset(params.rf_params, 0xFF, sizeof(params.rf_params));

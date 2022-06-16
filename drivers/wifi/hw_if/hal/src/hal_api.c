@@ -312,7 +312,7 @@ out:
 }
 
 
-void hal_rpu_ps_sleep(unsigned long data)
+static void hal_rpu_ps_sleep(unsigned long data)
 {
 	struct wifi_nrf_hal_dev_ctx *hal_dev_ctx = NULL;
 	unsigned long flags = 0;
@@ -333,7 +333,7 @@ void hal_rpu_ps_sleep(unsigned long data)
 }
 
 
-enum wifi_nrf_status hal_rpu_ps_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
+static enum wifi_nrf_status hal_rpu_ps_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 
@@ -797,22 +797,7 @@ out:
 	return status;
 }
 
-static void rx_tasklet_fn(unsigned long data)
-{
-	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
-	struct wifi_nrf_hal_dev_ctx *hal_dev_ctx = NULL;
-
-	hal_dev_ctx = (struct wifi_nrf_hal_dev_ctx *)data;
-
-	status = hal_rpu_eventq_process(hal_dev_ctx);
-
-	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Event queue processing failed\n", __func__);
-	}
-}
-
-enum wifi_nrf_status hal_rpu_eventq_process(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
+static enum wifi_nrf_status hal_rpu_eventq_process(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_SUCCESS;
 	struct wifi_nrf_hal_msg *event = NULL;
@@ -852,6 +837,21 @@ enum wifi_nrf_status hal_rpu_eventq_process(struct wifi_nrf_hal_dev_ctx *hal_dev
 
 out:
 	return status;
+}
+
+static void rx_tasklet_fn(unsigned long data)
+{
+	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
+	struct wifi_nrf_hal_dev_ctx *hal_dev_ctx = NULL;
+
+	hal_dev_ctx = (struct wifi_nrf_hal_dev_ctx *)data;
+
+	status = hal_rpu_eventq_process(hal_dev_ctx);
+
+	if (status != WIFI_NRF_STATUS_SUCCESS) {
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+				      "%s: Event queue processing failed\n", __func__);
+	}
 }
 
 void wifi_nrf_hal_proc_ctx_set(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, enum RPU_PROC_TYPE proc)
