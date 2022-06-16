@@ -260,8 +260,6 @@ static void zep_shim_nbuf_headroom_res(void *nbuf, unsigned int size)
 	nwb->data += size;
 	nwb->tail += size;
 	nwb->headroom += size;
-
-	/* return nwb->data; */
 }
 
 static unsigned int zep_shim_nbuf_headroom_get(void *nbuf)
@@ -323,8 +321,6 @@ void *net_pkt_to_nbuf(struct net_pkt *pkt)
 
 	len = net_pkt_get_len(pkt);
 
-	/* printk("Tx : %d\n", len); */
-
 	nwb = zep_shim_nbuf_alloc(len + 100);
 
 	if (!nwb) {
@@ -351,8 +347,6 @@ void *net_pkt_from_nbuf(void *iface, void *frm)
 	struct nwb *nwb = frm;
 
 	len = zep_shim_nbuf_data_size(nwb);
-
-	/* printk("Rx : %d\n", len); */
 
 	data = zep_shim_nbuf_data_get(nwb);
 
@@ -472,9 +466,6 @@ static void *zep_shim_llist_get_node_nxt(void *llist, void *llist_node)
 
 	zep_llist = (struct zep_shim_llist *)llist;
 	zep_node = (struct zep_shim_llist_node *)llist_node;
-
-	/* if (zep_node->head.next == &zep_llist->head) */
-	/* return NULL; */
 
 	zep_nxt_node = (struct zep_shim_llist_node *)sys_dlist_peek_next(&zep_llist->head,
 									 &zep_node->head);

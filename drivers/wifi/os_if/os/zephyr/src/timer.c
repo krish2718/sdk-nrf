@@ -17,7 +17,7 @@
 
 #include "timer.h"
 
-static void my_expiry_function(struct k_work *work)
+static void timer_expiry_function(struct k_work *work)
 {
 	struct timer_list *timer;
 
@@ -28,7 +28,7 @@ static void my_expiry_function(struct k_work *work)
 
 void init_timer(struct timer_list *timer)
 {
-	k_work_init_delayable(&timer->work, my_expiry_function);
+	k_work_init_delayable(&timer->work, timer_expiry_function);
 }
 
 void mod_timer(struct timer_list *timer, int msec)

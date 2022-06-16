@@ -8,5 +8,10 @@
 config WIFI_NRF
 	bool "Nordic WiFi driver"
 	select NRFX_QSPI
+	select WPA_SUPP
+	select NRFX_SPIM
+	select NRFX_SPIM3
+	select NRFX_SPIM4
+	select WIFI
 	help
 	Nordic Wifi Driver
