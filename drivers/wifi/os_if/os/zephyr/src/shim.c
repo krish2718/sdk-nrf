@@ -334,8 +334,6 @@ void *net_pkt_to_nbuf(struct net_pkt *pkt)
 
 	net_pkt_read(pkt, data, len);
 
-	net_pkt_unref(pkt);
-
 	return nwb;
 }
 
