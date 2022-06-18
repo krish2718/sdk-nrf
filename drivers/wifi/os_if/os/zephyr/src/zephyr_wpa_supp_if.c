@@ -401,7 +401,7 @@ void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv, struct img_umac_event_ml
 
 	memset(&event, 0, sizeof(event));
 
-	event.deauth_info.addr = &mgmt->sa;
+	event.deauth_info.addr = &mgmt->sa[0];
 	event.deauth_info.reason_code = le_to_host16(mgmt->u.deauth.reason_code);
 	if (frame + frame_len > mgmt->u.deauth.variable) {
 		event.deauth_info.ie = mgmt->u.deauth.variable;
@@ -432,7 +432,7 @@ void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv, struct img_umac_event_
 
 	memset(&event, 0, sizeof(event));
 
-	event.disassoc_info.addr = &mgmt->sa;
+	event.disassoc_info.addr = &mgmt->sa[0];
 	event.disassoc_info.reason_code = le_to_host16(mgmt->u.disassoc.reason_code);
 	if (frame + frame_len > mgmt->u.disassoc.variable) {
 		event.disassoc_info.ie = mgmt->u.disassoc.variable;
