@@ -464,8 +464,8 @@ void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx,
 
 	vif_ctx_zep = vif_ctx_map.vif_ctx;
 
-	if (!vif_ctx_zep) {
-		printk("%s: Interface %s not found\n", __func__, iface_name);
+	if (!vif_ctx_zep || !vif_ctx_zep->rpu_ctx_zep) {
+		printk("%s: Interface %s not found or not properly initialized\n", __func__, iface_name);
 		return NULL;
 	}
 
