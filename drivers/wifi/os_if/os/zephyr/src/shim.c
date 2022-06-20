@@ -89,7 +89,11 @@ static void zep_shim_qspi_cpy_from(void *priv, void *dest, unsigned long addr, s
 		count = (count + 4) & 0xfffffffc;
 	}
 
-	dev->read(addr, dest, count);
+	if (addr < 0x0C0000) {
+		dev->hl_read(addr, dest, count);
+	} else {
+		dev->read(addr, dest, count);
+	}
 }
 
 static void zep_shim_qspi_cpy_to(void *priv, unsigned long addr, const void *src, size_t count)
