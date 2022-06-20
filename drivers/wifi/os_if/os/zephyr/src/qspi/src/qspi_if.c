@@ -70,7 +70,7 @@ static void anomaly_122_uninit(const struct device *dev);
 
 #define WORD_SIZE 4
 
-LOG_MODULE_REGISTER(qspi_nor, CONFIG_FLASH_LOG_LEVEL);
+LOG_MODULE_REGISTER(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 /**
  * @brief QSPI buffer structure

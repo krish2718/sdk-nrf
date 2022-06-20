@@ -15,3 +15,7 @@ config WIFI_NRF
 	select WIFI
 	help
 	Nordic Wifi Driver
+
+module = WIFI_NRF
+module-str = WIFI_NRF
+source "subsys/logging/Kconfig.template.log_config"

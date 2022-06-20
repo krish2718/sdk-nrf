@@ -25,6 +25,10 @@
 
 #include "qspi_if.h"
 
+#include <logging/log.h>
+
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+
 static void *zep_shim_mem_alloc(size_t size)
 {
 	size = (size + 4) & 0xfffffffc;
