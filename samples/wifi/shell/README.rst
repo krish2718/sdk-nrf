@@ -14,9 +14,12 @@ to verify net_if settings.
 Building and Running
 ********************
 
-Verify the board and chip you are targeting provide Wi-Fi support.
+Currently, the following configurations are supported:
 
-For instance you can use nrf5340 by selecting the nrf5340dk_nrf5340_cpuapp board.
+7002 DK + QSPI (default)
+7002 EK + SPIM (disable QSPI_IF in drivers/wifi/CMakeLists.txt)
+
+You can build for the target by selecting nrf5340dk_nrf5340_cpuapp.
 
 .. zephyr-app-commands::
    :zephyr-app: samples/wifi/shell

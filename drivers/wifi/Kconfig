@@ -1,21 +1,11 @@
-# Nordic WiFi driver for nRF52840 and nRF5340
 #
-# Copyright (c) 2022 Nordic Semiconductor
+# Copyright (c) 2018-2020 Nordic Semiconductor ASA
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config WIFI_NRF
-	bool "Nordic WiFi driver"
-	select NRFX_QSPI
-	select WPA_SUPP
-	select NRFX_SPIM
-	select NRFX_SPIM3
-	select NRFX_SPIM4
-	select WIFI
-	help
-	Nordic Wifi Driver
+menu "NRF WiFi Drivers"
 
-module = WIFI_NRF
-module-str = WIFI_NRF
-source "subsys/logging/Kconfig.template.log_config"
+rsource "nrf700x/Kconfig"
+
+endmenu
