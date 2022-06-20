@@ -103,6 +103,7 @@ void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 
 		if (r->signal.signal_type == IMG_SIGNAL_TYPE_MBM) {
 			int val = (r->signal.signal.mbm_signal);
+
 			res.rssi = (val / 100);
 		} else if (r->signal.signal_type == IMG_SIGNAL_TYPE_UNSPEC) {
 			res.rssi = (r->signal.signal.unspec_signal);

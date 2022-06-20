@@ -1224,11 +1224,10 @@ int qspi_wait_while_rpu_awake(const struct device *dev)
 	int ret;
 
 	for (int ii = 0; ii < 1; ii++) {
-
 		ret = RDSR1(dev);
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
-			printk("RDSR1 = 0x%x\t \n", ret);
+			printk("RDSR1 = 0x%x\t\n", ret);
 		} else {
 			printk("RDSR1 = 0x%x\n", ret);
 			break;

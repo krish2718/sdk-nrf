@@ -53,16 +53,13 @@ enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, 
 	}
 
 #ifdef RPU_SLEEP_SUPPORT
-	wifi_nrf_osal_spinlock_irq_take(hal_dev_ctx->hpriv->opriv,
-				       hal_dev_ctx->rpu_ps_lock,
-				       &flags);
+	wifi_nrf_osal_spinlock_irq_take(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock,
+					&flags);
 
 	status = hal_rpu_ps_wake(hal_dev_ctx);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				     "%s: RPU wake failed\n",
-				     __func__);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv, "%s: RPU wake failed\n", __func__);
 		goto out;
 	}
 #endif
@@ -80,9 +77,7 @@ enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, 
 	status = WIFI_NRF_STATUS_SUCCESS;
 out:
 #ifdef RPU_SLEEP_SUPPORT
-	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
-				      hal_dev_ctx->rpu_ps_lock,
-				      &flags);
+	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock, &flags);
 #endif
 	return status;
 }
@@ -116,16 +111,13 @@ enum wifi_nrf_status hal_rpu_reg_write(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 	}
 
 #ifdef RPU_SLEEP_SUPPORT
-	wifi_nrf_osal_spinlock_irq_take(hal_dev_ctx->hpriv->opriv,
-				       hal_dev_ctx->rpu_ps_lock,
-				       &flags);
+	wifi_nrf_osal_spinlock_irq_take(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock,
+					&flags);
 
 	status = hal_rpu_ps_wake(hal_dev_ctx);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				     "%s: RPU wake failed\n",
-				     __func__);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv, "%s: RPU wake failed\n", __func__);
 		goto out;
 	}
 #endif
@@ -136,9 +128,7 @@ enum wifi_nrf_status hal_rpu_reg_write(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 
 #ifdef RPU_SLEEP_SUPPORT
 out:
-	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
-				      hal_dev_ctx->rpu_ps_lock,
-				      &flags);
+	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock, &flags);
 #endif
 
 	return status;

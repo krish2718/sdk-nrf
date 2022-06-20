@@ -32,8 +32,8 @@ static int pending_frames_count(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, int 
 	return count;
 }
 
-static enum wifi_nrf_status update_pend_q_bmp(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, unsigned int ac,
-				       int peer_id)
+static enum wifi_nrf_status update_pend_q_bmp(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					      unsigned int ac, int peer_id)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
@@ -190,7 +190,8 @@ unsigned int tx_desc_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, int queue)
 	return desc;
 }
 
-static int tx_aggr_check(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *first_nwb, int ac, int peer)
+static int tx_aggr_check(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *first_nwb, int ac,
+			 int peer)
 {
 	void *nwb = NULL;
 	void *pending_pkt_queue = NULL;
@@ -303,7 +304,7 @@ static int tx_curr_peer_opp_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, unsi
 }
 
 static int _tx_pending_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, unsigned int desc,
-			unsigned int ac)
+			       unsigned int ac)
 {
 	int len = 0;
 	void *pend_pkt_q = NULL;
@@ -430,7 +431,7 @@ out:
 }
 
 static int tx_cmd_prepare(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, struct host_rpu_msg *umac_cmd,
-		   int desc, void *txq, int peer_id)
+			  int desc, void *txq, int peer_id)
 {
 	struct img_tx_buff *config = NULL;
 	int len = 0;
@@ -522,8 +523,8 @@ static int tx_cmd_prepare(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, struct hos
 	return 0;
 }
 
-static enum wifi_nrf_status tx_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *txq, int desc,
-				 int peer_id)
+static enum wifi_nrf_status tx_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *txq,
+					int desc, int peer_id)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct host_rpu_msg *umac_cmd = NULL;
@@ -579,7 +580,7 @@ out:
 }
 
 static enum wifi_nrf_status tx_enqueue(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb,
-				unsigned int ac, unsigned int peer_id)
+				       unsigned int ac, unsigned int peer_id)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	void *queue = NULL;
@@ -608,8 +609,8 @@ out:
 }
 
 static enum wifi_nrf_status tx_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-				unsigned char wifi_nrf_if_idx, void *nbuf, unsigned int ac,
-				unsigned int peer_id)
+				       unsigned char wifi_nrf_if_idx, void *nbuf, unsigned int ac,
+				       unsigned int peer_id)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_fmac_priv *fpriv = NULL;
@@ -679,7 +680,7 @@ out:
 }
 
 static unsigned int tx_buff_req_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-			      struct img_tx_buff_done *config, unsigned char *ac)
+				     struct img_tx_buff_done *config, unsigned char *ac)
 {
 	struct wifi_nrf_fmac_priv *fpriv = NULL;
 	unsigned int pkts_pend = 0;
@@ -757,7 +758,7 @@ static unsigned int tx_buff_req_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 }
 
 static enum wifi_nrf_status tx_done_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-				     struct img_tx_buff_done *config)
+					    struct img_tx_buff_done *config)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_fmac_priv *fpriv = NULL;
@@ -877,7 +878,7 @@ out:
 }
 
 static enum wifi_nrf_status wifi_nrf_fmac_tx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, int if_id,
-				      void *nbuf, unsigned int ac, unsigned int peer_id)
+					     void *nbuf, unsigned int ac, unsigned int peer_id)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	unsigned int desc = 0;

@@ -48,8 +48,7 @@ extern struct qspi_config *qspi_config;
 const struct qspi_dev *qdev;
 struct qspi_config *cfg;
 
-enum {
-	SysBus = 0,
+enum { SysBus = 0,
 	ExtSysBus,
 	PBus,
 	PKTRAM,
@@ -533,18 +532,18 @@ static int cmd_qspi_init(const struct shell *shell, size_t argc, char **argv)
 	return 0;
 }
 
-int func_rpu_sleep(void){
-
+int func_rpu_sleep(void)
+{
 	return qspi_cmd_sleep_rpu(&qspi_perip);
 }
 
-int func_rpu_wake(void){
-
+int func_rpu_wake(void)
+{
 	return qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 }
 
-int func_rpu_sleep_status(void){
-
+int func_rpu_sleep_status(void)
+{
 	return RDSR1(&qspi_perip);
 }
 

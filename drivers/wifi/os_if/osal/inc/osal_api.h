@@ -1062,7 +1062,6 @@ void wifi_nrf_osal_qspi_cpy_to(struct wifi_nrf_osal_priv *opriv, void *priv, uns
  */
 void *wifi_nrf_osal_timer_alloc(struct wifi_nrf_osal_priv *opriv);
 
-
 /**
  * wifi_nrf_osal_timer_free() - Free a timer.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
@@ -1073,9 +1072,7 @@ void *wifi_nrf_osal_timer_alloc(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv,
-			     void *timer);
-
+void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv, void *timer);
 
 /**
  * wifi_nrf_osal_timer_init() - Initialize a timer.
@@ -1090,11 +1087,8 @@ void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv,
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv,
-			     void *timer,
-			     void (*callbk_fn)(unsigned long),
-			     unsigned long data);
-
+void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv, void *timer,
+			      void (*callbk_fn)(unsigned long), unsigned long data);
 
 /**
  * wifi_nrf_osal_timer_schedule() - Schedule a timer.
@@ -1103,14 +1097,12 @@ void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv,
  * @duration: Duration of the timer in seconds.
  *
  * Schedules a timer with a @duration seconds that has been allocated using
- * @wifi_nrf_osal_timer_alloc and initalized with @wifi_nrf_osal_timer_init.
+ * @wifi_nrf_osal_timer_alloc and initialized with @wifi_nrf_osal_timer_init.
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv,
-				 void *timer,
-				 unsigned long duration);
-
+void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv, void *timer,
+				  unsigned long duration);
 
 /**
  * wifi_nrf_osal_timer_kill() - Kill a timer.
@@ -1121,9 +1113,7 @@ void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv,
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv,
-			     void *timer);
-
+void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv, void *timer);
 
 int wifi_nrf_osal_bus_qspi_ps_sleep(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
 

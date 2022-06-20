@@ -28,8 +28,8 @@
 #define CONFIG_NORDIC_QSPI_NOR_STACK_WRITE_BUFFER_SIZE 0
 
 #define RPU_WAKEUP_NOW BIT(0) /* WAKEUP_NOW */
-#define RPU_AWAKE_BIT BIT(1)  /* RPU AWAKE FROM SLEEP */
-#define RPU_READY_BIT BIT(2)  /* RPI IS READY */
+#define RPU_AWAKE_BIT BIT(1) /* RPU AWAKE FROM SLEEP */
+#define RPU_READY_BIT BIT(2) /* RPI IS READY */
 
 struct qspi_config {
 	nrf_qspi_addrmode_t addrmode;
@@ -85,13 +85,12 @@ int qspi_deinit(void);
 
 void gpio_free_irq(int pin, struct gpio_callback *button_cb_data);
 
-int gpio_request_irq(int pin, struct gpio_callback *button_cb_data,
-					 void (*irq_handler)());
+int gpio_request_irq(int pin, struct gpio_callback *button_cb_data, void (*irq_handler)());
 
 struct qspi_config *qspi_defconfig(void);
 
 struct qspi_dev *qspi_dev(bool spim_flag);
-//struct qspi_dev *qspi_dev(void);
+/* struct qspi_dev *qspi_dev(void); */
 
 int qspi_cmd_sleep_rpu(const struct device *dev);
 
@@ -107,7 +106,6 @@ int qspi_wait_while_rpu_awake(const struct device *dev);
 void func_wifi_on(void);
 
 int func_gpio_config(void);
-int func_irq_config(struct gpio_callback *irq_callback_data,
-		void (*irq_handler)());
+int func_irq_config(struct gpio_callback *irq_callback_data, void (*irq_handler)());
 
 #endif /* __QSPI_IF_H__ */

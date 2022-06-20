@@ -378,12 +378,11 @@ static int spim_nrfx_pm_control(const struct device *dev, uint32_t ctrl_command,
 #define SPIM_NRFX_MISO_PULL_UP(idx) DT_PROP(SPIM(idx), miso_pull_up)
 
 #define SPIM_NRFX_MISO_PULL(idx)                                                                   \
-	(SPIM_NRFX_MISO_PULL_UP(idx)   ? SPIM_NRFX_MISO_PULL_DOWN(idx) ?                           \
-					 -1 /* invalid configuration */                            \
-					 :                                                         \
-					 NRF_GPIO_PIN_PULLUP :                                     \
-	 SPIM_NRFX_MISO_PULL_DOWN(idx) ? NRF_GPIO_PIN_PULLDOWN :                                   \
-					 NRF_GPIO_PIN_NOPULL)
+	(SPIM_NRFX_MISO_PULL_UP(idx) ?                                                             \
+		 SPIM_NRFX_MISO_PULL_DOWN(idx) ? -1 /* invalid configuration */                    \
+						 :                                                 \
+						 NRF_GPIO_PIN_PULLUP :                             \
+		 SPIM_NRFX_MISO_PULL_DOWN(idx) ? NRF_GPIO_PIN_PULLDOWN : NRF_GPIO_PIN_NOPULL)
 
 #define SPI_NRFX_SPIM_EXTENDED_CONFIG(idx)                                                         \
 	IF_ENABLED(NRFX_SPIM_EXTENDED_ENABLED,                                                     \

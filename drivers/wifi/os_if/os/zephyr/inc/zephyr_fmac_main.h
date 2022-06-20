@@ -35,10 +35,9 @@ struct wifi_nrf_vif_ctx_zep {
 	enum wifi_nrf_fmac_if_state if_state;
 };
 
-
 struct wifi_nrf_vif_ctx_map {
-        const char *ifname;
-        struct wifi_nrf_vif_ctx_zep *vif_ctx;
+	const char *ifname;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx;
 };
 
 struct wifi_nrf_ctx_zep {

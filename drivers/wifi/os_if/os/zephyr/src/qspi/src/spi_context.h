@@ -21,7 +21,7 @@ extern "C" {
 
 enum spi_ctx_runtime_op_mode {
 	SPI_CTX_RUNTIME_OP_MODE_MASTER = BIT(0),
-	SPI_CTX_RUNTIME_OP_MODE_SLAVE  = BIT(1),
+	SPI_CTX_RUNTIME_OP_MODE_SLAVE = BIT(1),
 };
 
 struct spi_context {
@@ -51,14 +51,13 @@ struct spi_context {
 #endif /* CONFIG_SPI_SLAVE */
 };
 
-#define SPI_CONTEXT_INIT_LOCK(_data, _ctx_name)				\
+#define SPI_CONTEXT_INIT_LOCK(_data, _ctx_name)                                                    \
 	._ctx_name.lock = Z_SEM_INITIALIZER(_data._ctx_name.lock, 0, 1)
 
-#define SPI_CONTEXT_INIT_SYNC(_data, _ctx_name)				\
+#define SPI_CONTEXT_INIT_SYNC(_data, _ctx_name)                                                    \
 	._ctx_name.sync = Z_SEM_INITIALIZER(_data._ctx_name.sync, 0, 1)
 
-static inline bool spi_context_configured(struct spi_context *ctx,
-					  const struct spi_config *config)
+static inline bool spi_context_configured(struct spi_context *ctx, const struct spi_config *config)
 {
 	return !!(ctx->config == config);
 }
@@ -68,13 +67,10 @@ static inline bool spi_context_is_slave(struct spi_context *ctx)
 	return (ctx->config->operation & SPI_OP_MODE_SLAVE);
 }
 
-static inline void spi_context_lock(struct spi_context *ctx,
-				    bool asynchronous,
-				    struct k_poll_signal *signal,
-				    const struct spi_config *spi_cfg)
+static inline void spi_context_lock(struct spi_context *ctx, bool asynchronous,
+				    struct k_poll_signal *signal, const struct spi_config *spi_cfg)
 {
-	if ((spi_cfg->operation & SPI_LOCK_ON) &&
-	    (k_sem_count_get(&ctx->lock) == 0) &&
+	if ((spi_cfg->operation & SPI_LOCK_ON) && (k_sem_count_get(&ctx->lock) == 0) &&
 	    (ctx->owner == spi_cfg)) {
 		return;
 	}
@@ -159,8 +155,7 @@ static inline void spi_context_complete(struct spi_context *ctx, int status)
 #endif /* CONFIG_SPI_ASYNC */
 }
 
-static inline
-gpio_dt_flags_t spi_context_cs_active_level(struct spi_context *ctx)
+static inline gpio_dt_flags_t spi_context_cs_active_level(struct spi_context *ctx)
 {
 	if (ctx->config->operation & SPI_CS_ACTIVE_HIGH)
 		return GPIO_ACTIVE_HIGH;
@@ -173,34 +168,28 @@ static inline void spi_context_cs_configure(struct spi_context *ctx)
 	if (ctx->config->cs && ctx->config->cs->gpio_dev) {
 		/* Validate CS active levels are equivalent */
 		__ASSERT(spi_context_cs_active_level(ctx) ==
-			 (ctx->config->cs->gpio_dt_flags & GPIO_ACTIVE_LOW),
+				 (ctx->config->cs->gpio_dt_flags & GPIO_ACTIVE_LOW),
 			 "Devicetree and spi_context CS levels are not equal");
-		gpio_pin_configure(ctx->config->cs->gpio_dev,
-				   ctx->config->cs->gpio_pin,
-				   ctx->config->cs->gpio_dt_flags |
-				   GPIO_OUTPUT_INACTIVE);
+		gpio_pin_configure(ctx->config->cs->gpio_dev, ctx->config->cs->gpio_pin,
+				   ctx->config->cs->gpio_dt_flags | GPIO_OUTPUT_INACTIVE);
 	} else {
 		LOG_INF("CS control inhibited (no GPIO device)");
 	}
 }
 
-static inline void _spi_context_cs_control(struct spi_context *ctx,
-					   bool on, bool force_off)
+static inline void _spi_context_cs_control(struct spi_context *ctx, bool on, bool force_off)
 {
 	if (ctx->config && ctx->config->cs && ctx->config->cs->gpio_dev) {
 		if (on) {
-			gpio_pin_set(ctx->config->cs->gpio_dev,
-				     ctx->config->cs->gpio_pin, 1);
+			gpio_pin_set(ctx->config->cs->gpio_dev, ctx->config->cs->gpio_pin, 1);
 			k_busy_wait(ctx->config->cs->delay);
 		} else {
-			if (!force_off &&
-			    ctx->config->operation & SPI_HOLD_ON_CS) {
+			if (!force_off && ctx->config->operation & SPI_HOLD_ON_CS) {
 				return;
 			}
 
 			k_busy_wait(ctx->config->cs->delay);
-			gpio_pin_set(ctx->config->cs->gpio_dev,
-				     ctx->config->cs->gpio_pin, 0);
+			gpio_pin_set(ctx->config->cs->gpio_dev, ctx->config->cs->gpio_pin, 0);
 		}
 	}
 }
@@ -221,11 +210,9 @@ static inline void spi_context_unlock_unconditionally(struct spi_context *ctx)
 	}
 }
 
-static inline
-void spi_context_buffers_setup(struct spi_context *ctx,
-			       const struct spi_buf_set *tx_bufs,
-			       const struct spi_buf_set *rx_bufs,
-			       uint8_t dfs)
+static inline void spi_context_buffers_setup(struct spi_context *ctx,
+					     const struct spi_buf_set *tx_bufs,
+					     const struct spi_buf_set *rx_bufs, uint8_t dfs)
 {
 	LOG_DBG("tx_bufs %p - rx_bufs %p - %u", tx_bufs, rx_bufs, dfs);
 
@@ -260,13 +247,11 @@ void spi_context_buffers_setup(struct spi_context *ctx,
 #endif /* CONFIG_SPI_SLAVE */
 
 	LOG_DBG("current_tx %p (%zu), current_rx %p (%zu), tx buf/len %p/%zu, rx buf/len %p/%zu",
-		    ctx->current_tx, ctx->tx_count,
-		    ctx->current_rx, ctx->rx_count,
-		    ctx->tx_buf, ctx->tx_len, ctx->rx_buf, ctx->rx_len);
+		ctx->current_tx, ctx->tx_count, ctx->current_rx, ctx->rx_count, ctx->tx_buf,
+		ctx->tx_len, ctx->rx_buf, ctx->rx_len);
 }
 
-static ALWAYS_INLINE
-void spi_context_update_tx(struct spi_context *ctx, uint8_t dfs, uint32_t len)
+static ALWAYS_INLINE void spi_context_update_tx(struct spi_context *ctx, uint8_t dfs, uint32_t len)
 {
 	if (!ctx->tx_len)
 		return;
@@ -293,20 +278,17 @@ void spi_context_update_tx(struct spi_context *ctx, uint8_t dfs, uint32_t len)
 	LOG_DBG("tx buf/len %p/%zu", ctx->tx_buf, ctx->tx_len);
 }
 
-static ALWAYS_INLINE
-bool spi_context_tx_on(struct spi_context *ctx)
+static ALWAYS_INLINE bool spi_context_tx_on(struct spi_context *ctx)
 {
 	return !!(ctx->tx_len);
 }
 
-static ALWAYS_INLINE
-bool spi_context_tx_buf_on(struct spi_context *ctx)
+static ALWAYS_INLINE bool spi_context_tx_buf_on(struct spi_context *ctx)
 {
 	return !!(ctx->tx_buf && ctx->tx_len);
 }
 
-static ALWAYS_INLINE
-void spi_context_update_rx(struct spi_context *ctx, uint8_t dfs, uint32_t len)
+static ALWAYS_INLINE void spi_context_update_rx(struct spi_context *ctx, uint8_t dfs, uint32_t len)
 {
 #ifdef CONFIG_SPI_SLAVE
 	if (spi_context_is_slave(ctx))
@@ -339,14 +321,12 @@ void spi_context_update_rx(struct spi_context *ctx, uint8_t dfs, uint32_t len)
 	LOG_DBG("rx buf/len %p/%zu", ctx->rx_buf, ctx->rx_len);
 }
 
-static ALWAYS_INLINE
-bool spi_context_rx_on(struct spi_context *ctx)
+static ALWAYS_INLINE bool spi_context_rx_on(struct spi_context *ctx)
 {
 	return !!(ctx->rx_len);
 }
 
-static ALWAYS_INLINE
-bool spi_context_rx_buf_on(struct spi_context *ctx)
+static ALWAYS_INLINE bool spi_context_rx_buf_on(struct spi_context *ctx)
 {
 	return !!(ctx->rx_buf && ctx->rx_len);
 }

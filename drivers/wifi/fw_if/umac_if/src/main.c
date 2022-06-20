@@ -140,7 +140,7 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 						  unsigned char wifi_nrf_vif_idx,
 						  unsigned char *rf_params, bool rf_params_valid,
 #ifdef RPU_SLEEP_SUPPORT
-					    	  int sleep_type,
+						  int sleep_type,
 #endif
 						  unsigned int phy_calib)
 {
@@ -283,8 +283,7 @@ void wifi_nrf_fmac_dev_rem(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 	wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv, fmac_dev_ctx);
 }
 
-struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(
-		struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
+struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	return wifi_nrf_hal_umac_info(fmac_dev_ctx->hal_dev_ctx);
 }
@@ -1171,9 +1170,9 @@ out:
 	return status;
 }
 
-static enum wifi_nrf_status wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
-						    unsigned char wifi_nrf_vif_idx,
-						    struct img_umac_set_wiphy_info *wiphy_info)
+static enum wifi_nrf_status
+wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx, unsigned char wifi_nrf_vif_idx,
+			       struct img_umac_set_wiphy_info *wiphy_info)
 {
 	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
 	struct img_umac_cmd_set_wiphy *set_wiphy_cmd = NULL;

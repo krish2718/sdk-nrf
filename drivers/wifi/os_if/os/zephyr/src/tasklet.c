@@ -24,16 +24,14 @@ void tasklet_cb(void *dummy1, void *dummy2, void *dummy3)
 	struct tasklet_struct *tasklet = dummy1;
 
 	while (1) {
-
 		k_sem_take(&tasklet->lock, K_FOREVER);
 
 		tasklet->callback(tasklet->data);
 	}
 }
 
-void tasklet_init(struct tasklet_struct *tasklet,
-						 void (*callback)(unsigned long),
-						 unsigned long data)
+void tasklet_init(struct tasklet_struct *tasklet, void (*callback)(unsigned long),
+		  unsigned long data)
 {
 	tasklet->callback = callback;
 	tasklet->data = data;
@@ -44,11 +42,9 @@ void tasklet_init(struct tasklet_struct *tasklet,
 
 	k_sem_init(&tasklet->lock, 1, 1);
 
-	tasklet->tid =
-	k_thread_create(&tasklet->tdata, thread1_stack_area,
-			K_THREAD_STACK_SIZEOF(thread1_stack_area),
-			tasklet_cb, tasklet, NULL, NULL,
-			PRIORITY, 0, K_NO_WAIT);
+	tasklet->tid = k_thread_create(&tasklet->tdata, thread1_stack_area,
+				       K_THREAD_STACK_SIZEOF(thread1_stack_area), tasklet_cb,
+				       tasklet, NULL, NULL, PRIORITY, 0, K_NO_WAIT);
 }
 
 void tasklet_schedule(struct tasklet_struct *tasklet)

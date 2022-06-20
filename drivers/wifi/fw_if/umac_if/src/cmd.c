@@ -68,7 +68,7 @@ enum wifi_nrf_status umac_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				   unsigned char *def_mac_addr, unsigned char def_vif_idx,
 				   unsigned char *rf_params, bool rf_params_valid,
 #ifdef RPU_SLEEP_SUPPORT
-			      	   int sleep_type,
+				   int sleep_type,
 #endif
 				   struct img_data_config_params config, unsigned int phy_calib)
 {

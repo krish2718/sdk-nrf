@@ -20,8 +20,7 @@ struct tasklet_struct {
 	struct k_thread tdata;
 };
 
-void tasklet_init(struct tasklet_struct *tasklet,
-		  void (*callback)(unsigned long callbk_data),
+void tasklet_init(struct tasklet_struct *tasklet, void (*callback)(unsigned long callbk_data),
 		  unsigned long data);
 
 void tasklet_schedule(struct tasklet_struct *tasklet);

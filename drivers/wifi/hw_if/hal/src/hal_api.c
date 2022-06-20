@@ -239,13 +239,11 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	unsigned long elapsed_time_usec = 0;
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 
-	if(!hal_dev_ctx) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				     "%s: Invalid parameters\n",
-				     __func__);
+	if (!hal_dev_ctx) {
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv, "%s: Invalid parameters\n",
+				      __func__);
 		return status;
-        }
-
+	}
 
 	if (hal_dev_ctx->rpu_ps_state == RPU_PS_STATE_AWAKE) {
 		status = WIFI_NRF_STATUS_SUCCESS;
@@ -271,46 +269,42 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 
 		do {
 			idle_time_us = wifi_nrf_osal_time_elapsed_us(hal_dev_ctx->hpriv->opriv,
-								    idle_time_start_us);
+								     idle_time_start_us);
 		} while ((idle_time_us / 1000) < RPU_PS_POLL_IDLE_TIMEOUT);
 
-		elapsed_time_usec = wifi_nrf_osal_time_elapsed_us(hal_dev_ctx->hpriv->opriv,
-								 start_time_us);
+		elapsed_time_usec =
+			wifi_nrf_osal_time_elapsed_us(hal_dev_ctx->hpriv->opriv, start_time_us);
 		elapsed_time_sec = (elapsed_time_usec / 1000000);
 	} while (elapsed_time_sec < RPU_PS_WAKE_TIMEOUT);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				     "%s: RPU is asleep for more than %d sec, reg_addr = 0x%X, reg_val = 0x%X\n",
-				     __func__,
-				     RPU_PS_WAKE_TIMEOUT,
-				     reg_addr,
-				     reg_val);
+		wifi_nrf_osal_log_err(
+			hal_dev_ctx->hpriv->opriv,
+			"%s: RPU is asleep for more than %d sec, reg_addr = 0x%X, reg_val = 0x%X\n",
+			__func__, RPU_PS_WAKE_TIMEOUT, reg_addr, reg_val);
 		goto out;
 	}
 #ifdef DEBUG_MODE_SUPPORT
 #ifdef DCR14_VALIDATE
 	else
 		wifi_nrf_osal_log_dbg(hal_dev_ctx->hpriv->opriv,
-				     "\n\n\n%s: RPU woke up after %d usec\n",
-				     __func__,
-				     elapsed_time_usec);
+				      "\n\n\n%s: RPU woke up after %d usec\n", __func__,
+				      elapsed_time_usec);
 #endif /* DCR14_VALIDATE */
 #endif /* DEBUG_MODE_SUPPORT */
 	hal_dev_ctx->rpu_ps_state = RPU_PS_STATE_AWAKE;
 
-	if(!g_irq_ctx)
-	if(hal_dev_ctx->rpu_ps_timer){
-		wifi_nrf_osal_timer_kill(hal_dev_ctx->hpriv->opriv,
-				hal_dev_ctx->rpu_ps_timer);
-		wifi_nrf_osal_timer_schedule(hal_dev_ctx->hpriv->opriv,
-				hal_dev_ctx->rpu_ps_timer,
-				RPU_PS_IDLE_TIMEOUT);
-	}
+	if (!g_irq_ctx)
+		if (hal_dev_ctx->rpu_ps_timer) {
+			wifi_nrf_osal_timer_kill(hal_dev_ctx->hpriv->opriv,
+						 hal_dev_ctx->rpu_ps_timer);
+			wifi_nrf_osal_timer_schedule(hal_dev_ctx->hpriv->opriv,
+						     hal_dev_ctx->rpu_ps_timer,
+						     RPU_PS_IDLE_TIMEOUT);
+		}
 out:
 	return status;
 }
-
 
 static void hal_rpu_ps_sleep(unsigned long data)
 {
@@ -319,19 +313,15 @@ static void hal_rpu_ps_sleep(unsigned long data)
 
 	hal_dev_ctx = (struct wifi_nrf_hal_dev_ctx *)data;
 
-	wifi_nrf_osal_spinlock_irq_take(hal_dev_ctx->hpriv->opriv,
-				       hal_dev_ctx->rpu_ps_lock,
-				       &flags);
+	wifi_nrf_osal_spinlock_irq_take(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock,
+					&flags);
 
 	wifi_nrf_bal_rpu_ps_sleep(hal_dev_ctx->bal_dev_ctx);
 
 	hal_dev_ctx->rpu_ps_state = RPU_PS_STATE_ASLEEP;
 
-	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv,
-				      hal_dev_ctx->rpu_ps_lock,
-				      &flags);
+	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock, &flags);
 }
-
 
 static enum wifi_nrf_status hal_rpu_ps_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
@@ -340,55 +330,44 @@ static enum wifi_nrf_status hal_rpu_ps_init(struct wifi_nrf_hal_dev_ctx *hal_dev
 	hal_dev_ctx->rpu_ps_lock = wifi_nrf_osal_spinlock_alloc(hal_dev_ctx->hpriv->opriv);
 
 	if (!hal_dev_ctx->rpu_ps_lock) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				     "%s: Unable to allocate lock\n",
-				     __func__);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv, "%s: Unable to allocate lock\n",
+				      __func__);
 		goto out;
 	}
 
-	wifi_nrf_osal_spinlock_init(hal_dev_ctx->hpriv->opriv,
-				   hal_dev_ctx->rpu_ps_lock);
+	wifi_nrf_osal_spinlock_init(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock);
 
 	hal_dev_ctx->rpu_ps_timer = wifi_nrf_osal_timer_alloc(hal_dev_ctx->hpriv->opriv);
 
 	if (!hal_dev_ctx->rpu_ps_timer) {
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				     "%s: Unable to allocate timer\n",
-				     __func__);
-		wifi_nrf_osal_spinlock_free(hal_dev_ctx->hpriv->opriv,
-					   hal_dev_ctx->rpu_ps_lock);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv, "%s: Unable to allocate timer\n",
+				      __func__);
+		wifi_nrf_osal_spinlock_free(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock);
 		goto out;
 	}
 
-	wifi_nrf_osal_timer_init(hal_dev_ctx->hpriv->opriv,
-				hal_dev_ctx->rpu_ps_timer,
-				hal_rpu_ps_sleep,
-				(unsigned long)hal_dev_ctx);
+	wifi_nrf_osal_timer_init(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_timer,
+				 hal_rpu_ps_sleep, (unsigned long)hal_dev_ctx);
 
 	hal_dev_ctx->rpu_ps_state = RPU_PS_STATE_ASLEEP;
 	hal_dev_ctx->dbg_enable = true;
 
 	status = WIFI_NRF_STATUS_SUCCESS;
 out:
-	return status;	
+	return status;
 }
-
 
 static void hal_rpu_ps_deinit(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
-	wifi_nrf_osal_timer_kill(hal_dev_ctx->hpriv->opriv,
-				hal_dev_ctx->rpu_ps_timer);
+	wifi_nrf_osal_timer_kill(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_timer);
 
-	wifi_nrf_osal_timer_free(hal_dev_ctx->hpriv->opriv,
-				hal_dev_ctx->rpu_ps_timer);
+	wifi_nrf_osal_timer_free(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_timer);
 
-	wifi_nrf_osal_spinlock_free(hal_dev_ctx->hpriv->opriv,
-				   hal_dev_ctx->rpu_ps_lock);
+	wifi_nrf_osal_spinlock_free(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->rpu_ps_lock);
 }
 
-
 static void hal_rpu_ps_set_state(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
-			  enum RPU_PS_STATE ps_state)
+				 enum RPU_PS_STATE ps_state)
 {
 	hal_dev_ctx->rpu_ps_state = ps_state;
 }
@@ -951,21 +930,13 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 	status = hal_rpu_ps_init(hal_dev_ctx);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(hpriv->opriv,
-				     "%s: hal_rpu_ps_init failed\n",
-				     __func__);
-		wifi_nrf_osal_tasklet_free(hpriv->opriv,
-					  hal_dev_ctx->rx_tasklet);
-		wifi_nrf_osal_spinlock_free(hpriv->opriv,
-					   hal_dev_ctx->lock_hal);
-		wifi_nrf_osal_spinlock_free(hpriv->opriv,
-					   hal_dev_ctx->lock_rx);
-		wifi_nrf_utils_q_free(hpriv->opriv,
-				      hal_dev_ctx->cmd_q);
-		wifi_nrf_utils_q_free(hpriv->opriv,
-				      hal_dev_ctx->event_q);
-		wifi_nrf_osal_mem_free(hpriv->opriv,
-				      hal_dev_ctx);
+		wifi_nrf_osal_log_err(hpriv->opriv, "%s: hal_rpu_ps_init failed\n", __func__);
+		wifi_nrf_osal_tasklet_free(hpriv->opriv, hal_dev_ctx->rx_tasklet);
+		wifi_nrf_osal_spinlock_free(hpriv->opriv, hal_dev_ctx->lock_hal);
+		wifi_nrf_osal_spinlock_free(hpriv->opriv, hal_dev_ctx->lock_rx);
+		wifi_nrf_utils_q_free(hpriv->opriv, hal_dev_ctx->cmd_q);
+		wifi_nrf_utils_q_free(hpriv->opriv, hal_dev_ctx->event_q);
+		wifi_nrf_osal_mem_free(hpriv->opriv, hal_dev_ctx);
 		hal_dev_ctx = NULL;
 		goto out;
 	}
@@ -1119,12 +1090,10 @@ void wifi_nrf_hal_dev_rem(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	wifi_nrf_osal_mem_free(hal_dev_ctx->hpriv->opriv, hal_dev_ctx);
 }
 
-struct host_rpu_umac_info *
-wifi_nrf_hal_umac_info(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx){
-
-	hal_rpu_mem_read(hal_dev_ctx, &hal_dev_ctx->umac_info, 
-			RPU_MEM_UMAC_BOOT_SIG,
-			sizeof(hal_dev_ctx->umac_info));
+struct host_rpu_umac_info *wifi_nrf_hal_umac_info(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
+{
+	hal_rpu_mem_read(hal_dev_ctx, &hal_dev_ctx->umac_info, RPU_MEM_UMAC_BOOT_SIG,
+			 sizeof(hal_dev_ctx->umac_info));
 
 	return &hal_dev_ctx->umac_info;
 }
@@ -1188,8 +1157,7 @@ enum wifi_nrf_status wifi_nrf_hal_irq_handler(void *data)
 #ifdef RPU_SLEEP_SUPPORT
 	ps_state = hal_dev_ctx->rpu_ps_state;
 
-	hal_rpu_ps_set_state(hal_dev_ctx,
-			     RPU_PS_STATE_AWAKE);
+	hal_rpu_ps_set_state(hal_dev_ctx, RPU_PS_STATE_AWAKE);
 	g_irq_ctx = 1;
 #endif
 
@@ -1198,8 +1166,7 @@ enum wifi_nrf_status wifi_nrf_hal_irq_handler(void *data)
 #ifdef RPU_SLEEP_SUPPORT
 	g_irq_ctx = 0;
 
-	hal_rpu_ps_set_state(hal_dev_ctx,
-			     ps_state);
+	hal_rpu_ps_set_state(hal_dev_ctx, ps_state);
 #endif
 
 	wifi_nrf_osal_spinlock_irq_rel(hal_dev_ctx->hpriv->opriv, hal_dev_ctx->lock_rx, &flags);

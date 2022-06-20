@@ -21,9 +21,9 @@
 #define MAX_HAL_RPU_READY_WAIT (1 * 1000 * 1000) /* 1 sec */
 
 #ifdef RPU_SLEEP_SUPPORT
-#define RPU_PS_IDLE_TIMEOUT 10  /* msecs */
-#define RPU_PS_POLL_IDLE_TIMEOUT 10  /* msecs */
-#define RPU_PS_WAKE_TIMEOUT 1  /* secs */
+#define RPU_PS_IDLE_TIMEOUT 10 /* msecs */
+#define RPU_PS_POLL_IDLE_TIMEOUT 10 /* msecs */
+#define RPU_PS_WAKE_TIMEOUT 1 /* secs */
 #endif
 
 enum RPU_PROC_TYPE { RPU_PROC_TYPE_MCU_LMAC, RPU_PROC_TYPE_MCU_UMAC, RPU_PROC_TYPE_MAX };
@@ -52,11 +52,7 @@ enum WIFI_NRF_HAL_MSG_TYPE {
 };
 
 #ifdef RPU_SLEEP_SUPPORT
-enum RPU_PS_STATE {
-	RPU_PS_STATE_ASLEEP,
-	RPU_PS_STATE_AWAKE,
-	RPU_PS_STATE_MAX
-};
+enum RPU_PS_STATE { RPU_PS_STATE_ASLEEP, RPU_PS_STATE_AWAKE, RPU_PS_STATE_MAX };
 #endif
 
 struct wifi_nrf_hal_cfg_params {

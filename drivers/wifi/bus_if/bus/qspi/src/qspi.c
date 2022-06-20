@@ -265,7 +265,7 @@ int wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
 	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	return wifi_nrf_osal_bus_qspi_ps_sleep(qspi_dev_ctx->qspi_priv->opriv,
-			qspi_dev_ctx->os_qspi_dev_ctx);
+					       qspi_dev_ctx->os_qspi_dev_ctx);
 }
 
 int wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
@@ -275,7 +275,7 @@ int wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
 	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	return wifi_nrf_osal_bus_qspi_ps_wake(qspi_dev_ctx->qspi_priv->opriv,
-			qspi_dev_ctx->os_qspi_dev_ctx);
+					      qspi_dev_ctx->os_qspi_dev_ctx);
 }
 
 int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
@@ -285,7 +285,7 @@ int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
 	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
 	return wifi_nrf_osal_bus_qspi_ps_status(qspi_dev_ctx->qspi_priv->opriv,
-			qspi_dev_ctx->os_qspi_dev_ctx);
+						qspi_dev_ctx->os_qspi_dev_ctx);
 }
 #endif
 

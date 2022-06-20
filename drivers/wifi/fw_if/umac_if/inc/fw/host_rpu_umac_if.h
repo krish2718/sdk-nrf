@@ -310,7 +310,7 @@
 #define IMG_AUTHTYPE_NETWORK_EAP 3
 #define IMG_AUTHTYPE_SAE 4
 
-	/* keep last */
+/* keep last */
 #define __IMG_AUTHTYPE_NUM 5
 #define IMG_AUTHTYPE_MAX (__IMG_AUTHTYPE_NUM)
 #define IMG_AUTHTYPE_AUTOMATIC 6

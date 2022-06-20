@@ -451,36 +451,24 @@ void *wifi_nrf_osal_timer_alloc(struct wifi_nrf_osal_priv *opriv)
 	return opriv->ops->timer_alloc();
 }
 
-
-void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv,
-			     void *timer)
+void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv, void *timer)
 {
 	opriv->ops->timer_free(timer);
 }
 
-
-void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv,
-			     void *timer,
-			     void (*callbk_fn)(unsigned long),
-			     unsigned long data)
+void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv, void *timer,
+			      void (*callbk_fn)(unsigned long), unsigned long data)
 {
-	opriv->ops->timer_init(timer,
-			       callbk_fn,
-			       data);
+	opriv->ops->timer_init(timer, callbk_fn, data);
 }
 
-
-void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv,
-				 void *timer,
-				 unsigned long duration)
+void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv, void *timer,
+				  unsigned long duration)
 {
-	opriv->ops->timer_schedule(timer,
-				   duration);
+	opriv->ops->timer_schedule(timer, duration);
 }
 
-
-void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv,
-			     void *timer)
+void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv, void *timer)
 {
 	opriv->ops->timer_kill(timer);
 }

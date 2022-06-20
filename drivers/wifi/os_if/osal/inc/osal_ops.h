@@ -262,11 +262,9 @@ struct wifi_nrf_osal_ops {
 					  struct wifi_nrf_osal_host_map *host_map);
 
 #ifdef RPU_SLEEP_SUPPORT
-	void * (*timer_alloc)(void);
+	void *(*timer_alloc)(void);
 	void (*timer_free)(void *timer);
-	void (*timer_init)(void *timer,
-			void (*callback)(unsigned long),
-			unsigned long data);
+	void (*timer_init)(void *timer, void (*callback)(unsigned long), unsigned long data);
 	void (*timer_schedule)(void *timer, unsigned long duration);
 	void (*timer_kill)(void *timer);
 

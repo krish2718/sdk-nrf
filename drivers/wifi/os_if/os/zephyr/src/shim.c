@@ -692,7 +692,7 @@ static void zep_shim_irq_handler(const struct device *dev, struct gpio_callback 
 }
 
 static enum wifi_nrf_status zep_shim_bus_qspi_intr_reg(void *os_dev_ctx, void *callbk_data,
-						int (*callbk_fn)(void *callbk_data))
+						       int (*callbk_fn)(void *callbk_data))
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct zep_shim_intr_priv *intr_priv = NULL;
@@ -751,9 +751,7 @@ static void *zep_shim_timer_alloc(void)
 	return timer;
 }
 
-static void zep_shim_timer_init(void *timer,
-		void (*callback)(unsigned long),
-		unsigned long data)
+static void zep_shim_timer_init(void *timer, void (*callback)(unsigned long), unsigned long data)
 {
 	((struct timer_list *)timer)->function = callback;
 	((struct timer_list *)timer)->data = data;

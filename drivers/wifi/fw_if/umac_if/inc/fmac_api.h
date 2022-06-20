@@ -837,7 +837,6 @@ enum wifi_nrf_status wifi_nrf_fmac_set_wiphy_params(void *wifi_nrf_fmac_dev_ctx,
 enum wifi_nrf_status wifi_nrf_fmac_conf_btcoex(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       struct rpu_btcoex *params);
 
-struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(
-		struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx);
+struct host_rpu_umac_info *wifi_nrf_fmac_umac_info(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx);
 
 #endif /* __FMAC_API_H__ */

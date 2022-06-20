@@ -25,7 +25,7 @@ void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm)
 	vif_ctx_zep = os_vif_ctx;
 
 	iface = vif_ctx_zep->zep_net_if_ctx;
-	
+
 	pkt = net_pkt_from_nbuf(iface, frm);
 
 	status = net_recv_data(iface, pkt);
@@ -67,8 +67,8 @@ void wifi_nrf_if_init(struct net_if *iface)
 
 	ethernet_init(iface);
 
-	net_if_set_link_addr(iface, (unsigned char*)&rpu_ctx_zep->mac_addr, 
-			sizeof(rpu_ctx_zep->mac_addr), NET_LINK_ETHERNET);
+	net_if_set_link_addr(iface, (unsigned char *)&rpu_ctx_zep->mac_addr,
+			     sizeof(rpu_ctx_zep->mac_addr), NET_LINK_ETHERNET);
 }
 
 enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev)

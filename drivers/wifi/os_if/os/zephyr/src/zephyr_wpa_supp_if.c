@@ -444,19 +444,18 @@ void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv, struct img_umac_event_
 
 static void iface_cb(struct net_if *iface, void *user_data)
 {
-    struct wifi_nrf_vif_ctx_map *vif_ctx_map = user_data;
+	struct wifi_nrf_vif_ctx_map *vif_ctx_map = user_data;
 
 	if (strncmp(iface->if_dev->dev->name, vif_ctx_map->ifname, IFNAMSIZ) == 0) {
 		vif_ctx_map->vif_ctx = net_if_get_device(iface)->data;
 	}
 }
 
-void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx,
-			      const char *iface_name,
-			      struct zep_wpa_supp_dev_callbk_fns *supp_callbk_fns)
+void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx, const char *iface_name,
+				 struct zep_wpa_supp_dev_callbk_fns *supp_callbk_fns)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct wifi_nrf_vif_ctx_map vif_ctx_map = {0};
+	struct wifi_nrf_vif_ctx_map vif_ctx_map = { 0 };
 
 	vif_ctx_map.ifname = iface_name;
 
@@ -465,7 +464,8 @@ void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx,
 	vif_ctx_zep = vif_ctx_map.vif_ctx;
 
 	if (!vif_ctx_zep || !vif_ctx_zep->rpu_ctx_zep) {
-		printk("%s: Interface %s not found or not properly initialized\n", __func__, iface_name);
+		printk("%s: Interface %s not found or not properly initialized\n",
+				__func__, iface_name);
 		return NULL;
 	}
 
@@ -686,15 +686,9 @@ out:
 	return ret;
 }
 
-
-int wifi_nrf_wpa_supp_add_key(struct img_umac_key_info *key_info,
-			   enum wpa_alg alg,
-			   int key_idx,
-			   int defkey,
-			   const unsigned char *seq,
-			   size_t seq_len,
-			   const unsigned char *key,
-			   size_t key_len)
+int wifi_nrf_wpa_supp_add_key(struct img_umac_key_info *key_info, enum wpa_alg alg, int key_idx,
+			      int defkey, const unsigned char *seq, size_t seq_len,
+			      const unsigned char *key, size_t key_len)
 {
 	unsigned int suite = 0;
 
@@ -905,17 +899,10 @@ out:
 	return ret;
 }
 
-
-int wifi_nrf_wpa_supp_set_key(void *if_priv,
-			   const unsigned char *ifname,
-			   enum wpa_alg alg,
-			   const unsigned char *addr,
-			   int key_idx,
-			   int set_tx,
-			   const unsigned char *seq,
-			   size_t seq_len,
-			   const unsigned char *key,
-			   size_t key_len)
+int wifi_nrf_wpa_supp_set_key(void *if_priv, const unsigned char *ifname, enum wpa_alg alg,
+			      const unsigned char *addr, int key_idx, int set_tx,
+			      const unsigned char *seq, size_t seq_len, const unsigned char *key,
+			      size_t key_len)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
@@ -964,8 +951,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 		key_info.valid_fields |= IMG_SEQ_VALID;
 	}
 
-
-	// TODO: Implement/check set_tx
+	/* TODO: Implement/check set_tx */
 	if (addr && !is_broadcast_ether_addr(addr)) {
 		mac_addr = addr;
 		key_info.key_type = IMG_KEYTYPE_PAIRWISE;
@@ -981,10 +967,8 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 	key_info.valid_fields |= IMG_KEY_IDX_VALID;
 
 	if (alg == WPA_ALG_NONE) {
-		status = wifi_nrf_fmac_del_key(rpu_ctx_zep->rpu_ctx,
-						 vif_ctx_zep->vif_idx,
-						 &key_info,
-						 mac_addr);
+		status = wifi_nrf_fmac_del_key(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx,
+					       &key_info, mac_addr);
 
 		if (status != WIFI_NRF_STATUS_SUCCESS) {
 			printk("%s: wifi_nrf_fmac_del_key failed\n", __func__);
@@ -992,10 +976,8 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			ret = 0;
 		}
 	} else {
-		status = wifi_nrf_fmac_add_key(rpu_ctx_zep->rpu_ctx,
-						 vif_ctx_zep->vif_idx,
-						 &key_info,
-						 mac_addr);
+		status = wifi_nrf_fmac_add_key(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx,
+					       &key_info, mac_addr);
 
 		if (status != WIFI_NRF_STATUS_SUCCESS) {
 			printk("%s: wifi_nrf_fmac_add_key failed\n", __func__);
@@ -1037,9 +1019,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv,
 		key_info.img_flags |= IMG_KEY_DEFAULT_TYPE_UNICAST;
 	}
 
-	status = wifi_nrf_fmac_set_key(rpu_ctx_zep->rpu_ctx,
-					 vif_ctx_zep->vif_idx,
-					 &key_info);
+	status = wifi_nrf_fmac_set_key(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &key_info);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		printk("%s: wifi_nrf_fmac_set_key failed\n", __func__);
