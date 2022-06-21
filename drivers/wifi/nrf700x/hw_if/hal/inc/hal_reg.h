@@ -8,6 +8,9 @@
  * @brief Header containing register read/write specific declarations for the
  * HAL Layer of the Wi-Fi driver.
  */
+
+
+
 #ifndef __HAL_REG_H__
 #define __HAL_REG_H__
 
@@ -28,7 +31,8 @@
  *		Pass : WIFI_NRF_STATUS_SUCCESS
  *		Error: WIFI_NRF_STATUS_FAIL
  */
-enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_ctx, unsigned int *val,
+enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_ctx,
+				      unsigned int *val,
 				      unsigned int rpu_reg_addr);
 
 /**
@@ -45,5 +49,6 @@ enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_ctx, unsi
  *		Error: WIFI_NRF_STATUS_FAIL
  */
 enum wifi_nrf_status hal_rpu_reg_write(struct wifi_nrf_hal_dev_ctx *hal_ctx,
-				       unsigned int rpu_reg_addr, unsigned int val);
+				       unsigned int rpu_reg_addr,
+				       unsigned int val);
 #endif /* __HAL_REG_H__ */

@@ -23,10 +23,12 @@ enum wifi_nrf_fmac_rx_cmd_type {
 	WIFI_NRF_FMAC_RX_CMD_TYPE_MAX,
 };
 
+
 struct wifi_nrf_fmac_rx_pool_map_info {
 	unsigned int pool_id;
 	unsigned int buf_id;
 };
+
 
 enum wifi_nrf_status wifi_nrf_fmac_rx_cmd_send(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					       enum wifi_nrf_fmac_rx_cmd_type cmd_type,

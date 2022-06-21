@@ -15,6 +15,7 @@
 #include "host_rpu_data_if.h"
 #include "fmac_structs.h"
 
+
 enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					      struct img_sap_client_pwrsave *config);
 

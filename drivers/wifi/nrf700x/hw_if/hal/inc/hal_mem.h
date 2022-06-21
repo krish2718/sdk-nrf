@@ -23,6 +23,7 @@ enum HAL_RPU_MEM_TYPE {
 	HAL_RPU_MEM_TYPE_MAX
 };
 
+
 /**
  * hal_rpu_mem_read() - Read from the RPU memory.
  * @hpriv: Pointer to HAL context.
@@ -39,8 +40,10 @@ enum HAL_RPU_MEM_TYPE {
  *		Pass : %WIFI_NRF_STATUS_SUCCESS
  *		Error: %WIFI_NRF_STATUS_FAIL
  */
-enum wifi_nrf_status hal_rpu_mem_read(struct wifi_nrf_hal_dev_ctx *hal_ctx, void *host_addr,
-				      unsigned int rpu_mem_addr, unsigned int len);
+enum wifi_nrf_status hal_rpu_mem_read(struct wifi_nrf_hal_dev_ctx *hal_ctx,
+				      void *host_addr,
+				      unsigned int rpu_mem_addr,
+				      unsigned int len);
 
 /**
  * hal_rpu_mem_write() - Write to the RPU memory.
@@ -59,8 +62,10 @@ enum wifi_nrf_status hal_rpu_mem_read(struct wifi_nrf_hal_dev_ctx *hal_ctx, void
  *		Error: %WIFI_NRF_STATUS_FAIL
  */
 enum wifi_nrf_status hal_rpu_mem_write(struct wifi_nrf_hal_dev_ctx *hal_ctx,
-				       unsigned int rpu_mem_addr, void *host_addr,
+				       unsigned int rpu_mem_addr,
+				       void *host_addr,
 				       unsigned int len);
+
 
 /**
  * hal_rpu_mem_clr() - Clear contents of RPU memory.
@@ -74,5 +79,6 @@ enum wifi_nrf_status hal_rpu_mem_write(struct wifi_nrf_hal_dev_ctx *hal_ctx,
  *		Error: %WIFI_NRF_STATUS_FAIL
  */
 enum wifi_nrf_status hal_rpu_mem_clr(struct wifi_nrf_hal_dev_ctx *hal_ctx,
-				     enum RPU_PROC_TYPE rpu_proc, enum HAL_RPU_MEM_TYPE mem_type);
+				     enum RPU_PROC_TYPE rpu_proc,
+				     enum HAL_RPU_MEM_TYPE mem_type);
 #endif /* __HAL_MEM_H__ */

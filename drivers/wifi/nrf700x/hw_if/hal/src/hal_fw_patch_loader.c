@@ -16,10 +16,12 @@
 /*
  * Copies the firmware patches to the RPU memory.
  */
-enum wifi_nrf_status
-wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, enum RPU_PROC_TYPE rpu_proc,
-			   void *fw_pri_patch_data, unsigned int fw_pri_patch_size,
-			   void *fw_sec_patch_data, unsigned int fw_sec_patch_size)
+enum wifi_nrf_status wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
+						enum RPU_PROC_TYPE rpu_proc,
+						void *fw_pri_patch_data,
+						unsigned int fw_pri_patch_size,
+						void *fw_sec_patch_data,
+						unsigned int fw_sec_patch_size)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	unsigned int pri_dest_addr = 0;
@@ -27,7 +29,8 @@ wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, enum RPU_PR
 
 	if (!fw_pri_patch_data) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Primary patch missing for RPU (%d)\n", __func__,
+				      "%s: Primary patch missing for RPU (%d)\n",
+				      __func__,
 				      rpu_proc);
 		status = WIFI_NRF_STATUS_FAIL;
 		goto out;
@@ -35,7 +38,8 @@ wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, enum RPU_PR
 
 	if (!fw_sec_patch_data) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Secondary patch missing for RPU (%d)\n", __func__,
+				      "%s: Secondary patch missing for RPU (%d)\n",
+				      __func__,
 				      rpu_proc);
 		status = WIFI_NRF_STATUS_FAIL;
 		goto out;
@@ -45,41 +49,49 @@ wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx, enum RPU_PR
 	hal_dev_ctx->curr_proc = rpu_proc;
 
 	switch (rpu_proc) {
-	case RPU_PROC_TYPE_MCU_LMAC:
-		pri_dest_addr = RPU_MEM_LMAC_PATCH_BIMG;
-		sec_dest_addr = RPU_MEM_LMAC_PATCH_BIN;
-		break;
-	case RPU_PROC_TYPE_MCU_UMAC:
-		pri_dest_addr = RPU_MEM_UMAC_PATCH_BIMG;
-		sec_dest_addr = RPU_MEM_UMAC_PATCH_BIN;
-		break;
-	default:
-		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Invalid RPU processor type[%d]\n", __func__, rpu_proc);
+		case RPU_PROC_TYPE_MCU_LMAC:
+			pri_dest_addr = RPU_MEM_LMAC_PATCH_BIMG;
+			sec_dest_addr = RPU_MEM_LMAC_PATCH_BIN;
+			break;
+		case RPU_PROC_TYPE_MCU_UMAC:
+			pri_dest_addr = RPU_MEM_UMAC_PATCH_BIMG;
+			sec_dest_addr = RPU_MEM_UMAC_PATCH_BIN;
+			break;
+		default:
+			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+					      "%s: Invalid RPU processor type[%d]\n",
+					      __func__,
+					      rpu_proc);
 
-		goto out;
+			goto out;
 	}
 
 	/* First copy the primary patch */
-	status = hal_rpu_mem_write(hal_dev_ctx, pri_dest_addr, (unsigned char *)fw_pri_patch_data,
+	status = hal_rpu_mem_write(hal_dev_ctx,
+				   pri_dest_addr,
+				   (unsigned char *)fw_pri_patch_data,
 				   fw_pri_patch_size);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				      "%s: Copying of primary ROM patch to RPU (%d) failed\n",
-				      __func__, rpu_proc);
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
 
 	/* Now copy the secondary patch */
-	status = hal_rpu_mem_write(hal_dev_ctx, sec_dest_addr, (unsigned char *)fw_sec_patch_data,
+	status = hal_rpu_mem_write(hal_dev_ctx,
+				   sec_dest_addr,
+				   (unsigned char *)fw_sec_patch_data,
 				   fw_sec_patch_size);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				      "%s: Copying of secondary ROM patch to RPU (%d) failed\n",
-				      __func__, rpu_proc);
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
@@ -91,10 +103,13 @@ out:
 	hal_dev_ctx->curr_proc = RPU_PROC_TYPE_MCU_LMAC;
 
 	return status;
+
 }
 
+
 enum wifi_nrf_status wifi_nrf_hal_fw_patch_boot(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
-						enum RPU_PROC_TYPE rpu_proc, bool is_patch_present)
+						enum RPU_PROC_TYPE rpu_proc,
+						bool is_patch_present)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	unsigned int boot_sig_addr = 0;
@@ -143,7 +158,9 @@ enum wifi_nrf_status wifi_nrf_hal_fw_patch_boot(struct wifi_nrf_hal_dev_ctx *hal
 		}
 	} else {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Invalid RPU processor type %d\n", __func__, rpu_proc);
+				      "%s: Invalid RPU processor type %d\n",
+				      __func__,
+				      rpu_proc);
 		goto out;
 	}
 
@@ -151,75 +168,93 @@ enum wifi_nrf_status wifi_nrf_hal_fw_patch_boot(struct wifi_nrf_hal_dev_ctx *hal
 	hal_dev_ctx->curr_proc = rpu_proc;
 
 	/* Clear the firmware pass signature location */
-	status = hal_rpu_mem_write(hal_dev_ctx, boot_sig_addr, &boot_sig_val, sizeof(boot_sig_val));
+	status = hal_rpu_mem_write(hal_dev_ctx,
+				   boot_sig_addr,
+				   &boot_sig_val,
+				   sizeof(boot_sig_val));
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				      "%s: Clearing of FW pass signature failed for RPU(%d)\n",
-				      __func__, rpu_proc);
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
 
 	if (is_patch_present) {
 		/* Write to sleep control register */
-		status = hal_rpu_reg_write(hal_dev_ctx, sleepctrl_addr, sleepctrl_val);
+		status = hal_rpu_reg_write(hal_dev_ctx,
+					   sleepctrl_addr,
+					   sleepctrl_val);
 	}
 
 	/* Write to Boot exception address 0 */
-	status = hal_rpu_reg_write(hal_dev_ctx, boot_excp_0_addr, boot_excp_0_val);
+	status = hal_rpu_reg_write(hal_dev_ctx,
+				   boot_excp_0_addr,
+				   boot_excp_0_val);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(
-			hal_dev_ctx->hpriv->opriv,
-			"%s: Writing to Boot exception 0 reg for RPU processor(%d) failed\n",
-			__func__, rpu_proc);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+				      "%s: Writing to Boot exception 0 reg for RPU processor(%d) failed\n",
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
 
 	/* Write to Boot exception address 1 */
-	status = hal_rpu_reg_write(hal_dev_ctx, boot_excp_1_addr, boot_excp_1_val);
+	status = hal_rpu_reg_write(hal_dev_ctx,
+				   boot_excp_1_addr,
+				   boot_excp_1_val);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(
-			hal_dev_ctx->hpriv->opriv,
-			"%s: Writing to Boot exception 1 reg for RPU processor(%d) failed\n",
-			__func__, rpu_proc);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+				      "%s: Writing to Boot exception 1 reg for RPU processor(%d) failed\n",
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
 
 	/* Write to Boot exception address 2 */
-	status = hal_rpu_reg_write(hal_dev_ctx, boot_excp_2_addr, boot_excp_2_val);
+	status = hal_rpu_reg_write(hal_dev_ctx,
+				   boot_excp_2_addr,
+				   boot_excp_2_val);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(
-			hal_dev_ctx->hpriv->opriv,
-			"%s: Writing to Boot exception 2 reg for RPU processor(%d) failed\n",
-			__func__, rpu_proc);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+				      "%s: Writing to Boot exception 2 reg for RPU processor(%d) failed\n",
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
 
 	/* Write to Boot exception address 3 */
-	status = hal_rpu_reg_write(hal_dev_ctx, boot_excp_3_addr, boot_excp_3_val);
+	status = hal_rpu_reg_write(hal_dev_ctx,
+				   boot_excp_3_addr,
+				   boot_excp_3_val);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		wifi_nrf_osal_log_err(
-			hal_dev_ctx->hpriv->opriv,
-			"%s: Writing to Boot exception 3 reg for RPU processor(%d) failed\n",
-			__func__, rpu_proc);
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+				      "%s: Writing to Boot exception 3 reg for RPU processor(%d) failed\n",
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
 
 	/* Perform pulsed soft reset of MIPS - this should now run */
-	status = hal_rpu_reg_write(hal_dev_ctx, run_addr, 0x1);
+	status = hal_rpu_reg_write(hal_dev_ctx,
+				   run_addr,
+				   0x1);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: RPU processor(%d) run failed\n", __func__, rpu_proc);
+				      "%s: RPU processor(%d) run failed\n",
+				      __func__,
+				      rpu_proc);
 
 		goto out;
 	}
@@ -228,4 +263,5 @@ out:
 	hal_dev_ctx->curr_proc = RPU_PROC_TYPE_MCU_LMAC;
 
 	return status;
+
 }

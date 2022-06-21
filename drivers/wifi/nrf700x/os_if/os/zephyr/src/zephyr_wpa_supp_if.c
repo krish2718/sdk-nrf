@@ -95,18 +95,12 @@ void wifi_nrf_wpa_supp_event_proc_scan_start(void *if_priv)
 
 void wifi_nrf_wpa_supp_event_proc_scan_done(void *if_priv,
 					    struct img_umac_event_trigger_scan *scan_done_event,
+					    unsigned int event_len,
 					    int aborted)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data *event = NULL;
 	struct scan_info *info = NULL;
-#ifdef notyet
-	struct wpa_driver_scan_ssid *s = NULL;
-#define MAX_REPORT_FREQS 50
-	int freqs[MAX_REPORT_FREQS];
-	int num_freqs = 0;
-	int i = 0;
-#endif /* notyet */
 
 	/* TODO: Fix this when FW starts sending SCAN_DONE before scan results */
 	if (scan_done_event) {
@@ -127,42 +121,12 @@ void wifi_nrf_wpa_supp_event_proc_scan_done(void *if_priv,
 	info->aborted = aborted;
 	info->external_scan = 0;
 	info->nl_scan_event = 1;
-#ifdef notyet
-	for (i = 0; i < scan_done_event->num_scan_ssid; i++) {
-		s = &info->ssids[info->num_ssids];
-
-		memcpy((unsigned char *)s->ssid, scan_done_event->scan_ssid[i].img_ssid,
-		       scan_done_event->scan_ssid[i].img_ssid_len);
-
-		s->ssid_len = scan_done_event->scan_ssid[i].img_ssid_len;
-
-		info->num_ssids++;
-
-		if (info->num_ssids == WPAS_MAX_SCAN_SSIDS) {
-			break;
-		}
-	}
-
-	for (i = 0; i < scan_done_event->num_scan_frequencies; i++) {
-		freqs[num_freqs] = scan_done_event->scan_frequencies[i];
-
-		num_freqs++;
-
-		if (num_freqs == (MAX_REPORT_FREQS - 1)) {
-			break;
-		}
-	}
-
-	/* TODO: Check why scan frequencies are not getting updated */
-	info->freqs = freqs;
-	info->num_freqs = scan_done_event->num_scan_frequencies;
-
-#endif /* notyet */
 	vif_ctx_zep->supp_callbk_fns.scan_done(vif_ctx_zep->supp_drv_if_ctx, event);
 }
 
 void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 					   struct img_umac_event_new_scan_results *scan_res,
+					   unsigned int event_len,
 					   bool more_res)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
@@ -185,12 +149,6 @@ void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 		beacon_ie_len = scan_res->beacon_ies.ie_len;
 	}
 
-#ifdef notyet
-	/* TODO: See what this is needed for */
-	if (nl80211_scan_filtered(drv, ie ? ie : beacon_ie, ie ? ie_len : beacon_ie_len)) {
-		goto out;
-	}
-#endif
 
 	r = k_calloc(sizeof(*r) + ie_len + beacon_ie_len, sizeof(char));
 
@@ -267,7 +225,9 @@ void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 	vif_ctx_zep->supp_callbk_fns.scan_res(vif_ctx_zep->supp_drv_if_ctx, r, more_res);
 }
 
-void wifi_nrf_wpa_supp_event_proc_auth_resp(void *if_priv, struct img_umac_event_mlme *auth_resp)
+void wifi_nrf_wpa_supp_event_proc_auth_resp(void *if_priv,
+					    struct img_umac_event_mlme *auth_resp,
+					    unsigned int event_len)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data event;
@@ -286,16 +246,6 @@ void wifi_nrf_wpa_supp_event_proc_auth_resp(void *if_priv, struct img_umac_event
 		return;
 	}
 
-#ifdef notyet
-	if (!(frame[4] & 0x01) && memcmp(bss->addr, recv_data + 4, ETH_ALEN) != 0 &&
-	    (is_zero_ether_addr(bss->rand_addr) ||
-	     os_memcmp(bss->rand_addr, recv_data + 4, ETH_ALEN) != 0) &&
-	    os_memcmp(bss->addr, recv_data + 4 + ETH_ALEN, ETH_ALEN) != 0) {
-		wpa_printf(MSG_MSGDUMP, "nl80211: %s: Ignore MLME frame event for foreign address",
-			   bss->ifname);
-		return;
-	}
-#endif /* notyet */
 
 	if (frame_len < 24 + sizeof(mgmt->u.auth)) {
 		printk("%s: Authentication response frame too short\n", __func__);
@@ -320,7 +270,9 @@ void wifi_nrf_wpa_supp_event_proc_auth_resp(void *if_priv, struct img_umac_event
 	vif_ctx_zep->supp_callbk_fns.auth_resp(vif_ctx_zep->supp_drv_if_ctx, &event);
 }
 
-void wifi_nrf_wpa_supp_event_proc_assoc_resp(void *if_priv, struct img_umac_event_mlme *assoc_resp)
+void wifi_nrf_wpa_supp_event_proc_assoc_resp(void *if_priv,
+					     struct img_umac_event_mlme *assoc_resp,
+					     unsigned int event_len)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data event;
@@ -365,22 +317,14 @@ void wifi_nrf_wpa_supp_event_proc_assoc_resp(void *if_priv, struct img_umac_even
 				(frame_len - 24 - sizeof(mgmt->u.assoc_resp));
 		}
 
-#ifdef notyet
-		/* TODO: See what is needed here */
-		if (req_ie) {
-			event.assoc_info.req_ies = nla_data(req_ie);
-			event.assoc_info.req_ies_len = nla_len(req_ie);
-		}
-
-		event.assoc_info.freq = drv->assoc_freq;
-		nl80211_parse_wmm_params(wmm, &event.assoc_info.wmm_params);
-#endif /* notyet */
 	}
 
 	vif_ctx_zep->supp_callbk_fns.assoc_resp(vif_ctx_zep->supp_drv_if_ctx, &event, status);
 }
 
-void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv, struct img_umac_event_mlme *deauth)
+void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv,
+					 struct img_umac_event_mlme *deauth,
+					 unsigned int event_len)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data event;
@@ -411,7 +355,9 @@ void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv, struct img_umac_event_ml
 	return vif_ctx_zep->supp_callbk_fns.deauth(vif_ctx_zep->supp_drv_if_ctx, &event);
 }
 
-void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv, struct img_umac_event_mlme *disassoc)
+void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv,
+					   struct img_umac_event_mlme *disassoc,
+					   unsigned int event_len)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	union wpa_event_data event;
@@ -484,9 +430,6 @@ int wifi_nrf_wpa_supp_scan2(void *if_priv, struct wpa_driver_scan_params *params
 	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_scan_info scan_info;
 	int indx = 0;
-#ifdef notyet
-	unsigned int scan_flags = 0;
-#endif /* notyet */
 	int ret = -1;
 
 	if (!if_priv || !params) {
@@ -498,31 +441,6 @@ int wifi_nrf_wpa_supp_scan2(void *if_priv, struct wpa_driver_scan_params *params
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
 	memset(&scan_info, 0x0, sizeof(scan_info));
-#ifdef notyet
-	if (params->freqs) {
-		for (indx = 0; params->freqs[indx]; indx++) {
-			scan_info.scan_params.channels[indx].center_frequency = params->freqs[indx];
-		}
-
-		scan_info.scan_params.num_scan_channels = indx;
-	}
-
-	if (params->duration) {
-		scan_info.scan_params.oper_ch_duration = params->duration;
-	}
-
-	if (params->num_ssids) {
-		scan_info.scan_params.num_scan_ssids = params->num_ssids;
-
-		for (indx = 0; indx < params->num_ssids; indx++) {
-			memcpy(scan_info.scan_params.scan_ssids[indx].img_ssid,
-			       params->ssids[indx].ssid, params->ssids[indx].ssid_len);
-
-			scan_info.scan_params.scan_ssids[indx].img_ssid_len =
-				params->ssids[indx].ssid_len;
-		}
-	}
-#endif /* notyet */
 
 	if (params->filter_ssids) {
 		scan_info.scan_params.num_scan_ssids = params->num_filter_ssids;
@@ -537,53 +455,6 @@ int wifi_nrf_wpa_supp_scan2(void *if_priv, struct wpa_driver_scan_params *params
 		}
 	}
 
-#ifdef notyet
-	if (params->only_new_results) {
-		/* The value to be set for scan_flags should be exposed as an enum by the UMAC
-		 * shared header files (CAL-2149)
-		 */
-		scan_flags |= IMG_SCAN_FLAG_FLUSH;
-	}
-
-	if (params->low_priority && drv->have_low_prio_scan) {
-		scan_flags |= IMG_SCAN_FLAG_LOW_PRIORITY;
-	}
-
-	if (params->oce_scan) {
-		scan_flags |= IMG_SCAN_FLAG_FILS_MAX_CHANNEL_TIME |
-			      IMG_SCAN_FLAG_ACCEPT_BCAST_PROBE_RESP |
-			      IMG_SCAN_FLAG_OCE_PROBE_REQ_HIGH_TX_RATE |
-			      IMG_SCAN_FLAG_OCE_PROBE_REQ_DEFERRAL_SUPPRESSION;
-	}
-
-	/* TODO: no_cck is set to 1 , put proper macro */
-	if (params->p2p_probe) {
-		scan_info.scan_params.no_cck = 1;
-	}
-
-	if (params->mac_addr_rand) {
-		scan_flags |= IMG_SCAN_FLAG_RANDOM_ADDR;
-
-		memcpy(scan_info.scan_params.mac_addr, params->mac_addr, ETH_ALEN);
-
-		scan_info.scan_params.valid_fields |= IMG_SCAN_PARAMS_MAC_ADDR_VALID;
-
-		memcpy(scan_info.scan_params.mac_addr_mask, params->mac_addr_mask, ETH_ALEN);
-
-		scan_info.scan_params.valid_fields |= IMG_SCAN_PARAMS_MAC_ADDR_MASK_VALID;
-	}
-
-	if (scan_flags) {
-		scan_info.scan_params.scan_flags = scan_flags;
-		scan_info.scan_params.valid_fields |= IMG_SCAN_PARAMS_SCAN_FLAGS_VALID;
-	}
-
-	if (params->extra_ies) {
-		scan_info.scan_params.ie.ie_len = params->extra_ies_len;
-
-		memcpy(&scan_info.scan_params.ie.ie, params->extra_ies, params->extra_ies_len);
-	}
-#endif /* notyet */
 
 	scan_info.scan_mode = 0;
 	scan_info.scan_reason = SCAN_CONNECT;
@@ -718,9 +589,6 @@ int wifi_nrf_wpa_supp_authenticate(void *if_priv, struct wpa_driver_auth_params 
 	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
 	struct img_umac_auth_info auth_info;
 	int ret = -1;
-#ifdef notyet
-	int i = 0;
-#endif /* notyet */
 	int type;
 	int count = 0;
 
@@ -734,26 +602,6 @@ int wifi_nrf_wpa_supp_authenticate(void *if_priv, struct wpa_driver_auth_params 
 
 	memset(&auth_info, 0, sizeof(auth_info));
 
-#ifdef notyet
-	for (i = 0; i < 4; i++) {
-		if (!params->wep_key[i]) {
-			continue;
-		}
-
-		wifi_nrf_wpa_supp_set_key(vif_ctx_zep, NULL, WPA_ALG_WEP, NULL, i,
-					  i == params->wep_tx_keyidx, NULL, 0, params->wep_key[i],
-					  params->wep_key_len[i]);
-
-		if (params->wep_tx_keyidx != i) {
-			continue;
-		}
-
-		if (wifi_nrf_wpa_supp_add_key(&auth_info.key_info, WPA_ALG_WEP, i, 1, NULL, 0,
-					      params->wep_key[i], params->wep_key_len[i]) < 0) {
-			goto out;
-		}
-	}
-#endif /* notyet */
 
 	if (params->bssid) {
 		memcpy(auth_info.img_bssid, params->bssid, ETH_ALEN);
@@ -855,15 +703,6 @@ int wifi_nrf_wpa_supp_associate(void *if_priv, struct wpa_driver_associate_param
 
 		memcpy(assoc_info.ssid.img_ssid, params->ssid, params->ssid_len);
 
-#ifdef notyet
-		if (params->ssid_len > sizeof(vif_ctx_zep->ssid)) {
-			goto out;
-		}
-
-		memcpy(vif_ctx_zep->ssid, params->ssid, params->ssid_len);
-
-		vif_ctx_zep->ssid_len = params->ssid_len;
-#endif /* notyet */
 	}
 
 	if (params->wpa_ie) {
@@ -903,12 +742,6 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv, const unsigned char *ifname, enum w
 	unsigned int suite;
 	int ret = -1;
 
-#ifdef notyet
-	/* Ignore for P2P Device */
-	if (drv->nlmode == NL80211_IFTYPE_P2P_DEVICE) {
-		return 0;
-	}
-#endif /* notyet */
 
 	if ((!if_priv) || (!ifname)) {
 		printk("%s: Invalid params\n", __func__);
@@ -941,6 +774,7 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv, const unsigned char *ifname, enum w
 		key_info.seq.img_seq_len = seq_len;
 		key_info.valid_fields |= IMG_SEQ_VALID;
 	}
+
 
 	/* TODO: Implement/check set_tx */
 	if (addr && !is_broadcast_ether_addr(addr)) {
@@ -985,12 +819,6 @@ int wifi_nrf_wpa_supp_set_key(void *if_priv, const unsigned char *ifname, enum w
 		goto out;
 	}
 
-#ifdef notyet
-	if (is_ap_interface(drv->nlmode) && addr && !is_broadcast_ether_addr(addr)) {
-		wpa_printf(MSG_ERROR, "nl80211: %s: Not going for SET_KEY Command.\n", __func__);
-		goto out;
-	}
-#endif /* notyet */
 
 	memset(&key_info, 0, sizeof(key_info));
 

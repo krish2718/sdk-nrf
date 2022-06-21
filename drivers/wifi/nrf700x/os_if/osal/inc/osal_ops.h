@@ -3,11 +3,18 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
+
+/**
+ * @brief File containing OPs declarations for the
+ * OSAL Layer of the Wi-Fi driver.
+ */
+
 #ifndef __OSAL_OPS_H__
 #define __OSAL_OPS_H__
 
 #include <stdarg.h>
 #include "osal_structs.h"
+
 
 /**
  * struct wifi_nrf_osal_ops - Ops to be provided by a specific OS implementation.
@@ -136,9 +143,9 @@
  *			  contents to the host memory if @dir has a value of
  *			  @WIFI_NRF_OSAL_DMA_DIR_FROM_DEV. The function returns the DMA address
  *			  of the mapped memory.
- * @bus_pcie_dev_dma_unmap: Unmap the host memory which was mapped for DMA using
- *			@bus_pcie_dev_dma_map. The address that will be passed to this Op to be
- *			unmapped will be the DMA address returned by @dma_bus_pcie_dev_map.
+ * @bus_pcie_dev_dma_unmap: Unmap the host memory which was mapped for DMA using @bus_pcie_dev_dma_map.
+ *			    The address that will be passed to this Op to be unmapped will
+ *			    be the DMA address returned by @dma_bus_pcie_dev_map.
  * @bus_pcie_dev_host_map_get: Get the host mapped address for a PCIe device.
  *
  * @timer_alloc: Allocates a timer and returns a pointer.
@@ -150,7 +157,7 @@
  *		whenever the timer expires.
  * @timer_schedule: Schedules a timer with a @duration
  *		that has been allocated using @timer_alloc and
- *		initialized with @timer_init.
+ *		initalized with @timer_init.
  * @timer_kill: Kills a timer that has been scheduled @timer_schedule.
  *
  * This structure exposes Ops which need to be implemented by the underlying OS
@@ -218,44 +225,57 @@ struct wifi_nrf_osal_ops {
 
 	void *(*tasklet_alloc)(void);
 	void (*tasklet_free)(void *tasklet);
-	void (*tasklet_init)(void *tasklet, void (*callback)(unsigned long), unsigned long data);
+	void (*tasklet_init)(void *tasklet,
+			     void (*callback)(unsigned long),
+			     unsigned long data);
 	void (*tasklet_schedule)(void *tasklet);
 	void (*tasklet_kill)(void *tasklet);
+
 
 	int (*sleep_ms)(int msecs);
 	int (*delay_us)(int usecs);
 	unsigned long (*time_get_curr_us)(void);
 	unsigned int (*time_elapsed_us)(unsigned long start_time_us);
 
-	void *(*bus_pcie_init)(const char *dev_name, unsigned int vendor_id,
-			       unsigned int sub_vendor_id, unsigned int device_id,
+	void *(*bus_pcie_init)(const char *dev_name,
+			       unsigned int vendor_id,
+			       unsigned int sub_vendor_id,
+			       unsigned int device_id,
 			       unsigned int sub_device_id);
 	void (*bus_pcie_deinit)(void *os_pcie_priv);
-	void *(*bus_pcie_dev_add)(void *pcie_priv, void *osal_pcie_dev_ctx);
+	void *(*bus_pcie_dev_add)(void *pcie_priv,
+				  void *osal_pcie_dev_ctx);
 	void (*bus_pcie_dev_rem)(void *os_pcie_dev_ctx);
 
 	enum wifi_nrf_status (*bus_pcie_dev_init)(void *os_pcie_dev_ctx);
 	void (*bus_pcie_dev_deinit)(void *os_pcie_dev_ctx);
 
-	enum wifi_nrf_status (*bus_pcie_dev_intr_reg)(void *os_pcie_dev_ctx, void *callbk_data,
+	enum wifi_nrf_status (*bus_pcie_dev_intr_reg)(void *os_pcie_dev_ctx,
+						      void *callbk_data,
 						      int (*callback_fn)(void *callbk_data));
 	void (*bus_pcie_dev_intr_unreg)(void *os_pcie_dev_ctx);
-	void *(*bus_pcie_dev_dma_map)(void *os_pcie_dev_ctx, void *virt_addr, size_t size,
+	void *(*bus_pcie_dev_dma_map)(void *os_pcie_dev_ctx,
+				      void *virt_addr,
+				      size_t size,
 				      enum wifi_nrf_osal_dma_dir dir);
-	void (*bus_pcie_dev_dma_unmap)(void *os_pcie_dev_ctx, void *dma_addr, size_t size,
+	void (*bus_pcie_dev_dma_unmap)(void *os_pcie_dev_ctx,
+				       void *dma_addr,
+				       size_t size,
 				       enum wifi_nrf_osal_dma_dir dir);
 	void (*bus_pcie_dev_host_map_get)(void *os_pcie_dev_ctx,
 					  struct wifi_nrf_osal_host_map *host_map);
 
 	void *(*bus_qspi_init)(void);
 	void (*bus_qspi_deinit)(void *os_qspi_priv);
-	void *(*bus_qspi_dev_add)(void *qspi_priv, void *osal_qspi_dev_ctx);
+	void *(*bus_qspi_dev_add)(void *qspi_priv,
+				  void *osal_qspi_dev_ctx);
 	void (*bus_qspi_dev_rem)(void *os_qspi_dev_ctx);
 
 	enum wifi_nrf_status (*bus_qspi_dev_init)(void *os_qspi_dev_ctx);
 	void (*bus_qspi_dev_deinit)(void *os_qspi_dev_ctx);
 
-	enum wifi_nrf_status (*bus_qspi_dev_intr_reg)(void *os_qspi_dev_ctx, void *callbk_data,
+	enum wifi_nrf_status (*bus_qspi_dev_intr_reg)(void *os_qspi_dev_ctx,
+						      void *callbk_data,
 						      int (*callback_fn)(void *callbk_data));
 	void (*bus_qspi_dev_intr_unreg)(void *os_qspi_dev_ctx);
 	void (*bus_qspi_dev_host_map_get)(void *os_qspi_dev_ctx,
@@ -264,15 +284,17 @@ struct wifi_nrf_osal_ops {
 #ifdef RPU_SLEEP_SUPPORT
 	void *(*timer_alloc)(void);
 	void (*timer_free)(void *timer);
-	void (*timer_init)(void *timer, void (*callback)(unsigned long), unsigned long data);
+	void (*timer_init)(void *timer,
+			   void (*callback)(unsigned long),
+			   unsigned long data);
 	void (*timer_schedule)(void *timer, unsigned long duration);
 	void (*timer_kill)(void *timer);
-
 	int (*bus_qspi_ps_sleep)(void *os_qspi_priv);
 	int (*bus_qspi_ps_wake)(void *os_qspi_priv);
 	int (*bus_qspi_ps_status)(void *os_qspi_priv);
-#endif
+#endif /* RPU_SLEEP_SUPPORT */
 };
+
 
 /**
  * get_os_ops() - The OSAL layer expects this Op return a initialized instance

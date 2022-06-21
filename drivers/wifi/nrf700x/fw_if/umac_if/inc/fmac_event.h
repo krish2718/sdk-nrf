@@ -26,5 +26,7 @@
  *		Pass: WIFI_NRF_STATUS_SUCCESS
  *		Fail: WIFI_NRF_STATUS_FAIL
  */
-enum wifi_nrf_status wifi_nrf_fmac_event_callback(void *data, void *event_data, unsigned int len);
+enum wifi_nrf_status wifi_nrf_fmac_event_callback(void *data,
+						  void *event_data,
+						  unsigned int len);
 #endif /* __FMAC_EVENT_H__ */

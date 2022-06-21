@@ -171,6 +171,8 @@
 #define EVENT_POOL_NUM_ELEMS (7)
 #define MAX_EVENT_POOL_LEN 1000
 
+#define MAX_NUM_OF_RX_QUEUES 3
+
 #define IMG_RPU_PWR_DATA_TYPE_LFC_ERR 0
 #define IMG_RPU_PWR_DATA_TYPE_VBAT_MON 1
 #define IMG_RPU_PWR_DATA_TYPE_TEMP 2
@@ -244,9 +246,7 @@ struct host_rpu_hpqm_info {
 	struct host_rpu_hpq event_avl_queue;
 	struct host_rpu_hpq cmd_busy_queue;
 	struct host_rpu_hpq cmd_avl_queue;
-	struct host_rpu_hpq rx1_buf_busy_queue;
-	struct host_rpu_hpq rx2_buf_busy_queue;
-	struct host_rpu_hpq rx3_buf_busy_queue;
+	struct host_rpu_hpq rx_buf_busy_queue[MAX_NUM_OF_RX_QUEUES];
 } __IMG_PKD;
 
 /**

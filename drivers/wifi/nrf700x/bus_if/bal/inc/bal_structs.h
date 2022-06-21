@@ -43,6 +43,7 @@ struct wifi_nrf_bal_priv {
 	enum wifi_nrf_status (*intr_callbk_fn)(void *ctx);
 };
 
+
 struct wifi_nrf_bal_dev_ctx {
 	struct wifi_nrf_bal_priv *bpriv;
 	void *hal_dev_ctx;

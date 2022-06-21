@@ -75,6 +75,7 @@ out:
 
 void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 					   struct img_umac_event_new_scan_display_results *scan_res,
+					   unsigned int event_len,
 					   bool more_res)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;

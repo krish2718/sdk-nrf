@@ -11,5 +11,7 @@
 
 #ifndef __ZEPHYR_UTIL_H__
 #define __ZEPHYR_UTIL_H__
-int hex_str_to_val(unsigned char *hex_arr, unsigned int hex_arr_sz, unsigned char *str);
+int hex_str_to_val(unsigned char *hex_arr,
+		   unsigned int hex_arr_sz,
+		   unsigned char *str);
 #endif /* __ZEPHYR_UTIL_H__ */

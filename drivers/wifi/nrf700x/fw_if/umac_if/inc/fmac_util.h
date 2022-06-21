@@ -3,12 +3,18 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
+
+/**
+ * @brief Header containing utility declarations for the
+ * FMAC IF Layer of the Wi-Fi driver.
+ */
 #ifndef __FMAC_UTIL_H__
 #define __FMAC_UTIL_H__
 
 #include <stdbool.h>
 #include "fmac_structs.h"
 #include "pack_def.h"
+
 
 #define WIFI_NRF_FMAC_ETH_ADDR_LEN 6
 #define WIFI_NRF_FMAC_ETH_HDR_LEN 14
@@ -61,54 +67,68 @@
 #define WIFI_NRF_FMAC_ETH_TYPE_MASK 0xFFFF
 
 struct wifi_nrf_fmac_ieee80211_hdr {
-	unsigned short fc;
-	unsigned short dur_id;
-	unsigned char addr_1[WIFI_NRF_FMAC_ETH_ADDR_LEN];
-	unsigned char addr_2[WIFI_NRF_FMAC_ETH_ADDR_LEN];
-	unsigned char addr_3[WIFI_NRF_FMAC_ETH_ADDR_LEN];
-	unsigned short seq_ctrl;
-	unsigned char addr_4[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+     unsigned short fc;
+     unsigned short dur_id;
+     unsigned char addr_1[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+     unsigned char addr_2[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+     unsigned char addr_3[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+     unsigned short seq_ctrl;
+     unsigned char addr_4[WIFI_NRF_FMAC_ETH_ADDR_LEN];
 } __IMG_PKD;
+
 
 struct wifi_nrf_fmac_eth_hdr {
-	unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
-	unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
-	unsigned short proto; /* packet type ID field */
+     unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
+     unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
+     unsigned short proto; /* packet type ID field */
 } __IMG_PKD;
 
+
 struct wifi_nrf_fmac_amsdu_hdr {
-	unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
-	unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
-	unsigned short length; /* length*/
+     unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
+     unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
+     unsigned short length; /* length*/
 } __IMG_PKD;
 
 bool wifi_nrf_util_is_multicast_addr(const unsigned char *addr);
 
 bool wifi_nrf_util_is_unicast_addr(const unsigned char *addr);
 
-bool wifi_nrf_util_ether_addr_equal(const unsigned char *addr_1, const unsigned char *addr_2);
+bool wifi_nrf_util_ether_addr_equal(const unsigned char *addr_1,
+				    const unsigned char *addr_2);
 
-int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb);
+int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+			  void *nwb);
 
 int wifi_nrf_util_get_vif_indx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			       const unsigned char *mac_addr);
 
-unsigned char *wifi_nrf_util_get_ra(struct wifi_nrf_fmac_vif_ctx *vif, void *nwb);
+unsigned char *wifi_nrf_util_get_ra(struct wifi_nrf_fmac_vif_ctx *vif,
+				    void *nwb);
 
-unsigned char *wifi_nrf_util_get_src(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb);
+unsigned char *wifi_nrf_util_get_src(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				     void *nwb);
 
-unsigned char *wifi_nrf_util_get_dest(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb);
+unsigned char *wifi_nrf_util_get_dest(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				      void *nwb);
 
-unsigned short wifi_nrf_util_tx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb);
+unsigned short wifi_nrf_util_tx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					     void *nwb);
 
-unsigned short wifi_nrf_util_rx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb);
+unsigned short wifi_nrf_util_rx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					     void *nwb);
 
 int wifi_nrf_util_get_skip_header_bytes(unsigned short eth_type);
 
-void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb,
-				  struct wifi_nrf_fmac_ieee80211_hdr *hdr, unsigned short eth_type);
+void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				  void *nwb,
+				  struct wifi_nrf_fmac_ieee80211_hdr *hdr,
+				  unsigned short eth_type);
 
-void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb);
+void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					   void *nwb);
 
-bool wifi_nrf_util_is_arr_zero(unsigned char *arr, unsigned int arr_sz);
+bool wifi_nrf_util_is_arr_zero(unsigned char *arr,
+			       unsigned int arr_sz);
 #endif /* __FMAC_UTIL_H__ */
+

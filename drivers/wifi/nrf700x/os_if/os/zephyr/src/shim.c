@@ -723,15 +723,6 @@ out:
 
 static void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
 {
-#ifdef notyet
-	struct zep_shim_intr_priv *intr_priv = NULL;
-
-	intr_priv = (struct zep_shim_intr_priv *)os_intr_priv;
-
-	gpio_free_irq(24, &intr_priv->gpio_cb_data);
-
-	k_free(intr_priv);
-#endif
 }
 
 #ifdef RPU_SLEEP_SUPPORT

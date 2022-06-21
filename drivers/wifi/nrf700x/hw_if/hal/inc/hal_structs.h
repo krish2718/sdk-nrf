@@ -21,12 +21,18 @@
 #define MAX_HAL_RPU_READY_WAIT (1 * 1000 * 1000) /* 1 sec */
 
 #ifdef RPU_SLEEP_SUPPORT
-#define RPU_PS_IDLE_TIMEOUT 10 /* msecs */
-#define RPU_PS_POLL_IDLE_TIMEOUT 10 /* msecs */
-#define RPU_PS_WAKE_TIMEOUT 1 /* secs */
-#endif
+#define RPU_PS_IDLE_TIMEOUT 10  /* msecs */
+#define RPU_PS_POLL_IDLE_TIMEOUT 10  /* msecs */
+#define RPU_PS_WAKE_TIMEOUT 1  /* secs */
+#endif /* RPU_SLEEP_SUPPORT */
 
-enum RPU_PROC_TYPE { RPU_PROC_TYPE_MCU_LMAC, RPU_PROC_TYPE_MCU_UMAC, RPU_PROC_TYPE_MAX };
+
+enum RPU_PROC_TYPE {
+	RPU_PROC_TYPE_MCU_LMAC,
+	RPU_PROC_TYPE_MCU_UMAC,
+	RPU_PROC_TYPE_MAX
+};
+
 
 enum WIFI_NRF_REGION_TYPE {
 	WIFI_NRF_REGION_TYPE_GRAM,
@@ -42,6 +48,7 @@ enum WIFI_NRF_REGION_TYPE {
 	WIFI_NRF_REGION_TYPE_MAX
 };
 
+
 enum WIFI_NRF_HAL_MSG_TYPE {
 	WIFI_NRF_HAL_MSG_TYPE_CMD_CTRL,
 	WIFI_NRF_HAL_MSG_TYPE_EVENT,
@@ -52,8 +59,13 @@ enum WIFI_NRF_HAL_MSG_TYPE {
 };
 
 #ifdef RPU_SLEEP_SUPPORT
-enum RPU_PS_STATE { RPU_PS_STATE_ASLEEP, RPU_PS_STATE_AWAKE, RPU_PS_STATE_MAX };
-#endif
+enum RPU_PS_STATE {
+	RPU_PS_STATE_ASLEEP,
+	RPU_PS_STATE_AWAKE,
+	RPU_PS_STATE_MAX
+};
+#endif /* RPU_SLEEP_SUPPORT */
+
 
 struct wifi_nrf_hal_cfg_params {
 	unsigned int max_cmd_size;
@@ -65,6 +77,7 @@ struct wifi_nrf_hal_cfg_params {
 	struct rx_buf_pool_params rx_buf_pool[MAX_NUM_OF_RX_QUEUES];
 	unsigned int max_tx_frm_sz;
 };
+
 
 /**
  * struct wifi_nrf_hal_priv - Structure to hold context information for the
@@ -90,16 +103,20 @@ struct wifi_nrf_hal_priv {
 	unsigned char num_devs;
 
 	void *add_dev_callbk_data;
-	void *(*add_dev_callbk_fn)(void *add_dev_callbk_data, void *hal_dev_ctx);
+	void *(*add_dev_callbk_fn)(void *add_dev_callbk_data,
+				    void *hal_dev_ctx);
 	void (*rem_dev_callbk_fn)(void *mac_ctx);
 
 	enum wifi_nrf_status (*init_dev_callbk_fn)(void *mac_ctx);
 	void (*deinit_dev_callbk_fn)(void *mac_ctx);
 
-	enum wifi_nrf_status (*intr_callbk_fn)(void *mac_ctx, void *event_data, unsigned int len);
+	enum wifi_nrf_status (*intr_callbk_fn)(void *mac_ctx,
+					       void *event_data,
+					       unsigned int len);
 	struct wifi_nrf_hal_cfg_params cfg_params;
 	unsigned long addr_pktram_base;
 };
+
 
 /**
  * struct wifi_nrf_hal_info - Structure to hold RPU information.
@@ -116,12 +133,14 @@ struct wifi_nrf_hal_info {
 	unsigned int tx_cmd_base;
 };
 
+
 struct wifi_nrf_hal_buf_map_info {
 	bool mapped;
 	unsigned long virt_addr;
 	unsigned long phy_addr;
 	unsigned int buf_len;
 };
+
 
 /**
  * struct wifi_nrf_hal_dev_ctx - Structure to hold per device context information
@@ -192,19 +211,19 @@ struct wifi_nrf_hal_dev_ctx {
 	unsigned long addr_rpu_pktram_base_rx;
 	unsigned long addr_rpu_pktram_base_rx_pool[MAX_NUM_OF_RX_QUEUES];
 
-	char *event_data;
-	char *event_data_curr;
-	unsigned int event_data_len;
-	unsigned int event_data_pending;
-	unsigned int event_resubmit;
-
 #ifdef RPU_SLEEP_SUPPORT
 	enum RPU_PS_STATE rpu_ps_state;
 	void *rpu_ps_timer;
 	void *rpu_ps_lock;
 	bool dbg_enable;
-#endif
+#endif /* RPU_SLEEP_SUPPORT */
+	char *event_data;
+	char *event_data_curr;
+	unsigned int event_data_len;
+	unsigned int event_data_pending;
+	unsigned int event_resubmit;
 };
+
 
 /**
  * struct wifi_nrf_hal_msg - Structure to hold information about a HAL message.

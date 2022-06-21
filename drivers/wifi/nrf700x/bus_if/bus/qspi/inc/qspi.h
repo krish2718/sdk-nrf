@@ -34,6 +34,7 @@ struct wifi_nrf_bus_qspi_priv {
 	struct wifi_nrf_bal_cfg_params cfg_params;
 };
 
+
 struct wifi_nrf_bus_qspi_dev_ctx {
 	struct wifi_nrf_bus_qspi_priv *qspi_priv;
 	void *bal_dev_ctx;

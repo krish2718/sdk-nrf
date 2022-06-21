@@ -40,7 +40,9 @@ unsigned char rate_protection_type;
 
 struct wifi_nrf_drv_priv_zep rpu_drv_priv_zep;
 
-void wifi_nrf_event_proc_scan_start_zep(void *if_priv)
+void wifi_nrf_event_proc_scan_start_zep(void *if_priv,
+					struct img_umac_event_trigger_scan *scan_start_event,
+					unsigned int event_len)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 
@@ -53,8 +55,10 @@ void wifi_nrf_event_proc_scan_start_zep(void *if_priv)
 	wifi_nrf_wpa_supp_event_proc_scan_start(if_priv);
 }
 
+
 void wifi_nrf_event_proc_scan_done_zep(void *vif_ctx,
-				       struct img_umac_event_trigger_scan *scan_done_event)
+				       struct img_umac_event_trigger_scan *scan_done_event,
+				       unsigned int event_len)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
@@ -74,7 +78,10 @@ void wifi_nrf_event_proc_scan_done_zep(void *vif_ctx,
 			return;
 		}
 	} else if (vif_ctx_zep->scan_type == SCAN_CONNECT) {
-		wifi_nrf_wpa_supp_event_proc_scan_done(vif_ctx_zep, scan_done_event, 0);
+		wifi_nrf_wpa_supp_event_proc_scan_done(vif_ctx_zep,
+						       scan_done_event,
+						       event_len,
+						       0);
 	} else {
 		printk("%s: Scan type = %d not supported yet\n", __func__, vif_ctx_zep->scan_type);
 		return;
@@ -82,6 +89,7 @@ void wifi_nrf_event_proc_scan_done_zep(void *vif_ctx,
 
 	status = WIFI_NRF_STATUS_SUCCESS;
 }
+
 
 static int wifi_nrf_umac_info(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
 {
@@ -103,6 +111,7 @@ static int wifi_nrf_umac_info(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
 
 	return 0;
 }
+
 
 enum wifi_nrf_status wifi_nrf_fmac_dev_add_zep(struct wifi_nrf_drv_priv_zep *drv_priv_zep)
 {

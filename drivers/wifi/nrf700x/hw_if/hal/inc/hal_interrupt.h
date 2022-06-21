@@ -26,6 +26,7 @@
  */
 enum wifi_nrf_status hal_rpu_irq_enable(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
 
+
 /**
  * hal_rpu_irq_disable() - Disables interrupts from the RPU.
  * @hal_dev_ctx: Pointer to HAL context.
@@ -37,6 +38,7 @@ enum wifi_nrf_status hal_rpu_irq_enable(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx
  *		Error: %WIFI_NRF_STATUS_FAIL
  */
 enum wifi_nrf_status hal_rpu_irq_disable(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx);
+
 
 /**
  * hal_rpu_irq_process() - Processes an interrupt from the RPU.

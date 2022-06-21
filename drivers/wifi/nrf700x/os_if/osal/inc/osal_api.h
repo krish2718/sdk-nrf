@@ -1,10 +1,14 @@
 /*
- * File Name: osal_api.h
+ * Copyright (c) 2022 Nordic Semiconductor ASA
  *
- * Copyright (c) 2011-2021 Nordic Semiconductor.
- * All rights reserved
- *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
+
+/**
+ * @brief File containing declarations for the
+ * OSAL Layer of the Wi-Fi driver.
+ */
+
 #ifndef __OSAL_API_H__
 #define __OSAL_API_H__
 
@@ -22,6 +26,7 @@
  */
 struct wifi_nrf_osal_priv *wifi_nrf_osal_init(void);
 
+
 /**
  * wifi_nrf_osal_deinit() - Deinitialize the OSAL layer.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
@@ -32,6 +37,7 @@ struct wifi_nrf_osal_priv *wifi_nrf_osal_init(void);
  * Return: None.
  */
 void wifi_nrf_osal_deinit(struct wifi_nrf_osal_priv *opriv);
+
 
 /**
  * wifi_nrf_osal_mem_alloc() - Allocate memory.
@@ -45,7 +51,8 @@ void wifi_nrf_osal_deinit(struct wifi_nrf_osal_priv *opriv);
  *		Pass: Pointer to start of allocated memory.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_mem_alloc(struct wifi_nrf_osal_priv *opriv, size_t size);
+void *wifi_nrf_osal_mem_alloc(struct wifi_nrf_osal_priv *opriv,
+			       size_t size);
 
 /**
  * wifi_nrf_osal_mem_zalloc() - Allocated zero-initialized memory.
@@ -59,7 +66,8 @@ void *wifi_nrf_osal_mem_alloc(struct wifi_nrf_osal_priv *opriv, size_t size);
  *		Pass: Pointer to start of allocated memory.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_mem_zalloc(struct wifi_nrf_osal_priv *opriv, size_t size);
+void *wifi_nrf_osal_mem_zalloc(struct wifi_nrf_osal_priv *opriv,
+				size_t size);
 
 /**
  * wifi_nrf_osal_mem_free() - Free previously allocated memory.
@@ -71,7 +79,8 @@ void *wifi_nrf_osal_mem_zalloc(struct wifi_nrf_osal_priv *opriv, size_t size);
  *
  * Return: None.
  */
-void wifi_nrf_osal_mem_free(struct wifi_nrf_osal_priv *opriv, void *buf);
+void wifi_nrf_osal_mem_free(struct wifi_nrf_osal_priv *opriv,
+			     void *buf);
 
 /**
  * wifi_nrf_osal_mem_cpy() - Copy contents from one memory location to another.
@@ -87,8 +96,10 @@ void wifi_nrf_osal_mem_free(struct wifi_nrf_osal_priv *opriv, void *buf);
  *		Pass: Pointer to destination memory.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_mem_cpy(struct wifi_nrf_osal_priv *opriv, void *dest, const void *src,
-			    size_t count);
+void *wifi_nrf_osal_mem_cpy(struct wifi_nrf_osal_priv *opriv,
+			     void *dest,
+			     const void *src,
+			     size_t count);
 
 /**
  * wifi_nrf_osal_mem_set() - Fill a block of memory with a particular value.
@@ -104,7 +115,11 @@ void *wifi_nrf_osal_mem_cpy(struct wifi_nrf_osal_priv *opriv, void *dest, const 
  *		Pass: Pointer to memory location which was set.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_mem_set(struct wifi_nrf_osal_priv *opriv, void *start, int val, size_t size);
+void *wifi_nrf_osal_mem_set(struct wifi_nrf_osal_priv *opriv,
+			     void *start,
+			     int val,
+			     size_t size);
+
 
 /**
  * wifi_nrf_osal_iomem_mmap() - Memory map IO memory into CPU space.
@@ -118,8 +133,9 @@ void *wifi_nrf_osal_mem_set(struct wifi_nrf_osal_priv *opriv, void *start, int v
  *		Pass: Pointer to the mapped IO memory.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_iomem_mmap(struct wifi_nrf_osal_priv *opriv, unsigned long addr,
-			       unsigned long size);
+void *wifi_nrf_osal_iomem_mmap(struct wifi_nrf_osal_priv *opriv,
+				unsigned long addr,
+				unsigned long size);
 
 /**
  * wifi_nrf_osal_iomem_unmap() - Unmap previously mapped IO memory from CPU space.
@@ -130,7 +146,8 @@ void *wifi_nrf_osal_iomem_mmap(struct wifi_nrf_osal_priv *opriv, unsigned long a
  *
  * Return: None.
  */
-void wifi_nrf_osal_iomem_unmap(struct wifi_nrf_osal_priv *opriv, volatile void *addr);
+void wifi_nrf_osal_iomem_unmap(struct wifi_nrf_osal_priv *opriv,
+				volatile void *addr);
 
 /**
  * wifi_nrf_osal_iomem_read_reg32() - Read value from a 32 bit IO memory mapped
@@ -144,7 +161,7 @@ void wifi_nrf_osal_iomem_unmap(struct wifi_nrf_osal_priv *opriv, volatile void *
  * Return: 32 bit value read from register.
  */
 unsigned int wifi_nrf_osal_iomem_read_reg32(struct wifi_nrf_osal_priv *opriv,
-					    const volatile void *addr);
+					     const volatile void *addr);
 
 /**
  * wifi_nrf_osal_iomem_write_reg32() - Write a 32 bit value to a IO memory mapped register.
@@ -157,8 +174,9 @@ unsigned int wifi_nrf_osal_iomem_read_reg32(struct wifi_nrf_osal_priv *opriv,
  *
  * Return: None.
  */
-void wifi_nrf_osal_iomem_write_reg32(struct wifi_nrf_osal_priv *opriv, volatile void *addr,
-				     unsigned int val);
+void wifi_nrf_osal_iomem_write_reg32(struct wifi_nrf_osal_priv *opriv,
+				      volatile void *addr,
+				      unsigned int val);
 
 /**
  * wifi_nrf_osal_iomem_cpy_from() - Copy data from the memory of a memory
@@ -174,8 +192,10 @@ void wifi_nrf_osal_iomem_write_reg32(struct wifi_nrf_osal_priv *opriv, volatile 
  *
  * Return: None.
  */
-void wifi_nrf_osal_iomem_cpy_from(struct wifi_nrf_osal_priv *opriv, void *dest,
-				  const volatile void *src, size_t count);
+void wifi_nrf_osal_iomem_cpy_from(struct wifi_nrf_osal_priv *opriv,
+				   void *dest,
+				   const volatile void *src,
+				   size_t count);
 
 /**
  * wifi_nrf_osal_iomem_cpy_to() - Copy data to the memory of a memory
@@ -191,8 +211,11 @@ void wifi_nrf_osal_iomem_cpy_from(struct wifi_nrf_osal_priv *opriv, void *dest,
  *
  * Return: None.
  */
-void wifi_nrf_osal_iomem_cpy_to(struct wifi_nrf_osal_priv *opriv, volatile void *dest,
-				const void *src, size_t count);
+void wifi_nrf_osal_iomem_cpy_to(struct wifi_nrf_osal_priv *opriv,
+				 volatile void *dest,
+				 const void *src,
+				 size_t count);
+
 
 /**
  * wifi_nrf_osal_spinlock_alloc() - Allocate a busy lock.
@@ -215,7 +238,9 @@ void *wifi_nrf_osal_spinlock_alloc(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_spinlock_free(struct wifi_nrf_osal_priv *opriv, void *lock);
+void wifi_nrf_osal_spinlock_free(struct wifi_nrf_osal_priv *opriv,
+				  void *lock);
+
 
 /**
  * wifi_nrf_osal_spinlock_init() - Initialize a busy lock.
@@ -226,7 +251,9 @@ void wifi_nrf_osal_spinlock_free(struct wifi_nrf_osal_priv *opriv, void *lock);
  *
  * Return: None.
  */
-void wifi_nrf_osal_spinlock_init(struct wifi_nrf_osal_priv *opriv, void *lock);
+void wifi_nrf_osal_spinlock_init(struct wifi_nrf_osal_priv *opriv,
+				  void *lock);
+
 
 /**
  * wifi_nrf_osal_spinlock_take() - Acquire a buys lock.
@@ -237,7 +264,9 @@ void wifi_nrf_osal_spinlock_init(struct wifi_nrf_osal_priv *opriv, void *lock);
  *
  * Return: None.
  */
-void wifi_nrf_osal_spinlock_take(struct wifi_nrf_osal_priv *opriv, void *lock);
+void wifi_nrf_osal_spinlock_take(struct wifi_nrf_osal_priv *opriv,
+				  void *lock);
+
 
 /**
  * wifi_nrf_osal_spinlock_rel() - Releases a busy lock.
@@ -248,7 +277,9 @@ void wifi_nrf_osal_spinlock_take(struct wifi_nrf_osal_priv *opriv, void *lock);
  *
  * Return: None.
  */
-void wifi_nrf_osal_spinlock_rel(struct wifi_nrf_osal_priv *opriv, void *lock);
+void wifi_nrf_osal_spinlock_rel(struct wifi_nrf_osal_priv *opriv,
+				 void *lock);
+
 
 /**
  * wifi_nrf_osal_spinlock_irq_take() - Acquire a busy lock and disable
@@ -262,8 +293,10 @@ void wifi_nrf_osal_spinlock_rel(struct wifi_nrf_osal_priv *opriv, void *lock);
  *
  * Return: None.
  */
-void wifi_nrf_osal_spinlock_irq_take(struct wifi_nrf_osal_priv *opriv, void *lock,
-				     unsigned long *flags);
+void wifi_nrf_osal_spinlock_irq_take(struct wifi_nrf_osal_priv *opriv,
+				      void *lock,
+				      unsigned long *flags);
+
 
 /**
  * wifi_nrf_osal_spinlock_irq_rel() - Release a busy lock and enable interrupts.
@@ -276,8 +309,10 @@ void wifi_nrf_osal_spinlock_irq_take(struct wifi_nrf_osal_priv *opriv, void *loc
  *
  * Return: None.
  */
-void wifi_nrf_osal_spinlock_irq_rel(struct wifi_nrf_osal_priv *opriv, void *lock,
-				    unsigned long *flags);
+void wifi_nrf_osal_spinlock_irq_rel(struct wifi_nrf_osal_priv *opriv,
+				     void *lock,
+				     unsigned long *flags);
+
 
 /**
  * wifi_nrf_osal_log_dbg() - Log a debug message.
@@ -289,7 +324,9 @@ void wifi_nrf_osal_spinlock_irq_rel(struct wifi_nrf_osal_priv *opriv, void *lock
  *
  * Return: Number of characters of the message logged.
  */
-int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv, const char *fmt, ...);
+int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv,
+			   const char *fmt, ...);
+
 
 /**
  * wifi_nrf_osal_log_info() - Log a informational message.
@@ -301,7 +338,9 @@ int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv, const char *fmt, ...
  *
  * Return: Number of characters of the message logged.
  */
-int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv, const char *fmt, ...);
+int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv,
+			    const char *fmt, ...);
+
 
 /**
  * wifi_nrf_osal_log_err() - Logs an error message.
@@ -313,7 +352,9 @@ int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv, const char *fmt, ..
  *
  * Return: Number of characters of the message logged.
  */
-int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv, const char *fmt, ...);
+int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv,
+			   const char *fmt, ...);
+
 
 /**
  * wifi_nrf_osal_llist_node_alloc() - Allocate a linked list mode.
@@ -327,6 +368,7 @@ int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv, const char *fmt, ...
  */
 void *wifi_nrf_osal_llist_node_alloc(struct wifi_nrf_osal_priv *opriv);
 
+
 /**
  * wifi_nrf_osal_llist_node_free() - Free a linked list node.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
@@ -337,7 +379,8 @@ void *wifi_nrf_osal_llist_node_alloc(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_llist_node_free(struct wifi_nrf_osal_priv *opriv, void *node);
+void wifi_nrf_osal_llist_node_free(struct wifi_nrf_osal_priv *opriv,
+				    void *node);
 
 /**
  * wifi_nrf_osal_llist_node_data_get() - Get data stored in a linked list node.
@@ -350,7 +393,9 @@ void wifi_nrf_osal_llist_node_free(struct wifi_nrf_osal_priv *opriv, void *node)
  *		Pass: Pointer to the data stored in the linked list node.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_llist_node_data_get(struct wifi_nrf_osal_priv *opriv, void *node);
+void *wifi_nrf_osal_llist_node_data_get(struct wifi_nrf_osal_priv *opriv,
+					 void *node);
+
 
 /**
  * wifi_nrf_osal_llist_node_data_set() - Set data in a linked list node.
@@ -363,7 +408,10 @@ void *wifi_nrf_osal_llist_node_data_get(struct wifi_nrf_osal_priv *opriv, void *
  *
  * Return: None.
  */
-void wifi_nrf_osal_llist_node_data_set(struct wifi_nrf_osal_priv *opriv, void *node, void *data);
+void wifi_nrf_osal_llist_node_data_set(struct wifi_nrf_osal_priv *opriv,
+					void *node,
+					void *data);
+
 
 /**
  * wifi_nrf_osal_llist_alloc() - Allocate a linked list.
@@ -377,6 +425,7 @@ void wifi_nrf_osal_llist_node_data_set(struct wifi_nrf_osal_priv *opriv, void *n
  */
 void *wifi_nrf_osal_llist_alloc(struct wifi_nrf_osal_priv *opriv);
 
+
 /**
  * wifi_nrf_osal_llist_free() - Free a linked list.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
@@ -386,7 +435,9 @@ void *wifi_nrf_osal_llist_alloc(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_llist_free(struct wifi_nrf_osal_priv *opriv, void *llist);
+void wifi_nrf_osal_llist_free(struct wifi_nrf_osal_priv *opriv,
+			       void *llist);
+
 
 /**
  * wifi_nrf_osal_llist_init() - Initialize a linked list.
@@ -397,7 +448,9 @@ void wifi_nrf_osal_llist_free(struct wifi_nrf_osal_priv *opriv, void *llist);
  *
  * Return: None.
  */
-void wifi_nrf_osal_llist_init(struct wifi_nrf_osal_priv *opriv, void *llist);
+void wifi_nrf_osal_llist_init(struct wifi_nrf_osal_priv *opriv,
+			       void *llist);
+
 
 /**
  * wifi_nrf_osal_llist_add_node_tail() - Add a node to the tail of a linked list.
@@ -410,8 +463,10 @@ void wifi_nrf_osal_llist_init(struct wifi_nrf_osal_priv *opriv, void *llist);
  *
  * Return: None.
  */
-void wifi_nrf_osal_llist_add_node_tail(struct wifi_nrf_osal_priv *opriv, void *llist,
-				       void *llist_node);
+void wifi_nrf_osal_llist_add_node_tail(struct wifi_nrf_osal_priv *opriv,
+					void *llist,
+					void *llist_node);
+
 
 /**
  * wifi_nrf_osal_llist_get_node_head() - Get the head of a linked list.
@@ -426,7 +481,9 @@ void wifi_nrf_osal_llist_add_node_tail(struct wifi_nrf_osal_priv *opriv, void *l
  *		Pass: Pointer to the head of the linked list.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_llist_get_node_head(struct wifi_nrf_osal_priv *opriv, void *llist);
+void *wifi_nrf_osal_llist_get_node_head(struct wifi_nrf_osal_priv *opriv,
+					 void *llist);
+
 
 /**
  * wifi_nrf_osal_llist_get_node_nxt() - Get the next node in a linked list.
@@ -441,8 +498,10 @@ void *wifi_nrf_osal_llist_get_node_head(struct wifi_nrf_osal_priv *opriv, void *
  *		Pass: Pointer to the next node in the linked list.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_llist_get_node_nxt(struct wifi_nrf_osal_priv *opriv, void *llist,
-				       void *llist_node);
+void *wifi_nrf_osal_llist_get_node_nxt(struct wifi_nrf_osal_priv *opriv,
+					void *llist,
+					void *llist_node);
+
 
 /**
  * wifi_nrf_osal_llist_del_node() - Delete node from a linked list.
@@ -455,7 +514,10 @@ void *wifi_nrf_osal_llist_get_node_nxt(struct wifi_nrf_osal_priv *opriv, void *l
  *
  * Return: None.
  */
-void wifi_nrf_osal_llist_del_node(struct wifi_nrf_osal_priv *opriv, void *llist, void *llist_node);
+void wifi_nrf_osal_llist_del_node(struct wifi_nrf_osal_priv *opriv,
+				   void *llist,
+				   void *llist_node);
+
 
 /**
  * wifi_nrf_osal_llist_len() - Get length of a linked list.
@@ -466,7 +528,9 @@ void wifi_nrf_osal_llist_del_node(struct wifi_nrf_osal_priv *opriv, void *llist,
  *
  * Return: Linked list length in bytes.
  */
-unsigned int wifi_nrf_osal_llist_len(struct wifi_nrf_osal_priv *opriv, void *llist);
+unsigned int wifi_nrf_osal_llist_len(struct wifi_nrf_osal_priv *opriv,
+				      void *llist);
+
 
 /**
  * wifi_nrf_osal_nbuf_alloc() - Allocate a network buffer
@@ -479,7 +543,9 @@ unsigned int wifi_nrf_osal_llist_len(struct wifi_nrf_osal_priv *opriv, void *lli
  *		Pass: Pointer to the allocated network buffer.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_nbuf_alloc(struct wifi_nrf_osal_priv *opriv, unsigned int size);
+void *wifi_nrf_osal_nbuf_alloc(struct wifi_nrf_osal_priv *opriv,
+				unsigned int size);
+
 
 /**
  * wifi_nrf_osal_nbuf_free() - Free a network buffer.
@@ -491,7 +557,9 @@ void *wifi_nrf_osal_nbuf_alloc(struct wifi_nrf_osal_priv *opriv, unsigned int si
  *
  * Return: None.
  */
-void wifi_nrf_osal_nbuf_free(struct wifi_nrf_osal_priv *opriv, void *nbuf);
+void wifi_nrf_osal_nbuf_free(struct wifi_nrf_osal_priv *opriv,
+			      void *nbuf);
+
 
 /**
  * wifi_nrf_osal_nbuf_headroom_res() - Reserve headroom space in a network buffer.
@@ -504,8 +572,11 @@ void wifi_nrf_osal_nbuf_free(struct wifi_nrf_osal_priv *opriv, void *nbuf);
  *
  * Return: None.
  */
-void wifi_nrf_osal_nbuf_headroom_res(struct wifi_nrf_osal_priv *opriv, void *nbuf,
-				     unsigned int size);
+void wifi_nrf_osal_nbuf_headroom_res(struct wifi_nrf_osal_priv *opriv,
+				      void *nbuf,
+				      unsigned int size);
+
+
 
 /**
  * wifi_nrf_osal_nbuf_headroom_get() - Get the size of the headroom in a network buffer.
@@ -517,7 +588,8 @@ void wifi_nrf_osal_nbuf_headroom_res(struct wifi_nrf_osal_priv *opriv, void *nbu
  *
  * Return: Size of the network buffer data headroom in bytes.
  */
-unsigned int wifi_nrf_osal_nbuf_headroom_get(struct wifi_nrf_osal_priv *opriv, void *nbuf);
+unsigned int wifi_nrf_osal_nbuf_headroom_get(struct wifi_nrf_osal_priv *opriv,
+					      void *nbuf);
 
 /**
  * wifi_nrf_osal_nbuf_data_size() - Get the size of data in a network buffer.
@@ -528,7 +600,9 @@ unsigned int wifi_nrf_osal_nbuf_headroom_get(struct wifi_nrf_osal_priv *opriv, v
  *
  * Return: Size of the network buffer data in bytes.
  */
-unsigned int wifi_nrf_osal_nbuf_data_size(struct wifi_nrf_osal_priv *opriv, void *nbuf);
+unsigned int wifi_nrf_osal_nbuf_data_size(struct wifi_nrf_osal_priv *opriv,
+					   void *nbuf);
+
 
 /**
  * wifi_nrf_osal_nbuf_data_get() - Get a handle to the data in a network buffer.
@@ -541,7 +615,9 @@ unsigned int wifi_nrf_osal_nbuf_data_size(struct wifi_nrf_osal_priv *opriv, void
  *		Pass: Pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_nbuf_data_get(struct wifi_nrf_osal_priv *opriv, void *nbuf);
+void *wifi_nrf_osal_nbuf_data_get(struct wifi_nrf_osal_priv *opriv,
+				   void *nbuf);
+
 
 /**
  * wifi_nrf_osal_nbuf_data_put() - Extend the tail portion of the data
@@ -558,7 +634,10 @@ void *wifi_nrf_osal_nbuf_data_get(struct wifi_nrf_osal_priv *opriv, void *nbuf);
  *		Pass: Updated pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_nbuf_data_put(struct wifi_nrf_osal_priv *opriv, void *nbuf, unsigned int size);
+void *wifi_nrf_osal_nbuf_data_put(struct wifi_nrf_osal_priv *opriv,
+				   void *nbuf,
+				   unsigned int size);
+
 
 /**
  * wifi_nrf_osal_nbuf_data_push() - Extend the head portion of the data
@@ -575,7 +654,10 @@ void *wifi_nrf_osal_nbuf_data_put(struct wifi_nrf_osal_priv *opriv, void *nbuf, 
  *		Pass: Updated pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_nbuf_data_push(struct wifi_nrf_osal_priv *opriv, void *nbuf, unsigned int size);
+void *wifi_nrf_osal_nbuf_data_push(struct wifi_nrf_osal_priv *opriv,
+				    void *nbuf,
+				    unsigned int size);
+
 
 /**
  * wifi_nrf_osal_nbuf_data_pull() - Reduce the head portion of the data
@@ -592,7 +674,10 @@ void *wifi_nrf_osal_nbuf_data_push(struct wifi_nrf_osal_priv *opriv, void *nbuf,
  *		Pass: Updated pointer to the data in the network buffer.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_nbuf_data_pull(struct wifi_nrf_osal_priv *opriv, void *nbuf, unsigned int size);
+void *wifi_nrf_osal_nbuf_data_pull(struct wifi_nrf_osal_priv *opriv,
+				    void *nbuf,
+				    unsigned int size);
+
 
 /**
  * wifi_nrf_osal_tasklet_alloc() - Allocate a tasklet.
@@ -606,6 +691,7 @@ void *wifi_nrf_osal_nbuf_data_pull(struct wifi_nrf_osal_priv *opriv, void *nbuf,
  */
 void *wifi_nrf_osal_tasklet_alloc(struct wifi_nrf_osal_priv *opriv);
 
+
 /**
  * wifi_nrf_osal_tasklet_free() - Free a tasklet.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
@@ -616,7 +702,9 @@ void *wifi_nrf_osal_tasklet_alloc(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_tasklet_free(struct wifi_nrf_osal_priv *opriv, void *tasklet);
+void wifi_nrf_osal_tasklet_free(struct wifi_nrf_osal_priv *opriv,
+				 void *tasklet);
+
 
 /**
  * wifi_nrf_osal_tasklet_init() - Initialize a tasklet.
@@ -634,8 +722,11 @@ void wifi_nrf_osal_tasklet_free(struct wifi_nrf_osal_priv *opriv, void *tasklet)
  *
  * Return: None.
  */
-void wifi_nrf_osal_tasklet_init(struct wifi_nrf_osal_priv *opriv, void *tasklet,
-				void (*callbk_fn)(unsigned long), unsigned long data);
+void wifi_nrf_osal_tasklet_init(struct wifi_nrf_osal_priv *opriv,
+				 void *tasklet,
+				 void (*callbk_fn)(unsigned long),
+				 unsigned long data);
+
 
 /**
  * wifi_nrf_osal_tasklet_schedule() - Schedule a tasklet.
@@ -648,7 +739,9 @@ void wifi_nrf_osal_tasklet_init(struct wifi_nrf_osal_priv *opriv, void *tasklet,
  *
  * Return: None.
  */
-void wifi_nrf_osal_tasklet_schedule(struct wifi_nrf_osal_priv *opriv, void *tasklet);
+void wifi_nrf_osal_tasklet_schedule(struct wifi_nrf_osal_priv *opriv,
+				     void *tasklet);
+
 
 /**
  * wifi_nrf_osal_tasklet_kill() - Terminate a tasklet.
@@ -660,7 +753,9 @@ void wifi_nrf_osal_tasklet_schedule(struct wifi_nrf_osal_priv *opriv, void *task
  *
  * Return: None.
  */
-void wifi_nrf_osal_tasklet_kill(struct wifi_nrf_osal_priv *opriv, void *tasklet);
+void wifi_nrf_osal_tasklet_kill(struct wifi_nrf_osal_priv *opriv,
+				 void *tasklet);
+
 
 /**
  * wifi_nrf_osal_sleep_ms() - Sleep for a specified duration in milliseconds.
@@ -671,7 +766,9 @@ void wifi_nrf_osal_tasklet_kill(struct wifi_nrf_osal_priv *opriv, void *tasklet)
  *
  * Return: None.
  */
-void wifi_nrf_osal_sleep_ms(struct wifi_nrf_osal_priv *opriv, unsigned int msecs);
+void wifi_nrf_osal_sleep_ms(struct wifi_nrf_osal_priv *opriv,
+			     unsigned int msecs);
+
 
 /**
  * wifi_nrf_osal_delay_us() - Delay for a specified duration in microseconds.
@@ -684,7 +781,9 @@ void wifi_nrf_osal_sleep_ms(struct wifi_nrf_osal_priv *opriv, unsigned int msecs
  *
  * Return: None.
  */
-void wifi_nrf_osal_delay_us(struct wifi_nrf_osal_priv *opriv, unsigned long usecs);
+void wifi_nrf_osal_delay_us(struct wifi_nrf_osal_priv *opriv,
+			     unsigned long usecs);
+
 
 /**
  * wifi_nrf_osal_time_get_curr_us() - Get current system uptime in microseconds.
@@ -695,6 +794,7 @@ void wifi_nrf_osal_delay_us(struct wifi_nrf_osal_priv *opriv, unsigned long usec
  * Return: System uptime in microseconds.
  */
 unsigned long wifi_nrf_osal_time_get_curr_us(struct wifi_nrf_osal_priv *opriv);
+
 
 /**
  * wifi_nrf_osal_time_elapsed_us() - Get elapsed time in microseconds
@@ -708,7 +808,9 @@ unsigned long wifi_nrf_osal_time_get_curr_us(struct wifi_nrf_osal_priv *opriv);
  * Return: Elapsed time in microseconds.
  */
 unsigned int wifi_nrf_osal_time_elapsed_us(struct wifi_nrf_osal_priv *opriv,
-					   unsigned long start_time_us);
+					    unsigned long start_time_us);
+
+
 
 /**
  * wifi_nrf_osal_bus_pcie_init() - Initialize a PCIe driver.
@@ -723,9 +825,13 @@ unsigned int wifi_nrf_osal_time_elapsed_us(struct wifi_nrf_osal_priv *opriv,
  *
  * Return: OS specific PCIe device context.
  */
-void *wifi_nrf_osal_bus_pcie_init(struct wifi_nrf_osal_priv *opriv, const char *dev_name,
-				  unsigned int vendor_id, unsigned int sub_vendor_id,
-				  unsigned int device_id, unsigned int sub_device_id);
+void *wifi_nrf_osal_bus_pcie_init(struct wifi_nrf_osal_priv *opriv,
+				   const char *dev_name,
+				   unsigned int vendor_id,
+				   unsigned int sub_vendor_id,
+				   unsigned int device_id,
+				   unsigned int sub_device_id);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_deinit() - Deinitialize a PCIe device driver.
@@ -737,7 +843,9 @@ void *wifi_nrf_osal_bus_pcie_init(struct wifi_nrf_osal_priv *opriv, const char *
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_pcie_deinit(struct wifi_nrf_osal_priv *opriv, void *os_pcie_priv);
+void wifi_nrf_osal_bus_pcie_deinit(struct wifi_nrf_osal_priv *opriv,
+				    void *os_pcie_priv);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_add() - Add a PCIe device instance.
@@ -749,8 +857,10 @@ void wifi_nrf_osal_bus_pcie_deinit(struct wifi_nrf_osal_priv *opriv, void *os_pc
  *
  * Return: OS specific PCIe device context.
  */
-void *wifi_nrf_osal_bus_pcie_dev_add(struct wifi_nrf_osal_priv *opriv, void *os_pcie_priv,
-				     void *osal_pcie_dev_ctx);
+void *wifi_nrf_osal_bus_pcie_dev_add(struct wifi_nrf_osal_priv *opriv,
+				      void *os_pcie_priv,
+				      void *osal_pcie_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_rem() - Remove a PCIe device instance.
@@ -762,7 +872,9 @@ void *wifi_nrf_osal_bus_pcie_dev_add(struct wifi_nrf_osal_priv *opriv, void *os_
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_pcie_dev_rem(struct wifi_nrf_osal_priv *opriv, void *os_pcie_dev_ctx);
+void wifi_nrf_osal_bus_pcie_dev_rem(struct wifi_nrf_osal_priv *opriv,
+				     void *os_pcie_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_init() - Initialize a PCIe device instance.
@@ -777,7 +889,8 @@ void wifi_nrf_osal_bus_pcie_dev_rem(struct wifi_nrf_osal_priv *opriv, void *os_p
  *		Fail: WIFI_NRF_STATUS_FAIL.
  */
 enum wifi_nrf_status wifi_nrf_osal_bus_pcie_dev_init(struct wifi_nrf_osal_priv *opriv,
-						     void *os_pcie_dev_ctx);
+						       void *os_pcie_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_deinit() - Deinitialize a PCIe device instance.
@@ -789,7 +902,9 @@ enum wifi_nrf_status wifi_nrf_osal_bus_pcie_dev_init(struct wifi_nrf_osal_priv *
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_pcie_dev_deinit(struct wifi_nrf_osal_priv *opriv, void *os_pcie_dev_ctx);
+void wifi_nrf_osal_bus_pcie_dev_deinit(struct wifi_nrf_osal_priv *opriv,
+					void *os_pcie_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_intr_reg() - Register a interrupt handler for a PCIe device.
@@ -806,8 +921,10 @@ void wifi_nrf_osal_bus_pcie_dev_deinit(struct wifi_nrf_osal_priv *opriv, void *o
  *	    Fail: WIFI_NRF_STATUS_FAIL.
  */
 enum wifi_nrf_status wifi_nrf_osal_bus_pcie_dev_intr_reg(struct wifi_nrf_osal_priv *opriv,
-							 void *os_pcie_dev_ctx, void *callbk_data,
-							 int (*callbk_fn)(void *callbk_data));
+							   void *os_pcie_dev_ctx,
+							   void *callbk_data,
+							   int (*callbk_fn)(void *callbk_data));
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_intr_unreg() - Unregister an interrupt handler for a PCIe device.
@@ -819,7 +936,9 @@ enum wifi_nrf_status wifi_nrf_osal_bus_pcie_dev_intr_reg(struct wifi_nrf_osal_pr
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_pcie_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv, void *os_pcie_dev_ctx);
+void wifi_nrf_osal_bus_pcie_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv,
+					    void *os_pcie_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_dma_map() - Map host memory for DMA access.
@@ -841,9 +960,12 @@ void wifi_nrf_osal_bus_pcie_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv, voi
  *		Pass: Pointer to the DMA mapped physical address.
  *		Error: NULL.
  */
-void *wifi_nrf_osal_bus_pcie_dev_dma_map(struct wifi_nrf_osal_priv *opriv, void *os_pcie_dev_ctx,
-					 void *virt_addr, size_t size,
-					 enum wifi_nrf_osal_dma_dir dir);
+void *wifi_nrf_osal_bus_pcie_dev_dma_map(struct wifi_nrf_osal_priv *opriv,
+					  void *os_pcie_dev_ctx,
+					  void *virt_addr,
+					  size_t size,
+					  enum wifi_nrf_osal_dma_dir dir);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_dma_unmap() - Unmap DMA mapped host memory.
@@ -857,9 +979,12 @@ void *wifi_nrf_osal_bus_pcie_dev_dma_map(struct wifi_nrf_osal_priv *opriv, void 
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_pcie_dev_dma_unmap(struct wifi_nrf_osal_priv *opriv, void *os_pcie_dev_ctx,
-					  void *dma_addr, size_t size,
-					  enum wifi_nrf_osal_dma_dir dir);
+void wifi_nrf_osal_bus_pcie_dev_dma_unmap(struct wifi_nrf_osal_priv *opriv,
+					   void *os_pcie_dev_ctx,
+					   void *dma_addr,
+					   size_t size,
+					   enum wifi_nrf_osal_dma_dir dir);
+
 
 /**
  * wifi_nrf_osal_bus_pcie_dev_host_map_get() - Get host mapped address for a PCIe device.
@@ -872,8 +997,11 @@ void wifi_nrf_osal_bus_pcie_dev_dma_unmap(struct wifi_nrf_osal_priv *opriv, void
  * Return: None.
  */
 void wifi_nrf_osal_bus_pcie_dev_host_map_get(struct wifi_nrf_osal_priv *opriv,
-					     void *os_pcie_dev_ctx,
-					     struct wifi_nrf_osal_host_map *host_map);
+					      void *os_pcie_dev_ctx,
+					      struct wifi_nrf_osal_host_map *host_map);
+
+
+
 
 /**
  * wifi_nrf_osal_bus_qspi_init() - Initialize a qspi driver.
@@ -885,6 +1013,7 @@ void wifi_nrf_osal_bus_pcie_dev_host_map_get(struct wifi_nrf_osal_priv *opriv,
  */
 void *wifi_nrf_osal_bus_qspi_init(struct wifi_nrf_osal_priv *opriv);
 
+
 /**
  * wifi_nrf_osal_bus_qspi_deinit() - Deinitialize a qspi device driver.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.
@@ -895,7 +1024,9 @@ void *wifi_nrf_osal_bus_qspi_init(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_qspi_deinit(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
+void wifi_nrf_osal_bus_qspi_deinit(struct wifi_nrf_osal_priv *opriv,
+				    void *os_qspi_priv);
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_add() - Add a qspi device instance.
@@ -907,8 +1038,10 @@ void wifi_nrf_osal_bus_qspi_deinit(struct wifi_nrf_osal_priv *opriv, void *os_qs
  *
  * Return: OS specific qspi device context.
  */
-void *wifi_nrf_osal_bus_qspi_dev_add(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv,
-				     void *osal_qspi_dev_ctx);
+void *wifi_nrf_osal_bus_qspi_dev_add(struct wifi_nrf_osal_priv *opriv,
+				      void *os_qspi_priv,
+				      void *osal_qspi_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_rem() - Remove a qspi device instance.
@@ -920,7 +1053,9 @@ void *wifi_nrf_osal_bus_qspi_dev_add(struct wifi_nrf_osal_priv *opriv, void *os_
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_qspi_dev_rem(struct wifi_nrf_osal_priv *opriv, void *os_qspi_dev_ctx);
+void wifi_nrf_osal_bus_qspi_dev_rem(struct wifi_nrf_osal_priv *opriv,
+				     void *os_qspi_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_init() - Initialize a qspi device instance.
@@ -935,7 +1070,8 @@ void wifi_nrf_osal_bus_qspi_dev_rem(struct wifi_nrf_osal_priv *opriv, void *os_q
  *		Fail: WIFI_NRF_STATUS_FAIL.
  */
 enum wifi_nrf_status wifi_nrf_osal_bus_qspi_dev_init(struct wifi_nrf_osal_priv *opriv,
-						     void *os_qspi_dev_ctx);
+						       void *os_qspi_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_deinit() - Deinitialize a qspi device instance.
@@ -947,7 +1083,9 @@ enum wifi_nrf_status wifi_nrf_osal_bus_qspi_dev_init(struct wifi_nrf_osal_priv *
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_qspi_dev_deinit(struct wifi_nrf_osal_priv *opriv, void *os_qspi_dev_ctx);
+void wifi_nrf_osal_bus_qspi_dev_deinit(struct wifi_nrf_osal_priv *opriv,
+					void *os_qspi_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_intr_reg() - Register a interrupt handler for a qspi device.
@@ -964,8 +1102,10 @@ void wifi_nrf_osal_bus_qspi_dev_deinit(struct wifi_nrf_osal_priv *opriv, void *o
  *	    Fail: WIFI_NRF_STATUS_FAIL.
  */
 enum wifi_nrf_status wifi_nrf_osal_bus_qspi_dev_intr_reg(struct wifi_nrf_osal_priv *opriv,
-							 void *os_qspi_dev_ctx, void *callbk_data,
-							 int (*callbk_fn)(void *callbk_data));
+							   void *os_qspi_dev_ctx,
+							   void *callbk_data,
+							   int (*callbk_fn)(void *callbk_data));
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_intr_unreg() - Unregister an interrupt handler for a qspi device.
@@ -977,7 +1117,9 @@ enum wifi_nrf_status wifi_nrf_osal_bus_qspi_dev_intr_reg(struct wifi_nrf_osal_pr
  *
  * Return: None.
  */
-void wifi_nrf_osal_bus_qspi_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv, void *os_qspi_dev_ctx);
+void wifi_nrf_osal_bus_qspi_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv,
+					    void *os_qspi_dev_ctx);
+
 
 /**
  * wifi_nrf_osal_bus_qspi_dev_host_map_get() - Get host mapped address for a qspi device.
@@ -990,8 +1132,8 @@ void wifi_nrf_osal_bus_qspi_dev_intr_unreg(struct wifi_nrf_osal_priv *opriv, voi
  * Return: None.
  */
 void wifi_nrf_osal_bus_qspi_dev_host_map_get(struct wifi_nrf_osal_priv *opriv,
-					     void *os_qspi_dev_ctx,
-					     struct wifi_nrf_osal_host_map *host_map);
+					      void *os_qspi_dev_ctx,
+					      struct wifi_nrf_osal_host_map *host_map);
 
 /**
  * wifi_nrf_osal_qspi_read_reg32() - Read value from a 32 bit register on a
@@ -1005,8 +1147,9 @@ void wifi_nrf_osal_bus_qspi_dev_host_map_get(struct wifi_nrf_osal_priv *opriv,
  *
  * Return: 32 bit value read from register.
  */
-unsigned int wifi_nrf_osal_qspi_read_reg32(struct wifi_nrf_osal_priv *opriv, void *priv,
-					   unsigned long addr);
+unsigned int wifi_nrf_osal_qspi_read_reg32(struct wifi_nrf_osal_priv *opriv,
+					    void *priv,
+					    unsigned long addr);
 
 /**
  * wifi_nrf_osal_qspi_write_reg32() -
@@ -1020,8 +1163,10 @@ unsigned int wifi_nrf_osal_qspi_read_reg32(struct wifi_nrf_osal_priv *opriv, voi
  *
  * Return: None.
  */
-void wifi_nrf_osal_qspi_write_reg32(struct wifi_nrf_osal_priv *opriv, void *priv,
-				    unsigned long addr, unsigned int val);
+void wifi_nrf_osal_qspi_write_reg32(struct wifi_nrf_osal_priv *opriv,
+				     void *priv,
+				     unsigned long addr,
+				     unsigned int val);
 
 /**
  * wifi_nrf_osal_qspi_cpy_from() -
@@ -1034,8 +1179,11 @@ void wifi_nrf_osal_qspi_write_reg32(struct wifi_nrf_osal_priv *opriv, void *priv
  *
  * Return: None.
  */
-void wifi_nrf_osal_qspi_cpy_from(struct wifi_nrf_osal_priv *opriv, void *priv, void *dest,
-				 unsigned long addr, size_t count);
+void wifi_nrf_osal_qspi_cpy_from(struct wifi_nrf_osal_priv *opriv,
+				  void *priv,
+				  void *dest,
+				  unsigned long addr,
+				  size_t count);
 
 /**
  * wifi_nrf_osal_qspi_cpy_to() -
@@ -1048,8 +1196,11 @@ void wifi_nrf_osal_qspi_cpy_from(struct wifi_nrf_osal_priv *opriv, void *priv, v
  *
  * Return: None.
  */
-void wifi_nrf_osal_qspi_cpy_to(struct wifi_nrf_osal_priv *opriv, void *priv, unsigned long addr,
-			       const void *src, size_t count);
+void wifi_nrf_osal_qspi_cpy_to(struct wifi_nrf_osal_priv *opriv,
+				void *priv,
+				unsigned long addr,
+				const void *src,
+				size_t count);
 
 #ifdef RPU_SLEEP_SUPPORT
 /**
@@ -1072,7 +1223,9 @@ void *wifi_nrf_osal_timer_alloc(struct wifi_nrf_osal_priv *opriv);
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv, void *timer);
+void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv,
+			       void *timer);
+
 
 /**
  * wifi_nrf_osal_timer_init() - Initialize a timer.
@@ -1087,8 +1240,11 @@ void wifi_nrf_osal_timer_free(struct wifi_nrf_osal_priv *opriv, void *timer);
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv, void *timer,
-			      void (*callbk_fn)(unsigned long), unsigned long data);
+void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv,
+			       void *timer,
+			       void (*callbk_fn)(unsigned long),
+			       unsigned long data);
+
 
 /**
  * wifi_nrf_osal_timer_schedule() - Schedule a timer.
@@ -1101,8 +1257,10 @@ void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv, void *timer,
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv, void *timer,
-				  unsigned long duration);
+void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv,
+				   void *timer,
+				   unsigned long duration);
+
 
 /**
  * wifi_nrf_osal_timer_kill() - Kill a timer.
@@ -1113,13 +1271,18 @@ void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv, void *timer,
  *
  * Return: None.
  */
-void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv, void *timer);
+void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv,
+			       void *timer);
 
-int wifi_nrf_osal_bus_qspi_ps_sleep(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
 
-int wifi_nrf_osal_bus_qspi_ps_wake(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
 
-int wifi_nrf_osal_bus_qspi_ps_status(struct wifi_nrf_osal_priv *opriv, void *os_qspi_priv);
-#endif
+int wifi_nrf_osal_bus_qspi_ps_sleep(struct wifi_nrf_osal_priv *opriv,
+				    void *os_qspi_priv);
 
+int wifi_nrf_osal_bus_qspi_ps_wake(struct wifi_nrf_osal_priv *opriv,
+				   void *os_qspi_priv);
+
+int wifi_nrf_osal_bus_qspi_ps_status(struct wifi_nrf_osal_priv *opriv,
+				     void *os_qspi_priv);
+#endif /* RPU_SLEEP_SUPPORT */
 #endif /* __OSAL_API_H__ */

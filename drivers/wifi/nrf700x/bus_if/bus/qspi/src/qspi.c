@@ -29,7 +29,9 @@ int wifi_nrf_bus_qspi_irq_handler(void *data)
 	return ret;
 }
 
-void *wifi_nrf_bus_qspi_dev_add(void *bus_priv, void *bal_dev_ctx)
+
+void *wifi_nrf_bus_qspi_dev_add(void *bus_priv,
+				void *bal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
@@ -38,47 +40,53 @@ void *wifi_nrf_bus_qspi_dev_add(void *bus_priv, void *bal_dev_ctx)
 
 	qspi_priv = bus_priv;
 
-	qspi_dev_ctx = wifi_nrf_osal_mem_zalloc(qspi_priv->opriv, sizeof(*qspi_dev_ctx));
+	qspi_dev_ctx = wifi_nrf_osal_mem_zalloc(qspi_priv->opriv,
+						sizeof(*qspi_dev_ctx));
 
 	if (!qspi_dev_ctx) {
-		wifi_nrf_osal_log_err(qspi_priv->opriv, "%s: Unable to allocate qspi_dev_ctx\n",
-				      __func__);
+		wifi_nrf_osal_log_err(qspi_priv->opriv,
+				      "%s: Unable to allocate qspi_dev_ctx\n", __func__);
 		goto out;
 	}
 
 	qspi_dev_ctx->qspi_priv = qspi_priv;
 	qspi_dev_ctx->bal_dev_ctx = bal_dev_ctx;
 
-	qspi_dev_ctx->os_qspi_dev_ctx = wifi_nrf_osal_bus_qspi_dev_add(
-		qspi_priv->opriv, qspi_priv->os_qspi_priv, qspi_dev_ctx);
+	qspi_dev_ctx->os_qspi_dev_ctx = wifi_nrf_osal_bus_qspi_dev_add(qspi_priv->opriv,
+								       qspi_priv->os_qspi_priv,
+								       qspi_dev_ctx);
 	;
 
 	if (!qspi_dev_ctx->os_qspi_dev_ctx) {
 		wifi_nrf_osal_log_err(qspi_priv->opriv,
 				      "%s: wifi_nrf_osal_bus_qspi_dev_add failed\n", __func__);
 
-		wifi_nrf_osal_mem_free(qspi_priv->opriv, qspi_dev_ctx);
+		wifi_nrf_osal_mem_free(qspi_priv->opriv,
+				       qspi_dev_ctx);
 
 		qspi_dev_ctx = NULL;
 
 		goto out;
 	}
 
-	wifi_nrf_osal_bus_qspi_dev_host_map_get(qspi_priv->opriv, qspi_dev_ctx->os_qspi_dev_ctx,
+	wifi_nrf_osal_bus_qspi_dev_host_map_get(qspi_priv->opriv,
+						qspi_dev_ctx->os_qspi_dev_ctx,
 						&host_map);
 
 	qspi_dev_ctx->host_addr_base = host_map.addr;
 
-	qspi_dev_ctx->addr_pktram_base =
-		qspi_dev_ctx->host_addr_base + qspi_priv->cfg_params.addr_pktram_base;
+	qspi_dev_ctx->addr_pktram_base = qspi_dev_ctx->host_addr_base +
+		qspi_priv->cfg_params.addr_pktram_base;
 
 	status = wifi_nrf_osal_bus_qspi_dev_intr_reg(qspi_dev_ctx->qspi_priv->opriv,
-						     qspi_dev_ctx->os_qspi_dev_ctx, qspi_dev_ctx,
+						     qspi_dev_ctx->os_qspi_dev_ctx,
+						     qspi_dev_ctx,
 						     &wifi_nrf_bus_qspi_irq_handler);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(qspi_dev_ctx->qspi_priv->opriv,
-				      "%s: Unable to register interrupt to the OS\n", __func__);
+				      "%s: Unable to register interrupt to the OS\n",
+				      __func__);
 
 		wifi_nrf_osal_bus_qspi_dev_intr_unreg(qspi_dev_ctx->qspi_priv->opriv,
 						      qspi_dev_ctx->os_qspi_dev_ctx);
@@ -86,7 +94,8 @@ void *wifi_nrf_bus_qspi_dev_add(void *bus_priv, void *bal_dev_ctx)
 		wifi_nrf_osal_bus_qspi_dev_rem(qspi_dev_ctx->qspi_priv->opriv,
 					       qspi_dev_ctx->os_qspi_dev_ctx);
 
-		wifi_nrf_osal_mem_free(qspi_priv->opriv, qspi_dev_ctx);
+		wifi_nrf_osal_mem_free(qspi_priv->opriv,
+				       qspi_dev_ctx);
 
 		qspi_dev_ctx = NULL;
 
@@ -97,6 +106,7 @@ out:
 	return qspi_dev_ctx;
 }
 
+
 void wifi_nrf_bus_qspi_dev_rem(void *bus_dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -106,8 +116,10 @@ void wifi_nrf_bus_qspi_dev_rem(void *bus_dev_ctx)
 	wifi_nrf_osal_bus_qspi_dev_intr_unreg(qspi_dev_ctx->qspi_priv->opriv,
 					      qspi_dev_ctx->os_qspi_dev_ctx);
 
-	wifi_nrf_osal_mem_free(qspi_dev_ctx->qspi_priv->opriv, qspi_dev_ctx);
+	wifi_nrf_osal_mem_free(qspi_dev_ctx->qspi_priv->opriv,
+			       qspi_dev_ctx);
 }
+
 
 enum wifi_nrf_status wifi_nrf_bus_qspi_dev_init(void *bus_dev_ctx)
 {
@@ -129,6 +141,7 @@ out:
 	return status;
 }
 
+
 void wifi_nrf_bus_qspi_dev_deinit(void *bus_dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -139,31 +152,41 @@ void wifi_nrf_bus_qspi_dev_deinit(void *bus_dev_ctx)
 					  qspi_dev_ctx->os_qspi_dev_ctx);
 }
 
-void *wifi_nrf_bus_qspi_init(struct wifi_nrf_osal_priv *opriv, void *params,
+
+void *wifi_nrf_bus_qspi_init(struct wifi_nrf_osal_priv *opriv,
+			     void *params,
 			     enum wifi_nrf_status (*intr_callbk_fn)(void *bal_dev_ctx))
 {
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 
-	qspi_priv = wifi_nrf_osal_mem_zalloc(opriv, sizeof(*qspi_priv));
+	qspi_priv = wifi_nrf_osal_mem_zalloc(opriv,
+					     sizeof(*qspi_priv));
 
 	if (!qspi_priv) {
-		wifi_nrf_osal_log_err(opriv, "%s: Unable to allocate memory for qspi_priv\n",
+		wifi_nrf_osal_log_err(opriv,
+				      "%s: Unable to allocate memory for qspi_priv\n",
 				      __func__);
 		goto out;
 	}
 
 	qspi_priv->opriv = opriv;
 
-	wifi_nrf_osal_mem_cpy(opriv, &qspi_priv->cfg_params, params, sizeof(qspi_priv->cfg_params));
+	wifi_nrf_osal_mem_cpy(opriv,
+			      &qspi_priv->cfg_params,
+			      params,
+			      sizeof(qspi_priv->cfg_params));
 
 	qspi_priv->intr_callbk_fn = intr_callbk_fn;
 
 	qspi_priv->os_qspi_priv = wifi_nrf_osal_bus_qspi_init(opriv);
 
 	if (!qspi_priv->os_qspi_priv) {
-		wifi_nrf_osal_log_err(opriv, "%s: Unable to register QSPI driver\n", __func__);
+		wifi_nrf_osal_log_err(opriv,
+				      "%s: Unable to register QSPI driver\n",
+				      __func__);
 
-		wifi_nrf_osal_mem_free(opriv, qspi_priv);
+		wifi_nrf_osal_mem_free(opriv,
+				       qspi_priv);
 
 		qspi_priv = NULL;
 
@@ -173,18 +196,23 @@ out:
 	return qspi_priv;
 }
 
+
 void wifi_nrf_bus_qspi_deinit(void *bus_priv)
 {
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 
 	qspi_priv = bus_priv;
 
-	wifi_nrf_osal_bus_qspi_deinit(qspi_priv->opriv, qspi_priv->os_qspi_priv);
+	wifi_nrf_osal_bus_qspi_deinit(qspi_priv->opriv,
+				      qspi_priv->os_qspi_priv);
 
-	wifi_nrf_osal_mem_free(qspi_priv->opriv, qspi_priv);
+	wifi_nrf_osal_mem_free(qspi_priv->opriv,
+			       qspi_priv);
 }
 
-unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx, unsigned long addr_offset)
+
+unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx,
+					 unsigned long addr_offset)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned int val = 0;
@@ -198,7 +226,10 @@ unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx, unsigned long addr_offse
 	return val;
 }
 
-void wifi_nrf_bus_qspi_write_word(void *dev_ctx, unsigned long addr_offset, unsigned int val)
+
+void wifi_nrf_bus_qspi_write_word(void *dev_ctx,
+				  unsigned long addr_offset,
+				  unsigned int val)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -206,32 +237,48 @@ void wifi_nrf_bus_qspi_write_word(void *dev_ctx, unsigned long addr_offset, unsi
 
 	wifi_nrf_osal_qspi_write_reg32(qspi_dev_ctx->qspi_priv->opriv,
 				       qspi_dev_ctx->os_qspi_dev_ctx,
-				       qspi_dev_ctx->host_addr_base + addr_offset, val);
+				       qspi_dev_ctx->host_addr_base + addr_offset,
+				       val);
 }
 
-void wifi_nrf_bus_qspi_read_block(void *dev_ctx, void *dest_addr, unsigned long src_addr_offset,
+
+void wifi_nrf_bus_qspi_read_block(void *dev_ctx,
+				  void *dest_addr,
+				  unsigned long src_addr_offset,
 				  size_t len)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
 	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
-	wifi_nrf_osal_qspi_cpy_from(qspi_dev_ctx->qspi_priv->opriv, qspi_dev_ctx->os_qspi_dev_ctx,
-				    dest_addr, qspi_dev_ctx->host_addr_base + src_addr_offset, len);
+	wifi_nrf_osal_qspi_cpy_from(qspi_dev_ctx->qspi_priv->opriv,
+				    qspi_dev_ctx->os_qspi_dev_ctx,
+				    dest_addr,
+				    qspi_dev_ctx->host_addr_base + src_addr_offset,
+				    len);
 }
 
-void wifi_nrf_bus_qspi_write_block(void *dev_ctx, unsigned long dest_addr_offset,
-				   const void *src_addr, size_t len)
+
+void wifi_nrf_bus_qspi_write_block(void *dev_ctx,
+				   unsigned long dest_addr_offset,
+				   const void *src_addr,
+				   size_t len)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
 	qspi_dev_ctx = (struct wifi_nrf_bus_qspi_dev_ctx *)dev_ctx;
 
-	wifi_nrf_osal_qspi_cpy_to(qspi_dev_ctx->qspi_priv->opriv, qspi_dev_ctx->os_qspi_dev_ctx,
-				  qspi_dev_ctx->host_addr_base + dest_addr_offset, src_addr, len);
+	wifi_nrf_osal_qspi_cpy_to(qspi_dev_ctx->qspi_priv->opriv,
+				  qspi_dev_ctx->os_qspi_dev_ctx,
+				  qspi_dev_ctx->host_addr_base + dest_addr_offset,
+				  src_addr,
+				  len);
 }
 
-unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx, unsigned long virt_addr, size_t len,
+
+unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx,
+					unsigned long virt_addr,
+					size_t len,
 					enum wifi_nrf_osal_dma_dir dma_dir)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -244,7 +291,10 @@ unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx, unsigned long virt_addr, 
 	return phy_addr;
 }
 
-unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx, unsigned long phy_addr, size_t len,
+
+unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx,
+					  unsigned long phy_addr,
+					  size_t len,
 					  enum wifi_nrf_osal_dma_dir dma_dir)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -257,6 +307,7 @@ unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx, unsigned long phy_addr,
 	return virt_addr;
 }
 
+
 #ifdef RPU_SLEEP_SUPPORT
 int wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
 {
@@ -268,6 +319,7 @@ int wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
 					       qspi_dev_ctx->os_qspi_dev_ctx);
 }
 
+
 int wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -278,6 +330,7 @@ int wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
 					      qspi_dev_ctx->os_qspi_dev_ctx);
 }
 
+
 int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -287,7 +340,8 @@ int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
 	return wifi_nrf_osal_bus_qspi_ps_status(qspi_dev_ctx->qspi_priv->opriv,
 						qspi_dev_ctx->os_qspi_dev_ctx);
 }
-#endif
+#endif /* RPU_SLEEP_SUPPORT */
+
 
 struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
 	.init = &wifi_nrf_bus_qspi_init,
@@ -306,8 +360,9 @@ struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
 	.ps_sleep = &wifi_nrf_bus_qspi_ps_sleep,
 	.ps_wake = &wifi_nrf_bus_qspi_ps_wake,
 	.ps_status = &wifi_nrf_bus_qspi_ps_status,
-#endif
+#endif /* RPU_SLEEP_SUPPORT */	
 };
+
 
 struct wifi_nrf_bal_ops *get_bus_ops(void)
 {

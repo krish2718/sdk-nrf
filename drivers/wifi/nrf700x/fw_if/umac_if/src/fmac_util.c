@@ -19,17 +19,21 @@ unsigned char llc_header[] = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00 };
 /* Bridge-Tunnel header (for EtherTypes ETH_P_AARP and ETH_P_IPX) */
 unsigned char aarp_ipx_header[] = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0xf8 };
 
+
 bool wifi_nrf_util_is_multicast_addr(const unsigned char *addr)
 {
 	return (0x01 & *addr);
 }
+
 
 bool wifi_nrf_util_is_unicast_addr(const unsigned char *addr)
 {
 	return !wifi_nrf_util_is_multicast_addr(addr);
 }
 
-bool wifi_nrf_util_ether_addr_equal(const unsigned char *addr_1, const unsigned char *addr_2)
+
+bool wifi_nrf_util_ether_addr_equal(const unsigned char *addr_1,
+				    const unsigned char *addr_2)
 {
 	const unsigned short *a = (const unsigned short *)addr_1;
 	const unsigned short *b = (const unsigned short *)addr_2;
@@ -37,27 +41,35 @@ bool wifi_nrf_util_ether_addr_equal(const unsigned char *addr_1, const unsigned 
 	return ((a[0] ^ b[0]) | (a[1] ^ b[1]) | (a[2] ^ b[2])) == 0;
 }
 
-unsigned short wifi_nrf_util_rx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
+
+unsigned short wifi_nrf_util_rx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					     void *nwb)
 {
 	unsigned char *payload = NULL;
 
 	payload = (unsigned char *)nwb;
+
 	return payload[6] << 8 | payload[7];
 }
 
-unsigned short wifi_nrf_util_tx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
+
+unsigned short wifi_nrf_util_tx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					     void *nwb)
 {
 	unsigned char *payload = NULL;
 
 	payload = (unsigned char *)nwb;
+
 	return payload[12] << 8 | payload[13];
 }
+
 
 int wifi_nrf_util_get_skip_header_bytes(unsigned short eth_type)
 {
 	int skip_header_bytes = sizeof(eth_type);
 
-	if (eth_type == WIFI_NRF_FMAC_ETH_P_AARP || eth_type == WIFI_NRF_FMAC_ETH_P_IPX) {
+	if (eth_type == WIFI_NRF_FMAC_ETH_P_AARP ||
+	    eth_type == WIFI_NRF_FMAC_ETH_P_IPX) {
 		skip_header_bytes += sizeof(aarp_ipx_header);
 	} else if (eth_type >= WIFI_NRF_FMAC_ETH_P_802_3_MIN) {
 		skip_header_bytes += sizeof(llc_header);
@@ -66,43 +78,67 @@ int wifi_nrf_util_get_skip_header_bytes(unsigned short eth_type)
 	return skip_header_bytes;
 }
 
-void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb,
-				  struct wifi_nrf_fmac_ieee80211_hdr *hdr, unsigned short eth_type)
+
+void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				  void *nwb,
+				  struct wifi_nrf_fmac_ieee80211_hdr *hdr,
+				  unsigned short eth_type)
 {
+
 	struct wifi_nrf_fmac_eth_hdr *ehdr = NULL;
 	unsigned int len = 0;
 
-	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv, nwb);
+	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
+					   nwb);
 
-	ehdr = (struct wifi_nrf_fmac_eth_hdr *)wifi_nrf_osal_nbuf_data_push(
-		fmac_dev_ctx->fpriv->opriv, nwb, sizeof(struct wifi_nrf_fmac_eth_hdr));
+	ehdr = (struct wifi_nrf_fmac_eth_hdr *)
+		wifi_nrf_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
+					     nwb,
+					     sizeof(struct wifi_nrf_fmac_eth_hdr));
 
 	switch (hdr->fc & (WIFI_NRF_FCTL_TODS | WIFI_NRF_FCTL_FROMDS)) {
-	case (WIFI_NRF_FCTL_TODS | WIFI_NRF_FCTL_FROMDS):
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->src, hdr->addr_4,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		case (WIFI_NRF_FCTL_TODS | WIFI_NRF_FCTL_FROMDS):
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->src,
+					      hdr->addr_4,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
 
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->dst, hdr->addr_1,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-		break;
-	case (WIFI_NRF_FCTL_FROMDS):
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->src, hdr->addr_3,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->dst, hdr->addr_1,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-		break;
-	case (WIFI_NRF_FCTL_TODS):
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->src, hdr->addr_2,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->dst, hdr->addr_3,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-		break;
-	default:
-		/* Both FROM and TO DS bit is zero*/
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->src, hdr->addr_2,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->dst, hdr->addr_1,
-				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->dst,
+					      hdr->addr_1,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			break;
+		case (WIFI_NRF_FCTL_FROMDS):
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->src,
+					      hdr->addr_3,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->dst,
+					      hdr->addr_1,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			break;
+		case (WIFI_NRF_FCTL_TODS):
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->src,
+					      hdr->addr_2,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->dst,
+					      hdr->addr_3,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			break;
+		default:
+			/* Both FROM and TO DS bit is zero*/
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->src,
+					      hdr->addr_2,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      ehdr->dst,
+					      hdr->addr_1,
+					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+
 	}
 
 	if (eth_type >= WIFI_NRF_FMAC_ETH_P_802_3_MIN) {
@@ -112,7 +148,9 @@ void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, vo
 	}
 }
 
-void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
+
+void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+					   void *nwb)
 {
 	struct wifi_nrf_fmac_eth_hdr *ehdr = NULL;
 	struct wifi_nrf_fmac_amsdu_hdr amsdu_hdr;
@@ -120,28 +158,37 @@ void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_de
 	unsigned short eth_type = 0;
 	unsigned char amsdu_hdr_len = sizeof(struct wifi_nrf_fmac_amsdu_hdr);
 
-	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, &amsdu_hdr,
-			      wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv, nwb),
+	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+			      &amsdu_hdr,
+			      wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+							  nwb),
 			      amsdu_hdr_len);
 
-	eth_type = wifi_nrf_util_rx_get_eth_type(
-		fmac_dev_ctx,
-		(void *)((char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv, nwb) +
-			 amsdu_hdr_len));
+	eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
+						 (void *)((char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+											      nwb) + amsdu_hdr_len));
 
-	wifi_nrf_osal_nbuf_data_pull(
-		fmac_dev_ctx->fpriv->opriv, nwb,
-		(amsdu_hdr_len + wifi_nrf_util_get_skip_header_bytes(eth_type)));
+	wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
+				     nwb,
+				     (amsdu_hdr_len +
+				      wifi_nrf_util_get_skip_header_bytes(eth_type)));
 
-	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv, nwb);
+	len = wifi_nrf_osal_nbuf_data_size(fmac_dev_ctx->fpriv->opriv,
+					   nwb);
 
-	ehdr = (struct wifi_nrf_fmac_eth_hdr *)wifi_nrf_osal_nbuf_data_push(
-		fmac_dev_ctx->fpriv->opriv, nwb, sizeof(struct wifi_nrf_fmac_eth_hdr));
+	ehdr = (struct wifi_nrf_fmac_eth_hdr *)
+		wifi_nrf_osal_nbuf_data_push(fmac_dev_ctx->fpriv->opriv,
+					     nwb,
+					     sizeof(struct wifi_nrf_fmac_eth_hdr));
 
-	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->src, amsdu_hdr.src,
+	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+			      ehdr->src,
+			      amsdu_hdr.src,
 			      WIFI_NRF_FMAC_ETH_ADDR_LEN);
 
-	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv, ehdr->dst, amsdu_hdr.dst,
+	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+			      ehdr->dst,
+			      amsdu_hdr.dst,
 			      WIFI_NRF_FMAC_ETH_ADDR_LEN);
 
 	if (eth_type >= WIFI_NRF_FMAC_ETH_P_802_3_MIN) {
@@ -151,7 +198,9 @@ void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_de
 	}
 }
 
-int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
+
+int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+			  void *nwb)
 {
 	unsigned short ether_type = 0;
 	int priority = 0;
@@ -164,63 +213,68 @@ int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
 	unsigned short ipv6_hdr = 0;
 	unsigned char *nwb_data = NULL;
 
-	ether_type = wifi_nrf_util_tx_get_eth_type(
-		fmac_dev_ctx, wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv, nwb));
-	nwb_data = (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv, nwb) +
-		   WIFI_NRF_FMAC_ETH_HDR_LEN;
+	ether_type = wifi_nrf_util_tx_get_eth_type(fmac_dev_ctx,
+						   wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+									       nwb));
+	nwb_data = (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+								nwb) + WIFI_NRF_FMAC_ETH_HDR_LEN;
 
 	switch (ether_type & WIFI_NRF_FMAC_ETH_TYPE_MASK) {
-	/* If VLAN 802.1Q (0x8100) ||
-	 * 802.1AD(0x88A8) FRAME calculate priority accordingly
-	 */
-	case WIFI_NRF_FMAC_ETH_P_8021Q: /* ETH_P_8021Q: */
-	case WIFI_NRF_FMAC_ETH_P_8021AD: /* ETH_P_8021AD: */
-		vlan_tci = (((unsigned char *)nwb_data)[4] << 8) | (((unsigned char *)nwb_data)[5]);
-		vlan_priority = ((vlan_tci & WIFI_NRF_FMAC_VLAN_PRIO_MASK) >>
-				 WIFI_NRF_FMAC_VLAN_PRIO_SHIFT);
-		priority = vlan_priority;
-		break;
+		/* If VLAN 802.1Q (0x8100) ||
+		 * 802.1AD(0x88A8) FRAME calculate priority accordingly
+		 */
+		case WIFI_NRF_FMAC_ETH_P_8021Q: /* ETH_P_8021Q: */
+		case WIFI_NRF_FMAC_ETH_P_8021AD: /* ETH_P_8021AD: */
+			vlan_tci = (((unsigned char *)nwb_data)[4] << 8) |
+				(((unsigned char *)nwb_data)[5]);
+			vlan_priority = ((vlan_tci & WIFI_NRF_FMAC_VLAN_PRIO_MASK)
+					 >> WIFI_NRF_FMAC_VLAN_PRIO_SHIFT);
+			priority = vlan_priority;
+			break;
 
-		/* If MPLS MC(0x8840) / UC(0x8847) frame calculate priority
-		 * accordingly
-		 */
-	case WIFI_NRF_FMAC_ETH_P_MPLS_UC: /*ETH_P_MPLS_UC:*/
-	case WIFI_NRF_FMAC_ETH_P_MPLS_MC: /*ETH_P_MPLS_MC:*/
-		mpls_hdr = (((unsigned char *)nwb_data)[0] << 24) |
-			   (((unsigned char *)nwb_data)[1] << 16) |
-			   (((unsigned char *)nwb_data)[2] << 8) | (((unsigned char *)nwb_data)[3]);
-		mpls_tc_qos = (mpls_hdr &
-			       (WIFI_NRF_FMAC_MPLS_LS_TC_MASK) >> WIFI_NRF_FMAC_MPLS_LS_TC_SHIFT);
-		priority = mpls_tc_qos;
-		break;
-		/* If IP (0x0800) frame calculate priority accordingly */
-	case WIFI_NRF_FMAC_ETH_P_IP: /*ETH_P_IP:*/
-		/*get the tos filed*/ /*DA+SA+ETH+(VER+IHL)*/
-		tos = (((unsigned char *)nwb_data)[1]);
-		/*get the dscp value */
-		dscp = (tos & 0xfc);
-		priority = dscp >> 5;
-		break;
-	case WIFI_NRF_FMAC_ETH_P_IPV6: /*ETH_P_IPV6:*/
-		/*get the tos filed*/ /*DA+SA+ETH*/
-		ipv6_hdr = (((unsigned char *)nwb_data)[0] << 8) | ((unsigned char *)nwb_data)[1];
-		dscp = (((ipv6_hdr & WIFI_NRF_FMAC_IPV6_TOS_MASK) >> WIFI_NRF_FMAC_IPV6_TOS_SHIFT) &
-			0xfc);
-		priority = dscp >> 5;
-		break;
-		/* If Media Independent (0x8917)
-		 * frame calculate priority accordingly.
-		 */
-	case WIFI_NRF_FMAC_ETH_P_80221: /* ETH_P_80221 */
-		/* 802.21 is always network control traffic */
-		priority = 0x07;
-		break;
-	default:
-		priority = 0;
+			/* If MPLS MC(0x8840) / UC(0x8847) frame calculate priority
+			 * accordingly
+			 */
+		case WIFI_NRF_FMAC_ETH_P_MPLS_UC: /*ETH_P_MPLS_UC:*/
+		case WIFI_NRF_FMAC_ETH_P_MPLS_MC: /*ETH_P_MPLS_MC:*/
+			mpls_hdr = (((unsigned char *)nwb_data)[0] << 24) |
+				(((unsigned char *)nwb_data)[1] << 16) |
+				(((unsigned char *)nwb_data)[2] << 8)  |
+				(((unsigned char *)nwb_data)[3]);
+			mpls_tc_qos = (mpls_hdr & (WIFI_NRF_FMAC_MPLS_LS_TC_MASK)
+				       >> WIFI_NRF_FMAC_MPLS_LS_TC_SHIFT);
+			priority = mpls_tc_qos;
+			break;
+			/* If IP (0x0800) frame calculate priority accordingly */
+		case WIFI_NRF_FMAC_ETH_P_IP:/*ETH_P_IP:*/
+			/*get the tos filed*//*DA+SA+ETH+(VER+IHL)*/
+			tos = (((unsigned char *)nwb_data)[1]);
+			/*get the dscp value */
+			dscp = (tos & 0xfc);
+			priority = dscp >> 5;
+			break;
+		case WIFI_NRF_FMAC_ETH_P_IPV6: /*ETH_P_IPV6:*/
+			/*get the tos filed*//*DA+SA+ETH*/
+			ipv6_hdr = (((unsigned char *)nwb_data)[0] << 8) |
+				((unsigned char *)nwb_data)[1];
+			dscp = (((ipv6_hdr & WIFI_NRF_FMAC_IPV6_TOS_MASK)
+				 >> WIFI_NRF_FMAC_IPV6_TOS_SHIFT) & 0xfc);
+			priority = dscp >> 5;
+			break;
+			/* If Media Independent (0x8917)
+			 * frame calculate priority accordingly.
+			 */
+		case WIFI_NRF_FMAC_ETH_P_80221: /* ETH_P_80221 */
+			/* 802.21 is always network control traffic */
+			priority = 0x07;
+			break;
+		default:
+			priority = 0;
 	}
 
 	return priority;
 }
+
 
 int wifi_nrf_util_get_vif_indx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			       const unsigned char *mac_addr)
@@ -231,39 +285,52 @@ int wifi_nrf_util_get_vif_indx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	for (i = 0; i < MAX_PEERS; i++) {
 		if (!wifi_nrf_util_ether_addr_equal(fmac_dev_ctx->tx_config.peers[i].ra_addr,
 						    mac_addr)) {
-			vif_index = fmac_dev_ctx->tx_config.peers[i].wifi_nrf_vif_idx;
+			vif_index = fmac_dev_ctx->tx_config.peers[i].if_idx;
 			break;
 		}
 	}
+
 	if (vif_index == -1) {
-		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv, "%s: Invalid vif_index = %d",
-				      __func__, vif_index);
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Invalid vif_index = %d",
+				      __func__,
+				      vif_index);
 	}
 
 	return vif_index;
 }
 
-unsigned char *wifi_nrf_util_get_dest(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
+
+unsigned char *wifi_nrf_util_get_dest(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				      void *nwb)
 {
-	return wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv, nwb);
+	return wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+					   nwb);
 }
 
-unsigned char *wifi_nrf_util_get_ra(struct wifi_nrf_fmac_vif_ctx *vif, void *nwb)
+
+unsigned char *wifi_nrf_util_get_ra(struct wifi_nrf_fmac_vif_ctx *vif,
+				    void *nwb)
 {
 	if (vif->if_type == IMG_IFTYPE_STATION) {
 		return vif->bssid;
 	}
 
-	return wifi_nrf_osal_nbuf_data_get(vif->fmac_dev_ctx->fpriv->opriv, nwb);
+	return wifi_nrf_osal_nbuf_data_get(vif->fmac_dev_ctx->fpriv->opriv,
+					   nwb);
 }
 
-unsigned char *wifi_nrf_util_get_src(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx, void *nwb)
+
+unsigned char *wifi_nrf_util_get_src(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				     void *nwb)
 {
-	return (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv, nwb) +
-	       WIFI_NRF_FMAC_ETH_ADDR_LEN;
+	return (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+							    nwb) + WIFI_NRF_FMAC_ETH_ADDR_LEN;
 }
 
-bool wifi_nrf_util_is_arr_zero(unsigned char *arr, unsigned int arr_sz)
+
+bool wifi_nrf_util_is_arr_zero(unsigned char *arr,
+			       unsigned int arr_sz)
 {
 	unsigned int i = 0;
 

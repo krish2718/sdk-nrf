@@ -39,6 +39,7 @@ enum wifi_nrf_fmac_ac {
 	WIFI_NRF_FMAC_AC_MAX
 };
 
+
 /**
  * enum wifi_nrf_fmac_if_state - The operational state of an interface.
  * @WIFI_NRF_FMAC_IF_STATE_INVALID: Invalid value. Used for error checks.
@@ -52,6 +53,7 @@ enum wifi_nrf_fmac_if_state {
 	WIFI_NRF_FMAC_IF_STATE_UP,
 	WIFI_NRF_FMAC_IF_STATE_DOWN
 };
+
 
 /**
  * struct wifi_nrf_fmac_callbk_fns - Callback functions to be invoked by UMAC
@@ -67,34 +69,94 @@ struct wifi_nrf_fmac_callbk_fns {
 	enum wifi_nrf_status (*if_state_chg_callbk_fn)(void *os_vif_ctx,
 						       enum wifi_nrf_fmac_if_state if_state);
 
-	void (*rx_frm_callbk_fn)(void *os_vif_ctx, void *frm);
+	void (*rx_frm_callbk_fn)(void *os_vif_ctx,
+				 void *frm);
 
-	void (*scan_start_callbk_fn)(void *os_vif_ctx);
+	void (*scan_start_callbk_fn)(void *os_vif_ctx,
+				     struct img_umac_event_trigger_scan *scan_start_event,
+				     unsigned int event_len);
 
 	void (*scan_done_callbk_fn)(void *os_vif_ctx,
-				    struct img_umac_event_trigger_scan *scan_done_event);
+				    struct img_umac_event_trigger_scan *scan_done_event,
+				    unsigned int event_len);
+
+	void (*scan_abort_callbk_fn)(void *os_vif_ctx,
+				     struct img_umac_event_trigger_scan *scan_done_event,
+				     unsigned int event_len);
 
 	void (*scan_res_callbk_fn)(void *os_vif_ctx,
-				   struct img_umac_event_new_scan_results *scan_res, bool more_res);
+				   struct img_umac_event_new_scan_results *scan_res,
+				   unsigned int event_len,
+				   bool more_res);
 
 	void (*disp_scan_res_callbk_fn)(void *os_vif_ctx,
 					struct img_umac_event_new_scan_display_results *scan_res,
+					unsigned int event_len,
 					bool more_res);
 
-	void (*auth_resp_callbk_fn)(void *os_vif_ctx, struct img_umac_event_mlme *auth_resp_event);
+	void (*auth_resp_callbk_fn)(void *os_vif_ctx,
+				    struct img_umac_event_mlme *auth_resp_event,
+				    unsigned int event_len);
 
 	void (*assoc_resp_callbk_fn)(void *os_vif_ctx,
-				     struct img_umac_event_mlme *assoc_resp_event);
+				     struct img_umac_event_mlme *assoc_resp_event,
+				     unsigned int event_len);
 
-	void (*deauth_callbk_fn)(void *os_vif_ctx, struct img_umac_event_mlme *deauth_event);
+	void (*deauth_callbk_fn)(void *os_vif_ctx,
+				 struct img_umac_event_mlme *deauth_event,
+				 unsigned int event_len);
 
-	void (*disassoc_callbk_fn)(void *os_vif_ctx, struct img_umac_event_mlme *disassoc_event);
+	void (*disassoc_callbk_fn)(void *os_vif_ctx,
+				   struct img_umac_event_mlme *disassoc_event,
+				   unsigned int event_len);
+
+	void (*mgmt_rx_callbk_fn)(void *os_vif_ctx,
+				  struct img_umac_event_mlme *mgmt_rx_event,
+				  unsigned int event_len);
+
+	void (*unprot_mlme_mgmt_rx_callbk_fn)(void *os_vif_ctx,
+					      struct img_umac_event_mlme *unprot_mlme_event,
+					      unsigned int event_len);
+
+	void (*tx_pwr_get_callbk_fn)(void *os_vif_ctx,
+				     struct img_umac_event_get_tx_power *info,
+				     unsigned int event_len);
+
+	void (*chnl_get_callbk_fn)(void *os_vif_ctx,
+				   struct img_umac_event_get_channel *info,
+				   unsigned int event_len);
+
+	void (*sta_get_callbk_fn)(void *os_vif_ctx,
+				  struct img_umac_event_new_station *info,
+				  unsigned int event_len);
+
+	void (*cookie_rsp_callbk_fn)(void *os_vif_ctx,
+				     struct img_umac_event_cookie_rsp *cookie_rsp,
+				     unsigned int event_len);
+
+	void (*tx_status_callbk_fn)(void *os_vif_ctx,
+				    struct img_umac_event_mlme *tx_status_event,
+				    unsigned int event_len);
+
+	void (*set_if_callbk_fn)(void *os_vif_ctx,
+				 struct img_umac_event_set_interface *set_if_event,
+				 unsigned int event_len);
+
+	void (*roc_callbk_fn)(void *os_vif_ctx,
+			      struct img_event_remain_on_channel *roc_event,
+			      unsigned int event_len);
+
+	void (*roc_cancel_callbk_fn)(void *os_vif_ctx,
+				     struct img_event_remain_on_channel *roc_cancel_event,
+				     unsigned int event_len);
 };
+
 
 struct wifi_nrf_fmac_buf_map_info {
 	bool mapped;
 	unsigned long nwb;
 };
+
 
 /**
  * struct wifi_nrf_fmac_init_dev_params - Structure to hold parameters for
@@ -114,12 +176,13 @@ struct wifi_nrf_fmac_init_dev_params {
 	unsigned char base_mac_addr[IMG_ETH_ADDR_LEN];
 	unsigned char def_vif_idx;
 	unsigned char rf_params[RF_PARAMS_SIZE];
+	bool rf_params_valid;
 #ifdef RPU_SLEEP_SUPPORT
 	int sleep_type;
-#endif
-	bool rf_params_valid;
+#endif /* RPU_SLEEP_SUPPORT */
 	unsigned int phy_calib;
 };
+
 
 /**
  * struct rpu_host_stats - Structure to hold host specific statistics.
@@ -142,6 +205,7 @@ struct rpu_host_stats {
 	unsigned long long total_rx_pkts;
 };
 
+
 /**
  * struct rpu_op_stats - Structure to hold per device host and firmware
  *                       statistics.
@@ -155,10 +219,11 @@ struct rpu_op_stats {
 	struct rpu_fw_stats fw;
 };
 
+
 /**
  * struct peer_info - Structure to hold peer context information.
  * @peer_id: Index with which a peer can be identified locally.
- * @wifi_nrf_vif_idx: Index of the VIF on which the peer is connected.
+ * @if_idx: Index of the VIF on which the peer is connected.
  * @ps_state: Power save state of the peer.
  * @is_legacy: Flag to indicate if the peer is HT/VHT or non-HT/VHT.
  * @qos_supported: Flag to indicate if the peer support WMM-QoS.
@@ -172,7 +237,7 @@ struct rpu_op_stats {
  */
 struct peers_info {
 	int peer_id;
-	unsigned char wifi_nrf_vif_idx;
+	unsigned char if_idx;
 	unsigned char ps_state;
 	unsigned char is_legacy;
 	unsigned char qos_supported;
@@ -181,6 +246,7 @@ struct peers_info {
 	unsigned int pairwise_cipher;
 	int ps_token_count;
 };
+
 
 /**
  * struct tx_config - Structure to hold transmit path context information.
@@ -222,6 +288,7 @@ struct tx_config {
 	unsigned int spare_desc_queue_map;
 };
 
+
 /**
  * struct wifi_nrf_fmac_priv - Structure to hold context information for the
  *                             UMAC IF layer.
@@ -253,6 +320,7 @@ struct wifi_nrf_fmac_priv {
 
 	struct wifi_nrf_fmac_callbk_fns callbk_fns;
 };
+
 
 /**
  * struct wifi_nrf_fmac_dev_ctx - Structure to hold per device context information
@@ -304,6 +372,7 @@ struct wifi_nrf_fmac_dev_ctx {
 	bool deinit_done;
 };
 
+
 /**
  * struct wifi_nrf_fmac_vif_ctx - Structure to hold per VIF context information
  *                                for the UMAC IF layer.
@@ -330,10 +399,12 @@ struct wifi_nrf_fmac_vif_ctx {
 	unsigned char bssid[IMG_ETH_ADDR_LEN];
 };
 
+
 struct wifi_nrf_fw_info {
 	void *data;
 	unsigned int size;
 };
+
 
 /**
  * struct wifi_nrf_fmac_fw_info - Structure to hold firmware information

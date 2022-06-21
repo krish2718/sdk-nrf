@@ -29,30 +29,44 @@
  * @dma_unmap:
  */
 struct wifi_nrf_bal_ops {
-	void *(*init)(struct wifi_nrf_osal_priv *opriv, void *cfg_params,
-		      enum wifi_nrf_status (*intr_callbk_fn)(void *hal_ctx));
+	void * (*init)(struct wifi_nrf_osal_priv *opriv,
+		       void *cfg_params,
+		       enum wifi_nrf_status (*intr_callbk_fn)(void *hal_ctx));
 	void (*deinit)(void *bus_priv);
-	void *(*dev_add)(void *bus_priv, void *bal_dev_ctx);
+	void * (*dev_add)(void *bus_priv,
+			  void *bal_dev_ctx);
 	void (*dev_rem)(void *bus_dev_ctx);
 
 	enum wifi_nrf_status (*dev_init)(void *bus_dev_ctx);
 	void (*dev_deinit)(void *bus_dev_ctx);
-	unsigned int (*read_word)(void *bus_dev_ctx, unsigned long addr_offset);
-	void (*write_word)(void *bus_dev_ctx, unsigned long addr_offset, unsigned int val);
-	void (*read_block)(void *bus_dev_ctx, void *dest_addr, unsigned long src_addr_offset,
+	unsigned int (*read_word)(void *bus_dev_ctx,
+				  unsigned long addr_offset);
+	void (*write_word)(void *bus_dev_ctx,
+			   unsigned long addr_offset,
+			   unsigned int val);
+	void (*read_block)(void *bus_dev_ctx,
+			   void *dest_addr,
+			   unsigned long src_addr_offset,
 			   size_t len);
-	void (*write_block)(void *bus_dev_ctx, unsigned long dest_addr_offset, const void *src_addr,
+	void (*write_block)(void *bus_dev_ctx,
+			    unsigned long dest_addr_offset,
+			    const void *src_addr,
 			    size_t len);
-	unsigned long (*dma_map)(void *bus_dev_ctx, unsigned long virt_addr, size_t len,
+	unsigned long (*dma_map)(void *bus_dev_ctx,
+				 unsigned long virt_addr,
+				 size_t len,
 				 enum wifi_nrf_osal_dma_dir dma_dir);
-	unsigned long (*dma_unmap)(void *bus_dev_ctx, unsigned long phy_addr, size_t len,
+	unsigned long (*dma_unmap)(void *bus_dev_ctx,
+				   unsigned long phy_addr,
+				   size_t len,
 				   enum wifi_nrf_osal_dma_dir dma_dir);
 #ifdef RPU_SLEEP_SUPPORT
-	int (*ps_sleep)(void *bus_dev_ctx);
-	int (*ps_wake)(void *bus_dev_ctx);
-	int (*ps_status)(void *bus_dev_ctx);
-#endif
+	void (*rpu_ps_sleep)(void *bus_dev_ctx);
+	void (*rpu_ps_wake)(void *bus_dev_ctx);
+	int (*rpu_ps_status)(void *bus_dev_ctx);
+#endif /* RPU_SLEEP_SUPPORT */
 };
+
 
 /**
  * get_bus_ops() - The BAL layer expects this Op return a initialized instance
