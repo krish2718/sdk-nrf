@@ -18,7 +18,7 @@
 #include <sys/time.h>
 #include "shim.h"
 
-#include "tasklet.h"
+#include "zephyr_work.h"
 #include "timer.h"
 
 #include "osal_ops.h"
@@ -501,38 +501,30 @@ static unsigned int zep_shim_llist_len(void *llist)
 	return zep_llist->len;
 }
 
-static void *zep_shim_tasklet_alloc(void)
+static void *zep_shim_work_alloc(void)
 {
-	struct tasklet_struct *tasklet = NULL;
-
-	tasklet = k_malloc(sizeof(*tasklet));
-
-	if (!tasklet) {
-		printk("%s: Unable to allocate memory for tasklet\n", __func__);
-	}
-
-	return tasklet;
+	return work_alloc();
 }
 
-static void zep_shim_tasklet_free(void *tasklet)
+static void zep_shim_work_free(void *item)
 {
-	k_free(tasklet);
+	return work_free(item);
 }
 
-static void zep_shim_tasklet_init(void *tasklet, void (*callback)(unsigned long data),
+static void zep_shim_work_init(void *item, void (*callback)(unsigned long data),
 				  unsigned long data)
 {
-	tasklet_init(tasklet, callback, data);
+	work_init(item, callback, data);
 }
 
-static void zep_shim_tasklet_schedule(void *tasklet)
+static void zep_shim_work_schedule(void *item)
 {
-	tasklet_schedule(tasklet);
+	work_schedule(item);
 }
 
-static void zep_shim_tasklet_kill(void *tasklet)
+static void zep_shim_work_kill(void *item)
 {
-	tasklet_kill(tasklet);
+	work_kill(item);
 }
 
 static unsigned long zep_shim_time_get_curr_us(void)
@@ -750,7 +742,7 @@ static void *zep_shim_timer_alloc(void)
 	timer = k_malloc(sizeof(*timer));
 
 	if (!timer)
-		printk("%s: Unable to allocate memory for tasklet\n", __func__);
+		printk("%s: Unable to allocate memory for work\n", __func__);
 
 	return timer;
 }
@@ -828,11 +820,11 @@ static const struct wifi_nrf_osal_ops wifi_nrf_os_zep_ops = {
 	.nbuf_data_push = zep_shim_nbuf_data_push,
 	.nbuf_data_pull = zep_shim_nbuf_data_pull,
 
-	.tasklet_alloc = zep_shim_tasklet_alloc,
-	.tasklet_free = zep_shim_tasklet_free,
-	.tasklet_init = zep_shim_tasklet_init,
-	.tasklet_schedule = zep_shim_tasklet_schedule,
-	.tasklet_kill = zep_shim_tasklet_kill,
+	.tasklet_alloc = zep_shim_work_alloc,
+	.tasklet_free = zep_shim_work_free,
+	.tasklet_init = zep_shim_work_init,
+	.tasklet_schedule = zep_shim_work_schedule,
+	.tasklet_kill = zep_shim_work_kill,
 
 	.sleep_ms = k_msleep,
 	.delay_us = k_usleep,

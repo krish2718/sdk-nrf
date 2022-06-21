@@ -63,7 +63,7 @@ zephyr_library_sources(
 	fw_if/umac_if/src/rx.c
 	fw_if/umac_if/src/tx.c
 	os_if/os/zephyr/src/shim.c
-	os_if/os/zephyr/src/tasklet.c
+	os_if/os/zephyr/src/zephyr_work.c
 	os_if/os/zephyr/src/timer.c
 	os_if/os/zephyr/src/util.c
 	os_if/os/zephyr/src/zephyr_disp_scan.c
