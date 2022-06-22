@@ -442,30 +442,21 @@ void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv, struct img_umac_event_
 	return vif_ctx_zep->supp_callbk_fns.disassoc(vif_ctx_zep->supp_drv_if_ctx, &event);
 }
 
-static void iface_cb(struct net_if *iface, void *user_data)
-{
-	struct wifi_nrf_vif_ctx_map *vif_ctx_map = user_data;
-
-	if (strncmp(iface->if_dev->dev->name, vif_ctx_map->ifname, IFNAMSIZ) == 0) {
-		vif_ctx_map->vif_ctx = net_if_get_device(iface)->data;
-	}
-}
-
 void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx, const char *iface_name,
 				 struct zep_wpa_supp_dev_callbk_fns *supp_callbk_fns)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
-	struct wifi_nrf_vif_ctx_map vif_ctx_map = { 0 };
+	const struct device *device = device_get_binding(iface_name);
 
-	vif_ctx_map.ifname = iface_name;
+	if (!device) {
+		printk("%s: Interface %s not found\n", __func__, iface_name);
+		return NULL;
+	}
 
-	net_if_foreach(iface_cb, &vif_ctx_map);
-
-	vif_ctx_zep = vif_ctx_map.vif_ctx;
+	vif_ctx_zep = device->data;
 
 	if (!vif_ctx_zep || !vif_ctx_zep->rpu_ctx_zep) {
-		printk("%s: Interface %s not found or not properly initialized\n",
-				__func__, iface_name);
+		printk("%s: Interface %s not properly initialized\n", __func__, iface_name);
 		return NULL;
 	}
 
