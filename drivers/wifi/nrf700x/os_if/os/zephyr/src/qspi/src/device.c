@@ -42,7 +42,7 @@ struct qspi_config *qspi_defconfig(void)
 	config.quad_spi = true;
 	config.addrmask = 0x800000; /* set bit23 (incr. addr mode) */
 
-	config.freq = 16; /* 16MHz */
+	config.freq = 32; /* 32MHz */
 
 	config.test_name = "QSPI TEST";
 	config.test_hlread = false;
@@ -50,7 +50,7 @@ struct qspi_config *qspi_defconfig(void)
 
 	config.qspi_slave_latency = 0;
 
-	if (config.freq == 16) /* 16MHz */
+	if (config.freq >= 16) /* 16MHz */
 		config.qspi_slave_latency = 1;
 
 	config.encryption = config.CMD_CNONCE = false;
