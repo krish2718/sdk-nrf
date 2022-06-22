@@ -23,7 +23,7 @@ enum wifi_nrf_status pal_rpu_addr_offset_get(struct wifi_nrf_osal_priv *opriv,
 	if (addr_base == RPU_ADDR_SBUS_START) {
 		region_offset = SOC_MMAP_ADDR_OFFSET_SYSBUS;
 	} else if ((rpu_addr >= RPU_ADDR_GRAM_START) &&
-		 (rpu_addr <= RPU_ADDR_GRAM_END)) {
+		   (rpu_addr <= RPU_ADDR_GRAM_END)) {
 		region_offset = SOC_MMAP_ADDR_OFFSET_GRAM_PKD;
 	} else if (addr_base == RPU_ADDR_PBUS_START) {
 		region_offset = SOC_MMAP_ADDR_OFFSET_PBUS;
@@ -60,38 +60,38 @@ char *pal_ops_get_fw_loc(struct wifi_nrf_osal_priv *opriv,
 	char *fw_loc = NULL;
 
 	switch (fw_type) {
-		case WIFI_NRF_FW_TYPE_LMAC_PATCH:
-			if (fw_subtype == WIFI_NRF_FW_SUBTYPE_PRI) {
-				fw_loc = WIFI_NRF_FW_LMAC_PATCH_LOC_PRI;
-			} else if (fw_subtype == WIFI_NRF_FW_SUBTYPE_SEC) {
-				fw_loc = WIFI_NRF_FW_LMAC_PATCH_LOC_SEC;
-			} else {
-				wifi_nrf_osal_log_err(opriv,
-						      "%s: Invalid LMAC FW sub-type = %d\n",
-						      __func__,
-						      fw_subtype);
-				goto out;
-			}
-			break;
-		case WIFI_NRF_FW_TYPE_UMAC_PATCH:
-			if (fw_subtype == WIFI_NRF_FW_SUBTYPE_PRI) {
-				fw_loc = WIFI_NRF_FW_UMAC_PATCH_LOC_PRI;
-			} else if (fw_subtype == WIFI_NRF_FW_SUBTYPE_SEC) {
-				fw_loc = WIFI_NRF_FW_UMAC_PATCH_LOC_SEC;
-			} else {
-				wifi_nrf_osal_log_err(opriv,
-						      "%s: Invalid UMAC FW sub-type = %d\n",
-						      __func__,
-						      fw_subtype);
-				goto out;
-			}
-			break;
-		default:
+	case WIFI_NRF_FW_TYPE_LMAC_PATCH:
+		if (fw_subtype == WIFI_NRF_FW_SUBTYPE_PRI) {
+			fw_loc = WIFI_NRF_FW_LMAC_PATCH_LOC_PRI;
+		} else if (fw_subtype == WIFI_NRF_FW_SUBTYPE_SEC) {
+			fw_loc = WIFI_NRF_FW_LMAC_PATCH_LOC_SEC;
+		} else {
 			wifi_nrf_osal_log_err(opriv,
-					      "%s: Invalid FW type = %d\n",
+					      "%s: Invalid LMAC FW sub-type = %d\n",
 					      __func__,
-					      fw_type);
+					      fw_subtype);
 			goto out;
+		}
+		break;
+	case WIFI_NRF_FW_TYPE_UMAC_PATCH:
+		if (fw_subtype == WIFI_NRF_FW_SUBTYPE_PRI) {
+			fw_loc = WIFI_NRF_FW_UMAC_PATCH_LOC_PRI;
+		} else if (fw_subtype == WIFI_NRF_FW_SUBTYPE_SEC) {
+			fw_loc = WIFI_NRF_FW_UMAC_PATCH_LOC_SEC;
+		} else {
+			wifi_nrf_osal_log_err(opriv,
+					      "%s: Invalid UMAC FW sub-type = %d\n",
+					      __func__,
+					      fw_subtype);
+			goto out;
+		}
+		break;
+	default:
+		wifi_nrf_osal_log_err(opriv,
+				      "%s: Invalid FW type = %d\n",
+				      __func__,
+				      fw_type);
+		goto out;
 	}
 
 out:

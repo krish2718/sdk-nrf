@@ -47,8 +47,8 @@ static enum wifi_nrf_status wifi_nrf_fmac_init_tx(struct wifi_nrf_fmac_dev_ctx *
 		fpriv->data_config.max_tx_aggregation *
 		sizeof(struct wifi_nrf_fmac_buf_map_info));
 
-	fmac_dev_ctx->tx_buf_info = (struct wifi_nrf_fmac_buf_map_info *)wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
-												  size);
+	fmac_dev_ctx->tx_buf_info = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
+							     size);
 
 	if (!fmac_dev_ctx->tx_buf_info) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -88,8 +88,8 @@ static enum wifi_nrf_status wifi_nrf_fmac_init_rx(struct wifi_nrf_fmac_dev_ctx *
 
 	size = (fpriv->num_rx_bufs * sizeof(struct wifi_nrf_fmac_buf_map_info));
 
-	fmac_dev_ctx->rx_buf_info = (struct wifi_nrf_fmac_buf_map_info *)wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
-												  size);
+	fmac_dev_ctx->rx_buf_info = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
+							     size);
 
 	if (!fmac_dev_ctx->rx_buf_info) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -152,9 +152,9 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 						  unsigned char if_idx,
 						  unsigned char *rf_params,
 						  bool rf_params_valid,
-#ifdef RPU_SLEEP_SUPPORT			       
+#ifdef RPU_SLEEP_SUPPORT
 						  int sleep_type,
-#endif /* RPU_SLEEP_SUPPORT */			       
+#endif /* RPU_SLEEP_SUPPORT */
 						  unsigned int phy_calib)
 {
 	unsigned long start_time_us = 0;
@@ -191,9 +191,9 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 			       if_idx,
 			       rf_params,
 			       rf_params_valid,
-#ifdef RPU_SLEEP_SUPPORT			       
+#ifdef RPU_SLEEP_SUPPORT
 			       sleep_type,
-#endif /* RPU_SLEEP_SUPPORT */ 			       
+#endif /* RPU_SLEEP_SUPPORT */
 			       fmac_dev_ctx->fpriv->data_config,
 			       phy_calib);
 
@@ -435,8 +435,10 @@ struct wifi_nrf_fmac_priv *wifi_nrf_fmac_init(struct img_data_config_params *dat
 				      fpriv->data_config.max_tx_aggregation);
 
 	for (pool_idx = 0; pool_idx < MAX_NUM_OF_RX_QUEUES; pool_idx++) {
-		hal_cfg_params.rx_buf_pool[pool_idx].num_bufs = fpriv->rx_buf_pools[pool_idx].num_bufs;
-		hal_cfg_params.rx_buf_pool[pool_idx].buf_sz = fpriv->rx_buf_pools[pool_idx].buf_sz + RX_BUF_HEADROOM;
+		hal_cfg_params.rx_buf_pool[pool_idx].num_bufs =
+			fpriv->rx_buf_pools[pool_idx].num_bufs;
+		hal_cfg_params.rx_buf_pool[pool_idx].buf_sz =
+			fpriv->rx_buf_pools[pool_idx].buf_sz + RX_BUF_HEADROOM;
 	}
 
 	hal_cfg_params.max_tx_frm_sz = TX_MAX_DATA_SIZE + TX_BUF_HEADROOM;
@@ -2193,16 +2195,16 @@ unsigned char wifi_nrf_fmac_add_vif(void *dev_ctx,
 	fmac_dev_ctx = dev_ctx;
 
 	switch (vif_info->iftype) {
-		case IMG_IFTYPE_STATION:
-		case IMG_IFTYPE_P2P_CLIENT:
-		case IMG_IFTYPE_AP:
-		case IMG_IFTYPE_P2P_GO:
-			break;
-		default:
-			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					      "%s: VIF type not supported\n",
-					      __func__);
-			goto err;
+	case IMG_IFTYPE_STATION:
+	case IMG_IFTYPE_P2P_CLIENT:
+	case IMG_IFTYPE_AP:
+	case IMG_IFTYPE_P2P_GO:
+		break;
+	default:
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: VIF type not supported\n",
+				      __func__);
+		goto err;
 	}
 
 
@@ -2314,16 +2316,16 @@ enum wifi_nrf_status wifi_nrf_fmac_del_vif(void *dev_ctx,
 	fmac_dev_ctx = dev_ctx;
 
 	switch (fmac_dev_ctx->vif_ctx[if_idx]->if_type) {
-		case IMG_IFTYPE_STATION:
-		case IMG_IFTYPE_P2P_CLIENT:
-		case IMG_IFTYPE_AP:
-		case IMG_IFTYPE_P2P_GO:
-			break;
-		default:
-			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					      "%s: VIF type not supported\n",
-					      __func__);
-			goto out;
+	case IMG_IFTYPE_STATION:
+	case IMG_IFTYPE_P2P_CLIENT:
+	case IMG_IFTYPE_AP:
+	case IMG_IFTYPE_P2P_GO:
+		break;
+	default:
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: VIF type not supported\n",
+				      __func__);
+		goto out;
 	}
 
 	vif_ctx = fmac_dev_ctx->vif_ctx[if_idx];
@@ -2389,15 +2391,15 @@ enum wifi_nrf_status wifi_nrf_fmac_chg_vif(void *dev_ctx,
 	fmac_dev_ctx = dev_ctx;
 
 	switch (vif_info->iftype) {
-		case IMG_IFTYPE_STATION:
-		case IMG_IFTYPE_P2P_CLIENT:
-		case IMG_IFTYPE_AP:
-		case IMG_IFTYPE_P2P_GO:
-			break;
-		default:
-			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					      "%s: VIF type not supported\n", __func__);
-			goto out;
+	case IMG_IFTYPE_STATION:
+	case IMG_IFTYPE_P2P_CLIENT:
+	case IMG_IFTYPE_AP:
+	case IMG_IFTYPE_P2P_GO:
+		break;
+	default:
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: VIF type not supported\n", __func__);
+		goto out;
 	}
 
 	if (wifi_nrf_fmac_vif_check_if_limit(fmac_dev_ctx,
@@ -2831,6 +2833,6 @@ enum wifi_nrf_status wifi_nrf_fmac_conf_ltf_gi(struct wifi_nrf_fmac_dev_ctx *fma
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 
 	status = umac_cmd_he_ltf_gi(fmac_dev_ctx, he_ltf, he_gi, enabled);
-	
+
 	return status;
 }

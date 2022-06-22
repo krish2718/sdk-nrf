@@ -97,47 +97,47 @@ void wifi_nrf_util_convert_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 					     sizeof(struct wifi_nrf_fmac_eth_hdr));
 
 	switch (hdr->fc & (WIFI_NRF_FCTL_TODS | WIFI_NRF_FCTL_FROMDS)) {
-		case (WIFI_NRF_FCTL_TODS | WIFI_NRF_FCTL_FROMDS):
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->src,
-					      hdr->addr_4,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+	case (WIFI_NRF_FCTL_TODS | WIFI_NRF_FCTL_FROMDS):
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->src,
+				      hdr->addr_4,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
 
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->dst,
-					      hdr->addr_1,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-			break;
-		case (WIFI_NRF_FCTL_FROMDS):
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->src,
-					      hdr->addr_3,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->dst,
-					      hdr->addr_1,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-			break;
-		case (WIFI_NRF_FCTL_TODS):
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->src,
-					      hdr->addr_2,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->dst,
-					      hdr->addr_3,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-			break;
-		default:
-			/* Both FROM and TO DS bit is zero*/
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->src,
-					      hdr->addr_2,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
-			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-					      ehdr->dst,
-					      hdr->addr_1,
-					      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->dst,
+				      hdr->addr_1,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		break;
+	case (WIFI_NRF_FCTL_FROMDS):
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->src,
+				      hdr->addr_3,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->dst,
+				      hdr->addr_1,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		break;
+	case (WIFI_NRF_FCTL_TODS):
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->src,
+				      hdr->addr_2,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->dst,
+				      hdr->addr_3,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		break;
+	default:
+		/* Both FROM and TO DS bit is zero*/
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->src,
+				      hdr->addr_2,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
+		wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+				      ehdr->dst,
+				      hdr->addr_1,
+				      WIFI_NRF_FMAC_ETH_ADDR_LEN);
 
 	}
 
@@ -156,7 +156,10 @@ void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_de
 	struct wifi_nrf_fmac_amsdu_hdr amsdu_hdr;
 	unsigned int len = 0;
 	unsigned short eth_type = 0;
-	unsigned char amsdu_hdr_len = sizeof(struct wifi_nrf_fmac_amsdu_hdr);
+	void *nwb_data = NULL;
+	unsigned char amsdu_hdr_len = 0;
+
+	amsdu_hdr_len = sizeof(struct wifi_nrf_fmac_amsdu_hdr);
 
 	wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 			      &amsdu_hdr,
@@ -164,9 +167,11 @@ void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_de
 							  nwb),
 			      amsdu_hdr_len);
 
+	nwb_data = (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+								nwb) + amsdu_hdr_len;
+
 	eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
-						 (void *)((char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
-											      nwb) + amsdu_hdr_len));
+						 nwb_data);
 
 	wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
 				     nwb,
@@ -211,65 +216,67 @@ int wifi_nrf_util_get_tid(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	unsigned char tos = 0;
 	unsigned char dscp = 0;
 	unsigned short ipv6_hdr = 0;
-	unsigned char *nwb_data = NULL;
+	void *nwb_data = NULL;
+
+	nwb_data = wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+					       nwb);
 
 	ether_type = wifi_nrf_util_tx_get_eth_type(fmac_dev_ctx,
-						   wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
-									       nwb));
+						   nwb_data);
+
 	nwb_data = (unsigned char *)wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
 								nwb) + WIFI_NRF_FMAC_ETH_HDR_LEN;
 
 	switch (ether_type & WIFI_NRF_FMAC_ETH_TYPE_MASK) {
-		/* If VLAN 802.1Q (0x8100) ||
-		 * 802.1AD(0x88A8) FRAME calculate priority accordingly
-		 */
-		case WIFI_NRF_FMAC_ETH_P_8021Q: /* ETH_P_8021Q: */
-		case WIFI_NRF_FMAC_ETH_P_8021AD: /* ETH_P_8021AD: */
-			vlan_tci = (((unsigned char *)nwb_data)[4] << 8) |
-				(((unsigned char *)nwb_data)[5]);
-			vlan_priority = ((vlan_tci & WIFI_NRF_FMAC_VLAN_PRIO_MASK)
-					 >> WIFI_NRF_FMAC_VLAN_PRIO_SHIFT);
-			priority = vlan_priority;
-			break;
-
-			/* If MPLS MC(0x8840) / UC(0x8847) frame calculate priority
-			 * accordingly
-			 */
-		case WIFI_NRF_FMAC_ETH_P_MPLS_UC: /*ETH_P_MPLS_UC:*/
-		case WIFI_NRF_FMAC_ETH_P_MPLS_MC: /*ETH_P_MPLS_MC:*/
-			mpls_hdr = (((unsigned char *)nwb_data)[0] << 24) |
-				(((unsigned char *)nwb_data)[1] << 16) |
-				(((unsigned char *)nwb_data)[2] << 8)  |
-				(((unsigned char *)nwb_data)[3]);
-			mpls_tc_qos = (mpls_hdr & (WIFI_NRF_FMAC_MPLS_LS_TC_MASK)
-				       >> WIFI_NRF_FMAC_MPLS_LS_TC_SHIFT);
-			priority = mpls_tc_qos;
-			break;
-			/* If IP (0x0800) frame calculate priority accordingly */
-		case WIFI_NRF_FMAC_ETH_P_IP:/*ETH_P_IP:*/
-			/*get the tos filed*//*DA+SA+ETH+(VER+IHL)*/
-			tos = (((unsigned char *)nwb_data)[1]);
-			/*get the dscp value */
-			dscp = (tos & 0xfc);
-			priority = dscp >> 5;
-			break;
-		case WIFI_NRF_FMAC_ETH_P_IPV6: /*ETH_P_IPV6:*/
-			/*get the tos filed*//*DA+SA+ETH*/
-			ipv6_hdr = (((unsigned char *)nwb_data)[0] << 8) |
-				((unsigned char *)nwb_data)[1];
-			dscp = (((ipv6_hdr & WIFI_NRF_FMAC_IPV6_TOS_MASK)
-				 >> WIFI_NRF_FMAC_IPV6_TOS_SHIFT) & 0xfc);
-			priority = dscp >> 5;
-			break;
-			/* If Media Independent (0x8917)
-			 * frame calculate priority accordingly.
-			 */
-		case WIFI_NRF_FMAC_ETH_P_80221: /* ETH_P_80221 */
-			/* 802.21 is always network control traffic */
-			priority = 0x07;
-			break;
-		default:
-			priority = 0;
+	/* If VLAN 802.1Q (0x8100) ||
+	 * 802.1AD(0x88A8) FRAME calculate priority accordingly
+	 */
+	case WIFI_NRF_FMAC_ETH_P_8021Q:
+	case WIFI_NRF_FMAC_ETH_P_8021AD:
+		vlan_tci = (((unsigned char *)nwb_data)[4] << 8) |
+			(((unsigned char *)nwb_data)[5]);
+		vlan_priority = ((vlan_tci & WIFI_NRF_FMAC_VLAN_PRIO_MASK)
+				 >> WIFI_NRF_FMAC_VLAN_PRIO_SHIFT);
+		priority = vlan_priority;
+		break;
+	/* If MPLS MC(0x8840) / UC(0x8847) frame calculate priority
+	 * accordingly
+	 */
+	case WIFI_NRF_FMAC_ETH_P_MPLS_UC:
+	case WIFI_NRF_FMAC_ETH_P_MPLS_MC:
+		mpls_hdr = (((unsigned char *)nwb_data)[0] << 24) |
+			(((unsigned char *)nwb_data)[1] << 16) |
+			(((unsigned char *)nwb_data)[2] << 8)  |
+			(((unsigned char *)nwb_data)[3]);
+		mpls_tc_qos = (mpls_hdr & (WIFI_NRF_FMAC_MPLS_LS_TC_MASK)
+			       >> WIFI_NRF_FMAC_MPLS_LS_TC_SHIFT);
+		priority = mpls_tc_qos;
+		break;
+	/* If IP (0x0800) frame calculate priority accordingly */
+	case WIFI_NRF_FMAC_ETH_P_IP:
+		/*get the tos filed*//*DA+SA+ETH+(VER+IHL)*/
+		tos = (((unsigned char *)nwb_data)[1]);
+		/*get the dscp value */
+		dscp = (tos & 0xfc);
+		priority = dscp >> 5;
+		break;
+	case WIFI_NRF_FMAC_ETH_P_IPV6:
+		/* Get the TOS filled DA+SA+ETH */
+		ipv6_hdr = (((unsigned char *)nwb_data)[0] << 8) |
+			((unsigned char *)nwb_data)[1];
+		dscp = (((ipv6_hdr & WIFI_NRF_FMAC_IPV6_TOS_MASK)
+			 >> WIFI_NRF_FMAC_IPV6_TOS_SHIFT) & 0xfc);
+		priority = dscp >> 5;
+		break;
+	/* If Media Independent (0x8917)
+	 * frame calculate priority accordingly.
+	 */
+	case WIFI_NRF_FMAC_ETH_P_80221:
+		/* 802.21 is always network control traffic */
+		priority = 0x07;
+		break;
+	default:
+		priority = 0;
 	}
 
 	return priority;

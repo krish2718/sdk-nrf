@@ -193,16 +193,7 @@ int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv,
 			  const char *fmt,
 			  ...)
 {
-	va_list args;
-	int ret = -1;
-
-	va_start(args, fmt);
-
-	ret = opriv->ops->log_dbg(fmt, args);
-
-	va_end(args);
-
-	return ret;
+	return 0;
 }
 
 
@@ -210,17 +201,7 @@ int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv,
 			   const char *fmt,
 			   ...)
 {
-	va_list args;
-	int ret = -1;
-
-	va_start(args, fmt);
-
-	ret = opriv->ops->log_info(fmt, args);
-
-	va_end(args);
-
-
-	return ret;
+	return 0;
 }
 
 
@@ -228,16 +209,7 @@ int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv,
 			  const char *fmt,
 			  ...)
 {
-	va_list args;
-	int ret = -1;
-
-	va_start(args, fmt);
-
-	ret = opriv->ops->log_err(fmt, args);
-
-	va_end(args);
-
-	return ret;
+	return 0;
 }
 
 
@@ -708,7 +680,9 @@ void wifi_nrf_osal_timer_init(struct wifi_nrf_osal_priv *opriv,
 			      void (*callbk_fn)(unsigned long),
 			      unsigned long data)
 {
-	opriv->ops->timer_init(timer, callbk_fn, data);
+	opriv->ops->timer_init(timer,
+			       callbk_fn,
+			       data);
 }
 
 
@@ -716,7 +690,8 @@ void wifi_nrf_osal_timer_schedule(struct wifi_nrf_osal_priv *opriv,
 				  void *timer,
 				  unsigned long duration)
 {
-	opriv->ops->timer_schedule(timer, duration);
+	opriv->ops->timer_schedule(timer,
+				   duration);
 }
 
 
@@ -725,6 +700,7 @@ void wifi_nrf_osal_timer_kill(struct wifi_nrf_osal_priv *opriv,
 {
 	opriv->ops->timer_kill(timer);
 }
+
 
 
 int wifi_nrf_osal_bus_qspi_ps_sleep(struct wifi_nrf_osal_priv *opriv,

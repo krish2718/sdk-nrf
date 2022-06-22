@@ -31,10 +31,16 @@ int wifi_nrf_wpa_supp_associate(void *if_priv, struct wpa_driver_associate_param
 
 int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid);
 
-int wifi_nrf_wpa_supp_set_key(void *if_priv, const unsigned char *ifname, enum wpa_alg alg,
-			      const unsigned char *addr, int key_idx, int set_tx,
-			      const unsigned char *seq, size_t seq_len, const unsigned char *key,
-			      size_t key_len);
+int wifi_nrf_wpa_supp_set_key(void *if_priv,
+			   const unsigned char *ifname,
+			   enum wpa_alg alg,
+			   const unsigned char *addr,
+			   int key_idx,
+			   int set_tx,
+			   const unsigned char *seq,
+			   size_t seq_len,
+			   const unsigned char *key,
+			   size_t key_len);
 
 void wifi_nrf_wpa_supp_event_proc_scan_start(void *if_priv);
 

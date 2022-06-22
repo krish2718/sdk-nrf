@@ -1213,6 +1213,7 @@ void wifi_nrf_osal_qspi_cpy_to(struct wifi_nrf_osal_priv *opriv,
  */
 void *wifi_nrf_osal_timer_alloc(struct wifi_nrf_osal_priv *opriv);
 
+
 /**
  * wifi_nrf_osal_timer_free() - Free a timer.
  * @opriv: Pointer to the OSAL context returned by the @wifi_nrf_osal_init API.

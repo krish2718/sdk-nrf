@@ -96,9 +96,10 @@ static enum wifi_nrf_status wifi_nrf_bal_isr(void *ctx)
 }
 
 
-struct wifi_nrf_bal_priv *wifi_nrf_bal_init(struct wifi_nrf_osal_priv *opriv,
-					    struct wifi_nrf_bal_cfg_params *cfg_params,
-					    enum wifi_nrf_status (*intr_callbk_fn)(void *hal_dev_ctx))
+struct wifi_nrf_bal_priv *
+wifi_nrf_bal_init(struct wifi_nrf_osal_priv *opriv,
+		  struct wifi_nrf_bal_cfg_params *cfg_params,
+		  enum wifi_nrf_status (*intr_callbk_fn)(void *hal_dev_ctx))
 {
 	struct wifi_nrf_bal_priv *bpriv = NULL;
 

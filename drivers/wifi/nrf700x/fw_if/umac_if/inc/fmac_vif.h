@@ -30,4 +30,3 @@ void wifi_nrf_fmac_vif_update_if_type(void *fmac_dev_ctx,
 				      unsigned char if_idx,
 				      int if_type);
 #endif /* __FMAC_VIF_H__ */
-

@@ -101,7 +101,7 @@ enum wifi_nrf_status sap_client_update_pmmode(struct wifi_nrf_fmac_dev_ctx *fmac
 
 	if (id == -1) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				      "%s: Invalid Peer_ID, Mac addres = %pM\n",
+				      "%s: Invalid Peer_ID, Mac address = %pM\n",
 				      __func__,
 				      config->mac_addr);
 

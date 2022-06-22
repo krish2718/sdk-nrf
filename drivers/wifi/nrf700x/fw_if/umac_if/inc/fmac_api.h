@@ -25,6 +25,7 @@
 #include "fmac_vif.h"
 #include "fmac_bb.h"
 
+
 /**
  * wifi_nrf_fmac_init() - Initializes the UMAC IF layer of the RPU WLAN FullMAC
  *                        driver.
@@ -769,7 +770,7 @@ enum wifi_nrf_status wifi_nrf_fmac_get_tx_power(void *fmac_dev_ctx,
 						unsigned int if_idx);
 
 /**
- * wifi_nrf_fmac_get_channel() - Get channel definition
+ * wifi_nrf_fmac_get_channel() - Get channel definition.
  *
  * @fmac_dev_ctx: Pointer to the UMAC IF context for a RPU WLAN device.
  * @if_idx: VIF index.
@@ -894,7 +895,7 @@ enum wifi_nrf_status wifi_nrf_fmac_conf_btcoex(struct wifi_nrf_fmac_dev_ctx *fma
  * @he_gi: HE GI parameter which will be configured in RPU
  * @enabled: enable/disable HE LTF and GI parameter configured
  *
- * This function is used to send a command to RPU 
+ * This function is used to send a command to RPU
  * to configure HE ltf and gi parameters in RPU.
  *
  * Returns: Status
@@ -905,4 +906,5 @@ enum wifi_nrf_status wifi_nrf_fmac_conf_ltf_gi(struct wifi_nrf_fmac_dev_ctx *fma
 					       unsigned char he_ltf,
 					       unsigned char he_gi,
 					       unsigned char enabled);
+
 #endif /* __FMAC_API_H__ */

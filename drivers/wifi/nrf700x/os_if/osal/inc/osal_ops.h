@@ -143,7 +143,8 @@
  *			  contents to the host memory if @dir has a value of
  *			  @WIFI_NRF_OSAL_DMA_DIR_FROM_DEV. The function returns the DMA address
  *			  of the mapped memory.
- * @bus_pcie_dev_dma_unmap: Unmap the host memory which was mapped for DMA using @bus_pcie_dev_dma_map.
+ * @bus_pcie_dev_dma_unmap: Unmap the host memory which was mapped for DMA using
+ *			    @bus_pcie_dev_dma_map.
  *			    The address that will be passed to this Op to be unmapped will
  *			    be the DMA address returned by @dma_bus_pcie_dev_map.
  * @bus_pcie_dev_host_map_get: Get the host mapped address for a PCIe device.
@@ -157,7 +158,7 @@
  *		whenever the timer expires.
  * @timer_schedule: Schedules a timer with a @duration
  *		that has been allocated using @timer_alloc and
- *		initalized with @timer_init.
+ *		initialized with @timer_init.
  * @timer_kill: Kills a timer that has been scheduled @timer_schedule.
  *
  * This structure exposes Ops which need to be implemented by the underlying OS

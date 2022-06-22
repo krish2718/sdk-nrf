@@ -37,11 +37,12 @@
  *
  * Returns: Pointer to instance of HAL layer context.
  */
-struct wifi_nrf_hal_priv *wifi_nrf_hal_init(struct wifi_nrf_osal_priv *opriv,
-					    struct wifi_nrf_hal_cfg_params *cfg_params,
-					    enum wifi_nrf_status (*intr_callbk_fn)(void *nvlsi_mac_ctx,
-										   void *event_data,
-										   unsigned int len));
+struct wifi_nrf_hal_priv *
+wifi_nrf_hal_init(struct wifi_nrf_osal_priv *opriv,
+		  struct wifi_nrf_hal_cfg_params *cfg_params,
+		  enum wifi_nrf_status (*intr_callbk_fn)(void *mac_ctx,
+							 void *event_data,
+							 unsigned int len));
 
 /**
  * wifi_nrf_hal_deinit() - Deinitialize the HAL layer.

@@ -97,18 +97,18 @@ void tx_desc_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 
 	if (desc >= (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
 		switch (desc % (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
-			case 0:
-				fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xfff0;
-				break;
-			case 1:
-				fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xff0f;
-				break;
-			case 2:
-				fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xf0ff;
-				break;
-			case 3:
-				fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0x0fff;
-				break;
+		case 0:
+			fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xfff0;
+			break;
+		case 1:
+			fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xff0f;
+			break;
+		case 2:
+			fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xf0ff;
+			break;
+		case 3:
+			fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0x0fff;
+			break;
 		}
 	}
 
@@ -176,23 +176,24 @@ unsigned int tx_desc_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				 * Fourth nibble represent second spare desc
 				 * (B15B14B13B12 : V0-VI-BE-BK)
 				 */
-				switch (desc % (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
-					case 0:
-						fmac_dev_ctx->tx_config.spare_desc_queue_map |=
-							(1 << queue);
-						break;
-					case 1:
-						fmac_dev_ctx->tx_config.spare_desc_queue_map |=
-							(1 << (4 + queue));
-						break;
-					case 2:
-						fmac_dev_ctx->tx_config.spare_desc_queue_map |=
-							(1 << (8 + queue));
-						break;
-					case 3:
-						fmac_dev_ctx->tx_config.spare_desc_queue_map |=
-							(1 << (12 + queue));
-						break;
+				switch (desc % (fpriv->num_tx_tokens_per_ac *
+						WIFI_NRF_FMAC_AC_MAX)) {
+				case 0:
+					fmac_dev_ctx->tx_config.spare_desc_queue_map |=
+						(1 << queue);
+					break;
+				case 1:
+					fmac_dev_ctx->tx_config.spare_desc_queue_map |=
+						(1 << (4 + queue));
+					break;
+				case 2:
+					fmac_dev_ctx->tx_config.spare_desc_queue_map |=
+						(1 << (8 + queue));
+					break;
+				case 3:
+					fmac_dev_ctx->tx_config.spare_desc_queue_map |=
+						(1 << (12 + queue));
+					break;
 				}
 				break;
 			}
@@ -228,13 +229,17 @@ int tx_aggr_check(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				    pending_pkt_queue);
 
 	if (nwb) {
-		if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_dest(fmac_dev_ctx, nwb),
-						    wifi_nrf_util_get_dest(fmac_dev_ctx, first_nwb))) {
+		if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_dest(fmac_dev_ctx,
+									   nwb),
+						    wifi_nrf_util_get_dest(fmac_dev_ctx,
+									   first_nwb))) {
 			aggr = false;
 		}
 
-		if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_src(fmac_dev_ctx, nwb),
-						    wifi_nrf_util_get_src(fmac_dev_ctx, first_nwb))) {
+		if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_src(fmac_dev_ctx,
+									  nwb),
+						    wifi_nrf_util_get_src(fmac_dev_ctx,
+									  first_nwb))) {
 			aggr = false;
 		}
 	}
@@ -441,13 +446,14 @@ enum wifi_nrf_status tx_cmd_prep_callbk_fn(void *callbk_data,
 
 	nwb = (unsigned long)nbuf;
 
-	desc_id = (config->tx_desc_num * fmac_dev_ctx->fpriv->data_config.max_tx_aggregation) + config->num_tx_pkts;
+	desc_id = (config->tx_desc_num *
+		   fmac_dev_ctx->fpriv->data_config.max_tx_aggregation) + config->num_tx_pkts;
 
 	tx_buf_info = &fmac_dev_ctx->tx_buf_info[desc_id];
 
 	if (tx_buf_info->mapped) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				      "%s: Init TX command called for already mapped TX buffer(%d)\n",
+				      "%s: Init_TX cmd called for already mapped TX buffer(%d)\n",
 				      __func__,
 				      desc_id);
 
@@ -498,6 +504,7 @@ int tx_cmd_prepare(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	struct img_tx_buff *config = NULL;
 	int len = 0;
 	void *nwb = NULL;
+	void *nwb_data = NULL;
 	unsigned int txq_len = 0;
 	unsigned int max_txq_len = 0;
 	unsigned char *data = NULL;
@@ -550,10 +557,11 @@ int tx_cmd_prepare(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			      wifi_nrf_util_get_src(fmac_dev_ctx, nwb),
 			      IMG_ETH_ALEN);
 
+	nwb_data = wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+					       nwb);
 	config->mac_hdr_info.etype =
 		wifi_nrf_util_tx_get_eth_type(fmac_dev_ctx,
-					      (wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
-									   nwb)));
+					      nwb_data);
 
 	config->mac_hdr_info.dscp_or_tos =
 		wifi_nrf_util_get_tid(fmac_dev_ctx, nwb);
@@ -771,13 +779,17 @@ enum wifi_nrf_status tx_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 
 			aggr_status = true;
 
-			if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_dest(fmac_dev_ctx, nbuf),
-							    wifi_nrf_util_get_dest(fmac_dev_ctx, first_nwb))) {
+			if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_dest(fmac_dev_ctx,
+										   nbuf),
+							    wifi_nrf_util_get_dest(fmac_dev_ctx,
+										   first_nwb))) {
 				aggr_status = false;
 			}
 
-			if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_src(fmac_dev_ctx, nbuf),
-							    wifi_nrf_util_get_src(fmac_dev_ctx, first_nwb))) {
+			if (!wifi_nrf_util_ether_addr_equal(wifi_nrf_util_get_src(fmac_dev_ctx,
+										  nbuf),
+							    wifi_nrf_util_get_src(fmac_dev_ctx,
+										  first_nwb))) {
 				aggr_status = false;
 			}
 		}
@@ -791,7 +803,7 @@ enum wifi_nrf_status tx_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 			}
 
 		}
-		goto out;
+			goto out;
 	}
 out:
 	return status;
@@ -821,18 +833,18 @@ unsigned int tx_buff_req_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	} else {
 		if (desc >= (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
 			switch (desc %  (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
-				case 0:
-					tx_done_q = (queue_map & 0x0f);
-					break;
-				case 1:
-					tx_done_q = ((queue_map & 0xf0) >> 4);
-					break;
-				case 2:
-					tx_done_q = ((queue_map & 0xf00) >> 8);
-					break;
-				case 3:
-					tx_done_q = ((queue_map & 0xf000) >> 12);
-					break;
+			case 0:
+				tx_done_q = (queue_map & 0x0f);
+				break;
+			case 1:
+				tx_done_q = ((queue_map & 0xf0) >> 4);
+				break;
+			case 2:
+				tx_done_q = ((queue_map & 0xf00) >> 8);
+				break;
+			case 3:
+				tx_done_q = ((queue_map & 0xf000) >> 12);
+				break;
 			}
 		}
 
@@ -921,7 +933,7 @@ enum wifi_nrf_status tx_done_process(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 
 		if (!tx_buf_info->mapped) {
 			wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-					      "%s: Deinit TX command called for unmapped TX buffer(%d)\n",
+					      "%s: Deinit_TX cmd called for unmapped TX buf(%d)\n",
 					      __func__,
 					      desc_id);
 			status = WIFI_NRF_STATUS_FAIL;
@@ -1077,6 +1089,8 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_fmac_priv *fpriv = NULL;
+	void *mem_ptr = NULL;
+	void *q_ptr = NULL;
 	unsigned int i = 0;
 	unsigned int j = 0;
 
@@ -1100,15 +1114,18 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 	for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
 		for (j = 0; j < MAX_SW_PEERS; j++) {
-			fmac_dev_ctx->tx_config.data_pending_txq[j][i] = wifi_nrf_utils_q_alloc(fpriv->opriv);
+			fmac_dev_ctx->tx_config.data_pending_txq[j][i] =
+				wifi_nrf_utils_q_alloc(fpriv->opriv);
 
 			if (!fmac_dev_ctx->tx_config.data_pending_txq[j][i]) {
 				wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
 						      "%s: Unable to allocate data_pending_txq\n",
 						      __func__);
 
+				mem_ptr = fmac_dev_ctx->tx_config.send_pkt_coalesce_count_p;
+
 				wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
-						       fmac_dev_ctx->tx_config.send_pkt_coalesce_count_p);
+						       mem_ptr);
 
 				goto out;
 			}
@@ -1131,8 +1148,10 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
+				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
+
 				wifi_nrf_utils_q_free(fpriv->opriv,
-						      fmac_dev_ctx->tx_config.data_pending_txq[j][i]);
+						      q_ptr);
 			}
 		}
 
@@ -1155,8 +1174,10 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 			for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
 				for (j = 0; j < MAX_SW_PEERS; j++) {
+					q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
+
 					wifi_nrf_utils_q_free(fpriv->opriv,
-							      fmac_dev_ctx->tx_config.data_pending_txq[j][i]);
+							      q_ptr);
 				}
 			}
 
@@ -1171,9 +1192,10 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 		fmac_dev_ctx->tx_config.curr_peer_opp[j] = 0;
 	}
 
-	fmac_dev_ctx->tx_config.buf_pool_bmp_p = wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
-									  (sizeof(unsigned long) *
-									   (fpriv->num_tx_tokens/TX_DESC_BUCKET_BOUND) + 1));
+	fmac_dev_ctx->tx_config.buf_pool_bmp_p =
+		wifi_nrf_osal_mem_zalloc(fmac_dev_ctx->fpriv->opriv,
+					 (sizeof(unsigned long) *
+					  (fpriv->num_tx_tokens/TX_DESC_BUCKET_BOUND) + 1));
 
 	if (!fmac_dev_ctx->tx_config.buf_pool_bmp_p) {
 		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -1190,8 +1212,10 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
+				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
+
 				wifi_nrf_utils_q_free(fpriv->opriv,
-						      fmac_dev_ctx->tx_config.data_pending_txq[j][i]);
+						      q_ptr);
 			}
 		}
 
@@ -1231,8 +1255,10 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
+				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
+
 				wifi_nrf_utils_q_free(fpriv->opriv,
-						      fmac_dev_ctx->tx_config.data_pending_txq[j][i]);
+						      q_ptr);
 			}
 		}
 
@@ -1268,8 +1294,10 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
+				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
+
 				wifi_nrf_utils_q_free(fpriv->opriv,
-						      fmac_dev_ctx->tx_config.data_pending_txq[j][i]);
+						      q_ptr);
 			}
 		}
 

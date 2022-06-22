@@ -285,12 +285,15 @@ static enum wifi_nrf_status hal_rpu_event_get(struct wifi_nrf_hal_dev_ctx *hal_d
 				}
 			}
 
-			hal_dev_ctx->event_data_pending -= hal_dev_ctx->hpriv->cfg_params.max_event_size;
-			hal_dev_ctx->event_data_curr += hal_dev_ctx->hpriv->cfg_params.max_event_size;
+			hal_dev_ctx->event_data_pending -=
+			       hal_dev_ctx->hpriv->cfg_params.max_event_size;
+			hal_dev_ctx->event_data_curr +=
+			       hal_dev_ctx->hpriv->cfg_params.max_event_size;
 
 		} else {
-			/* If this is not part of a fragmented event check if we need to copy any additional data
-			 * i.e. if the event is a corner case event of large size
+			/* If this is not part of a fragmented event check if we need to
+			 * copy any additional data i.e. if the event is a corner case
+			 * event of large size.
 			 */
 			if (rpu_msg_len > RPU_EVENT_COMMON_SIZE_MAX) {
 				status = hal_rpu_mem_read(hal_dev_ctx,
@@ -335,8 +338,10 @@ static enum wifi_nrf_status hal_rpu_event_get(struct wifi_nrf_hal_dev_ctx *hal_d
 
 		}
 	} else {
-		event_data_size = (hal_dev_ctx->event_data_pending > hal_dev_ctx->hpriv->cfg_params.max_event_size) ?
-			hal_dev_ctx->hpriv->cfg_params.max_event_size : hal_dev_ctx->event_data_pending;
+		event_data_size = (hal_dev_ctx->event_data_pending >
+				   hal_dev_ctx->hpriv->cfg_params.max_event_size) ?
+				  hal_dev_ctx->hpriv->cfg_params.max_event_size :
+				  hal_dev_ctx->event_data_pending;
 
 		if (hal_dev_ctx->event_data) {
 			status = hal_rpu_mem_read(hal_dev_ctx,

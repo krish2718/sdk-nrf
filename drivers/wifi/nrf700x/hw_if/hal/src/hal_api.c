@@ -20,7 +20,8 @@
 
 
 
-static enum wifi_nrf_status wifi_nrf_hal_rpu_pktram_buf_map_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
+static enum wifi_nrf_status
+wifi_nrf_hal_rpu_pktram_buf_map_init(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	unsigned int pool_idx = 0;
@@ -45,9 +46,10 @@ static enum wifi_nrf_status wifi_nrf_hal_rpu_pktram_buf_map_init(struct wifi_nrf
 	hal_dev_ctx->addr_rpu_pktram_base_rx_pool[0] = hal_dev_ctx->addr_rpu_pktram_base_rx;
 
 	for (pool_idx = 1; pool_idx < MAX_NUM_OF_RX_QUEUES; pool_idx++) {
-		hal_dev_ctx->addr_rpu_pktram_base_rx_pool[pool_idx] = (hal_dev_ctx->addr_rpu_pktram_base_rx_pool[pool_idx - 1] +
-								       (hal_dev_ctx->hpriv->cfg_params.rx_buf_pool[pool_idx - 1].num_bufs *
-									hal_dev_ctx->hpriv->cfg_params.rx_buf_pool[pool_idx - 1].buf_sz));
+		hal_dev_ctx->addr_rpu_pktram_base_rx_pool[pool_idx] =
+			(hal_dev_ctx->addr_rpu_pktram_base_rx_pool[pool_idx - 1] +
+			 (hal_dev_ctx->hpriv->cfg_params.rx_buf_pool[pool_idx - 1].num_bufs *
+			  hal_dev_ctx->hpriv->cfg_params.rx_buf_pool[pool_idx - 1].buf_sz));
 	}
 
 	status = WIFI_NRF_STATUS_SUCCESS;
@@ -282,12 +284,13 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	unsigned long elapsed_time_usec = 0;
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 
-	if(!hal_dev_ctx) {
+	if (!hal_dev_ctx) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
 				      "%s: Invalid parameters\n",
 				      __func__);
 		return status;
 	}
+
 
 	if (hal_dev_ctx->rpu_ps_state == RPU_PS_STATE_AWAKE) {
 		status = WIFI_NRF_STATUS_SUCCESS;
@@ -323,7 +326,8 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: RPU is asleep for more than %d sec, reg_addr = 0x%X, reg_val = 0x%X\n",
+				      "%s: RPU is not ready for more than %d sec,"
+				      "reg_addr = 0x%X, reg_val = 0x%X\n",
 				      __func__,
 				      RPU_PS_WAKE_TIMEOUT,
 				      reg_addr,
@@ -338,6 +342,7 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 out:
 	return status;
 }
+
 
 static void hal_rpu_ps_sleep(unsigned long data)
 {
@@ -400,6 +405,7 @@ out:
 	return status;
 }
 
+
 static void hal_rpu_ps_deinit(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
 	wifi_nrf_osal_timer_kill(hal_dev_ctx->hpriv->opriv,
@@ -411,6 +417,7 @@ static void hal_rpu_ps_deinit(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	wifi_nrf_osal_spinlock_free(hal_dev_ctx->hpriv->opriv,
 				    hal_dev_ctx->rpu_ps_lock);
 }
+
 
 static void hal_rpu_ps_set_state(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 				 enum RPU_PS_STATE ps_state)
@@ -680,7 +687,7 @@ static enum wifi_nrf_status hal_rpu_cmd_process_queue(struct wifi_nrf_hal_dev_ct
 
 		if (status != WIFI_NRF_STATUS_SUCCESS) {
 			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-					      "%s: Timed out waiting for RPU to give a free command buffer\n",
+					      "%s: Timeout waiting to get free cmd buff from RPU\n",
 					      __func__);
 			wifi_nrf_osal_mem_free(hal_dev_ctx->hpriv->opriv,
 					       cmd);
@@ -739,7 +746,7 @@ static enum wifi_nrf_status hal_rpu_cmd_queue(struct wifi_nrf_hal_dev_ctx *hal_d
 
 			if (!hal_msg) {
 				wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-						      "%s: Unable to allocate buffer for fragmented HAL command\n",
+						      "%s: Unable to alloc buff for frag HAL cmd\n",
 						      __func__);
 				status = WIFI_NRF_STATUS_FAIL;
 				goto out;
@@ -758,7 +765,7 @@ static enum wifi_nrf_status hal_rpu_cmd_queue(struct wifi_nrf_hal_dev_ctx *hal_d
 
 			if (status != WIFI_NRF_STATUS_SUCCESS) {
 				wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-						      "%s: Unable to queue fragmented HAL command\n",
+						      "%s: Unable to queue frag HAL cmd\n",
 						      __func__);
 				goto out;
 			}
@@ -1010,9 +1017,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 
 		wifi_nrf_osal_mem_free(hpriv->opriv,
 				       hal_dev_ctx);
-		
+
 		hal_dev_ctx = NULL;
-		
+
 		goto out;
 	}
 
@@ -1174,8 +1181,9 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 		num_rx_bufs = hal_dev_ctx->hpriv->cfg_params.rx_buf_pool[i].num_bufs;
 
 		size = (num_rx_bufs * sizeof(struct wifi_nrf_hal_buf_map_info));
-		hal_dev_ctx->rx_buf_info[i] = (struct wifi_nrf_hal_buf_map_info *)wifi_nrf_osal_mem_zalloc(hpriv->opriv,
-													   size);
+
+		hal_dev_ctx->rx_buf_info[i] = wifi_nrf_osal_mem_zalloc(hpriv->opriv,
+								       size);
 
 		if (!hal_dev_ctx->rx_buf_info[i]) {
 			wifi_nrf_osal_log_err(hpriv->opriv,
@@ -1203,10 +1211,11 @@ struct wifi_nrf_hal_dev_ctx *wifi_nrf_hal_dev_add(struct wifi_nrf_hal_priv *hpri
 		}
 	}
 
-	size = (hal_dev_ctx->hpriv->cfg_params.max_tx_frms * sizeof(struct wifi_nrf_hal_buf_map_info));
+	size = (hal_dev_ctx->hpriv->cfg_params.max_tx_frms *
+		sizeof(struct wifi_nrf_hal_buf_map_info));
 
-	hal_dev_ctx->tx_buf_info = (struct wifi_nrf_hal_buf_map_info *)wifi_nrf_osal_mem_zalloc(hpriv->opriv,
-												size);
+	hal_dev_ctx->tx_buf_info = wifi_nrf_osal_mem_zalloc(hpriv->opriv,
+							    size);
 
 	if (!hal_dev_ctx->tx_buf_info) {
 		wifi_nrf_osal_log_err(hpriv->opriv,
@@ -1327,7 +1336,7 @@ void wifi_nrf_hal_dev_rem(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 
 struct host_rpu_umac_info *wifi_nrf_hal_umac_info(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
-	hal_rpu_mem_read(hal_dev_ctx, &hal_dev_ctx->umac_info, 
+	hal_rpu_mem_read(hal_dev_ctx, &hal_dev_ctx->umac_info,
 			 RPU_MEM_UMAC_BOOT_SIG,
 			 sizeof(hal_dev_ctx->umac_info));
 
@@ -1605,7 +1614,8 @@ enum wifi_nrf_status wifi_nrf_hal_fw_chk_boot(struct wifi_nrf_hal_dev_ctx *hal_d
 
 	if (i == 1000) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Boot signature check failed for RPU(%d), Expected: 0x%X, Actual: 0x%X\n",
+				      "%s: Boot_sig check failed for RPU(%d), "
+				      "Expected: 0x%X, Actual: 0x%X\n",
 				      __func__,
 				      rpu_proc,
 				      exp_val,
@@ -1620,11 +1630,12 @@ out:
 }
 
 
-struct wifi_nrf_hal_priv *wifi_nrf_hal_init(struct wifi_nrf_osal_priv *opriv,
-					    struct wifi_nrf_hal_cfg_params *cfg_params,
-					    enum wifi_nrf_status (*intr_callbk_fn)(void *mac_dev_ctx,
-										   void *event_data,
-										   unsigned int len))
+struct wifi_nrf_hal_priv *
+wifi_nrf_hal_init(struct wifi_nrf_osal_priv *opriv,
+		  struct wifi_nrf_hal_cfg_params *cfg_params,
+		  enum wifi_nrf_status (*intr_callbk_fn)(void *dev_ctx,
+							 void *event_data,
+							 unsigned int len))
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_hal_priv *hpriv = NULL;

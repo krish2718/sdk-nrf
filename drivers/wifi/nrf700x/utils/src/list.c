@@ -156,11 +156,12 @@ unsigned int wifi_nrf_utils_list_len(struct wifi_nrf_osal_priv *opriv,
 }
 
 
-enum wifi_nrf_status wifi_nrf_utils_list_traverse(struct wifi_nrf_osal_priv *opriv,
-						  void *list,
-						  void *callbk_data,
-						  enum wifi_nrf_status (*callbk_func)(void *callbk_data,
-										      void *data))
+enum wifi_nrf_status
+wifi_nrf_utils_list_traverse(struct wifi_nrf_osal_priv *opriv,
+			     void *list,
+			     void *callbk_data,
+			     enum wifi_nrf_status (*callbk_func)(void *callbk_data,
+								 void *data))
 {
 	void *list_node = NULL;
 	void *data = NULL;

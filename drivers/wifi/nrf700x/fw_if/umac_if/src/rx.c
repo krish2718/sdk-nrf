@@ -14,9 +14,10 @@
 #include "fmac_util.h"
 
 
-static enum wifi_nrf_status wifi_nrf_fmac_map_desc_to_pool(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
-							   unsigned int desc_id,
-							   struct wifi_nrf_fmac_rx_pool_map_info *pool_info)
+static enum wifi_nrf_status
+wifi_nrf_fmac_map_desc_to_pool(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+			       unsigned int desc_id,
+			       struct wifi_nrf_fmac_rx_pool_map_info *pool_info)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	unsigned int pool_id = 0;
@@ -177,6 +178,7 @@ enum wifi_nrf_status wifi_nrf_fmac_rx_event_process(struct wifi_nrf_fmac_dev_ctx
 	unsigned int pkt_len = 0;
 	struct wifi_nrf_fmac_ieee80211_hdr hdr;
 	unsigned short eth_type = 0;
+	unsigned int size = 0;
 
 	vif_ctx = fmac_dev_ctx->vif_ctx[config->wdev_id];
 
@@ -237,46 +239,48 @@ enum wifi_nrf_status wifi_nrf_fmac_rx_event_process(struct wifi_nrf_fmac_dev_ctx
 
 		if (config->rx_pkt_type == IMG_RX_PKT_DATA) {
 			switch (config->rx_buff_info[i].pkt_type) {
-				case PKT_TYPE_MPDU:
-					wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
-							      &hdr,
-							      nwb_data,
-							      sizeof(struct wifi_nrf_fmac_ieee80211_hdr));
+			case PKT_TYPE_MPDU:
+				wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+						      &hdr,
+						      nwb_data,
+						      sizeof(struct wifi_nrf_fmac_ieee80211_hdr));
 
-					eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
-										 (void *)((char *)nwb_data +
-											  config->mac_header_len));
+				eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
+									 ((char *)nwb_data +
+									  config->mac_header_len));
 
-					/* Remove hdr len and llc header/length */
-					wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
-								     nwb,
-								     config->mac_header_len +
-								     wifi_nrf_util_get_skip_header_bytes(eth_type));
+				size = config->mac_header_len +
+					wifi_nrf_util_get_skip_header_bytes(eth_type);
 
-					wifi_nrf_util_convert_to_eth(fmac_dev_ctx,
-								     nwb,
-								     &hdr,
-								     eth_type);
-					break;
-				case PKT_TYPE_MSDU_WITH_MAC:
-					wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
-								     nwb,
-								     config->mac_header_len);
+				/* Remove hdr len and llc header/length */
+				wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
+							     nwb,
+							     size);
 
-					wifi_nrf_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
-									      nwb);
-					break;
-				case PKT_TYPE_MSDU:
-					wifi_nrf_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
-									      nwb);
-					break;
-				default:
-					wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-							      "%s: Invalid pkt_type=%d\n",
-							      __func__,
-							      (config->rx_buff_info[i].pkt_type));
-					status = WIFI_NRF_STATUS_FAIL;
-					goto out;
+				wifi_nrf_util_convert_to_eth(fmac_dev_ctx,
+							     nwb,
+							     &hdr,
+							     eth_type);
+				break;
+			case PKT_TYPE_MSDU_WITH_MAC:
+				wifi_nrf_osal_nbuf_data_pull(fmac_dev_ctx->fpriv->opriv,
+							     nwb,
+							     config->mac_header_len);
+
+				wifi_nrf_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
+								      nwb);
+				break;
+			case PKT_TYPE_MSDU:
+				wifi_nrf_util_rx_convert_amsdu_to_eth(fmac_dev_ctx,
+								      nwb);
+				break;
+			default:
+				wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+						      "%s: Invalid pkt_type=%d\n",
+						      __func__,
+						      (config->rx_buff_info[i].pkt_type));
+				status = WIFI_NRF_STATUS_FAIL;
+				goto out;
 			}
 
 			fmac_dev_ctx->fpriv->callbk_fns.rx_frm_callbk_fn(vif_ctx->os_vif_ctx,

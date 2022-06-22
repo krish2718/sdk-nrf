@@ -67,27 +67,27 @@
 #define WIFI_NRF_FMAC_ETH_TYPE_MASK 0xFFFF
 
 struct wifi_nrf_fmac_ieee80211_hdr {
-     unsigned short fc;
-     unsigned short dur_id;
-     unsigned char addr_1[WIFI_NRF_FMAC_ETH_ADDR_LEN];
-     unsigned char addr_2[WIFI_NRF_FMAC_ETH_ADDR_LEN];
-     unsigned char addr_3[WIFI_NRF_FMAC_ETH_ADDR_LEN];
-     unsigned short seq_ctrl;
-     unsigned char addr_4[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+	unsigned short fc;
+	unsigned short dur_id;
+	unsigned char addr_1[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+	unsigned char addr_2[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+	unsigned char addr_3[WIFI_NRF_FMAC_ETH_ADDR_LEN];
+	unsigned short seq_ctrl;
+	unsigned char addr_4[WIFI_NRF_FMAC_ETH_ADDR_LEN];
 } __IMG_PKD;
 
 
 struct wifi_nrf_fmac_eth_hdr {
-     unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
-     unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
-     unsigned short proto; /* packet type ID field */
+	unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
+	unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
+	unsigned short proto; /* packet type ID field */
 } __IMG_PKD;
 
 
 struct wifi_nrf_fmac_amsdu_hdr {
-     unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
-     unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
-     unsigned short length; /* length*/
+	unsigned char dst[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* destination eth addr */
+	unsigned char src[WIFI_NRF_FMAC_ETH_ADDR_LEN]; /* source ether addr */
+	unsigned short length; /* length*/
 } __IMG_PKD;
 
 bool wifi_nrf_util_is_multicast_addr(const unsigned char *addr);
@@ -131,4 +131,3 @@ void wifi_nrf_util_rx_convert_amsdu_to_eth(struct wifi_nrf_fmac_dev_ctx *fmac_de
 bool wifi_nrf_util_is_arr_zero(unsigned char *arr,
 			       unsigned int arr_sz);
 #endif /* __FMAC_UTIL_H__ */
-

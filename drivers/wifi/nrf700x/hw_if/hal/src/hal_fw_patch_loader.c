@@ -49,21 +49,21 @@ enum wifi_nrf_status wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal
 	hal_dev_ctx->curr_proc = rpu_proc;
 
 	switch (rpu_proc) {
-		case RPU_PROC_TYPE_MCU_LMAC:
-			pri_dest_addr = RPU_MEM_LMAC_PATCH_BIMG;
-			sec_dest_addr = RPU_MEM_LMAC_PATCH_BIN;
-			break;
-		case RPU_PROC_TYPE_MCU_UMAC:
-			pri_dest_addr = RPU_MEM_UMAC_PATCH_BIMG;
-			sec_dest_addr = RPU_MEM_UMAC_PATCH_BIN;
-			break;
-		default:
-			wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-					      "%s: Invalid RPU processor type[%d]\n",
-					      __func__,
-					      rpu_proc);
+	case RPU_PROC_TYPE_MCU_LMAC:
+		pri_dest_addr = RPU_MEM_LMAC_PATCH_BIMG;
+		sec_dest_addr = RPU_MEM_LMAC_PATCH_BIN;
+		break;
+	case RPU_PROC_TYPE_MCU_UMAC:
+		pri_dest_addr = RPU_MEM_UMAC_PATCH_BIMG;
+		sec_dest_addr = RPU_MEM_UMAC_PATCH_BIN;
+		break;
+	default:
+		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
+				      "%s: Invalid RPU processor type[%d]\n",
+				      __func__,
+				      rpu_proc);
 
-			goto out;
+		goto out;
 	}
 
 	/* First copy the primary patch */

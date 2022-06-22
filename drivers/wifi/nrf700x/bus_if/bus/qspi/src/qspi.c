@@ -360,7 +360,7 @@ struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
 	.ps_sleep = &wifi_nrf_bus_qspi_ps_sleep,
 	.ps_wake = &wifi_nrf_bus_qspi_ps_wake,
 	.ps_status = &wifi_nrf_bus_qspi_ps_status,
-#endif /* RPU_SLEEP_SUPPORT */	
+#endif /* RPU_SLEEP_SUPPORT */
 };
 
 
