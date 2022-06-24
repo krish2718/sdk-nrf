@@ -153,6 +153,8 @@
 #define IMG_UMAC_CMD_CONFIG_TWT 47
 #define IMG_UMAC_CMD_TEARDOWN_TWT 48
 #endif
+#define IMG_UMAC_CMD_CONFIG_UAPSD 49
+#define IMG_UMAC_CMD_ABORT_SCAN 50
 
 /**
  * enum img_umac_events - Events that the RPU can send to the host.
@@ -310,7 +312,7 @@
 #define IMG_AUTHTYPE_NETWORK_EAP 3
 #define IMG_AUTHTYPE_SAE 4
 
-/* keep last */
+	/* keep last */
 #define __IMG_AUTHTYPE_NUM 5
 #define IMG_AUTHTYPE_MAX (__IMG_AUTHTYPE_NUM)
 #define IMG_AUTHTYPE_AUTOMATIC 6
