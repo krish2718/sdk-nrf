@@ -67,6 +67,7 @@ unsigned long wifi_nrf_hal_buf_map_rx(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 	struct wifi_nrf_hal_buf_map_info *rx_buf_info = NULL;
 	unsigned long addr_to_map = 0;
 	unsigned long bounce_buf_addr = 0;
+	unsigned long rpu_addr = 0;
 
 	rx_buf_info = &hal_dev_ctx->rx_buf_info[pool_id][buf_id];
 
@@ -92,10 +93,12 @@ unsigned long wifi_nrf_hal_buf_map_rx(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 	bounce_buf_addr = hal_dev_ctx->addr_rpu_pktram_base_rx_pool[pool_id] +
 		(buf_id * buf_len);
 
-	wifi_nrf_bal_write_block(hal_dev_ctx->bal_dev_ctx,
-				 (unsigned int)bounce_buf_addr,
-				 (void *)buf,
-				 hal_dev_ctx->hpriv->cfg_params.rx_buf_headroom_sz);
+	rpu_addr = RPU_MEM_PKT_BASE + (bounce_buf_addr - hal_dev_ctx->addr_rpu_pktram_base);
+
+	hal_rpu_mem_write(hal_dev_ctx,
+			(unsigned int)rpu_addr,
+			(void *)buf,
+			hal_dev_ctx->hpriv->cfg_params.rx_buf_headroom_sz);
 
 	addr_to_map = bounce_buf_addr + hal_dev_ctx->hpriv->cfg_params.rx_buf_headroom_sz;
 
@@ -128,6 +131,7 @@ unsigned long wifi_nrf_hal_buf_unmap_rx(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx
 	struct wifi_nrf_hal_buf_map_info *rx_buf_info = NULL;
 	unsigned long unmapped_addr = 0;
 	unsigned long virt_addr = 0;
+	unsigned long rpu_addr = 0;
 
 	rx_buf_info = &hal_dev_ctx->rx_buf_info[pool_id][buf_id];
 
@@ -151,11 +155,13 @@ unsigned long wifi_nrf_hal_buf_unmap_rx(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx
 			goto out;
 		}
 
-		wifi_nrf_bal_read_block(hal_dev_ctx->bal_dev_ctx,
-					(void *)(rx_buf_info->virt_addr +
-						 hal_dev_ctx->hpriv->cfg_params.rx_buf_headroom_sz),
-					unmapped_addr,
-					data_len);
+		rpu_addr = RPU_MEM_PKT_BASE + (unmapped_addr - hal_dev_ctx->addr_rpu_pktram_base);
+
+		hal_rpu_mem_read(hal_dev_ctx,
+				(void *)(rx_buf_info->virt_addr +
+					hal_dev_ctx->hpriv->cfg_params.rx_buf_headroom_sz),
+				rpu_addr,
+				data_len);
 	}
 
 	virt_addr = rx_buf_info->virt_addr;
@@ -177,6 +183,7 @@ unsigned long wifi_nrf_hal_buf_map_tx(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 	struct wifi_nrf_hal_buf_map_info *tx_buf_info = NULL;
 	unsigned long addr_to_map = 0;
 	unsigned long bounce_buf_addr = 0;
+	unsigned long rpu_addr = 0;
 
 	tx_buf_info = &hal_dev_ctx->tx_buf_info[desc_id];
 
@@ -204,10 +211,12 @@ unsigned long wifi_nrf_hal_buf_map_tx(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 		(desc_id * hal_dev_ctx->hpriv->cfg_params.max_tx_frm_sz) +
 		hal_dev_ctx->hpriv->cfg_params.tx_buf_headroom_sz;
 
-	wifi_nrf_bal_write_block(hal_dev_ctx->bal_dev_ctx,
-				 (unsigned int)bounce_buf_addr,
-				 (void *)buf,
-				 buf_len);
+	rpu_addr = RPU_MEM_PKT_BASE + (bounce_buf_addr - hal_dev_ctx->addr_rpu_pktram_base);
+
+	hal_rpu_mem_write(hal_dev_ctx,
+			(unsigned int)rpu_addr,
+			(void *)buf,
+			buf_len);
 
 	addr_to_map = bounce_buf_addr;
 
@@ -272,6 +281,8 @@ out:
 
 
 #ifdef RPU_SLEEP_SUPPORT
+unsigned int g_irq_ctx;
+
 enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 {
 	unsigned long reg_addr = 0;
@@ -294,6 +305,16 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 
 	if (hal_dev_ctx->rpu_ps_state == RPU_PS_STATE_AWAKE) {
 		status = WIFI_NRF_STATUS_SUCCESS;
+		if (!g_irq_ctx) {
+			if (hal_dev_ctx->rpu_ps_timer) {
+				wifi_nrf_osal_timer_kill(hal_dev_ctx->hpriv->opriv,
+						hal_dev_ctx->rpu_ps_timer);
+				wifi_nrf_osal_timer_schedule(hal_dev_ctx->hpriv->opriv,
+						hal_dev_ctx->rpu_ps_timer,
+						RPU_PS_IDLE_TIMEOUT);
+			}
+		}
+
 		goto out;
 	}
 
@@ -302,6 +323,8 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 	start_time_us = wifi_nrf_osal_time_get_curr_us(hal_dev_ctx->hpriv->opriv);
 
 	rpu_ps_state_mask = (1 << RPU_REG_BIT_PS_STATE);
+
+	wifi_nrf_osal_sleep_ms(hal_dev_ctx->hpriv->opriv, 1);
 
 	do {
 		/* Poll the RPU PS state */
@@ -1415,11 +1438,13 @@ enum wifi_nrf_status wifi_nrf_hal_irq_handler(void *data)
 	ps_state = hal_dev_ctx->rpu_ps_state;
 	hal_rpu_ps_set_state(hal_dev_ctx,
 			     RPU_PS_STATE_AWAKE);
+	g_irq_ctx = 1;
 #endif /* RPU_SLEEP_SUPPORT */
 
 	status = hal_rpu_irq_process(hal_dev_ctx);
 
 #ifdef RPU_SLEEP_SUPPORT
+	g_irq_ctx = 0;
 	hal_rpu_ps_set_state(hal_dev_ctx,
 			     ps_state);
 #endif /* RPU_SLEEP_SUPPORT */
