@@ -33,8 +33,7 @@ int get_free_work_item_index(void)
 		return i;
 	}
 
-	if (i == MAX_WORK_ITEMS)
-		return -1;
+	return -1;
 }
 
 void workqueue_callback(struct k_work *work)
