@@ -18,11 +18,4 @@ target_include_directories(mbedcrypto_common
 
 target_sources(app PRIVATE
 	src/main.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/shell_utils.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/zperf_session.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/zperf_shell.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/zperf_udp_receiver.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/zperf_udp_uploader.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/zperf_tcp_receiver.c
-	${ZEPHYR_BASE}/samples/net/zperf/src/zperf_tcp_uploader.c
 )
