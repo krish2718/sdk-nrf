@@ -7,7 +7,7 @@
 #include <zephyr.h>
 #include <sys/printk.h>
 #include <nrfx_clock.h>
-
+#include <stdio.h>
 
 void main(void)
 {
