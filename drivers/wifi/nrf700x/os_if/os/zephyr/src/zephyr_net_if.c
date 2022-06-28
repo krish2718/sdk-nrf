@@ -10,10 +10,13 @@
  */
 
 #include <stdlib.h>
+//#include <logging/log.h>
 #include "fmac_api.h"
 #include "shim.h"
 #include "zephyr_fmac_main.h"
 #include "zephyr_net_if.h"
+
+//LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm)
 {
@@ -31,7 +34,7 @@ void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm)
 	status = net_recv_data(iface, pkt);
 
 	if (status < 0) {
-		printk("RCV Packet dropped by NET stack: %d", status);
+		LOG_ERR("RCV Packet dropped by NET stack: %d", status);
 		net_pkt_unref(pkt);
 	}
 }
@@ -59,7 +62,7 @@ void wifi_nrf_if_init(struct net_if *iface)
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
 	if (!rpu_ctx_zep || !vif_ctx_zep) {
-		printk("%s: vif_ctx_zep is NULL\n", __func__);
+		LOG_ERR("%s: vif_ctx_zep is NULL\n", __func__);
 		return;
 	}
 
@@ -85,7 +88,7 @@ int wifi_nrf_if_send(const struct device *dev, struct net_pkt *pkt)
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
 	if (!vif_ctx_zep) {
-		printk("%s: vif_ctx_zep is NULL\n", __func__);
+		LOG_ERR("%s: vif_ctx_zep is NULL\n", __func__);
 		net_pkt_unref(pkt);
 		return -1;
 	}

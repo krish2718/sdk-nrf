@@ -456,11 +456,11 @@ const struct device *spim_perip_get(void)
 #endif
 
 	if (spi_perip == NULL) {
-		printk("Could not get SPI device\n");
+		LOG_ERR("Could not get SPI device\n");
 		return NULL;
 	}
 
-	printk("%p : got device\n", spi_perip);
+	LOG_INF("%p : got device\n", spi_perip);
 
 	return spi_perip;
 }
@@ -505,14 +505,14 @@ unsigned int spim_xfer_rx(const struct device *spi_perip, const struct spi_confi
 	tx_buffer = (uint8_t *)(k_malloc(dummy + len));
 
 	if (tx_buffer == NULL) {
-		printk("SPI error:NO MEMORY for tx_buffer\n");
+		LOG_ERR("SPI error:NO MEMORY for tx_buffer\n");
 		return -ENOMEM;
 	}
 
 	rx_buffer = (uint8_t *)(k_malloc(dummy + len));
 
 	if (rx_buffer == NULL) {
-		printk("SPI error:NO MEMORY rx_buffer\n");
+		LOG_ERR("SPI error:NO MEMORY rx_buffer\n");
 		k_free(tx_buffer);
 		return -ENOMEM;
 	}
@@ -540,7 +540,7 @@ unsigned int spim_xfer_rx(const struct device *spi_perip, const struct spi_confi
 	memcpy(data, rx_buffer + dummy, len);
 
 	if (err)
-		printk("SPI error: %d\n", err);
+		LOG_ERR("SPI error: %d\n", err);
 
 	k_free(tx_buffer);
 	k_free(rx_buffer);
@@ -570,12 +570,12 @@ unsigned int spim_wait_while_rpu_awake(const struct device *spi_perip,
 	for (int ii = 0; ii < 10; ii++) {
 		err = spi_transceive(spi_perip, spi_cfg, &tx, &rx);
 
-		printk("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
+		LOG_DBG("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
 
 		if ((err < 0) || ((sr[1] & RPU_AWAKE_BIT) == 0)) {
-			printk("ret val = 0x%x\t RDSR1 = 0x%x --- FAILED RPU Wakeup\n", err, sr[1]);
+			LOG_ERR("ret val = 0x%x\t RDSR1 = 0x%x --- FAILED RPU Wakeup\n", err, sr[1]);
 		} else {
-			printk("ret val = 0x%x\t RDSR1 = 0x%x -- RPU Awake!!\n", err, sr[1]);
+			LOG_ERR("ret val = 0x%x\t RDSR1 = 0x%x -- RPU Awake!!\n", err, sr[1]);
 			break;
 		}
 		k_msleep(1);
@@ -607,12 +607,12 @@ unsigned int spim_validate_rpu_awake(const struct device *spi_perip,
 	for (int ii = 0; ii < 1; ii++) {
 		err = spi_transceive(spi_perip, spi_cfg, &tx, &rx);
 
-		printk("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
+		LOG_DBG("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
 
 		if ((err < 0) || ((sr[1] & RPU_AWAKE_BIT) == 0)) {
-			printk("RDSR2 = 0x%x\n", sr[1]);
+			LOG_INF("RDSR2 = 0x%x\n", sr[1]);
 		} else {
-			printk("RDSR2 = 0x%x\n", sr[1]);
+			LOG_INF("RDSR2 = 0x%x\n", sr[1]);
 			break;
 		}
 		/* k_msleep(1); */
@@ -639,10 +639,10 @@ unsigned int spim_cmd_rpu_wakeup(const struct device *spi_perip, const struct sp
 	err = spi_transceive(spi_perip, spi_cfg, &tx, NULL);
 
 	if (err) {
-		printk("SPI error: %d\n", err);
+		LOG_ERR("SPI error: %d\n", err);
 	} else {
 		/* Connect MISO to MOSI for loopback */
-		/* printk("TX sent: %x\n", tx_buffer[0]); */
+		/* LOG_ERR("TX sent: %x\n", tx_buffer[0]); */
 	}
 
 	return 0;
@@ -663,10 +663,10 @@ unsigned int spim_cmd_sleep_rpu(const struct device *spi_perip, const struct spi
 	err = spi_transceive(spi_perip, spi_cfg, &tx, NULL);
 
 	if (err) {
-		printk("SPI error: %d\n", err);
+		LOG_ERR("SPI error: %d\n", err);
 	} else {
 		/* Connect MISO to MOSI for loopback */
-		/* printk("TX sent: %x\n", tx_buffer[0]); */
+		/* LOG_ERR("TX sent: %x\n", tx_buffer[0]); */
 	}
 
 	return 0;
@@ -694,10 +694,10 @@ int spim_init(struct qspi_config *config)
 	config->spimfreq = config->freq * 1000000;
 #endif
 
-	printk("sck pin = 0x%08x\n", spi_4z_config.config.sck_pin);
-	printk("mosi pin = 0x%08x\n", spi_4z_config.config.mosi_pin);
-	printk("miso pin = 0x%08x\n", spi_4z_config.config.miso_pin);
-	printk("ss pin = 0x%08x\n", spi_4z_config.config.ss_pin);
+	LOG_INF("sck pin = 0x%08x\n", spi_4z_config.config.sck_pin);
+	LOG_INF("mosi pin = 0x%08x\n", spi_4z_config.config.mosi_pin);
+	LOG_INF("miso pin = 0x%08x\n", spi_4z_config.config.miso_pin);
+	LOG_INF("ss pin = 0x%08x\n", spi_4z_config.config.ss_pin);
 
 	k_sem_init(&spim_config->lock, 1, 1);
 
@@ -707,7 +707,7 @@ int spim_init(struct qspi_config *config)
 void spim_addr_check(unsigned int addr, const void *data, unsigned int len)
 {
 	if ((addr % 4 != 0) || (((unsigned int)data) % 4 != 0) || (len % 4 != 0)) {
-		printk("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
+		LOG_ERR("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
 		       (unsigned int)data, (addr % 4 != 0), (((unsigned int)data) % 4 != 0),
 		       (len % 4 != 0));
 	}
@@ -758,7 +758,7 @@ int spim_hl_readw(unsigned int addr, void *data)
 	rxb = k_malloc(len);
 
 	if (rxb == NULL) {
-		printk("%s: ERROR ENOMEM line %d\n", __func__, __LINE__);
+		LOG_ERR("%s: ERROR ENOMEM line %d\n", __func__, __LINE__);
 		return -ENOMEM;
 	}
 	memset(rxb, 0, len);

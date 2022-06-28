@@ -298,7 +298,7 @@ nrfx_err_t _nrfx_qspi_init(nrfx_qspi_config_t const *p_config, nrfx_qspi_handler
 	/* RDC4IO = 4'hA (register IFTIMING), which means 10 Dummy Cycles for READ4. */
 	p_reg->IFTIMING |= qspi_config->RDC4IO;
 
-	/* printk("%04x : IFTIMING\n", p_reg->IFTIMING & qspi_config->RDC4IO); */
+	/* LOG_INF("%04x : IFTIMING\n", p_reg->IFTIMING & qspi_config->RDC4IO); */
 
 	/* ACTIVATE task fails for slave bitfile so ignore it */
 	return NRFX_SUCCESS;
@@ -691,10 +691,10 @@ static inline void qspi_fill_init_struct(nrfx_qspi_config_t *initstruct)
 	initstruct->prot_if.writeoc = _qspi_get_writeoc();
 	initstruct->phy_if.sck_freq = _qspi_get_sckfreq();
 
-	/* printk("%04x : ADDRMODE\n", initstruct->prot_if.addrmode); */
-	/* printk("%04x : SCKFREQ\n", initstruct->phy_if.sck_freq); */
-	/* printk("%04x : READOC\n", initstruct->prot_if.readoc); */
-	/* printk("%04x : WRITEOC\n", initstruct->prot_if.writeoc); */
+	/* LOG_INF("%04x : ADDRMODE\n", initstruct->prot_if.addrmode); */
+	/* LOG_INF("%04x : SCKFREQ\n", initstruct->phy_if.sck_freq); */
+	/* LOG_INF("%04x : READOC\n", initstruct->prot_if.readoc); */
+	/* LOG_INF("%04x : WRITEOC\n", initstruct->prot_if.writeoc); */
 
 	initstruct->phy_if.dpmen = false;
 }
@@ -1158,7 +1158,7 @@ static int qspi_cmd_encryption(const struct device *dev, nrf_qspi_encryption_t *
 	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0)
-		printk("cmd_encryption failed %d\n", ret);
+		LOG_INF("cmd_encryption failed %d\n", ret);
 
 	return ret;
 }
@@ -1184,7 +1184,7 @@ int qspi_validate_rpu_wake_writecmd(const struct device *dev)
 
 		ANOMALY_122_UNINIT(dev);
 
-		printk("RDSR2 = 0x%x\n", sr);
+		LOG_INF("RDSR2 = 0x%x\n", sr);
 
 		/* k_msleep(1); */
 	}
@@ -1227,9 +1227,9 @@ int qspi_wait_while_rpu_awake(const struct device *dev)
 		ret = RDSR1(dev);
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
-			printk("RDSR1 = 0x%x\t\n", ret);
+			LOG_INF("RDSR1 = 0x%x\t\n", ret);
 		} else {
-			printk("RDSR1 = 0x%x\n", ret);
+			LOG_INF("RDSR1 = 0x%x\n", ret);
 			break;
 		}
 		k_msleep(1);
@@ -1264,10 +1264,10 @@ int qspi_wait_while_firmware_awake(const struct device *dev)
 		ANOMALY_122_UNINIT(dev);
 
 		if ((ret < 0) || (sr != 0x6)) {
-			printk("ret val = 0x%x\t RDSR1 = 0x%x\n", ret, sr);
+			LOG_INF("ret val = 0x%x\t RDSR1 = 0x%x\n", ret, sr);
 		} else {
-			printk("RDSR1 = 0x%x\n", sr);
-			printk("RPU is awake...\n");
+			LOG_INF("RDSR1 = 0x%x\n", sr);
+			LOG_INF("RPU is awake...\n");
 			break;
 		}
 		k_msleep(1);
@@ -1297,7 +1297,7 @@ int qspi_cmd_wakeup_rpu(const struct device *dev, uint8_t data)
 	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0)
-		printk("cmd_wakeup RPU failed %d\n", ret);
+		LOG_ERR("cmd_wakeup RPU failed %d\n", ret);
 
 	return ret;
 }
@@ -1314,7 +1314,7 @@ struct device qspi_perip = {
 
 int qspi_deinit(void)
 {
-	printk("TODO : %s\n", __func__);
+	LOG_INF("TODO : %s\n", __func__);
 
 	return 0;
 }
@@ -1338,7 +1338,7 @@ int qspi_init(struct qspi_config *config)
 	config->writeoc = config->quad_spi ? NRF_QSPI_WRITEOC_PP4IO : NRF_QSPI_WRITEOC_PP;
 
 	rc = qspi_nor_init(&qspi_perip);
-	/* printk("exited qspi_nor_init()\n"); */
+	/* LOG_INF("exited qspi_nor_init()\n"); */
 
 	k_sem_init(&qspi_config->lock, 1, 1);
 
@@ -1356,7 +1356,7 @@ int qspi_init(struct qspi_config *config)
 			config->enc_enabled = true;
 	}
 #endif
-	printk("exiting %s\n", __func__);
+	LOG_INF("exiting %s\n", __func__);
 	return rc;
 }
 
@@ -1382,7 +1382,7 @@ void qspi_update_nonce(unsigned int addr, int len, int hlread)
 void qspi_addr_check(unsigned int addr, const void *data, unsigned int len)
 {
 	if ((addr % 4 != 0) || (((unsigned int)data) % 4 != 0) || (len % 4 != 0)) {
-		printk("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
+		LOG_INF("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
 		       (unsigned int)data, (addr % 4 != 0), (((unsigned int)data) % 4 != 0),
 		       (len % 4 != 0));
 	}
@@ -1437,7 +1437,7 @@ int qspi_hl_readw(unsigned int addr, void *data)
 	rxb = k_malloc(len);
 
 	if (rxb == NULL) {
-		printk("%s: ERROR ENOMEM line %d\n", __func__, __LINE__);
+		LOG_ERR("%s: ERROR ENOMEM line %d\n", __func__, __LINE__);
 		return -ENOMEM;
 	}
 
@@ -1496,7 +1496,7 @@ int qspi_cmd_sleep_rpu(const struct device *dev)
 	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0) {
-		printk("cmd_wakeup RPU failed: %d\n", ret);
+		LOG_ERR("cmd_wakeup RPU failed: %d\n", ret);
 	}
 
 	return ret;

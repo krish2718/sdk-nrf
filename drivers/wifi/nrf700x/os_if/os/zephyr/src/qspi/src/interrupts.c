@@ -15,6 +15,9 @@
 #include <sys/util.h>
 #include <sys/printk.h>
 #include <inttypes.h>
+#include "qspi_if.h"
+#include <logging/log.h>
+LOG_MODULE_DECLARE(spi_nrfx_spim);
 
 #define SLEEP_TIME_MS 1
 
@@ -30,7 +33,7 @@
 
 void gpio_free_irq(int pin, struct gpio_callback *button_cb_data)
 {
-	printk("TODO : %s\n", __func__);
+	LOG_ERR("TODO : %s\n", __func__);
 }
 
 int gpio_request_irq(int pin, struct gpio_callback *button_cb_data, void (*irq_handler)())
@@ -51,20 +54,20 @@ int gpio_request_irq(int pin, struct gpio_callback *button_cb_data, void (*irq_h
 #endif
 
 	if (!device_is_ready(button.port)) {
-		printk("Error: button device %s is not ready\n", button.port->name);
+		LOG_ERR("Error: button device %s is not ready\n", button.port->name);
 		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&button, GPIO_INPUT);
 	if (ret != 0) {
-		printk("Error %d: failed to configure %s pin %d\n", ret, button.port->name,
+		LOG_ERR("Error %d: failed to configure %s pin %d\n", ret, button.port->name,
 		       button.pin);
 		return ret;
 	}
 
 	ret = gpio_pin_interrupt_configure_dt(&button, GPIO_INT_EDGE_RISING);
 	if (ret != 0) {
-		printk("Error %d: failed to configure interrupt on %s pin %d\n", ret,
+		LOG_ERR("Error %d: failed to configure interrupt on %s pin %d\n", ret,
 		       button.port->name, button.pin);
 		return ret;
 	}

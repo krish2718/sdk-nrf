@@ -13,6 +13,8 @@
 #include <sys/printk.h>
 #include <stdio.h>
 #include <string.h>
+#include <logging/log.h>
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 int hex_str_to_val(unsigned char *hex_arr, unsigned int hex_arr_sz, unsigned char *str)
 {
@@ -25,13 +27,13 @@ int hex_str_to_val(unsigned char *hex_arr, unsigned int hex_arr_sz, unsigned cha
 	len = strlen(str);
 
 	if (len / 2 > hex_arr_sz) {
-		printk("%s: String length (%d) greater than array size (%d)\n", __func__, len,
+		LOG_ERR("%s: String length (%d) greater than array size (%d)\n", __func__, len,
 		       hex_arr_sz);
 		return -1;
 	}
 
 	if (len % 2) {
-		printk("%s:String length = %d, is not the multiple of 2\n", __func__, len);
+		LOG_ERR("%s:String length = %d, is not the multiple of 2\n", __func__, len);
 		return -1;
 	}
 
@@ -42,7 +44,7 @@ int hex_str_to_val(unsigned char *hex_arr, unsigned int hex_arr_sz, unsigned cha
 		ch = ((str[i] >= 'A' && str[i] <= 'Z') ? str[i] + 32 : str[i]);
 
 		if ((ch < '0' || ch > '9') && (ch < 'a' || ch > 'f')) {
-			printk("%s: Invalid hex character in string %d\n", __func__, ch);
+			LOG_ERR("%s: Invalid hex character in string %d\n", __func__, ch);
 			return -1;
 		}
 

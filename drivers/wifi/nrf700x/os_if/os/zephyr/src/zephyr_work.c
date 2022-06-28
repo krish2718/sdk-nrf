@@ -11,12 +11,15 @@
 
 #include <zephyr.h>
 #include <sys/printk.h>
+#include <logging/log.h>
 
 #include "zephyr_work.h"
 
 #define STACKSIZE 4096
 #define PRIORITY 0
 #define MAX_WORK_ITEMS 10
+
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 K_THREAD_STACK_DEFINE(wq_stack_area, STACKSIZE);
 struct k_work_q zep_wifi_drv_q;
@@ -48,7 +51,7 @@ struct zep_work_item *work_alloc(void)
 	unsigned int free_work_index = get_free_work_item_index();
 
 	if (free_work_index < 0) {
-		printk("%s: Reached maximum work items", __func__);
+		LOG_ERR("%s: Reached maximum work items", __func__);
 		return NULL;
 	}
 

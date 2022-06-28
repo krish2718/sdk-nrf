@@ -189,29 +189,6 @@ void wifi_nrf_osal_spinlock_irq_rel(struct wifi_nrf_osal_priv *opriv,
 }
 
 
-int wifi_nrf_osal_log_dbg(struct wifi_nrf_osal_priv *opriv,
-			  const char *fmt,
-			  ...)
-{
-	return 0;
-}
-
-
-int wifi_nrf_osal_log_info(struct wifi_nrf_osal_priv *opriv,
-			   const char *fmt,
-			   ...)
-{
-	return 0;
-}
-
-
-int wifi_nrf_osal_log_err(struct wifi_nrf_osal_priv *opriv,
-			  const char *fmt,
-			  ...)
-{
-	return 0;
-}
-
 
 void *wifi_nrf_osal_llist_node_alloc(struct wifi_nrf_osal_priv *opriv)
 {
