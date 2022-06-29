@@ -16,11 +16,11 @@
 #include "fmac_api.h"
 #include "zephyr_util.h"
 #include "zephyr_fmac_main.h"
-#include "zephyr_wpa_supp_if.h"
 #include "zephyr_net_if.h"
 #include "zephyr_disp_scan.h"
-
-//LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+#ifdef CONFIG_WPA_SUPP
+#include "zephyr_wpa_supp_if.h"
+#endif /* CONFIG_WPA_SUPP */
 
 unsigned char aggregation = 1;
 unsigned char wmm = 1;
@@ -55,7 +55,9 @@ void wifi_nrf_event_proc_scan_start_zep(void *if_priv,
 		return;
 	}
 
+#ifdef CONFIG_WPA_SUPP
 	wifi_nrf_wpa_supp_event_proc_scan_start(if_priv);
+#endif /* CONFIG_WPA_SUPP */
 }
 
 
@@ -80,11 +82,13 @@ void wifi_nrf_event_proc_scan_done_zep(void *vif_ctx,
 			LOG_ERR("%s: wifi_nrf_disp_scan_res_get_zep failed\n", __func__);
 			return;
 		}
+#ifdef CONFIG_WPA_SUPP
 	} else if (vif_ctx_zep->scan_type == SCAN_CONNECT) {
 		wifi_nrf_wpa_supp_event_proc_scan_done(vif_ctx_zep,
 						       scan_done_event,
 						       event_len,
 						       0);
+#endif /* CONFIG_WPA_SUPP */
 	} else {
 		LOG_ERR("%s: Scan type = %d not supported yet\n", __func__, vif_ctx_zep->scan_type);
 		return;
@@ -100,17 +104,21 @@ static int wifi_nrf_umac_info(struct wifi_nrf_ctx_zep *rpu_ctx_zep)
 
 	umac_info = wifi_nrf_fmac_umac_info(rpu_ctx_zep->rpu_ctx);
 
-	if (umac_info->mac_address0[0] == 0xffffffff && umac_info->mac_address0[1] == 0xffffffff) {
+	if (umac_info->mac_address0[0] == 0xffffffff &&
+	    umac_info->mac_address0[1] == 0xffffffff) {
 		LOG_ERR("Invalid MAC address0. OTP uninitialized !\n");
 		return -1;
 	}
 
-	if (umac_info->mac_address1[0] == 0xffffffff && umac_info->mac_address1[1] == 0xffffffff) {
+	if (umac_info->mac_address1[0] == 0xffffffff &&
+	    umac_info->mac_address1[1] == 0xffffffff) {
 		LOG_ERR("Invalid MAC address1\n");
 		return -1;
 	}
 
-	memcpy(&rpu_ctx_zep->mac_addr, umac_info->mac_address0, IMG_ETH_ALEN);
+	memcpy(&rpu_ctx_zep->mac_addr,
+	       umac_info->mac_address0,
+	       IMG_ETH_ALEN);
 
 	return 0;
 }
@@ -359,14 +367,18 @@ static int wifi_nrf_drv_main_zep(const struct device *dev)
 	callbk_fns.rx_frm_callbk_fn = wifi_nrf_if_rx_frm;
 	callbk_fns.scan_start_callbk_fn = wifi_nrf_event_proc_scan_start_zep;
 	callbk_fns.scan_done_callbk_fn = wifi_nrf_event_proc_scan_done_zep;
-	callbk_fns.scan_res_callbk_fn = wifi_nrf_wpa_supp_event_proc_scan_res;
 	callbk_fns.disp_scan_res_callbk_fn = wifi_nrf_event_proc_disp_scan_res_zep;
+#ifdef CONFIG_WPA_SUPP
+	callbk_fns.scan_res_callbk_fn = wifi_nrf_wpa_supp_event_proc_scan_res;
 	callbk_fns.auth_resp_callbk_fn = wifi_nrf_wpa_supp_event_proc_auth_resp;
 	callbk_fns.assoc_resp_callbk_fn = wifi_nrf_wpa_supp_event_proc_assoc_resp;
 	callbk_fns.deauth_callbk_fn = wifi_nrf_wpa_supp_event_proc_deauth;
 	callbk_fns.disassoc_callbk_fn = wifi_nrf_wpa_supp_event_proc_disassoc;
+#endif /* CONFIG_WPA_SUPP */
 
-	rpu_drv_priv_zep.fmac_priv = wifi_nrf_fmac_init(&data_config, rx_buf_pools, &callbk_fns);
+	rpu_drv_priv_zep.fmac_priv = wifi_nrf_fmac_init(&data_config,
+						       	rx_buf_pools,
+						       	&callbk_fns);
 
 	if (rpu_drv_priv_zep.fmac_priv == NULL) {
 		LOG_ERR("%s: wifi_nrf_fmac_init failed\n", __func__);
@@ -417,13 +429,17 @@ out:
 	return ret;
 }
 
-static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
+static const struct wifi_nrf_dev_ops dev_ops = {
 	.if_api.iface_api.init = wifi_nrf_if_init,
 	.if_api.get_capabilities = wifi_nrf_if_caps_get,
 	.if_api.send = wifi_nrf_if_send,
 
 	.off_api.disp_scan = wifi_nrf_disp_scan_zep,
+};
 
+
+#ifdef CONFIG_WPA_SUPP
+static const struct zep_wpa_supp_dev_ops wpa_supp_ops = {
 	.init = wifi_nrf_wpa_supp_dev_init,
 	.deinit = wifi_nrf_wpa_supp_dev_deinit,
 	.scan2 = wifi_nrf_wpa_supp_scan2,
@@ -435,13 +451,19 @@ static const struct zep_wpa_supp_dev_ops wifi_nrf_dev_ops = {
 	.set_supp_port = wifi_nrf_wpa_set_supp_port,
 	.set_key = wifi_nrf_wpa_supp_set_key,
 };
+#endif /* CONFIG_WPA_SUPP */
+
 
 ETH_NET_DEVICE_INIT(wlan0, /* name - token */
 		    "wlan0", /* driver name - dev->name */
 		    wifi_nrf_drv_main_zep, /* init_fn */
 		    NULL, /* pm_action_cb */
 		    &rpu_drv_priv_zep.rpu_ctx_zep.vif_ctx_zep[0], /* data */
+#ifdef CONFIG_WPA_SUPP
+		    &wpa_supp_ops, /* cfg */
+#else /* CONFIG_WPA_SUPP */
 		    NULL, /* cfg */
+#endif /* !CONFIG_WPA_SUPP */
 		    CONFIG_WIFI_INIT_PRIORITY, /* prio */
-		    &wifi_nrf_dev_ops, /* api */
+		    &dev_ops, /* api */
 		    1500); /*mtu */

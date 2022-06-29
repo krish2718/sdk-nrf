@@ -343,9 +343,6 @@ static enum wifi_nrf_status umac_event_ctrl_process(struct wifi_nrf_fmac_dev_ctx
 					      umac_hdr->cmd_evnt);
 		break;
 	case IMG_UMAC_EVENT_IFFLAGS_STATUS:
-		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				      "%s: Processing IMG_UMAC_EVENT_IFFLAGS_STATUS\n",
-				      __func__);
 		evnt_vif_state = (struct img_umac_event_vif_state *)event_data;
 
 		if (evnt_vif_state->status < 0)
@@ -357,10 +354,7 @@ static enum wifi_nrf_status umac_event_ctrl_process(struct wifi_nrf_fmac_dev_ctx
 	case IMG_UMAC_EVENT_BEACON_HINT:
 	case IMG_UMAC_EVENT_CONNECT:
 	case IMG_UMAC_EVENT_DISCONNECT:
-		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
-				      "%s: Not doing anything for event %d\n",
-				      __func__,
-				      umac_hdr->cmd_evnt);
+		/* Nothing to be done */
 		break;
 	case IMG_UMAC_EVENT_NEW_STATION:
 	case IMG_UMAC_EVENT_DEL_STATION:

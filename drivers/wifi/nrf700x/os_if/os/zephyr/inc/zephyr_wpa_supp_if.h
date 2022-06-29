@@ -12,6 +12,7 @@
 #ifndef __ZEPHYR_WPA_SUPP_IF_H__
 #define __ZEPHYR_WPA_SUPP_IF_H__
 
+#ifdef CONFIG_WPA_SUPP
 void *wifi_nrf_wpa_supp_dev_init(void *supp_drv_if_ctx, const char *iface_name,
 				 struct zep_wpa_supp_dev_callbk_fns *supp_callbk_fns);
 
@@ -69,4 +70,5 @@ void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv,
 void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv,
 					   struct img_umac_event_mlme *disassoc,
 					   unsigned int event_len);
+#endif /* CONFIG_WPA_SUPP */
 #endif /*  __ZEPHYR_WPA_SUPP_IF_H__ */

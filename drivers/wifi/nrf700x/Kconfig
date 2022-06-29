@@ -1,4 +1,4 @@
-# Nordic WiFi driver for nRF52840 and nRF5340
+# Nordic Wi-Fi driver for nRF700x 
 #
 # Copyright (c) 2022 Nordic Semiconductor
 #
@@ -6,7 +6,7 @@
 #
 
 config WIFI_NRF
-	bool "Nordic WiFi driver"
+	bool "Nordic Wi-Fi driver"
 	select NRFX_QSPI
 	select WPA_SUPP
 	select NRFX_SPIM
@@ -14,7 +14,7 @@ config WIFI_NRF
 	select NRFX_SPIM4
 	select WIFI
 	help
-	Nordic Wifi Driver
+	Nordic Wi-Fi Driver
 
 module = WIFI_NRF
 module-str = WIFI_NRF

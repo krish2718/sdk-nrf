@@ -82,7 +82,7 @@ enum wifi_nrf_status hal_rpu_reg_read(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 
 	if (*val == 0xFFFFFFFF) {
 		wifi_nrf_osal_log_err(hal_dev_ctx->hpriv->opriv,
-				      "%s: Error !! Value read at addr_offset = %x is = %X\n",
+				      "%s: Error !! Value read at addr_offset = %lx is = %X\n",
 				      __func__,
 				      addr_offset,
 				      *val);

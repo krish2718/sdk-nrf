@@ -7,19 +7,28 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(hello_world)
+project(nrf_wifi_shell)
 
-set(HOSTAP_BASE ${WEST_TOPDIR}/modules/lib/hostap)
-set(WPA_SUPPLICANT_BASE ${HOSTAP_BASE}/wpa_supplicant)
-set(COMMON_SRC_BASE ${HOSTAP_BASE}/src)
+set(WIFI_NRF_DRV_BASE ${WEST_TOPDIR}/nrf/drivers/wifi/nrf700x)
+if(CONFIG_WPA_SUPP)
+set(WPA_SUPP_BASE ${WEST_TOPDIR}/modules/lib/hostap)
+endif()
+
 # TODO: Remove this hack
 target_include_directories(mbedcrypto_common
         INTERFACE
         ${CMAKE_SOURCE_DIR}
         ${ZEPHYR_BASE}/subsys/net/ip
-        #${HOSTAP_BASE}/
-        ${WPA_SUPPLICANT_BASE}/
-	${COMMON_SRC_BASE}/
+	${WIFI_NRF_DRV_BASE}/os_if/osal/inc
+	${WIFI_NRF_DRV_BASE}/os_if/os/zephyr/inc
+	${WIFI_NRF_DRV_BASE}/fw_if/umac_if/inc
+	${WIFI_NRF_DRV_BASE}/fw_if/umac_if/inc/fw
+	${WIFI_NRF_DRV_BASE}/hw_if/hal/inc/fw
+if(CONFIG_WPA_SUPP)
+	${WPA_SUPP_BASE}/wpa_supplicant
+	${WPA_SUPP_BASE}/src
+	${WPA_SUPP_BASE}/zephyr/src
+endif()
 )
 
 target_sources(app PRIVATE

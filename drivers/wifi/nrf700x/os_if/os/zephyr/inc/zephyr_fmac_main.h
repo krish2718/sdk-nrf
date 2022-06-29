@@ -15,9 +15,12 @@
 #include <zephyr.h>
 #include <stdio.h>
 #include <net/wifi_mgmt.h>
-#include "drivers/driver_zephyr.h"
+#include <net/ethernet.h>
 #include "fmac_api.h"
 #include "host_rpu_umac_if.h"
+#ifdef CONFIG_WPA_SUPP
+#include "drivers/driver_zephyr.h"
+#endif /* CONFIG_WPA_SUPP */
 
 struct wifi_nrf_vif_ctx_zep {
 	const struct device *zep_dev_ctx;
@@ -26,13 +29,15 @@ struct wifi_nrf_vif_ctx_zep {
 	void *rpu_ctx_zep;
 	unsigned char vif_idx;
 
-	struct zep_wpa_supp_dev_callbk_fns supp_callbk_fns;
 	scan_result_cb_t disp_scan_cb;
 	bool scan_in_progress;
 	int scan_type;
 
 	unsigned int assoc_freq;
 	enum wifi_nrf_fmac_if_state if_state;
+#ifdef CONFIG_WPA_SUPP
+	struct zep_wpa_supp_dev_callbk_fns supp_callbk_fns;
+#endif /* CONFIG_WPA_SUPP */
 };
 
 struct wifi_nrf_vif_ctx_map {
@@ -51,5 +56,16 @@ struct wifi_nrf_drv_priv_zep {
 	struct wifi_nrf_fmac_priv *fmac_priv;
 	/* TODO: Replace with a linked list to handle unlimited RPUs */
 	struct wifi_nrf_ctx_zep rpu_ctx_zep;
+};
+
+
+struct wifi_nrf_dev_offload_ops {
+	int (*disp_scan)(const struct device *dev,
+			 scan_result_cb_t cb);
+};
+
+struct wifi_nrf_dev_ops {
+	struct ethernet_api if_api;
+	struct wifi_nrf_dev_offload_ops off_api;
 };
 #endif /* __ZEPHYR_FMAC_MAIN_H__ */

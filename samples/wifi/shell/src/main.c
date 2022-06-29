@@ -12,8 +12,9 @@
 void main(void)
 {
 #ifdef CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP
-	// For now hardcode to 128MHz
-	nrfx_clock_divider_set(NRF_CLOCK_DOMAIN_HFCLK, NRF_CLOCK_HFCLK_DIV_1);
+	/* For now hardcode to 128MHz */
+	nrfx_clock_divider_set(NRF_CLOCK_DOMAIN_HFCLK,
+			       NRF_CLOCK_HFCLK_DIV_1);
 #endif
-	printf("Starting %s with CPU frequency: %d MHz\n", CONFIG_BOARD, SystemCoreClock/MHZ(1));
+	printk("Starting %s with CPU frequency: %d MHz\n", CONFIG_BOARD, SystemCoreClock/MHZ(1));
 }

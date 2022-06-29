@@ -15,7 +15,8 @@
 #include "zephyr_fmac_main.h"
 #include "zephyr_disp_scan.h"
 
-int wifi_nrf_disp_scan_zep(const struct device *dev, scan_result_cb_t cb)
+int wifi_nrf_disp_scan_zep(const struct device *dev,
+			   scan_result_cb_t cb)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
@@ -27,7 +28,7 @@ int wifi_nrf_disp_scan_zep(const struct device *dev, scan_result_cb_t cb)
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
 	if (!vif_ctx_zep) {
-		printk("%s: vif_ctx_zep is NULL\n", __func__);
+		LOG_ERR("%s: vif_ctx_zep is NULL\n", __func__);
 		goto out;
 	}
 
@@ -41,7 +42,7 @@ int wifi_nrf_disp_scan_zep(const struct device *dev, scan_result_cb_t cb)
 	status = wifi_nrf_fmac_scan(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &scan_info);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_fmac_scan failed\n", __func__);
+		LOG_ERR("%s: wifi_nrf_fmac_scan failed\n", __func__);
 		goto out;
 	}
 
@@ -60,11 +61,12 @@ enum wifi_nrf_status wifi_nrf_disp_scan_res_get_zep(struct wifi_nrf_vif_ctx_zep 
 
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 
-	status = wifi_nrf_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx,
+	status = wifi_nrf_fmac_scan_res_get(rpu_ctx_zep->rpu_ctx,
+					    vif_ctx_zep->vif_idx,
 					    SCAN_DISPLAY);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		printk("%s: wifi_nrf_fmac_scan failed\n", __func__);
+		LOG_ERR("%s: wifi_nrf_fmac_scan failed\n", __func__);
 		goto out;
 	}
 
@@ -100,7 +102,9 @@ void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 			res.security = WIFI_SECURITY_TYPE_PSK;
 		}
 
-		memcpy(res.ssid, r->ssid.img_ssid, res.ssid_length);
+		memcpy(res.ssid,
+		       r->ssid.img_ssid,
+		       res.ssid_length);
 
 		if (r->signal.signal_type == IMG_SIGNAL_TYPE_MBM) {
 			int val = (r->signal.signal.mbm_signal);
@@ -110,7 +114,9 @@ void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 			res.rssi = (r->signal.signal.unspec_signal);
 		}
 
-		vif_ctx_zep->disp_scan_cb(vif_ctx_zep->zep_net_if_ctx, 0, &res);
+		vif_ctx_zep->disp_scan_cb(vif_ctx_zep->zep_net_if_ctx,
+					  0,
+					  &res);
 
 		/* NET_MGMT dropping events if too many are queued */
 		k_yield();

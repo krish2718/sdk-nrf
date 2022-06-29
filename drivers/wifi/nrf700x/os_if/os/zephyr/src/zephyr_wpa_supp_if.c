@@ -9,6 +9,7 @@
  * Zephyr OS layer of the Wi-Fi driver.
  */
 
+#ifdef CONFIG_WPA_SUPP
 #include <stdlib.h>
 #include <device.h>
 #include "zephyr_fmac_main.h"
@@ -656,13 +657,11 @@ int wifi_nrf_wpa_supp_authenticate(void *if_priv, struct wpa_driver_auth_params 
 	status = wifi_nrf_fmac_auth(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &auth_info);
 
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
-		ret = -1;
-
 		LOG_ERR("%s: MLME command failed (auth): count=%d ret=%d\n", __func__, count, ret);
-
 		count++;
+		ret = -1;
 	} else {
-		LOG_ERR("%s:Authentication request sent successfully\n", __func__);
+		LOG_INF("%s:Authentication request sent successfully\n", __func__);
 		ret = 0;
 	}
 out:
@@ -721,7 +720,7 @@ int wifi_nrf_wpa_supp_associate(void *if_priv, struct wpa_driver_associate_param
 	if (status != WIFI_NRF_STATUS_SUCCESS) {
 		LOG_ERR("%s: MLME command failed (assoc)\n", __func__);
 	} else {
-		LOG_ERR("%s: Association request sent successfully\n", __func__);
+		LOG_INF("%s: Association request sent successfully\n", __func__);
 		ret = 0;
 	}
 
@@ -870,3 +869,4 @@ int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid)
 
 	return wifi_nrf_fmac_chg_sta(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &chg_sta_info);
 }
+#endif /* CONFIG_WPA_SUPP */
