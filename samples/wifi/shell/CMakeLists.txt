@@ -18,4 +18,5 @@ target_include_directories(mbedcrypto_common
 
 target_sources(app PRIVATE
 	src/main.c
+	src/supp_shell.c
 )
