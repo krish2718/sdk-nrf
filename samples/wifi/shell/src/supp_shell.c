@@ -22,10 +22,10 @@ LOG_MODULE_REGISTER(net_supp_shell, LOG_LEVEL_INF);
 #include <net/wifi_mgmt.h>
 #include <net/net_event.h>
 #include "common.h"
-#include "wpa_supplicant/config.h"
+#include "utils/common.h"
+#include "config.h"
 #include "wpa_supplicant_i.h"
-#include "supp_mgmt.h"
-#include "driver_zephyr.h"
+#include "drivers/driver_zephyr.h"
 
 #define SUPPLICANT_SHELL_MODULE "wpa_cli"
 
