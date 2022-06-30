@@ -43,9 +43,11 @@ static struct {
 
 static uint32_t scan_result;
 
-int cli_main (int, const char **);
+int cli_main(int argc, const char **argv);
+
 extern struct wpa_supplicant *wpa_s_0;
-struct wpa_ssid *ssid_0 = NULL;
+
+struct wpa_ssid *ssid_0;
 
 #define MAX_SSID_LEN 32
 
@@ -58,7 +60,7 @@ static void scan_result_cb(struct net_if *iface,
 		return;
 	}
 
-	if (!entry){
+	if (!entry) {
 		if (status) {
 			shell_fprintf(context.shell,
 				      SHELL_WARNING,
@@ -133,7 +135,7 @@ static int __wifi_args_to_params(size_t argc,
 		idx++;
 
 		if ((idx < argc) && (strlen(argv[idx]) <= 2)) {
-			params->security= strtol(argv[idx], &endptr, 10);
+			params->security = strtol(argv[idx], &endptr, 10);
 		}
 	} else {
 		params->security = WIFI_SECURITY_TYPE_NONE;
@@ -178,7 +180,7 @@ static int cmd_supplicant_connect(const struct shell *shell,
 	ssid->key_mgmt = WPA_KEY_MGMT_NONE;
 
 	wpa_s_0->conf->filter_ssids = 1;
-	wpa_s_0->conf->ap_scan= 1;
+	wpa_s_0->conf->ap_scan = 1;
 
 	if (params->psk) {
 		// TODO: Extend enum wifi_security_type

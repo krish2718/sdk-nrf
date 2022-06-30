@@ -41,7 +41,8 @@ const struct device *spim_perip_get(void)
 
 #ifdef CONFIG_BOARD_NRF52840DK_NRF52840
 	spi_perip = device_get_binding("SPI_3");
-#elif defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
+#elif defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) \
+	|| defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
 	spi_perip = device_get_binding("SPI_4");
 #endif
 
@@ -159,7 +160,7 @@ int spim_RDSR1(const struct device *spi_perip)
 
 	err = spi_transceive(spi_perip, spim_cfg, &tx, &rx);
 
-	if(err == 0)
+	if (err == 0)
 		return sr[1];
 
 	return err;

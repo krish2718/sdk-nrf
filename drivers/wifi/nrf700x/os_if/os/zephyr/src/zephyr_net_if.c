@@ -10,13 +10,13 @@
  */
 
 #include <stdlib.h>
-//#include <logging/log.h>
+/* #include <logging/log.h> */
 #include "fmac_api.h"
 #include "shim.h"
 #include "zephyr_fmac_main.h"
 #include "zephyr_net_if.h"
 
-//LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+/* LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL); */
 
 void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm)
 {

@@ -84,7 +84,7 @@ void work_schedule(struct zep_work_item *item)
 
 void work_kill(struct zep_work_item *item)
 {
-	// TODO: Based on context, use _sync version
+	/* TODO: Based on context, use _sync version */
 	k_work_cancel(&item->work);
 }
 

@@ -113,7 +113,7 @@ void wifi_nrf_wpa_supp_event_proc_scan_done(void *if_priv,
 	event = k_calloc(sizeof(*event), sizeof(char));
 
 	if (!event) {
-		LOG_ERR("%s: Unable to allocate memory for the wpa_event_data instance\n", __func__);
+		LOG_ERR("%s: Unable to allocate memory\n", __func__);
 		return;
 	}
 

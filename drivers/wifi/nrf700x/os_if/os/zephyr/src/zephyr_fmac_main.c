@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <net/ethernet.h>
-//#include <logging/log.h>
+/* #include <logging/log.h> */
 #include "rpu_fw_patches.h"
 #include "fmac_api.h"
 #include "zephyr_util.h"
@@ -377,8 +377,8 @@ static int wifi_nrf_drv_main_zep(const struct device *dev)
 #endif /* CONFIG_WPA_SUPP */
 
 	rpu_drv_priv_zep.fmac_priv = wifi_nrf_fmac_init(&data_config,
-						       	rx_buf_pools,
-						       	&callbk_fns);
+							rx_buf_pools,
+							&callbk_fns);
 
 	if (rpu_drv_priv_zep.fmac_priv == NULL) {
 		LOG_ERR("%s: wifi_nrf_fmac_init failed\n", __func__);

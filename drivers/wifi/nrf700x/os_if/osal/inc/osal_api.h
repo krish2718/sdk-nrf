@@ -19,9 +19,9 @@
 
 LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
-#define wifi_nrf_osal_log_dbg(o, f,...) LOG_DBG(f, ##__VA_ARGS__)
-#define wifi_nrf_osal_log_err(o, f,...)  LOG_ERR(f, ##__VA_ARGS__)
-#define wifi_nrf_osal_log_info(o,f,...)  LOG_INF(f, ##__VA_ARGS__)
+#define wifi_nrf_osal_log_dbg(o, f, ...) LOG_DBG(f, ##__VA_ARGS__)
+#define wifi_nrf_osal_log_err(o, f, ...)  LOG_ERR(f, ##__VA_ARGS__)
+#define wifi_nrf_osal_log_info(o, f, ...)  LOG_INF(f, ##__VA_ARGS__)
 
 /**
  * wifi_nrf_osal_init() - Initialize the OSAL layer.

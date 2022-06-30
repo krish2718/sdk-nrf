@@ -6,4 +6,3 @@
 
 config SHIELD_NRF7002_EK
 	def_bool $(shields_list_contains,nrf7002_ek)
-
