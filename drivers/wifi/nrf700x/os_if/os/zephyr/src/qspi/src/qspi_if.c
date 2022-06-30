@@ -9,6 +9,8 @@
  * Zephyr OS layer of the Wi-Fi driver.
  */
 
+#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP)
+
 #define DT_DRV_COMPAT nordic_qspi_nor
 
 #include <errno.h>
@@ -70,7 +72,7 @@ static void anomaly_122_uninit(const struct device *dev);
 
 #define WORD_SIZE 4
 
-LOG_MODULE_REGISTER(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 /**
  * @brief QSPI buffer structure
@@ -1192,7 +1194,7 @@ int qspi_validate_rpu_wake_writecmd(const struct device *dev)
 	return ret;
 }
 
-int RDSR1(const struct device *dev)
+int qspi_RDSR1(const struct device *dev)
 {
 	int ret = 0;
 	uint8_t sr = 0;
@@ -1224,7 +1226,7 @@ int qspi_wait_while_rpu_awake(const struct device *dev)
 	int ret;
 
 	for (int ii = 0; ii < 1; ii++) {
-		ret = RDSR1(dev);
+		ret = qspi_RDSR1(dev);
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
 			LOG_INF("RDSR1 = 0x%x\t\n", ret);
@@ -1501,3 +1503,4 @@ int qspi_cmd_sleep_rpu(const struct device *dev)
 
 	return ret;
 }
+#endif

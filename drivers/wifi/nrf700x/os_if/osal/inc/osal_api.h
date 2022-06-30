@@ -15,6 +15,14 @@
 #include <stdarg.h>
 #include "osal_structs.h"
 
+#include <logging/log.h>
+
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+
+#define wifi_nrf_osal_log_dbg(o, f,...) LOG_DBG(f, ##__VA_ARGS__)
+#define wifi_nrf_osal_log_err(o, f,...)  LOG_ERR(f, ##__VA_ARGS__)
+#define wifi_nrf_osal_log_info(o,f,...)  LOG_INF(f, ##__VA_ARGS__)
+
 /**
  * wifi_nrf_osal_init() - Initialize the OSAL layer.
  *
@@ -312,15 +320,6 @@ void wifi_nrf_osal_spinlock_irq_take(struct wifi_nrf_osal_priv *opriv,
 void wifi_nrf_osal_spinlock_irq_rel(struct wifi_nrf_osal_priv *opriv,
 				     void *lock,
 				     unsigned long *flags);
-
-#include <logging/log.h>
-
-LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
-
-#define wifi_nrf_osal_log_dbg(o, f,...) LOG_DBG(f, ##__VA_ARGS__)
-#define wifi_nrf_osal_log_err(o, f,...)  LOG_ERR(f, ##__VA_ARGS__)
-#define wifi_nrf_osal_log_info(o,f,...)  LOG_INF(f, ##__VA_ARGS__)
-
 
 /**
  * wifi_nrf_osal_llist_node_alloc() - Allocate a linked list mode.

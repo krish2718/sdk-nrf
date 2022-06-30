@@ -27,7 +27,7 @@
 
 #include <logging/log.h>
 
-LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+LOG_MODULE_REGISTER(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 static void *zep_shim_mem_alloc(size_t size)
 {

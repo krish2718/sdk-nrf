@@ -343,7 +343,7 @@ void get_sleep_stats(uint32_t addr, uint32_t *buff, uint32_t wrd_len)
 	spim_wait_while_rpu_awake_fn(spim_perip);
 
 	(hl_flag) ? qdev->hl_read(addr, buff, wrd_len * 4) : qdev->read(addr, buff, wrd_len * 4);
-	spim_cmd_sleep_rpu_fn(&qspi_perip);
+	spim_cmd_sleep_rpu_fn(spim_perip);
 
 #endif
 }
@@ -502,17 +502,29 @@ static int cmd_qspi_init(const struct shell *shell, size_t argc, char **argv)
 
 int func_rpu_sleep(void)
 {
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	return qspi_cmd_sleep_rpu(&qspi_perip);
+#else
+	return spim_cmd_sleep_rpu_fn(spim_perip);
+#endif
 }
 
 int func_rpu_wake(void)
 {
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	return qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
+#else
+	return spim_cmd_rpu_wakeup_fn(spim_perip, 0x1);
+#endif
 }
 
 int func_rpu_sleep_status(void)
 {
-	return RDSR1(&qspi_perip);
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+	return qspi_RDSR1(&qspi_perip);
+#else
+	return spim_RDSR1(spim_perip);
+#endif
 }
 
 /* -------------------------------------------------------------------------------------- */

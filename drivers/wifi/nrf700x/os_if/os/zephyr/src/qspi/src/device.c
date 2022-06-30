@@ -20,15 +20,18 @@
 
 struct qspi_config config;
 
+#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP)
 struct qspi_dev qspi = { .init = qspi_init,
 			 .read = qspi_read,
 			 .write = qspi_write,
 			 .hl_read = qspi_hl_read};
+#else
 
 struct qspi_dev spim = { .init = spim_init,
 			 .read = spim_read,
 			 .write = spim_write,
 			 .hl_read = spim_hl_read};
+#endif
 
 struct qspi_config *qspi_defconfig(void)
 {
@@ -53,7 +56,7 @@ struct qspi_config *qspi_defconfig(void)
 
 	config.encryption = config.CMD_CNONCE = false;
 
-#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
+#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP)
 
 	/*For #Bit 6 Enable below: i.e ALL Ones for QSPI Key*/
 	memset(&config.p_cfg.key, 0xff, sizeof(config.p_cfg.key));

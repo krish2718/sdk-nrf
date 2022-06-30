@@ -17,7 +17,8 @@
 #include "spi_if.h"
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(wifi_nrf_spim);
+
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 struct qspi_config *spim_config;
 
@@ -137,11 +138,11 @@ unsigned int spim_xfer_rx(const struct device *spi_perip, const struct spi_confi
 	return err;
 }
 
-unsigned int spim_wait_while_rpu_awake(const struct device *spi_perip,
-				       const struct spi_config *spi_cfg)
+int spim_RDSR1(const struct device *spi_perip)
 {
 	int err, len;
 	static uint8_t tx_buffer[6] = { 0x1f };
+	const struct spi_config *spim_cfg = &spi_cfg;
 
 	len = sizeof(tx_buffer);
 
@@ -156,26 +157,38 @@ unsigned int spim_wait_while_rpu_awake(const struct device *spi_perip,
 	};
 	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
 
-	for (int ii = 0; ii < 10; ii++) {
-		err = spi_transceive(spi_perip, spi_cfg, &tx, &rx);
+	err = spi_transceive(spi_perip, spim_cfg, &tx, &rx);
 
-		LOG_DBG("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
+	if(err == 0)
+		return sr[1];
 
-		if ((err < 0) || ((sr[1] & RPU_AWAKE_BIT) == 0)) {
-			LOG_ERR("ret val = 0x%x\t RDSR1 = 0x%x --- FAILED RPU Wakeup\n", err, sr[1]);
+	return err;
+}
+
+int spim_wait_while_rpu_awake(const struct device *spi_perip,
+				       const struct spi_config *spi_cfg)
+{
+	int ret;
+
+	for (int ii = 0; ii < 1; ii++) {
+
+		ret = spim_RDSR1(spi_perip);
+
+		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
+			LOG_INF("RDSR1 = 0x%x\t\n", ret);
 		} else {
-			LOG_ERR("ret val = 0x%x\t RDSR1 = 0x%x -- RPU Awake!!\n", err, sr[1]);
+			LOG_INF("RDSR1 = 0x%x\n", ret);
 			break;
 		}
 		k_msleep(1);
 	}
 
-	return 0;
+	return ret;
 }
 
 /* Wait until RDSR2 confirms RPU_WAKE write is successful */
-unsigned int spim_validate_rpu_awake(const struct device *spi_perip,
-				     const struct spi_config *spi_cfg)
+int spim_validate_rpu_awake(const struct device *spi_perip,
+		const struct spi_config *spi_cfg)
 {
 	int err, len;
 	static uint8_t tx_buffer[6] = { 0x2f };
@@ -210,7 +223,7 @@ unsigned int spim_validate_rpu_awake(const struct device *spi_perip,
 	return 0;
 }
 
-unsigned int spim_cmd_rpu_wakeup(const struct device *spi_perip, const struct spi_config *spi_cfg,
+int spim_cmd_rpu_wakeup(const struct device *spi_perip, const struct spi_config *spi_cfg,
 				 uint32_t data)
 {
 	int err, len;
@@ -369,22 +382,22 @@ int spim_hl_read(unsigned int addr, void *data, int len)
 
 /* ------------------------------added for wifi utils -------------------------------- */
 
-void spim_cmd_rpu_wakeup_fn(const struct device *spi_perip, uint32_t data)
+int spim_cmd_rpu_wakeup_fn(const struct device *spi_perip, uint32_t data)
 {
-	spim_cmd_rpu_wakeup(spim_perip, &spi_cfg, data);
+	return spim_cmd_rpu_wakeup(spim_perip, &spi_cfg, data);
 }
 
-void spim_cmd_sleep_rpu_fn(const struct device *spi_perip)
+int spim_cmd_sleep_rpu_fn(const struct device *spi_perip)
 {
-	spim_cmd_sleep_rpu(spim_perip, &spi_cfg);
+	return spim_cmd_sleep_rpu(spim_perip, &spi_cfg);
 }
 
-void spim_wait_while_rpu_awake_fn(const struct device *spi_perip)
+int spim_wait_while_rpu_awake_fn(const struct device *spi_perip)
 {
-	spim_wait_while_rpu_awake(spim_perip, &spi_cfg);
+	return spim_wait_while_rpu_awake(spim_perip, &spi_cfg);
 }
 
-void spim_validate_rpu_awake_fn(const struct device *spi_perip)
+int spim_validate_rpu_awake_fn(const struct device *spi_perip)
 {
-	spim_validate_rpu_awake(spim_perip, &spi_cfg);
+	return spim_validate_rpu_awake(spim_perip, &spi_cfg);
 }
