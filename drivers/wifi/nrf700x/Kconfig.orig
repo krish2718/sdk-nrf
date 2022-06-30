@@ -13,7 +13,6 @@ config WIFI_NRF
 	select NRFX_SPIM3
 	select NRFX_SPIM4
 	select WIFI
-	select SPI
 	help
 	Nordic Wi-Fi Driver
 

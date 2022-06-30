@@ -22,7 +22,6 @@ zephyr_library_compile_definitions(
 	SHELIAK_SOC	# SOC
 	ASICBUILD	# SOC
 	C0_CHIP
-	QSPI_IF
 	#RPU_SLEEP_SUPPORT
 )
 
@@ -71,7 +70,6 @@ zephyr_library_sources(
 	os_if/os/zephyr/src/zephyr_net_if.c
 	os_if/os/zephyr/src/zephyr_wpa_supp_if.c
 	os_if/os/zephyr/src/qspi/src/device.c
-	os_if/os/zephyr/src/qspi/src/interrupts.c
 	os_if/os/zephyr/src/qspi/src/qspi_if.c
 	os_if/os/zephyr/src/qspi/src/qspi_main.c
 	os_if/os/zephyr/src/qspi/src/spi_if.c

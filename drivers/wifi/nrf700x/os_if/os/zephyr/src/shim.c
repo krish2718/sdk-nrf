@@ -581,11 +581,7 @@ static void *zep_shim_bus_qspi_dev_add(void *os_qspi_priv, void *osal_qspi_dev_c
 
 	func_wifi_on();
 
-#if QSPI_IF
-	qdev = qspi_dev(0); /* QSPI dev */
-#else
-	qdev = qspi_dev(1); /* SPIM dev */
-#endif
+	qdev = qspi_dev();
 
 	zep_qspi_priv->qspi_dev = qdev;
 	zep_qspi_priv->dev_added = true;

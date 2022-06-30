@@ -23,14 +23,12 @@ struct qspi_config config;
 struct qspi_dev qspi = { .init = qspi_init,
 			 .read = qspi_read,
 			 .write = qspi_write,
-			 .hl_read = qspi_hl_read,
-			 .hard_reset = hard_reset };
+			 .hl_read = qspi_hl_read};
 
 struct qspi_dev spim = { .init = spim_init,
 			 .read = spim_read,
 			 .write = spim_write,
-			 .hl_read = spim_hl_read,
-			 .hard_reset = hard_reset };
+			 .hl_read = spim_hl_read};
 
 struct qspi_config *qspi_defconfig(void)
 {
@@ -55,7 +53,7 @@ struct qspi_config *qspi_defconfig(void)
 
 	config.encryption = config.CMD_CNONCE = false;
 
-#ifdef CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP
+#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
 
 	/*For #Bit 6 Enable below: i.e ALL Ones for QSPI Key*/
 	memset(&config.p_cfg.key, 0xff, sizeof(config.p_cfg.key));
@@ -64,13 +62,16 @@ struct qspi_config *qspi_defconfig(void)
 	config.p_cfg.nonce[1] = 0x0;
 	config.p_cfg.nonce[2] = 0x1;
 
-#endif /*CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP*/
+#endif /*CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP*/
 
 	return &config;
 }
 
-struct qspi_dev *qspi_dev(bool spim_flag)
+struct qspi_dev *qspi_dev(void)
 {
-	/* spim_flag : 0 -> qspi, 1 -> spim */
-	return (spim_flag) ? &spim : &qspi;
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+	return &qspi;
+#else
+	return &spim;
+#endif
 }

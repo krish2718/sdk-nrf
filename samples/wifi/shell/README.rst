@@ -16,16 +16,17 @@ Building and Running
 
 Currently, the following configurations are supported:
 
-7002 DK + QSPI (default)
-7002 EK + SPIM (disable QSPI_IF in drivers/wifi/CMakeLists.txt)
+7002 DK + QSPI
+7002 EK + SPIM
 
-You can build for the target by selecting nrf5340dk_nrf5340_cpuapp.
+You can build for the DK by using the following command
 
-.. zephyr-app-commands::
-   :zephyr-app: samples/wifi/shell
-   :board: nrf5340dk_nrf5340_cpuapp
-   :goals: build
-   :compact:
+west build -b nrf7002dk_nrf5340_cpuapp
+
+
+You can build for the EK by using the following command
+
+west build -b nrf5340dk_nrf5340_cpuapp -- -DSHIELD=nrf7002_ek
 
 Sample console interaction
 ==========================
@@ -47,7 +48,7 @@ Sample console interaction
    wlan0: radio_work_free('sme-connect'@0x20044688): num_active_works --> 0
    wlan0: CTRL-EVENT-CONNECTED - Connection to f0:1d:2d:73:c4:cf completed [id=0 id_str=]
 
-   .. wait for 15/20 seconds DHCP to get resolved
+   .. wait for 15/20 seconds for DHCP to get resolved
 
    <inf> net_dhcpv4: Received: 192.168.1.101[00:01:01.078,735]
    <err> net_mgmt: Event info length 48 > max size 43[00:01:01.078,826]

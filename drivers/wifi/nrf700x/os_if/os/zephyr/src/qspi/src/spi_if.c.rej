@@ -1,0 +1,14 @@
+--- drivers/wifi/nrf700x/os_if/os/zephyr/src/qspi/src/spi_if.c
++++ drivers/wifi/nrf700x/os_if/os/zephyr/src/qspi/src/spi_if.c
+@@ -273,11 +-148,6 @@ int spim_init(struct qspi_config *config)
+ 	config->spimfreq = config->freq * 1000000;
+ #endif
+ 
+-	printk("sck pin = 0x%08x\n", spi_4z_config.config.sck_pin);
+-	printk("mosi pin = 0x%08x\n", spi_4z_config.config.mosi_pin);
+-	printk("miso pin = 0x%08x\n", spi_4z_config.config.miso_pin);
+-	printk("ss pin = 0x%08x\n", spi_4z_config.config.ss_pin);
+-
+ 	k_sem_init(&spim_config->lock, 1, 1);
+ 
+ 	return 0;

@@ -48,9 +48,9 @@ struct qspi_config {
 	struct k_sem lock;
 	unsigned int addrmask;
 	unsigned char qspi_slave_latency;
-#ifdef CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP
+#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
 	nrf_qspi_encryption_t p_cfg;
-#endif /*CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP*/
+#endif /*CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP*/
 	int test_hlread;
 	char *test_name;
 	int test_start;
@@ -89,8 +89,7 @@ int gpio_request_irq(int pin, struct gpio_callback *button_cb_data, void (*irq_h
 
 struct qspi_config *qspi_defconfig(void);
 
-struct qspi_dev *qspi_dev(bool spim_flag);
-/* struct qspi_dev *qspi_dev(void); */
+struct qspi_dev *qspi_dev(void);
 
 int qspi_cmd_sleep_rpu(const struct device *dev);
 
@@ -107,5 +106,7 @@ void func_wifi_on(void);
 
 int func_gpio_config(void);
 int func_irq_config(struct gpio_callback *irq_callback_data, void (*irq_handler)());
+
+int RDSR1(const struct device *dev);
 
 #endif /* __QSPI_IF_H__ */

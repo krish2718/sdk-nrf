@@ -20,23 +20,16 @@
 
 #define SLEEP_TIME_MS 2
 
-#if QSPI_IF
-#define PIN_BUCKEN 12 /* P0.12 */
-#define PIN_IOVDD 31 /* P0.31 */
-#else
-#define PIN_BUCKEN 1 /* P1.01 */
-#define PIN_IOVDD 0 /* P1.00 */
-#endif
+#define NRF7002_NODE DT_NODELABEL(nrf7002)
 
-#if SHELIAK_SOC
-#if QSPI_IF
-#define PIN_IRQ 23 /* P0.23 on DK */
-#else
-#define PIN_IRQ 9 /* P1.9 on EK */
-#endif
-#else
-#define PIN_IRQ 24 /* P0.24 on FPGA */
-#endif
+static const struct gpio_dt_spec iovdd_ctrl_spec =
+GPIO_DT_SPEC_GET(NRF7002_NODE, iovdd_ctrl_gpios);
+
+static const struct gpio_dt_spec bucken_spec =
+GPIO_DT_SPEC_GET(NRF7002_NODE, bucken_gpios);
+
+static const struct gpio_dt_spec host_irq_spec =
+GPIO_DT_SPEC_GET(NRF7002_NODE, host_irq_gpios);
 
 #define SW_VER "1.6"
 
@@ -327,7 +320,7 @@ static int cmd_memtest(const struct shell *shell, size_t argc, char **argv)
 
 void get_sleep_stats(uint32_t addr, uint32_t *buff, uint32_t wrd_len)
 {
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 	printk("Waiting for RPU awake...\n");
 
@@ -389,30 +382,16 @@ int func_irq_config(struct gpio_callback *irq_callback_data, void (*irq_handler)
 {
 	int ret;
 
-#if QSPI_IF
-	gpio_dev = device_get_binding("GPIO_0");
-	if (gpio_dev == NULL) {
-		return -1;
-	}
-#else
-	gpio_dev = device_get_binding("GPIO_1");
-	if (gpio_dev == NULL) {
-		return -1;
-	}
-#endif
+	ret = gpio_pin_configure_dt(&host_irq_spec, GPIO_INPUT);
 
-	ret = gpio_pin_configure(gpio_dev, PIN_IRQ, (GPIO_INPUT | GPIO_INT_EDGE_TO_ACTIVE));
-	if (ret < 0) {
-		return -1;
-	}
+	ret = gpio_pin_interrupt_configure_dt(&host_irq_spec,
+			GPIO_INT_EDGE_TO_ACTIVE);
 
-	ret = gpio_pin_interrupt_configure(gpio_dev, PIN_IRQ, (GPIO_INT_EDGE_TO_ACTIVE));
-	if (ret < 0) {
-		return -1;
-	}
+	gpio_init_callback(irq_callback_data,
+			irq_handler,
+			BIT(host_irq_spec.pin));
 
-	gpio_init_callback(irq_callback_data, irq_handler, BIT(PIN_IRQ));
-	gpio_add_callback(gpio_dev, irq_callback_data);
+	gpio_add_callback(host_irq_spec.port, irq_callback_data);
 
 	printk("Finished Interrupt config\n\n");
 
@@ -423,29 +402,22 @@ int func_gpio_config(void)
 {
 	int ret;
 
-#if QSPI_IF
-	gpio_dev = device_get_binding("GPIO_0");
-	if (gpio_dev == NULL) {
-		return -1;
-	}
-#else
-	gpio_dev = device_get_binding("GPIO_1");
-	if (gpio_dev == NULL) {
-		return -1;
-	}
-#endif
-
-	/* Put P0.12 to highest drive mode H0H1 or E0E1 */
-	ret = gpio_pin_configure(gpio_dev, PIN_BUCKEN,
-				 GPIO_OUTPUT | (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos));
-	if (ret < 0) {
-		return -1;
+	if (!device_is_ready(iovdd_ctrl_spec.port)) {
+		return -ENODEV;
 	}
 
-	ret = gpio_pin_configure(gpio_dev, PIN_IOVDD, GPIO_OUTPUT);
-	if (ret < 0) {
-		return -1;
+	if (!device_is_ready(bucken_spec.port)) {
+		return -ENODEV;
 	}
+
+	if (!device_is_ready(host_irq_spec.port)) {
+		return -ENODEV;
+	}
+
+	ret = gpio_pin_configure_dt(&bucken_spec,
+			GPIO_OUTPUT | (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos));
+
+	ret = gpio_pin_configure_dt(&iovdd_ctrl_spec, GPIO_OUTPUT);
 
 	printk("GPIO configuration done...\n\n");
 
@@ -465,10 +437,10 @@ static int cmd_gpio_config(const struct shell *shell, size_t argc, char **argv)
 /* -------------------------------------------------------------------------------------- */
 static int func_pwron(void)
 {
-	gpio_pin_set(gpio_dev, PIN_BUCKEN, 1);
+	gpio_pin_set_dt(&bucken_spec, 1);
 #if SHELIAK_SOC
 	k_msleep(SLEEP_TIME_MS);
-	gpio_pin_set(gpio_dev, PIN_IOVDD, 1);
+	gpio_pin_set_dt(&iovdd_ctrl_spec, 1);
 	printk("BUCKEN=1, IOVDD=1...\n");
 #else
 #endif
@@ -511,11 +483,7 @@ static int cmd_config(const struct shell *shell, size_t argc, char **argv)
 
 static void func_qspi_init(void)
 {
-#if QSPI_IF
-	qdev = qspi_dev(0); /* QSPI dev */
-#else
-	qdev = qspi_dev(1); /* SPIM dev */
-#endif
+	qdev = qspi_dev();
 
 	cfg = qspi_defconfig();
 
@@ -552,7 +520,7 @@ int func_rpu_sleep_status(void)
 
 int func_rpuwake(void)
 {
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 	printk("exited qspi_cmd_wakeup_rpu()\n");
 
@@ -583,7 +551,7 @@ static int cmd_rpuwake(const struct shell *shell, size_t argc, char **argv)
 
 static int func_wrsr2(uint8_t data)
 {
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_cmd_wakeup_rpu(&qspi_perip, data);
 #else
 	spim_cmd_rpu_wakeup_fn(spim_perip, data);
@@ -606,7 +574,7 @@ static int cmd_wrsr2(const struct shell *shell, size_t argc, char **argv)
 /* -------------------------------------------------------------------------------------- */
 static int func_rdsr2(void)
 {
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_validate_rpu_wake_writecmd(&qspi_perip);
 #else
 	spim_validate_rpu_awake_fn(spim_perip);
@@ -625,7 +593,7 @@ static int cmd_rdsr2(const struct shell *shell, size_t argc, char **argv)
 
 static int func_rdsr1(void)
 {
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_wait_while_rpu_awake(&qspi_perip);
 #else
 	spim_wait_while_rpu_awake_fn(spim_perip);
@@ -682,8 +650,8 @@ static int cmd_wifi_on(const struct shell *shell, size_t argc, char **argv)
 static int cmd_wifi_off(const struct shell *shell, size_t argc, char **argv)
 {
 #if SHELIAK_SOC
-	gpio_pin_set(gpio_dev, PIN_IOVDD, 0); /* IOVDD CNTRL = 0 */
-	gpio_pin_set(gpio_dev, PIN_BUCKEN, 0); /* BUCKEN = 0 */
+	gpio_pin_set_dt(&iovdd_ctrl_spec, 0); /* IOVDD CNTRL = 0 */
+	gpio_pin_set_dt(&bucken_spec, 0); /* BUCKEN = 0 */
 	shell_print(shell, "IOVDD=0, BUCKEN=0...");
 #else
 #endif
@@ -736,7 +704,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 	shell_print(shell, "         reads them back and validates them");
 	shell_print(shell, "  ");
 	shell_print(shell, "uart:~$ wifiutils wifi_on  ");
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	shell_print(shell, "         - Configures all gpio pins ");
 	shell_print(
 		shell,
@@ -753,7 +721,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 #endif
 	shell_print(shell, "  ");
 	shell_print(shell, "uart:~$ wifiutils wifi_off ");
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	shell_print(
 		shell,
 		"         This writes 0 to IOVDD Control (P0.31) and then writes 0 to BUCKEN Control (P0.12)");
@@ -768,7 +736,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 		    "         This continuously does the RPU sleep/wake cycle and displays stats ");
 	shell_print(shell, "  ");
 	shell_print(shell, "uart:~$ wifiutils gpio_config ");
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	shell_print(
 		shell,
 		"         Configures BUCKEN(P0.12) as o/p, IOVDD control (P0.31) as output and HOST_IRQ (P0.23) as input");
@@ -829,7 +797,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 static int cmd_ver(const struct shell *shell, size_t argc, char **argv)
 {
 	shell_print(shell, "wifiutils Version: %s", SW_VER);
-#if QSPI_IF
+#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	shell_print(shell, "Build for QSPI interface on nRF7002 board");
 #else
 	shell_print(shell,
