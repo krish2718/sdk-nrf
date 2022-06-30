@@ -45,12 +45,6 @@
 
 #define IMG_ETH_ADDR_LEN 6
 
-#define PHY_THRESHOLD_NORMAL (-65)
-#define PHY_THRESHOLD_PROD_MODE (-93)
-
-#define MAX_TX_STREAMS 1
-#define MAX_RX_STREAMS 1
-
 #define MAX_NUM_VIFS 2
 #define MAX_NUM_STAS 2
 #define MAX_NUM_APS 1

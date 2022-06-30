@@ -15,7 +15,7 @@ config WIFI_NRF
 	select WIFI
 	select SPI
 	help
-	Nordic Wi-Fi Driver
+	  Nordic Wi-Fi Driver
 
 module = WIFI_NRF
 module-str = WIFI_NRF

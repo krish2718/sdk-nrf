@@ -58,7 +58,7 @@ zephyr_library_sources(
 	fw_if/umac_if/src/fmac_peer.c
 	fw_if/umac_if/src/fmac_util.c
 	fw_if/umac_if/src/fmac_vif.c
-	fw_if/umac_if/src/main.c
+	fw_if/umac_if/src/fmac_api.c
 	fw_if/umac_if/src/rx.c
 	fw_if/umac_if/src/tx.c
 	os_if/os/zephyr/src/shim.c

@@ -26,9 +26,9 @@ enum wifi_nrf_fw_patch_type {
  */
 enum wifi_nrf_status wifi_nrf_hal_fw_patch_load(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,
 						enum RPU_PROC_TYPE rpu_proc,
-						void *fw_pri_patch_data,
+						const void *fw_pri_patch_data,
 						unsigned int fw_pri_patch_size,
-						void *fw_sec_patch_data,
+						const void *fw_sec_patch_data,
 						unsigned int fw_sec_patch_size);
 
 enum wifi_nrf_status wifi_nrf_hal_fw_patch_boot(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx,

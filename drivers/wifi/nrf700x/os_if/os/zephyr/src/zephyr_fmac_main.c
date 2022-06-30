@@ -22,24 +22,24 @@
 #include "zephyr_wpa_supp_if.h"
 #endif /* CONFIG_WPA_SUPP */
 
-unsigned char aggregation = 1;
-unsigned char wmm = 1;
-unsigned char max_num_tx_agg_sessions = 4;
-unsigned char max_num_rx_agg_sessions = 2;
-unsigned char reorder_buf_size = 64;
-unsigned char max_rxampdu_size = MAX_RX_AMPDU_SIZE_64KB;
+static const unsigned char aggregation = 1;
+static const unsigned char wmm = 1;
+static const unsigned char max_num_tx_agg_sessions = 4;
+static const unsigned char max_num_rx_agg_sessions = 2;
+static const unsigned char reorder_buf_size = 64;
+static const unsigned char max_rxampdu_size = MAX_RX_AMPDU_SIZE_64KB;
 
-unsigned char max_tx_aggregation = 4;
+static const unsigned char max_tx_aggregation = 4;
 
-unsigned int rx1_num_bufs = 21;
-unsigned int rx2_num_bufs = 21;
-unsigned int rx3_num_bufs = 21;
+static const unsigned int rx1_num_bufs = 21;
+static const unsigned int rx2_num_bufs = 21;
+static const unsigned int rx3_num_bufs = 21;
 
-unsigned int rx1_buf_sz = 1600;
-unsigned int rx2_buf_sz = 1600;
-unsigned int rx3_buf_sz = 1600;
+static const unsigned int rx1_buf_sz = 1600;
+static const unsigned int rx2_buf_sz = 1600;
+static const unsigned int rx3_buf_sz = 1600;
 
-unsigned char rate_protection_type;
+static const unsigned char rate_protection_type;
 
 struct wifi_nrf_drv_priv_zep rpu_drv_priv_zep;
 

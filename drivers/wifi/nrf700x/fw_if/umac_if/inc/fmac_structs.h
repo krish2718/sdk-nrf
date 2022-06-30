@@ -401,7 +401,7 @@ struct wifi_nrf_fmac_vif_ctx {
 
 
 struct wifi_nrf_fw_info {
-	void *data;
+	const void *data;
 	unsigned int size;
 };
 
