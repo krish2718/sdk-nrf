@@ -11,10 +11,9 @@
 
 #if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP)
 
-#define DT_DRV_COMPAT nordic_qspi_nor
+#define DT_DRV_COMPAT nordic_nrf7002_qspi
 
 #include <errno.h>
-#include <drivers/flash.h>
 #include <init.h>
 #include <string.h>
 #include <logging/log.h>
@@ -29,14 +28,6 @@ struct qspi_config *qspi_config;
 unsigned int nonce_last_addr;
 unsigned int nonce_cnt;
 
-struct qspi_nor_config {
-	/* JEDEC id from devicetree */
-	uint8_t id[SPI_NOR_MAX_ID_LEN];
-
-	/* Size from devicetree, in bytes */
-	uint32_t size;
-};
-
 /* Main config structure */
 static nrfx_qspi_config_t QSPIconfig;
 
@@ -44,8 +35,6 @@ static nrfx_qspi_config_t QSPIconfig;
 #define QSPI_SECTOR_SIZE SPI_NOR_SECTOR_SIZE
 #define QSPI_BLOCK_SIZE SPI_NOR_BLOCK_SIZE
 
-/* instance 0 flash size in bytes */
-#define INST_0_BYTES (DT_INST_PROP(0, size) / 8)
 
 #define INST_0_SCK_FREQUENCY DT_INST_PROP(0, sck_frequency)
 BUILD_ASSERT(INST_0_SCK_FREQUENCY >= (NRF_QSPI_BASE_CLOCK_FREQ / 16), "Unsupported SCK frequency.");
@@ -326,12 +315,6 @@ nrf_qspi_writeoc_t _qspi_get_writeoc(void)
 nrf_qspi_frequency_t _qspi_get_sckfreq(void)
 {
 	return qspi_config->sckfreq;
-}
-
-int _qspi_nor_read_id(const struct device *dev, const struct qspi_nor_config *const flash_id)
-{
-	/* bypass flash id check */
-	return 0;
 }
 
 /**
@@ -770,123 +753,25 @@ static int qspi_nrfx_configure(const struct device *dev)
 	return ret;
 }
 
-static int qspi_read_jedec_id(const struct device *dev, uint8_t *id)
-{
-	const struct qspi_buf rx_buf = { .buf = id, .len = 3 };
-	const struct qspi_cmd cmd = {
-		.op_code = SPI_NOR_CMD_RDID,
-		.rx_buf = &rx_buf,
-	};
-
-	int ret = ANOMALY_122_INIT(dev);
-
-	if (ret == 0)
-		ret = qspi_send_cmd(dev, &cmd, false);
-
-	ANOMALY_122_UNINIT(dev);
-
-	return ret;
-}
-
-#if defined(CONFIG_FLASH_JESD216_API)
-
-static int qspi_sfdp_read(const struct device *dev, off_t offset, void *data, size_t len)
-{
-	__ASSERT(data != NULL, "null destination");
-
-	uint8_t addr_buf[] = {
-		offset >> 16, offset >> 8, offset, 0, /* wait state */
-	};
-	nrf_qspi_cinstr_conf_t cinstr_cfg = {
-		.opcode = JESD216_CMD_READ_SFDP,
-		.length = NRF_QSPI_CINSTR_LEN_1B,
-		.io2_level = true,
-		.io3_level = true,
-	};
-
-	int res = ANOMALY_122_INIT(dev);
-
-	if (res != NRFX_SUCCESS) {
-		LOG_DBG("ANOMALY_122_INIT: %x", res);
-		goto out;
-	}
-
-	qspi_lock(dev);
-
-	res = nrfx_qspi_lfm_start(&cinstr_cfg);
-
-	if (res != NRFX_SUCCESS) {
-		LOG_DBG("lfm_start: %x", res);
-		goto out;
-	}
-
-	res = nrfx_qspi_lfm_xfer(addr_buf, NULL, sizeof(addr_buf), false);
-
-	if (res != NRFX_SUCCESS) {
-		LOG_DBG("lfm_xfer addr: %x", res);
-		goto out;
-	}
-
-	res = nrfx_qspi_lfm_xfer(NULL, data, len, true);
-
-	if (res != NRFX_SUCCESS) {
-		LOG_DBG("lfm_xfer read: %x", res);
-		goto out;
-	}
-
-out:
-	qspi_unlock(dev);
-	ANOMALY_122_UNINIT(dev);
-	return qspi_get_zephyr_ret_code(res);
-}
-
-#endif /* CONFIG_FLASH_JESD216_API */
-
-/**
- * @brief Retrieve the Flash JEDEC ID and compare it with the one expected
- *
- * @param dev The device structure
- * @param flash_id The flash info structure which contains the
- *		  expected JEDEC ID
- * @return 0 on success, negative errno code otherwise
- */
-static inline int qspi_nor_read_id(const struct device *dev,
-				   const struct qspi_nor_config *const flash_id)
-{
-	uint8_t id[SPI_NOR_MAX_ID_LEN];
-	int ret = qspi_read_jedec_id(dev, id);
-
-	if (ret != 0)
-		return -EIO;
-
-	if (memcmp(flash_id->id, id, SPI_NOR_MAX_ID_LEN) != 0) {
-		LOG_ERR("JEDEC id [%02x %02x %02x] expect [%02x %02x %02x]", id[0], id[1], id[2],
-			flash_id->id[0], flash_id->id[1], flash_id->id[2]);
-		return -ENODEV;
-	}
-
-	return 0;
-}
-
-static inline nrfx_err_t read_non_aligned(const struct device *dev, off_t addr, void *dest,
+static inline nrfx_err_t read_non_aligned(const struct device *dev, int addr, void *dest,
 					  size_t size)
 {
 	uint8_t __aligned(WORD_SIZE) buf[WORD_SIZE * 2];
 	uint8_t *dptr = dest;
 
-	off_t flash_prefix = (WORD_SIZE - (addr % WORD_SIZE)) % WORD_SIZE;
+	int flash_prefix = (WORD_SIZE - (addr % WORD_SIZE)) % WORD_SIZE;
 
 	if (flash_prefix > size)
 		flash_prefix = size;
 
-	off_t dest_prefix = (WORD_SIZE - (off_t)dptr % WORD_SIZE) % WORD_SIZE;
+	int dest_prefix = (WORD_SIZE - (int)dptr % WORD_SIZE) % WORD_SIZE;
 
 	if (dest_prefix > size)
 		dest_prefix = size;
 
-	off_t flash_suffix = (size - flash_prefix) % WORD_SIZE;
-	off_t flash_middle = size - flash_prefix - flash_suffix;
-	off_t dest_middle = size - dest_prefix - (size - dest_prefix) % WORD_SIZE;
+	int flash_suffix = (size - flash_prefix) % WORD_SIZE;
+	int flash_middle = size - flash_prefix - flash_suffix;
+	int dest_middle = size - dest_prefix - (size - dest_prefix) % WORD_SIZE;
 
 	if (flash_middle > dest_middle) {
 		flash_middle = dest_middle;
@@ -936,7 +821,7 @@ static inline nrfx_err_t read_non_aligned(const struct device *dev, off_t addr, 
 	return res;
 }
 
-static int qspi_nor_read(const struct device *dev, off_t addr, void *dest, size_t size)
+static int qspi_nor_read(const struct device *dev, int addr, void *dest, size_t size)
 {
 	if (!dest)
 		return -EINVAL;
@@ -964,7 +849,7 @@ out:
 }
 
 /* addr aligned, sptr not null, slen less than 4 */
-static inline nrfx_err_t write_sub_word(const struct device *dev, off_t addr, const void *sptr,
+static inline nrfx_err_t write_sub_word(const struct device *dev, int addr, const void *sptr,
 					size_t slen)
 {
 	uint8_t __aligned(4) buf[4];
@@ -995,7 +880,7 @@ BUILD_ASSERT((CONFIG_NORDIC_QSPI_NOR_STACK_WRITE_BUFFER_SIZE % 4) == 0,
  *
  * If not enabled return the error the peripheral would have produced.
  */
-static inline nrfx_err_t write_from_nvmc(const struct device *dev, off_t addr, const void *sptr,
+static inline nrfx_err_t write_from_nvmc(const struct device *dev, int addr, const void *sptr,
 					 size_t slen)
 {
 #if NVMC_WRITE_OK
@@ -1022,7 +907,7 @@ static inline nrfx_err_t write_from_nvmc(const struct device *dev, off_t addr, c
 	return res;
 }
 
-static int qspi_nor_write(const struct device *dev, off_t addr, const void *src, size_t size)
+static int qspi_nor_write(const struct device *dev, int addr, const void *src, size_t size)
 {
 	if (!src)
 		return -EINVAL;
@@ -1096,18 +981,12 @@ static int qspi_nor_write_protection_set(const struct device *dev, bool write_pr
  */
 static int qspi_nor_configure(const struct device *dev)
 {
-	const struct qspi_nor_config *params = dev->config;
-
 	int ret = qspi_nrfx_configure(dev);
 
 	if (ret != 0)
 		return ret;
 
 	ANOMALY_122_UNINIT(dev);
-
-	/* now the spi bus is configured, we can verify the flash id */
-	if (_qspi_nor_read_id(dev, params) != 0)
-		return -ENODEV;
 
 	return 0;
 }
@@ -1133,17 +1012,6 @@ static int qspi_nor_init(const struct device *dev)
 	return qspi_nor_configure(dev);
 }
 
-#if defined(CONFIG_FLASH_PAGE_LAYOUT)
-
-/* instance 0 page count */
-#define LAYOUT_PAGES_COUNT (INST_0_BYTES / CONFIG_NORDIC_QSPI_NOR_FLASH_LAYOUT_PAGE_SIZE)
-
-BUILD_ASSERT((CONFIG_NORDIC_QSPI_NOR_FLASH_LAYOUT_PAGE_SIZE * LAYOUT_PAGES_COUNT) == INST_0_BYTES,
-	     "QSPI_NOR_FLASH_LAYOUT_PAGE_SIZE incompatible with flash size");
-
-#undef LAYOUT_PAGES_COUNT
-
-#endif /* CONFIG_FLASH_PAGE_LAYOUT */
 #if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
 static int qspi_cmd_encryption(const struct device *dev, nrf_qspi_encryption_t *p_cfg)
 {
@@ -1306,13 +1174,7 @@ int qspi_cmd_wakeup_rpu(const struct device *dev, uint8_t data)
 	return ret;
 }
 
-static const struct qspi_nor_config flash_id = {
-	.id = DT_INST_PROP(0, jedec_id),
-	.size = INST_0_BYTES,
-};
-
 struct device qspi_perip = {
-	.config = &flash_id,
 	.data = &qspi_nor_memory_data,
 };
 
