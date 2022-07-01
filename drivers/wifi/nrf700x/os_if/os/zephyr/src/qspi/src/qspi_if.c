@@ -302,7 +302,7 @@ nrfx_err_t _nrfx_qspi_init(nrfx_qspi_config_t const *p_config, nrfx_qspi_handler
 	/* RDC4IO = 4'hA (register IFTIMING), which means 10 Dummy Cycles for READ4. */
 	p_reg->IFTIMING |= qspi_config->RDC4IO;
 
-	/* LOG_INF("%04x : IFTIMING\n", p_reg->IFTIMING & qspi_config->RDC4IO); */
+	/* LOG_DBG("%04x : IFTIMING\n", p_reg->IFTIMING & qspi_config->RDC4IO); */
 
 	/* ACTIVATE task fails for slave bitfile so ignore it */
 	return NRFX_SUCCESS;
@@ -695,10 +695,10 @@ static inline void qspi_fill_init_struct(nrfx_qspi_config_t *initstruct)
 	initstruct->prot_if.writeoc = _qspi_get_writeoc();
 	initstruct->phy_if.sck_freq = _qspi_get_sckfreq();
 
-	/* LOG_INF("%04x : ADDRMODE\n", initstruct->prot_if.addrmode); */
-	/* LOG_INF("%04x : SCKFREQ\n", initstruct->phy_if.sck_freq); */
-	/* LOG_INF("%04x : READOC\n", initstruct->prot_if.readoc); */
-	/* LOG_INF("%04x : WRITEOC\n", initstruct->prot_if.writeoc); */
+	/* LOG_DBG("%04x : ADDRMODE\n", initstruct->prot_if.addrmode); */
+	/* LOG_DBG("%04x : SCKFREQ\n", initstruct->phy_if.sck_freq); */
+	/* LOG_DBG("%04x : READOC\n", initstruct->prot_if.readoc); */
+	/* LOG_DBG("%04x : WRITEOC\n", initstruct->prot_if.writeoc); */
 
 	initstruct->phy_if.dpmen = false;
 }
@@ -1162,7 +1162,7 @@ static int qspi_cmd_encryption(const struct device *dev, nrf_qspi_encryption_t *
 	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0)
-		LOG_INF("cmd_encryption failed %d\n", ret);
+		LOG_DBG("cmd_encryption failed %d\n", ret);
 
 	return ret;
 }
@@ -1188,7 +1188,7 @@ int qspi_validate_rpu_wake_writecmd(const struct device *dev)
 
 		ANOMALY_122_UNINIT(dev);
 
-		LOG_INF("RDSR2 = 0x%x\n", sr);
+		LOG_DBG("RDSR2 = 0x%x\n", sr);
 
 		/* k_msleep(1); */
 	}
@@ -1231,9 +1231,9 @@ int qspi_wait_while_rpu_awake(const struct device *dev)
 		ret = qspi_RDSR1(dev);
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
-			LOG_INF("RDSR1 = 0x%x\t\n", ret);
+			LOG_DBG("RDSR1 = 0x%x\t\n", ret);
 		} else {
-			LOG_INF("RDSR1 = 0x%x\n", ret);
+			LOG_DBG("RDSR1 = 0x%x\n", ret);
 			break;
 		}
 		k_msleep(1);
@@ -1268,10 +1268,10 @@ int qspi_wait_while_firmware_awake(const struct device *dev)
 		ANOMALY_122_UNINIT(dev);
 
 		if ((ret < 0) || (sr != 0x6)) {
-			LOG_INF("ret val = 0x%x\t RDSR1 = 0x%x\n", ret, sr);
+			LOG_DBG("ret val = 0x%x\t RDSR1 = 0x%x\n", ret, sr);
 		} else {
-			LOG_INF("RDSR1 = 0x%x\n", sr);
-			LOG_INF("RPU is awake...\n");
+			LOG_DBG("RDSR1 = 0x%x\n", sr);
+			LOG_DBG("RPU is awake...\n");
 			break;
 		}
 		k_msleep(1);
@@ -1318,7 +1318,7 @@ struct device qspi_perip = {
 
 int qspi_deinit(void)
 {
-	LOG_INF("TODO : %s\n", __func__);
+	LOG_DBG("TODO : %s\n", __func__);
 
 	return 0;
 }
@@ -1343,7 +1343,7 @@ int qspi_init(struct qspi_config *config)
 	config->writeoc = config->quad_spi ? NRF_QSPI_WRITEOC_PP4IO : NRF_QSPI_WRITEOC_PP;
 
 	rc = qspi_nor_init(&qspi_perip);
-	/* LOG_INF("exited qspi_nor_init()\n"); */
+	/* LOG_DBG("exited qspi_nor_init()\n"); */
 
 	k_sem_init(&qspi_config->lock, 1, 1);
 
@@ -1362,7 +1362,7 @@ int qspi_init(struct qspi_config *config)
 			config->enc_enabled = true;
 	}
 #endif
-	LOG_INF("exiting %s\n", __func__);
+	LOG_DBG("exiting %s\n", __func__);
 	return rc;
 }
 
@@ -1389,7 +1389,7 @@ void qspi_update_nonce(unsigned int addr, int len, int hlread)
 void qspi_addr_check(unsigned int addr, const void *data, unsigned int len)
 {
 	if ((addr % 4 != 0) || (((unsigned int)data) % 4 != 0) || (len % 4 != 0)) {
-		LOG_INF("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
+		LOG_DBG("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
 		       (unsigned int)data, (addr % 4 != 0), (((unsigned int)data) % 4 != 0),
 		       (len % 4 != 0));
 	}

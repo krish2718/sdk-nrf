@@ -51,7 +51,7 @@ const struct device *spim_perip_get(void)
 		return NULL;
 	}
 
-	LOG_INF("%p : got device\n", spi_perip);
+	LOG_DBG("%p : got device\n", spi_perip);
 
 	return spi_perip;
 }
@@ -176,9 +176,9 @@ int spim_wait_while_rpu_awake(const struct device *spi_perip,
 		ret = spim_RDSR1(spi_perip);
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
-			LOG_INF("RDSR1 = 0x%x\t\n", ret);
+			LOG_DBG("RDSR1 = 0x%x\t\n", ret);
 		} else {
-			LOG_INF("RDSR1 = 0x%x\n", ret);
+			LOG_DBG("RDSR1 = 0x%x\n", ret);
 			break;
 		}
 		k_msleep(1);
@@ -213,9 +213,9 @@ int spim_validate_rpu_awake(const struct device *spi_perip,
 		LOG_DBG("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
 
 		if ((err < 0) || ((sr[1] & RPU_AWAKE_BIT) == 0)) {
-			LOG_INF("RDSR2 = 0x%x\n", sr[1]);
+			LOG_DBG("RDSR2 = 0x%x\n", sr[1]);
 		} else {
-			LOG_INF("RDSR2 = 0x%x\n", sr[1]);
+			LOG_DBG("RDSR2 = 0x%x\n", sr[1]);
 			break;
 		}
 		/* k_msleep(1); */
