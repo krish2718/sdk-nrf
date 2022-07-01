@@ -56,69 +56,52 @@ const struct device *spim_perip_get(void)
 	return spi_perip;
 }
 
-unsigned int spim_xfer_tx(const struct device *spi_perip, const struct spi_config *spi_cfg,
-			  unsigned int addr, const void *data, unsigned int len)
+int spim_xfer_tx(const struct device *spi_perip, const struct spi_config *spi_cfg,
+		unsigned int addr, void *data, unsigned int len)
 {
 	int err;
-	static uint8_t *tx_buffer;
+	static uint8_t hdr[4];
 
-	tx_buffer = (uint8_t *)(k_malloc(4 + len));
-
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = 4 + len };
-	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+	const struct spi_buf tx_buf[] = {
+		{.buf = hdr,  .len = 4 },
+		{.buf = data, .len = len },
+	};
+	const struct spi_buf_set tx = { .buffers = tx_buf, .count = 2 };
 
 	/* PP opcode : 0x02 */
-	tx_buffer[0] = 0x02;
+	hdr[0] = 0x02;
 
 	/* addr */
-	tx_buffer[1] = (((addr >> 16) & 0xFF) | 0x80);
-	tx_buffer[2] = (addr >> 8) & 0xFF;
-	tx_buffer[3] = addr & 0xFF;
-
-	/* data */
-	memcpy(tx_buffer + 4, data, len);
+	hdr[1] = (((addr >> 16) & 0xFF) | 0x80);
+	hdr[2] = (addr >> 8) & 0xFF;
+	hdr[3] = addr & 0xFF;
 
 	err = spi_transceive(spi_perip, spi_cfg, &tx, NULL);
-
-	k_free(tx_buffer);
 
 	return err;
 }
 
-unsigned int spim_xfer_rx(const struct device *spi_perip, const struct spi_config *spi_cfg,
-			  unsigned int addr, void *data, unsigned int len)
+#define DUMMY_BYTES 5
+
+int _spim_xfer_rx(const struct device *spi_perip, 
+		const struct spi_config *spi_cfg,
+		unsigned int addr, unsigned int len,
+		void *rx)
 {
 	int err;
-	int dummy = 5;
 	uint8_t *tx_buffer = NULL;
-	uint8_t *rx_buffer = NULL;
 
-	tx_buffer = (uint8_t *)(k_malloc(dummy + len));
+	tx_buffer = (uint8_t *)(k_malloc(DUMMY_BYTES + len));
 
 	if (tx_buffer == NULL) {
 		LOG_ERR("SPI error:NO MEMORY for tx_buffer\n");
 		return -ENOMEM;
 	}
 
-	rx_buffer = (uint8_t *)(k_malloc(dummy + len));
+	memset(tx_buffer, 0, len + DUMMY_BYTES);
 
-	if (rx_buffer == NULL) {
-		LOG_ERR("SPI error:NO MEMORY rx_buffer\n");
-		k_free(tx_buffer);
-		return -ENOMEM;
-	}
-
-	memset(tx_buffer, 0, len + dummy);
-	memset(rx_buffer, 0, len + dummy);
-
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = (len + dummy) };
+	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = (len + DUMMY_BYTES) };
 	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
-
-	struct spi_buf rx_buf = {
-		.buf = rx_buffer,
-		.len = (len + dummy),
-	};
-	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
 
 	/* FASTREAD opcode : 0x0b */
 
@@ -127,13 +110,43 @@ unsigned int spim_xfer_rx(const struct device *spi_perip, const struct spi_confi
 	tx_buffer[2] = (addr >> 8) & 0xFF;
 	tx_buffer[3] = addr & 0xFF;
 
-	err = spi_transceive(spi_perip, spi_cfg, &tx, &rx);
-	memcpy(data, rx_buffer + dummy, len);
+	err = spi_transceive(spi_perip, spi_cfg, &tx, rx);
+
+	k_free(tx_buffer);
+
+	return err;
+}
+
+int spim_xfer_rx(const struct device *spi_perip,
+		const struct spi_config *spi_cfg,
+		unsigned int addr, void *data, unsigned int len)
+{
+	int err;
+	uint8_t *rx_buffer = NULL;
+
+	rx_buffer = (uint8_t *)(k_malloc(DUMMY_BYTES + len));
+
+	if (rx_buffer == NULL) {
+		LOG_ERR("SPI error:NO MEMORY rx_buffer\n");
+		return -ENOMEM;
+	}
+
+	memset(rx_buffer, 0, len + DUMMY_BYTES);
+
+	struct spi_buf rx_buf = {
+		.buf = rx_buffer,
+		.len = (len + DUMMY_BYTES),
+	};
+
+	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
+
+	err = _spim_xfer_rx(spi_perip, spi_cfg, addr, len, (void*)&rx);
 
 	if (err)
 		LOG_ERR("SPI error: %d\n", err);
+	else
+		memcpy(data, rx_buffer + DUMMY_BYTES, len);
 
-	k_free(tx_buffer);
 	k_free(rx_buffer);
 
 	return err;
@@ -314,7 +327,7 @@ int spim_write(unsigned int addr, const void *data, int len)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_tx(spim_perip, &spi_cfg, addr, data, len);
+	status = spim_xfer_tx(spim_perip, &spi_cfg, addr, (void*)data, len);
 
 	k_sem_give(&spim_config->lock);
 
