@@ -171,7 +171,7 @@ int spim_wait_while_rpu_awake(const struct device *spi_perip,
 {
 	int ret;
 
-	for (int ii = 0; ii < 1; ii++) {
+	for (int ii = 0; ii < 10; ii++) {
 
 		ret = spim_RDSR1(spi_perip);
 
