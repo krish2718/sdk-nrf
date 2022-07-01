@@ -1227,7 +1227,7 @@ int qspi_wait_while_rpu_awake(const struct device *dev)
 {
 	int ret;
 
-	for (int ii = 0; ii < 1; ii++) {
+	for (int ii = 0; ii < 10; ii++) {
 		ret = qspi_RDSR1(dev);
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {

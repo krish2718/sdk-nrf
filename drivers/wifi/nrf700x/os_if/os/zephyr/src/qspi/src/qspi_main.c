@@ -20,6 +20,10 @@
 
 #define SLEEP_TIME_MS 2
 
+#include <logging/log.h>
+
+LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
+
 #define NRF7002_NODE DT_NODELABEL(nrf7002)
 
 static const struct gpio_dt_spec iovdd_ctrl_spec =
@@ -70,13 +74,13 @@ struct gpio_callback irq_callback_data;
 
 void irq_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	printk("\n !!! IRQ Hit !!!!\n");
+	LOG_DBG("\n !!! IRQ Hit !!!!\n");
 }
 
 void print_memmap(void)
 {
 	for (int i = 0; i < NUM_MEM_BLOCKS; i++) {
-		printk(" %-14s : 0x%06x - 0x%06x (%05d words)\n", blk_name[i], shk_memmap[i][0],
+		LOG_DBG(" %-14s : 0x%06x - 0x%06x (%05d words)\n", blk_name[i], shk_memmap[i][0],
 		       shk_memmap[i][1], 1 + ((shk_memmap[i][1] - shk_memmap[i][0]) >> 2));
 	}
 }
@@ -117,7 +121,7 @@ static int validate_addr(uint32_t start_addr, uint32_t len)
 	ret |= validate_addr_blk(start_addr, end_addr, 10);
 
 	if (!ret) {
-		printk("Address validation failed - pls check memmory map and re-try\n");
+		LOG_DBG("Address validation failed - pls check memmory map and re-try\n");
 		print_memmap();
 		return 0;
 	}
@@ -178,7 +182,7 @@ static int cmd_write_blk(const struct shell *shell, size_t argc, char **argv)
 	buff = (uint32_t *)k_malloc(num_words * 4);
 	for (i = 0; i < num_words; i++) {
 		buff[i] = pattern + i * offset;
-		/* printk("%08x\n", buff[i]); */
+		/* LOG_DBG("%08x\n", buff[i]); */
 	}
 
 	qdev->write(addr, buff, num_words * 4);
@@ -198,7 +202,7 @@ static int cmd_read_wrd(const struct shell *shell, size_t argc, char **argv)
 		return -1;
 
 	/* shell_print(shell, "hl_read = %d",(int) hl_flag); */
-	/* printk("QSPI/SPIM latency = %d\n",cfg->qspi_slave_latency); */
+	/* LOG_DBG("QSPI/SPIM latency = %d\n",cfg->qspi_slave_latency); */
 	(hl_flag) ? qdev->hl_read(addr, &val, 4) : qdev->read(addr, &val, 4);
 
 	/* shell_print(shell, "addr = 0x%08x Read val = 0x%08x\n",addr, val); */
@@ -228,7 +232,7 @@ static int cmd_read_blk(const struct shell *shell, size_t argc, char **argv)
 	if (!validate_addr(addr, num_words * 4))
 		return -1;
 
-	/* printk("QSPI/SPIM latency = %d\n",cfg->qspi_slave_latency); */
+	/* LOG_DBG("QSPI/SPIM latency = %d\n",cfg->qspi_slave_latency); */
 
 	buff = (uint32_t *)k_malloc(num_words * 4);
 
@@ -281,7 +285,7 @@ static int cmd_memtest(const struct shell *shell, size_t argc, char **argv)
 		shell_print(shell, "Error... Cannot write to ROM blocks");
 	}
 
-	/* printk("QSPI/SPIM latency = %d\n",cfg->qspi_slave_latency); */
+	/* LOG_DBG("QSPI/SPIM latency = %d\n",cfg->qspi_slave_latency); */
 
 	buff = (uint32_t *)k_malloc(2000 * 4);
 	rxbuff = (uint32_t *)k_malloc(2000 * 4);
@@ -294,7 +298,7 @@ static int cmd_memtest(const struct shell *shell, size_t argc, char **argv)
 
 		for (i = 0; i < test_chunk; i++) {
 			buff[i] = pattern + (i + chunk_no * 2000) * offset;
-			/* printk("%08x\n", buff[i]); */
+			/* LOG_DBG("%08x\n", buff[i]); */
 		}
 
 		qdev->write(addr, buff, test_chunk * 4);
@@ -322,23 +326,23 @@ void get_sleep_stats(uint32_t addr, uint32_t *buff, uint32_t wrd_len)
 {
 #if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
-	printk("Waiting for RPU awake...\n");
+	LOG_DBG("Waiting for RPU awake...\n");
 
 	qspi_validate_rpu_wake_writecmd(&qspi_perip);
-	printk("exited qspi_validate_rpu_wake_writecmd(). Waiting for rpu_awake.....\n");
+	LOG_DBG("exited qspi_validate_rpu_wake_writecmd(). Waiting for rpu_awake.....\n");
 
 	qspi_wait_while_firmware_awake(&qspi_perip);
-	printk("exited qspi_wait_while_rpu_awake()...\n");
+	LOG_DBG("exited qspi_wait_while_rpu_awake()...\n");
 
 	(hl_flag) ? qdev->hl_read(addr, buff, wrd_len * 4) : qdev->read(addr, buff, wrd_len * 4);
 	qspi_cmd_sleep_rpu(&qspi_perip);
 
 #else
 	spim_cmd_rpu_wakeup_fn(spim_perip, 0x1);
-	printk("exited spim_cmd_rpu_wakeup_fn()\n");
+	LOG_DBG("exited spim_cmd_rpu_wakeup_fn()\n");
 
 	spim_validate_rpu_awake_fn(spim_perip);
-	printk("exited spim_validate_rpu_awake_fn(). Waiting for rpu_awake.....\n");
+	LOG_DBG("exited spim_validate_rpu_awake_fn(). Waiting for rpu_awake.....\n");
 
 	spim_wait_while_rpu_awake_fn(spim_perip);
 
@@ -369,7 +373,7 @@ static int cmd_sleep_stats(const struct shell *shell, size_t argc, char **argv)
 	get_sleep_stats(addr, buff, wrd_len);
 
 	for (int i = 0; i < wrd_len; i++) {
-		printk("0x%08x\n", buff[i]);
+		LOG_DBG("0x%08x\n", buff[i]);
 	}
 
 	k_free(buff);
@@ -393,7 +397,7 @@ int func_irq_config(struct gpio_callback *irq_callback_data, void (*irq_handler)
 
 	gpio_add_callback(host_irq_spec.port, irq_callback_data);
 
-	printk("Finished Interrupt config\n\n");
+	LOG_DBG("Finished Interrupt config\n\n");
 
 	return 0;
 }
@@ -419,7 +423,7 @@ int func_gpio_config(void)
 
 	ret = gpio_pin_configure_dt(&iovdd_ctrl_spec, GPIO_OUTPUT);
 
-	printk("GPIO configuration done...\n\n");
+	LOG_DBG("GPIO configuration done...\n\n");
 
 	return 0;
 }
@@ -441,7 +445,8 @@ static int func_pwron(void)
 #if SHELIAK_SOC
 	k_msleep(SLEEP_TIME_MS);
 	gpio_pin_set_dt(&iovdd_ctrl_spec, 1);
-	printk("BUCKEN=1, IOVDD=1...\n");
+	k_msleep(SLEEP_TIME_MS);
+	LOG_DBG("BUCKEN=1, IOVDD=1...\n");
 #else
 #endif
 
@@ -472,8 +477,8 @@ static int cmd_config(const struct shell *shell, size_t argc, char **argv)
 	cfg->freq = qspi_spim_freq_MHz;
 	shk_memmap[mem_block][2] = qspi_spim_latency;
 	cfg->qspi_slave_latency = qspi_spim_latency;
-	printk("QSPIM freq = %d MHz\n", cfg->freq);
-	printk("QSPIM latency = %d\n", cfg->qspi_slave_latency);
+	LOG_DBG("QSPIM freq = %d MHz\n", cfg->freq);
+	LOG_DBG("QSPIM latency = %d\n", cfg->qspi_slave_latency);
 
 	return 0;
 }
@@ -489,9 +494,9 @@ static void func_qspi_init(void)
 
 	qdev->init(cfg);
 
-	printk("QSPI/SPIM freq = %d MHz\n", cfg->freq);
-	printk("QSPI/SPIM latency = %d\n", cfg->qspi_slave_latency);
-	printk("QSPI/SPIM Config done...\n");
+	LOG_DBG("QSPI/SPIM freq = %d MHz\n", cfg->freq);
+	LOG_DBG("QSPI/SPIM latency = %d\n", cfg->qspi_slave_latency);
+	LOG_DBG("QSPI/SPIM Config done...\n");
 }
 
 static int cmd_qspi_init(const struct shell *shell, size_t argc, char **argv)
@@ -534,18 +539,18 @@ int func_rpuwake(void)
 {
 #if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
-	printk("exited qspi_cmd_wakeup_rpu()\n");
+	LOG_DBG("exited qspi_cmd_wakeup_rpu()\n");
 
 	qspi_validate_rpu_wake_writecmd(&qspi_perip);
-	printk("exited qspi_validate_rpu_wake_writecmd(). Waiting for rpu_awake.....\n");
+	LOG_DBG("exited qspi_validate_rpu_wake_writecmd(). Waiting for rpu_awake.....\n");
 
 	qspi_wait_while_rpu_awake(&qspi_perip);
 #else
 	spim_cmd_rpu_wakeup_fn(spim_perip, 0x1);
-	printk("exited spim_cmd_rpu_wakeup_fn()\n");
+	LOG_DBG("exited spim_cmd_rpu_wakeup_fn()\n");
 
 	spim_wait_while_rpu_awake_fn(spim_perip);
-	printk("exited spim_wait_while_rpu_awake_fn(). Waiting for rpu_awake.....\n");
+	LOG_DBG("exited spim_wait_while_rpu_awake_fn(). Waiting for rpu_awake.....\n");
 
 	spim_validate_rpu_awake_fn(spim_perip);
 #endif
@@ -569,7 +574,7 @@ static int func_wrsr2(uint8_t data)
 	spim_cmd_rpu_wakeup_fn(spim_perip, data);
 #endif
 
-	printk("Written 0x%x to WRSR2\n", data);
+	LOG_DBG("Written 0x%x to WRSR2\n", data);
 	return 0;
 }
 
@@ -628,7 +633,7 @@ static int func_rpuclks_on(void)
 	uint32_t rpu_clks = 0x100;
 	/* Enable RPU Clocks */
 	qdev->write(0x048C20, &rpu_clks, 4);
-	printk("RPU Clocks ON...\n");
+	LOG_DBG("RPU Clocks ON...\n");
 #endif
 	return 0;
 }
