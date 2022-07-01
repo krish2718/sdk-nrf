@@ -83,7 +83,7 @@ int spim_xfer_tx(const struct device *spi_perip, const struct spi_config *spi_cf
 
 #define DUMMY_BYTES 5
 
-int _spim_xfer_rx(const struct device *spi_perip, 
+int _spim_xfer_rx(const struct device *spi_perip,
 		const struct spi_config *spi_cfg,
 		unsigned int addr, unsigned int len,
 		void *rx)
@@ -140,7 +140,7 @@ int spim_xfer_rx(const struct device *spi_perip,
 
 	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
 
-	err = _spim_xfer_rx(spi_perip, spi_cfg, addr, len, (void*)&rx);
+	err = _spim_xfer_rx(spi_perip, spi_cfg, addr, len, (void *)&rx);
 
 	if (err)
 		LOG_ERR("SPI error: %d\n", err);
@@ -327,7 +327,7 @@ int spim_write(unsigned int addr, const void *data, int len)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_tx(spim_perip, &spi_cfg, addr, (void*)data, len);
+	status = spim_xfer_tx(spim_perip, &spi_cfg, addr, (void *)data, len);
 
 	k_sem_give(&spim_config->lock);
 

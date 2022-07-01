@@ -265,4 +265,3 @@ arduino_spi: &spi4 {
 
 /* Include partition configuration file */
 #include "nrf5340_cpuapp_partition_conf.dts"
-
