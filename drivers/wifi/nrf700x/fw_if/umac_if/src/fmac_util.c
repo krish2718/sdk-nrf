@@ -13,11 +13,7 @@
 #include "fmac_util.h"
 #include "host_rpu_umac_if.h"
 
-/* Ethernet-II snap header (RFC1042 for most EtherTypes) */
-unsigned char llc_header[] = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00 };
 
-/* Bridge-Tunnel header (for EtherTypes ETH_P_AARP and ETH_P_IPX) */
-unsigned char aarp_ipx_header[] = { 0xaa, 0xaa, 0x03, 0x00, 0x00, 0xf8 };
 
 
 bool wifi_nrf_util_is_multicast_addr(const unsigned char *addr)
@@ -66,7 +62,13 @@ unsigned short wifi_nrf_util_tx_get_eth_type(struct wifi_nrf_fmac_dev_ctx *fmac_
 
 int wifi_nrf_util_get_skip_header_bytes(unsigned short eth_type)
 {
-	int skip_header_bytes = sizeof(eth_type);
+	/* Ethernet-II snap header (RFC1042 for most EtherTypes) */
+	unsigned char llc_header[] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00};
+	/* Bridge-Tunnel header (for EtherTypes ETH_P_AARP and ETH_P_IPX) */
+	static unsigned char aarp_ipx_header[] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0xf8};
+	int skip_header_bytes = 0;
+
+	skip_header_bytes = sizeof(eth_type);
 
 	if (eth_type == WIFI_NRF_FMAC_ETH_P_AARP ||
 	    eth_type == WIFI_NRF_FMAC_ETH_P_IPX) {

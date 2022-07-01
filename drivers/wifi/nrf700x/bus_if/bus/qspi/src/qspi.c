@@ -13,9 +13,8 @@
 #include "qspi.h"
 #include "pal.h"
 
-#define WIFI_NRF_QSPI_DEV_NAME "wlan0"
 
-int wifi_nrf_bus_qspi_irq_handler(void *data)
+static int wifi_nrf_bus_qspi_irq_handler(void *data)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *dev_ctx = NULL;
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
@@ -30,8 +29,8 @@ int wifi_nrf_bus_qspi_irq_handler(void *data)
 }
 
 
-void *wifi_nrf_bus_qspi_dev_add(void *bus_priv,
-				void *bal_dev_ctx)
+static void *wifi_nrf_bus_qspi_dev_add(void *bus_priv,
+				       void *bal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
@@ -107,7 +106,7 @@ out:
 }
 
 
-void wifi_nrf_bus_qspi_dev_rem(void *bus_dev_ctx)
+static void wifi_nrf_bus_qspi_dev_rem(void *bus_dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -121,7 +120,7 @@ void wifi_nrf_bus_qspi_dev_rem(void *bus_dev_ctx)
 }
 
 
-enum wifi_nrf_status wifi_nrf_bus_qspi_dev_init(void *bus_dev_ctx)
+static enum wifi_nrf_status wifi_nrf_bus_qspi_dev_init(void *bus_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
@@ -142,7 +141,7 @@ out:
 }
 
 
-void wifi_nrf_bus_qspi_dev_deinit(void *bus_dev_ctx)
+static void wifi_nrf_bus_qspi_dev_deinit(void *bus_dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -153,9 +152,9 @@ void wifi_nrf_bus_qspi_dev_deinit(void *bus_dev_ctx)
 }
 
 
-void *wifi_nrf_bus_qspi_init(struct wifi_nrf_osal_priv *opriv,
-			     void *params,
-			     enum wifi_nrf_status (*intr_callbk_fn)(void *bal_dev_ctx))
+static void *wifi_nrf_bus_qspi_init(struct wifi_nrf_osal_priv *opriv,
+				    void *params,
+				    enum wifi_nrf_status (*intr_callbk_fn)(void *bal_dev_ctx))
 {
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 
@@ -197,7 +196,7 @@ out:
 }
 
 
-void wifi_nrf_bus_qspi_deinit(void *bus_priv)
+static void wifi_nrf_bus_qspi_deinit(void *bus_priv)
 {
 	struct wifi_nrf_bus_qspi_priv *qspi_priv = NULL;
 
@@ -211,8 +210,8 @@ void wifi_nrf_bus_qspi_deinit(void *bus_priv)
 }
 
 
-unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx,
-					 unsigned long addr_offset)
+static unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx,
+						unsigned long addr_offset)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned int val = 0;
@@ -227,9 +226,9 @@ unsigned int wifi_nrf_bus_qspi_read_word(void *dev_ctx,
 }
 
 
-void wifi_nrf_bus_qspi_write_word(void *dev_ctx,
-				  unsigned long addr_offset,
-				  unsigned int val)
+static void wifi_nrf_bus_qspi_write_word(void *dev_ctx,
+					 unsigned long addr_offset,
+					 unsigned int val)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -242,10 +241,10 @@ void wifi_nrf_bus_qspi_write_word(void *dev_ctx,
 }
 
 
-void wifi_nrf_bus_qspi_read_block(void *dev_ctx,
-				  void *dest_addr,
-				  unsigned long src_addr_offset,
-				  size_t len)
+static void wifi_nrf_bus_qspi_read_block(void *dev_ctx,
+					 void *dest_addr,
+					 unsigned long src_addr_offset,
+					 size_t len)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -259,10 +258,10 @@ void wifi_nrf_bus_qspi_read_block(void *dev_ctx,
 }
 
 
-void wifi_nrf_bus_qspi_write_block(void *dev_ctx,
-				   unsigned long dest_addr_offset,
-				   const void *src_addr,
-				   size_t len)
+static void wifi_nrf_bus_qspi_write_block(void *dev_ctx,
+					  unsigned long dest_addr_offset,
+					  const void *src_addr,
+					  size_t len)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -276,10 +275,10 @@ void wifi_nrf_bus_qspi_write_block(void *dev_ctx,
 }
 
 
-unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx,
-					unsigned long virt_addr,
-					size_t len,
-					enum wifi_nrf_osal_dma_dir dma_dir)
+static unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx,
+					       unsigned long virt_addr,
+					       size_t len,
+					       enum wifi_nrf_osal_dma_dir dma_dir)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned long phy_addr = 0;
@@ -292,10 +291,10 @@ unsigned long wifi_nrf_bus_qspi_dma_map(void *dev_ctx,
 }
 
 
-unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx,
-					  unsigned long phy_addr,
-					  size_t len,
-					  enum wifi_nrf_osal_dma_dir dma_dir)
+static unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx,
+						 unsigned long phy_addr,
+						 size_t len,
+						 enum wifi_nrf_osal_dma_dir dma_dir)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 	unsigned long virt_addr = 0;
@@ -309,7 +308,7 @@ unsigned long wifi_nrf_bus_qspi_dma_unmap(void *dev_ctx,
 
 
 #ifdef RPU_SLEEP_SUPPORT
-void wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
+static void wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -320,7 +319,7 @@ void wifi_nrf_bus_qspi_ps_sleep(void *dev_ctx)
 }
 
 
-void wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
+static void wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -331,7 +330,7 @@ void wifi_nrf_bus_qspi_ps_wake(void *dev_ctx)
 }
 
 
-int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
+static int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
 {
 	struct wifi_nrf_bus_qspi_dev_ctx *qspi_dev_ctx = NULL;
 
@@ -343,7 +342,7 @@ int wifi_nrf_bus_qspi_ps_status(void *dev_ctx)
 #endif /* RPU_SLEEP_SUPPORT */
 
 
-struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
+static struct wifi_nrf_bal_ops wifi_nrf_bus_qspi_ops = {
 	.init = &wifi_nrf_bus_qspi_init,
 	.deinit = &wifi_nrf_bus_qspi_deinit,
 	.dev_add = &wifi_nrf_bus_qspi_dev_add,

@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config WIFI_NRF
-	bool "Nordic Wi-Fi driver"
+config NRF_700X
+	bool "nRF700x driver"
 	select NRFX_QSPI
 	select WPA_SUPP
 	select NRFX_SPIM
