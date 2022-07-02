@@ -18,6 +18,7 @@
 #include <net/net_if.h>
 #include <net/wifi_mgmt.h>
 #include <net/net_event.h>
+#include "common.h"
 #include "zephyr_fmac_main.h"
 #ifdef CONFIG_WPA_SUPP
 #include "utils/common.h"

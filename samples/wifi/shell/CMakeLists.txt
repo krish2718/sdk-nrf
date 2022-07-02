@@ -15,8 +15,8 @@ set(WPA_SUPP_BASE ${WEST_TOPDIR}/modules/lib/hostap)
 endif()
 
 # TODO: Remove this hack
-target_include_directories(app
-	PRIVATE
+target_include_directories(mbedcrypto_common
+	INTERFACE
 	${CMAKE_SOURCE_DIR}
 	${ZEPHYR_BASE}/subsys/net/ip
 	${WIFI_NRF_DRV_BASE}/osal/os_if/inc
