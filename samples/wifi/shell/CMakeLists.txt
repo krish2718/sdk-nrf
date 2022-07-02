@@ -19,11 +19,11 @@ target_include_directories(app
 	PRIVATE
 	${CMAKE_SOURCE_DIR}
 	${ZEPHYR_BASE}/subsys/net/ip
-	${WIFI_NRF_DRV_BASE}/os_if/osal/inc
-	${WIFI_NRF_DRV_BASE}/os_if/os/zephyr/inc
-	${WIFI_NRF_DRV_BASE}/fw_if/umac_if/inc
-	${WIFI_NRF_DRV_BASE}/fw_if/umac_if/inc/fw
-	${WIFI_NRF_DRV_BASE}/hw_if/hal/inc/fw
+	${WIFI_NRF_DRV_BASE}/osal/os_if/inc
+	${WIFI_NRF_DRV_BASE}/zephyr/inc
+	${WIFI_NRF_DRV_BASE}/osal/fw_if/umac_if/inc
+	${WIFI_NRF_DRV_BASE}/osal/fw_if/umac_if/inc/fw
+	${WIFI_NRF_DRV_BASE}/osal/hw_if/hal/inc/fw
 if(CONFIG_WPA_SUPP)
 	${WPA_SUPP_BASE}/wpa_supplicant
 	${WPA_SUPP_BASE}/src
