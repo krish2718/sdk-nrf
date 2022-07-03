@@ -31,6 +31,12 @@ if(CONFIG_WPA_SUPP)
 endif()
 )
 
+target_compile_definitions_ifdef(CONFIG_WPA_SUPP_CRYPTO
+	app
+	PRIVATE
+	CONFIG_WEP
+)
+
 target_sources(app PRIVATE
 	src/main.c
 	src/supp_shell.c
