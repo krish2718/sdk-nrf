@@ -20,7 +20,7 @@
 
 struct qspi_config config;
 
-#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP)
+#if defined(CONFIG_NRFX_QSPI)
 struct qspi_dev qspi = { .init = qspi_init,
 			 .read = qspi_read,
 			 .write = qspi_write,
@@ -36,11 +36,13 @@ struct qspi_dev spim = { .init = spim_init,
 struct qspi_config *qspi_defconfig(void)
 {
 	memset(&config, 0, sizeof(struct qspi_config));
-
+ 
+#if defined(CONFIG_NRFX_QSPI)
 	config.addrmode = NRF_QSPI_ADDRMODE_24BIT;
 	config.RDC4IO = 0xA0;
 	config.easydma = true;
 	config.quad_spi = true;
+#endif
 	config.addrmask = 0x800000; /* set bit23 (incr. addr mode) */
 
 	config.freq = 16; /* 16MHz */
@@ -56,7 +58,7 @@ struct qspi_config *qspi_defconfig(void)
 
 	config.encryption = config.CMD_CNONCE = false;
 
-#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP)
+#if defined(CONFIG_NRFX_QSPI)
 
 	/*For #Bit 6 Enable below: i.e ALL Ones for QSPI Key*/
 	memset(&config.p_cfg.key, 0xff, sizeof(config.p_cfg.key));
@@ -65,14 +67,14 @@ struct qspi_config *qspi_defconfig(void)
 	config.p_cfg.nonce[1] = 0x0;
 	config.p_cfg.nonce[2] = 0x1;
 
-#endif /*CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP*/
+#endif /*CONFIG_NRFX_QSPI*/
 
 	return &config;
 }
 
 struct qspi_dev *qspi_dev(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	return &qspi;
 #else
 	return &spim;

@@ -5,17 +5,27 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+DT_COMPAT_NORDIC_NRF7002_QSPI := nordic,nrf7002-qspi
+DT_COMPAT_NORDIC_NRF7002_SPI := nordic,nrf7002-spi
+
 config NRF_700X
 	bool "nRF700x driver"
-	select NRFX_QSPI
 	select WPA_SUPP
-	select NRFX_SPIM
-	select NRFX_SPIM3
-	select NRFX_SPIM4
 	select WIFI
-	select SPI
 	help
 	  Nordic Wi-Fi Driver
+
+if NRF_700X
+
+config NRF700X_ON_QSPI
+	def_bool $(dt_compat_enabled,$(DT_COMPAT_NORDIC_NRF7002_QSPI))
+	select NRFX_QSPI
+
+config NRF700X_ON_SPI
+	def_bool $(dt_compat_enabled,$(DT_COMPAT_NORDIC_NRF7002_SPI))
+	select SPI
+
+endif
 
 module = WIFI_NRF
 module-str = WIFI_NRF

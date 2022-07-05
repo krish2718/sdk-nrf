@@ -324,7 +324,7 @@ static int cmd_memtest(const struct shell *shell, size_t argc, char **argv)
 
 void get_sleep_stats(uint32_t addr, uint32_t *buff, uint32_t wrd_len)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 	LOG_DBG("Waiting for RPU awake...\n");
 
@@ -338,16 +338,16 @@ void get_sleep_stats(uint32_t addr, uint32_t *buff, uint32_t wrd_len)
 	qspi_cmd_sleep_rpu(&qspi_perip);
 
 #else
-	spim_cmd_rpu_wakeup_fn(spim_perip, 0x1);
+	spim_cmd_rpu_wakeup_fn(0x1);
 	LOG_DBG("exited spim_cmd_rpu_wakeup_fn()\n");
 
-	spim_validate_rpu_awake_fn(spim_perip);
+	spim_validate_rpu_awake_fn();
 	LOG_DBG("exited spim_validate_rpu_awake_fn(). Waiting for rpu_awake.....\n");
 
-	spim_wait_while_rpu_awake_fn(spim_perip);
+	spim_wait_while_rpu_awake_fn();
 
 	(hl_flag) ? qdev->hl_read(addr, buff, wrd_len * 4) : qdev->read(addr, buff, wrd_len * 4);
-	spim_cmd_sleep_rpu_fn(spim_perip);
+	spim_cmd_sleep_rpu_fn();
 
 #endif
 }
@@ -507,28 +507,28 @@ static int cmd_qspi_init(const struct shell *shell, size_t argc, char **argv)
 
 int func_rpu_sleep(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	return qspi_cmd_sleep_rpu(&qspi_perip);
 #else
-	return spim_cmd_sleep_rpu_fn(spim_perip);
+	return spim_cmd_sleep_rpu_fn();
 #endif
 }
 
 int func_rpu_wake(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	return qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 #else
-	return spim_cmd_rpu_wakeup_fn(spim_perip, 0x1);
+	return spim_cmd_rpu_wakeup_fn(0x1);
 #endif
 }
 
 int func_rpu_sleep_status(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	return qspi_RDSR1(&qspi_perip);
 #else
-	return spim_RDSR1(spim_perip);
+	return spim_RDSR1();
 #endif
 }
 
@@ -537,7 +537,7 @@ int func_rpu_sleep_status(void)
 
 int func_rpuwake(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 	LOG_DBG("exited qspi_cmd_wakeup_rpu()\n");
 
@@ -546,13 +546,13 @@ int func_rpuwake(void)
 
 	qspi_wait_while_rpu_awake(&qspi_perip);
 #else
-	spim_cmd_rpu_wakeup_fn(spim_perip, 0x1);
+	spim_cmd_rpu_wakeup_fn(0x1);
 	LOG_DBG("exited spim_cmd_rpu_wakeup_fn()\n");
 
-	spim_wait_while_rpu_awake_fn(spim_perip);
+	spim_wait_while_rpu_awake_fn();
 	LOG_DBG("exited spim_wait_while_rpu_awake_fn(). Waiting for rpu_awake.....\n");
 
-	spim_validate_rpu_awake_fn(spim_perip);
+	spim_validate_rpu_awake_fn();
 #endif
 
 	return 0;
@@ -568,10 +568,10 @@ static int cmd_rpuwake(const struct shell *shell, size_t argc, char **argv)
 
 static int func_wrsr2(uint8_t data)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	qspi_cmd_wakeup_rpu(&qspi_perip, data);
 #else
-	spim_cmd_rpu_wakeup_fn(spim_perip, data);
+	spim_cmd_rpu_wakeup_fn(data);
 #endif
 
 	LOG_DBG("Written 0x%x to WRSR2\n", data);
@@ -591,10 +591,10 @@ static int cmd_wrsr2(const struct shell *shell, size_t argc, char **argv)
 /* -------------------------------------------------------------------------------------- */
 static int func_rdsr2(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	qspi_validate_rpu_wake_writecmd(&qspi_perip);
 #else
-	spim_validate_rpu_awake_fn(spim_perip);
+	spim_validate_rpu_awake_fn();
 #endif
 
 	return 0;
@@ -610,10 +610,10 @@ static int cmd_rdsr2(const struct shell *shell, size_t argc, char **argv)
 
 static int func_rdsr1(void)
 {
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+#if CONFIG_NRFX_QSPI
 	qspi_wait_while_rpu_awake(&qspi_perip);
 #else
-	spim_wait_while_rpu_awake_fn(spim_perip);
+	spim_wait_while_rpu_awake_fn();
 #endif
 	return 0;
 }
@@ -688,24 +688,24 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 {
 	shell_print(shell, "Supported commands....  ");
 	shell_print(shell, "=========================  ");
-	shell_print(shell, "uart:~$ wifiutils read_wrd    <address> ");
-	shell_print(shell, "         ex: $ wifiutils read_wrd 0x0c0000");
+	shell_print(shell, "uart:~$ nrf700x_shell read_wrd    <address> ");
+	shell_print(shell, "         ex: $ nrf700x_shell read_wrd 0x0c0000");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils write_wrd   <address> <data>");
-	shell_print(shell, "         ex: $ wifiutils write_wrd 0x0c0000 0xabcd1234");
+	shell_print(shell, "uart:~$ nrf700x_shell write_wrd   <address> <data>");
+	shell_print(shell, "         ex: $ nrf700x_shell write_wrd 0x0c0000 0xabcd1234");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils read_blk    <address> <num_words>");
-	shell_print(shell, "         ex: $ wifiutils read_blk 0x0c0000 64");
+	shell_print(shell, "uart:~$ nrf700x_shell read_blk    <address> <num_words>");
+	shell_print(shell, "         ex: $ nrf700x_shell read_blk 0x0c0000 64");
 	shell_print(shell, "         Note - num_words can be a maximum of 2000");
 	shell_print(shell, "  ");
 	shell_print(
 		shell,
-		"uart:~$ wifiutils write_blk   <address> <start_pattern> <pattern_increment> <num_words>");
-	shell_print(shell, "         ex: $ wifiutils write_blk 0x0c0000 0xaaaa5555 0 64");
+		"uart:~$ nrf700x_shell write_blk   <address> <start_pattern> <pattern_increment> <num_words>");
+	shell_print(shell, "         ex: $ nrf700x_shell write_blk 0x0c0000 0xaaaa5555 0 64");
 	shell_print(
 		shell,
 		"         This writes pattern 0xaaaa5555 to 64 locations starting from 0x0c0000");
-	shell_print(shell, "         ex: $ wifiutils write_blk 0x0c0000 0x0 1 64");
+	shell_print(shell, "         ex: $ nrf700x_shell write_blk 0x0c0000 0x0 1 64");
 	shell_print(
 		shell,
 		"         This writes pattern 0x0, 0x1,0x2,0x3....etc to 64 locations starting from 0x0c0000");
@@ -713,15 +713,15 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 	shell_print(shell, "  ");
 	shell_print(
 		shell,
-		"uart:~$ wifiutils memtest   <address> <start_pattern> <pattern_increment> <num_words>");
-	shell_print(shell, "         ex: $ wifiutils memtest 0x0c0000 0xaaaa5555 0 64");
+		"uart:~$ nrf700x_shell memtest   <address> <start_pattern> <pattern_increment> <num_words>");
+	shell_print(shell, "         ex: $ nrf700x_shell memtest 0x0c0000 0xaaaa5555 0 64");
 	shell_print(
 		shell,
 		"         This writes pattern 0xaaaa5555 to 64 locations starting from 0x0c0000,");
 	shell_print(shell, "         reads them back and validates them");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils wifi_on  ");
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+	shell_print(shell, "uart:~$ nrf700x_shell wifi_on  ");
+#if CONFIG_NRFX_QSPI
 	shell_print(shell, "         - Configures all gpio pins ");
 	shell_print(
 		shell,
@@ -737,8 +737,8 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 	shell_print(shell, "         - Enables all gated RPU clocks");
 #endif
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils wifi_off ");
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+	shell_print(shell, "uart:~$ nrf700x_shell wifi_off ");
+#if CONFIG_NRFX_QSPI
 	shell_print(
 		shell,
 		"         This writes 0 to IOVDD Control (P0.31) and then writes 0 to BUCKEN Control (P0.12)");
@@ -748,12 +748,12 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 		"         This writes 0 to IOVDD Control (P1.00) and then writes 0 to BUCKEN Control (P1.01)");
 #endif
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils sleep_stats ");
+	shell_print(shell, "uart:~$ nrf700x_shell sleep_stats ");
 	shell_print(shell,
 		    "         This continuously does the RPU sleep/wake cycle and displays stats ");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils gpio_config ");
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+	shell_print(shell, "uart:~$ nrf700x_shell gpio_config ");
+#if CONFIG_NRFX_QSPI
 	shell_print(
 		shell,
 		"         Configures BUCKEN(P0.12) as o/p, IOVDD control (P0.31) as output and HOST_IRQ (P0.23) as input");
@@ -765,37 +765,37 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 	shell_print(shell, "         and interruptible with a ISR hooked to it");
 #endif
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils qspi_init ");
+	shell_print(shell, "uart:~$ nrf700x_shell qspi_init ");
 	shell_print(shell, "         Initializes QSPI driver functions ");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils pwron ");
+	shell_print(shell, "uart:~$ nrf700x_shell pwron ");
 	shell_print(shell, "         Sets BUCKEN=1, delay, IOVDD cntrl=1 ");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils rpuwake ");
+	shell_print(shell, "uart:~$ nrf700x_shell rpuwake ");
 	shell_print(shell, "         Wakeup RPU: Write 0x1 to WRSR2 register");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils rpuclks_on ");
+	shell_print(shell, "uart:~$ nrf700x_shell rpuclks_on ");
 	shell_print(
 		shell,
 		"         Enables all gated RPU clocks. Only SysBUS and PKTRAM will work w/o this setting enabled");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils wrsr2 <val> ");
+	shell_print(shell, "uart:~$ nrf700x_shell wrsr2 <val> ");
 	shell_print(shell, "         writes <val> (0/1) to WRSR2 reg - takes LSByte of <val>");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils rdsr1 ");
+	shell_print(shell, "uart:~$ nrf700x_shell rdsr1 ");
 	shell_print(shell, "         Reads RDSR1 Register");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils rdsr2 ");
+	shell_print(shell, "uart:~$ nrf700x_shell rdsr2 ");
 	shell_print(shell, "         Reads RDSR2 Register");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils trgirq ");
+	shell_print(shell, "uart:~$ nrf700x_shell trgirq ");
 	shell_print(shell, "         Generates IRQ interrupt to host");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils clrirq ");
+	shell_print(shell, "uart:~$ nrf700x_shell clrirq ");
 	shell_print(shell, "         Clears host IRQ generated interrupt");
 	shell_print(shell, "  ");
 	shell_print(shell,
-		    "uart:~$ wifiutils config  <qspi/spi Freq> <mem_block_num> <read_latency>");
+		    "uart:~$ nrf700x_shell config  <qspi/spi Freq> <mem_block_num> <read_latency>");
 	shell_print(shell, "         QSPI/SPI clock freq in MHz : 4/8/16 etc");
 	shell_print(shell, "         block num as per memmap (starting from 0) : 0-10");
 	shell_print(shell, "         QSPI/SPIM read latency for the selected block : 0-255");
@@ -803,18 +803,18 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 		shell,
 		"         NOTE: need to do a wifi_off and wifi_on for these changes to take effect");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils ver ");
+	shell_print(shell, "uart:~$ nrf700x_shell ver ");
 	shell_print(shell, "         Display SW version and other details of the hex file ");
 	shell_print(shell, "  ");
-	shell_print(shell, "uart:~$ wifiutils help ");
+	shell_print(shell, "uart:~$ nrf700x_shell help ");
 	shell_print(shell, "         Lists all commands with usage example(s) ");
 	shell_print(shell, "  ");
 }
 
 static int cmd_ver(const struct shell *shell, size_t argc, char **argv)
 {
-	shell_print(shell, "wifiutils Version: %s", SW_VER);
-#if CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP
+	shell_print(shell, "nrf700x_shell Version: %s", SW_VER);
+#if CONFIG_NRFX_QSPI
 	shell_print(shell, "Build for QSPI interface on nRF7002 board");
 #else
 	shell_print(shell,
@@ -855,7 +855,7 @@ static int cmd_clrirq(const struct shell *shell, size_t argc, char **argv)
 
 /* Creating subcommands (level 1 command) array for command "demo". */
 SHELL_STATIC_SUBCMD_SET_CREATE(
-	sub_wifiutils,
+	sub_nrf700x_shell,
 	SHELL_CMD(write_blk, NULL,
 		  "Writes a block of words to Sheliak host memory via QSPI interface",
 		  cmd_write_blk),
@@ -887,5 +887,5 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 	SHELL_CMD(ver, NULL, "Display SW version of the hex file", cmd_ver),
 	SHELL_CMD(help, NULL, "Help with all supported commmands", cmd_help), SHELL_SUBCMD_SET_END);
 
-/* Creating root (level 0) command "wifiutils" */
-SHELL_CMD_REGISTER(wifiutils, &sub_wifiutils, "wifiutils commands", NULL);
+/* Creating root (level 0) command "nrf700x_shell" */
+SHELL_CMD_REGISTER(nrf700x_shell, &sub_nrf700x_shell, "nrf700x_shell commands", NULL);

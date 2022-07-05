@@ -13,7 +13,9 @@
 #define __QSPI_IF_H__
 
 #include <drivers/gpio.h>
+#ifdef CONFIG_NRFX_QSPI
 #include <nrfx_qspi.h>
+#endif
 
 /* QSPI driver config */
 #define CONFIG_FLASH_HAS_DRIVER_ENABLED 1
@@ -32,10 +34,12 @@
 #define RPU_READY_BIT BIT(2) /* RPI IS READY */
 
 struct qspi_config {
+#ifdef CONFIG_NRFX_QSPI
 	nrf_qspi_addrmode_t addrmode;
 	nrf_qspi_readoc_t readoc;
 	nrf_qspi_writeoc_t writeoc;
 	nrf_qspi_frequency_t sckfreq;
+#endif
 	unsigned int freq;
 	unsigned int spimfreq;
 	unsigned char RDC4IO;
@@ -48,9 +52,9 @@ struct qspi_config {
 	struct k_sem lock;
 	unsigned int addrmask;
 	unsigned char qspi_slave_latency;
-#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
+#ifdef CONFIG_NRFX_QSPI
 	nrf_qspi_encryption_t p_cfg;
-#endif /*CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP*/
+#endif /*CONFIG_NRFX_QSPI*/
 	int test_hlread;
 	char *test_name;
 	int test_start;

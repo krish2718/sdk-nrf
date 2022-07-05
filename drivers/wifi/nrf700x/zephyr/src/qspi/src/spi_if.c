@@ -20,148 +20,78 @@
 
 LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
+#define NRF7002_NODE DT_NODELABEL(nrf7002)
+
 struct qspi_config *spim_config;
 
-struct spi_cs_control cs_contrl = {
-	.gpio = GPIO_DT_SPEC_GET(DT_NODELABEL(spi4), cs_gpios)
-};
+static const struct spi_dt_spec spi_spec =
+SPI_DT_SPEC_GET(NRF7002_NODE, SPI_WORD_SET(8) | SPI_TRANSFER_MSB, 0);
 
-static const struct spi_config spi_cfg = {
-	.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB,
-	.frequency = 8000000,
-	.slave = 0,
-	.cs = &cs_contrl
-};
-
-const struct device *spim_perip;
-
-const struct device *spim_perip_get(void)
-{
-	const struct device *spi_perip;
-
-#ifdef CONFIG_BOARD_NRF52840DK_NRF52840
-	spi_perip = device_get_binding("SPI_3");
-#elif defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) \
-	|| defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
-	spi_perip = device_get_binding("SPI_4");
-#endif
-
-	if (spi_perip == NULL) {
-		LOG_ERR("Could not get SPI device\n");
-		return NULL;
-	}
-
-	LOG_DBG("%p : got device\n", spi_perip);
-
-	return spi_perip;
-}
-
-int spim_xfer_tx(const struct device *spi_perip, const struct spi_config *spi_cfg,
-		unsigned int addr, void *data, unsigned int len)
+int spim_xfer_tx(unsigned int addr, void *data, unsigned int len)
 {
 	int err;
-	static uint8_t hdr[4];
+	uint8_t hdr[4] = {
+		0x02, /* PP opcode */
+		(((addr >> 16) & 0xFF) | 0x80),
+		(addr >> 8) & 0xFF,
+		(addr & 0xFF)
+	};
 
 	const struct spi_buf tx_buf[] = {
-		{.buf = hdr,  .len = 4 },
+		{.buf = hdr,  .len = sizeof(hdr) },
 		{.buf = data, .len = len },
 	};
 	const struct spi_buf_set tx = { .buffers = tx_buf, .count = 2 };
 
-	/* PP opcode : 0x02 */
-	hdr[0] = 0x02;
 
-	/* addr */
-	hdr[1] = (((addr >> 16) & 0xFF) | 0x80);
-	hdr[2] = (addr >> 8) & 0xFF;
-	hdr[3] = addr & 0xFF;
-
-	err = spi_transceive(spi_perip, spi_cfg, &tx, NULL);
+	err = spi_transceive_dt(&spi_spec, &tx, NULL);
 
 	return err;
 }
 
 #define DUMMY_BYTES 5
 
-int _spim_xfer_rx(const struct device *spi_perip,
-		const struct spi_config *spi_cfg,
-		unsigned int addr, unsigned int len,
-		void *rx)
+int spim_xfer_rx(unsigned int addr, void *data, unsigned int len)
 {
-	int err;
-	uint8_t *tx_buffer = NULL;
-
-	tx_buffer = (uint8_t *)(k_malloc(DUMMY_BYTES + len));
-
-	if (tx_buffer == NULL) {
-		LOG_ERR("SPI error:NO MEMORY for tx_buffer\n");
-		return -ENOMEM;
-	}
-
-	memset(tx_buffer, 0, len + DUMMY_BYTES);
-
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = (len + DUMMY_BYTES) };
-	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
-
-	/* FASTREAD opcode : 0x0b */
-
-	tx_buffer[0] = 0x0b;
-	tx_buffer[1] = (addr >> 16) & 0xFF;
-	tx_buffer[2] = (addr >> 8) & 0xFF;
-	tx_buffer[3] = addr & 0xFF;
-
-	err = spi_transceive(spi_perip, spi_cfg, &tx, rx);
-
-	k_free(tx_buffer);
-
-	return err;
-}
-
-int spim_xfer_rx(const struct device *spi_perip,
-		const struct spi_config *spi_cfg,
-		unsigned int addr, void *data, unsigned int len)
-{
-	int err;
-	uint8_t *rx_buffer = NULL;
-
-	rx_buffer = (uint8_t *)(k_malloc(DUMMY_BYTES + len));
-
-	if (rx_buffer == NULL) {
-		LOG_ERR("SPI error:NO MEMORY rx_buffer\n");
-		return -ENOMEM;
-	}
-
-	memset(rx_buffer, 0, len + DUMMY_BYTES);
-
-	struct spi_buf rx_buf = {
-		.buf = rx_buffer,
-		.len = (len + DUMMY_BYTES),
+	uint8_t hdr[DUMMY_BYTES] = {
+		0x0b,
+		(addr >> 16) & 0xFF,
+		(addr >> 8) & 0xFF,
+		addr & 0xFF,
+		0
 	};
 
-	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
+	const struct spi_buf tx_buf[] = {
+		{.buf = hdr,  .len = sizeof(hdr) },
+		{.buf = NULL, .len = len },
+	};
 
-	err = _spim_xfer_rx(spi_perip, spi_cfg, addr, len, (void *)&rx);
+	const struct spi_buf_set tx = { .buffers = tx_buf, .count = 2 };
 
-	if (err)
-		LOG_ERR("SPI error: %d\n", err);
-	else
-		memcpy(data, rx_buffer + DUMMY_BYTES, len);
+	const struct spi_buf rx_buf[] = {
+		{.buf = hdr,  .len = sizeof(hdr)},
+		{.buf = data, .len = len },
+	};
 
-	k_free(rx_buffer);
+	const struct spi_buf_set rx = { .buffers = rx_buf, .count = 2 };
 
-	return err;
+	return spi_transceive_dt(&spi_spec, &tx, &rx);
 }
 
-int spim_RDSR1(const struct device *spi_perip)
+int spim_RDSR1(void)
 {
-	int err, len;
-	static uint8_t tx_buffer[6] = { 0x1f };
-	const struct spi_config *spim_cfg = &spi_cfg;
+	int err;
+	uint8_t tx_buffer[6] = { 0x1f };
 
-	len = sizeof(tx_buffer);
+	const struct spi_buf tx_buf = { 
+		.buf = tx_buffer, 
+		.len = sizeof(tx_buffer) 
+	};
 
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = len };
-	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+	const struct spi_buf_set tx = { 
+		.buffers = &tx_buf, 
+		.count = 1 
+	};
 
 	uint8_t sr[6];
 
@@ -171,7 +101,7 @@ int spim_RDSR1(const struct device *spi_perip)
 	};
 	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
 
-	err = spi_transceive(spi_perip, spim_cfg, &tx, &rx);
+	err = spi_transceive_dt(&spi_spec, &tx, &rx);
 
 	if (err == 0)
 		return sr[1];
@@ -179,14 +109,13 @@ int spim_RDSR1(const struct device *spi_perip)
 	return err;
 }
 
-int spim_wait_while_rpu_awake(const struct device *spi_perip,
-				       const struct spi_config *spi_cfg)
+int spim_wait_while_rpu_awake(void)
 {
 	int ret;
 
 	for (int ii = 0; ii < 10; ii++) {
 
-		ret = spim_RDSR1(spi_perip);
+		ret = spim_RDSR1();
 
 		if ((ret < 0) || ((ret & RPU_AWAKE_BIT) == 0)) {
 			LOG_DBG("RDSR1 = 0x%x\t\n", ret);
@@ -201,16 +130,19 @@ int spim_wait_while_rpu_awake(const struct device *spi_perip,
 }
 
 /* Wait until RDSR2 confirms RPU_WAKE write is successful */
-int spim_validate_rpu_awake(const struct device *spi_perip,
-		const struct spi_config *spi_cfg)
+int spim_validate_rpu_awake(void)
 {
-	int err, len;
-	static uint8_t tx_buffer[6] = { 0x2f };
+	int err;
+	uint8_t tx_buffer[6] = { 0x2f };
 
-	len = sizeof(tx_buffer);
-
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = len };
-	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+	const struct spi_buf tx_buf = { 
+		.buf = tx_buffer, 
+		.len = sizeof(tx_buffer) 
+	};
+	const struct spi_buf_set tx = { 
+		.buffers = &tx_buf, 
+		.count = 1 
+	};
 
 	uint8_t sr[6];
 
@@ -218,10 +150,13 @@ int spim_validate_rpu_awake(const struct device *spi_perip,
 		.buf = &sr,
 		.len = sizeof(sr),
 	};
-	const struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
+	const struct spi_buf_set rx = { 
+		.buffers = &rx_buf, 
+		.count = 1 
+	};
 
 	for (int ii = 0; ii < 1; ii++) {
-		err = spi_transceive(spi_perip, spi_cfg, &tx, &rx);
+		err = spi_transceive_dt(&spi_spec, &tx, &rx);
 
 		LOG_DBG("%x %x %x %x %x %x\n", sr[0], sr[1], sr[2], sr[3], sr[4], sr[5]);
 
@@ -237,52 +172,37 @@ int spim_validate_rpu_awake(const struct device *spi_perip,
 	return 0;
 }
 
-int spim_cmd_rpu_wakeup(const struct device *spi_perip, const struct spi_config *spi_cfg,
-				 uint32_t data)
+int spim_cmd_rpu_wakeup(uint32_t data)
 {
-	int err, len;
-	static uint8_t tx_buffer[] = { 0x3f, 0x1 };
+	int err;
+	uint8_t tx_buffer[] = { 0x3f, 0x1 };
 
 	tx_buffer[1] = data & 0xff;
 
-	/* printf("TODO : %s:\n", __func__); */
-
-	len = sizeof(tx_buffer);
-
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = len };
+	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = sizeof(tx_buffer) };
 	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
 
-	err = spi_transceive(spi_perip, spi_cfg, &tx, NULL);
+	err = spi_transceive_dt(&spi_spec, &tx, NULL);
 
 	if (err) {
 		LOG_ERR("SPI error: %d\n", err);
-	} else {
-		/* Connect MISO to MOSI for loopback */
-		/* LOG_ERR("TX sent: %x\n", tx_buffer[0]); */
 	}
 
 	return 0;
 }
 
-unsigned int spim_cmd_sleep_rpu(const struct device *spi_perip, const struct spi_config *spi_cfg)
+unsigned int spim_cmd_sleep_rpu(void)
 {
-	int err, len;
-	static uint8_t tx_buffer[] = { 0x3f, 0x0 };
+	int err;
+	uint8_t tx_buffer[] = { 0x3f, 0x0 };
 
-	/* printf("TODO : %s:\n", __func__); */
-
-	len = sizeof(tx_buffer);
-
-	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = len };
+	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = sizeof(tx_buffer) };
 	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
 
-	err = spi_transceive(spi_perip, spi_cfg, &tx, NULL);
+	err = spi_transceive_dt(&spi_spec, &tx, NULL);
 
 	if (err) {
 		LOG_ERR("SPI error: %d\n", err);
-	} else {
-		/* Connect MISO to MOSI for loopback */
-		/* LOG_ERR("TX sent: %x\n", tx_buffer[0]); */
 	}
 
 	return 0;
@@ -290,25 +210,19 @@ unsigned int spim_cmd_sleep_rpu(const struct device *spi_perip, const struct spi
 
 int spim_init(struct qspi_config *config)
 {
-	spim_perip = spim_perip_get();
+	if (!spi_is_ready(&spi_spec)) {
+		LOG_ERR("Device %s is not ready\n", spi_spec.bus->name);
+		return -ENODEV;
+	}
 
 	spim_config = config;
-
-#if defined(CONFIG_BOARD_NRF7002DK_NRF5340_CPUAPP) || defined(CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP)
-	/* SPIM4 (<32Mbps)  : 1Mbps -> 1Mhz */
-	config->spimfreq = config->freq * 1000000;
-#endif
-#ifdef CONFIG_BOARD_NRF52840DK_NRF52840
-	/* SPIM3 (<8Mbps): 1Mbps -> 1Mhz */
-	config->spimfreq = config->freq * 1000000;
-#endif
 
 	k_sem_init(&spim_config->lock, 1, 1);
 
 	return 0;
 }
 
-void spim_addr_check(unsigned int addr, const void *data, unsigned int len)
+static void spim_addr_check(unsigned int addr, const void *data, unsigned int len)
 {
 	if ((addr % 4 != 0) || (((unsigned int)data) % 4 != 0) || (len % 4 != 0)) {
 		LOG_ERR("%s : Unaligned address %x %x %d %x %x\n", __func__, addr,
@@ -327,7 +241,7 @@ int spim_write(unsigned int addr, const void *data, int len)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_tx(spim_perip, &spi_cfg, addr, (void *)data, len);
+	status = spim_xfer_tx(addr, (void *)data, len);
 
 	k_sem_give(&spim_config->lock);
 
@@ -344,7 +258,7 @@ int spim_read(unsigned int addr, void *data, int len)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_rx(spim_perip, &spi_cfg, addr, data, len);
+	status = spim_xfer_rx(addr, data, len);
 
 	k_sem_give(&spim_config->lock);
 
@@ -369,7 +283,7 @@ int spim_hl_readw(unsigned int addr, void *data)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_rx(spim_perip, &spi_cfg, addr, rxb, len);
+	status = spim_xfer_rx(addr, rxb, len);
 
 	k_sem_give(&spim_config->lock);
 
@@ -396,22 +310,22 @@ int spim_hl_read(unsigned int addr, void *data, int len)
 
 /* ------------------------------added for wifi utils -------------------------------- */
 
-int spim_cmd_rpu_wakeup_fn(const struct device *spi_perip, uint32_t data)
+int spim_cmd_rpu_wakeup_fn(uint32_t data)
 {
-	return spim_cmd_rpu_wakeup(spim_perip, &spi_cfg, data);
+	return spim_cmd_rpu_wakeup(data);
 }
 
-int spim_cmd_sleep_rpu_fn(const struct device *spi_perip)
+int spim_cmd_sleep_rpu_fn(void)
 {
-	return spim_cmd_sleep_rpu(spim_perip, &spi_cfg);
+	return spim_cmd_sleep_rpu();
 }
 
-int spim_wait_while_rpu_awake_fn(const struct device *spi_perip)
+int spim_wait_while_rpu_awake_fn(void)
 {
-	return spim_wait_while_rpu_awake(spim_perip, &spi_cfg);
+	return spim_wait_while_rpu_awake();
 }
 
-int spim_validate_rpu_awake_fn(const struct device *spi_perip)
+int spim_validate_rpu_awake_fn(void)
 {
-	return spim_validate_rpu_awake(spim_perip, &spi_cfg);
+	return spim_validate_rpu_awake();
 }

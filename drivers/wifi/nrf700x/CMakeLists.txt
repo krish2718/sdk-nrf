@@ -70,7 +70,13 @@ zephyr_library_sources(
 	zephyr/src/zephyr_net_if.c
 	zephyr/src/zephyr_wpa_supp_if.c
 	zephyr/src/qspi/src/device.c
-	zephyr/src/qspi/src/qspi_if.c
 	zephyr/src/qspi/src/qspi_main.c
+)
+
+zephyr_library_sources_ifdef(CONFIG_NRF700X_ON_QSPI
+	zephyr/src/qspi/src/qspi_if.c
+)
+
+zephyr_library_sources_ifdef(CONFIG_NRF700X_ON_SPI
 	zephyr/src/qspi/src/spi_if.c
 )
