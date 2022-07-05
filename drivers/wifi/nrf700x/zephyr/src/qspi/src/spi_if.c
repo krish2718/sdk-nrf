@@ -84,13 +84,13 @@ int spim_RDSR1(void)
 	uint8_t tx_buffer[6] = { 0x1f };
 
 	const struct spi_buf tx_buf = { 
-		.buf = tx_buffer, 
-		.len = sizeof(tx_buffer) 
+		.buf = tx_buffer,
+		.len = sizeof(tx_buffer)
 	};
 
-	const struct spi_buf_set tx = { 
-		.buffers = &tx_buf, 
-		.count = 1 
+	const struct spi_buf_set tx = {
+		.buffers = &tx_buf,
+		.count = 1
 	};
 
 	uint8_t sr[6];
@@ -135,13 +135,13 @@ int spim_validate_rpu_awake(void)
 	int err;
 	uint8_t tx_buffer[6] = { 0x2f };
 
-	const struct spi_buf tx_buf = { 
-		.buf = tx_buffer, 
-		.len = sizeof(tx_buffer) 
+	const struct spi_buf tx_buf = {
+		.buf = tx_buffer,
+		.len = sizeof(tx_buffer)
 	};
-	const struct spi_buf_set tx = { 
-		.buffers = &tx_buf, 
-		.count = 1 
+	const struct spi_buf_set tx = {
+		.buffers = &tx_buf,
+		.count = 1
 	};
 
 	uint8_t sr[6];
@@ -150,9 +150,9 @@ int spim_validate_rpu_awake(void)
 		.buf = &sr,
 		.len = sizeof(sr),
 	};
-	const struct spi_buf_set rx = { 
-		.buffers = &rx_buf, 
-		.count = 1 
+	const struct spi_buf_set rx = {
+		.buffers = &rx_buf,
+		.count = 1
 	};
 
 	for (int ii = 0; ii < 1; ii++) {

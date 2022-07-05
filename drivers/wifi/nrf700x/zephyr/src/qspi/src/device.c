@@ -36,7 +36,6 @@ struct qspi_dev spim = { .init = spim_init,
 struct qspi_config *qspi_defconfig(void)
 {
 	memset(&config, 0, sizeof(struct qspi_config));
- 
 #if defined(CONFIG_NRFX_QSPI)
 	config.addrmode = NRF_QSPI_ADDRMODE_24BIT;
 	config.RDC4IO = 0xA0;
