@@ -286,7 +286,6 @@ enum wifi_nrf_status wifi_nrf_fmac_rx_event_process(struct wifi_nrf_fmac_dev_ctx
 			fmac_dev_ctx->fpriv->callbk_fns.rx_frm_callbk_fn(vif_ctx->os_vif_ctx,
 									 nwb);
 		} else if (config->rx_pkt_type == IMG_RX_PKT_BCN_PRB_RSP) {
-
 			wifi_nrf_osal_nbuf_free(fmac_dev_ctx->fpriv->opriv,
 						nwb);
 		} else {

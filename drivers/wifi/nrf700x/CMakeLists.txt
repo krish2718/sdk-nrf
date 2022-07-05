@@ -18,11 +18,11 @@ zephyr_library_compile_definitions(
 	REG_MODE_SUPPORT
 	REG_DEBUG_MODE_SUPPORT
 	OFFLINE_MODE
-	#FW_PATCH_INBUILT
 	SHELIAK_SOC	# SOC
 	ASICBUILD	# SOC
 	C0_CHIP
 	#RPU_SLEEP_SUPPORT
+	#RPU_SLEEP_DBG
 )
 
 zephyr_library_include_directories(

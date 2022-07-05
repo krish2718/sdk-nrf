@@ -196,9 +196,9 @@ struct temp_vbat_config {
 	unsigned int temp_calib_bitmap;
 	unsigned int vbat_calibp_bitmap;
 	unsigned int temp_vbat_mon_period;
-	int VthVeryLow;
-	int VthLow;
-	int VthHi;
+	int vth_very_low;
+	int vth_low;
+	int vth_hi;
 	int temp_threshold;
 	int vbat_threshold;
 } __IMG_PKD;

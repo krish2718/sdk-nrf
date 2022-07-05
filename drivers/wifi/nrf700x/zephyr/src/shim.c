@@ -624,8 +624,6 @@ static void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
 #ifdef RPU_SLEEP_SUPPORT
 static int zep_shim_bus_qspi_ps_sleep(void *os_qspi_priv)
 {
-	struct zep_shim_bus_qspi_priv *qspi_priv = os_qspi_priv;
-
 	func_rpu_sleep();
 
 	return 0;
@@ -633,8 +631,6 @@ static int zep_shim_bus_qspi_ps_sleep(void *os_qspi_priv)
 
 static int zep_shim_bus_qspi_ps_wake(void *os_qspi_priv)
 {
-	struct zep_shim_bus_qspi_priv *qspi_priv = os_qspi_priv;
-
 	func_rpu_wake();
 
 	return 0;
@@ -642,8 +638,6 @@ static int zep_shim_bus_qspi_ps_wake(void *os_qspi_priv)
 
 static int zep_shim_bus_qspi_ps_status(void *os_qspi_priv)
 {
-	struct zep_shim_bus_qspi_priv *qspi_priv = os_qspi_priv;
-
 	return func_rpu_sleep_status();
 }
 #endif

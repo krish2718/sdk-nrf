@@ -216,6 +216,8 @@ struct wifi_nrf_hal_dev_ctx {
 	void *rpu_ps_timer;
 	void *rpu_ps_lock;
 	bool dbg_enable;
+	bool irq_ctx;
+	bool rpu_fw_booted;
 #endif /* RPU_SLEEP_SUPPORT */
 	char *event_data;
 	char *event_data_curr;

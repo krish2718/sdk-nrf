@@ -1288,6 +1288,17 @@ struct img_umac_cmd_scan {
 	struct img_umac_hdr umac_hdr;
 	struct img_umac_scan_info info;
 } __IMG_PKD;
+/**
+ * struct img_umac_cmd_abort_scan - Abort Scan request.
+ *
+ * @umac_hdr: Refer to &struct img_umac_hdr.
+ *
+ */
+
+struct img_umac_cmd_abort_scan {
+	struct img_umac_hdr umac_hdr;
+} __IMG_PKD;
+
 
 /**
  * struct img_umac_cmd_get_scan_results - Get scan results.

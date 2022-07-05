@@ -150,7 +150,6 @@ void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 		beacon_ie_len = scan_res->beacon_ies.ie_len;
 	}
 
-
 	r = k_calloc(sizeof(*r) + ie_len + beacon_ie_len, sizeof(char));
 
 	if (!r) {

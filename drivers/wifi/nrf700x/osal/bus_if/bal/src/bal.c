@@ -9,7 +9,44 @@
  * driver.
  */
 
+
 #include "bal_api.h"
+
+#ifdef RPU_SLEEP_SUPPORT
+#ifdef RPU_SLEEP_DBG
+#include "pal.h"
+
+static void wifi_nrf_rpu_bal_sleep_chk(struct wifi_nrf_bal_dev_ctx *bal_ctx,
+				       unsigned long addr)
+{
+        unsigned int sleep_reg_val = 0;
+        unsigned int rpu_ps_state_mask = 0;
+        unsigned long sleep_reg_addr = 0;
+
+        if (!bal_ctx->rpu_fw_booted)
+                return;
+
+        sleep_reg_addr = pal_rpu_ps_ctrl_reg_addr_get();
+
+        if (sleep_reg_addr == addr)
+                return;
+
+	sleep_reg_val = bal_ctx->bpriv->ops->read_word(bal_ctx->bus_dev_ctx,
+						       sleep_reg_addr);
+
+	rpu_ps_state_mask = ((1 << RPU_REG_BIT_PS_STATE) |
+			     (1 << RPU_REG_BIT_READY_STATE));
+	
+	if ((sleep_reg_val & rpu_ps_state_mask) != rpu_ps_state_mask) {
+		wifi_nrf_osal_log_err(bal_ctx->bpriv->opriv,
+				      "%s:RPU is being accessed when it is not ready !!! (Reg val = 0x%X)\n",
+				      __func__,
+				      sleep_reg_val);
+	}
+}
+#endif	/* RPU_SLEEP_DBG */
+#endif  /* RPU_SLEEP_SUPPORT */
+
 
 struct wifi_nrf_bal_dev_ctx *wifi_nrf_bal_dev_add(struct wifi_nrf_bal_priv *bpriv,
 						  void *hal_dev_ctx)
@@ -64,6 +101,10 @@ void wifi_nrf_bal_dev_rem(struct wifi_nrf_bal_dev_ctx *bal_dev_ctx)
 enum wifi_nrf_status wifi_nrf_bal_dev_init(struct wifi_nrf_bal_dev_ctx *bal_dev_ctx)
 {
 	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
+
+#ifdef RPU_SLEEP_SUPPORT
+	bal_dev_ctx->rpu_fw_booted = true;
+#endif /* RPU_SLEEP_SUPPORT */
 
 	status = bal_dev_ctx->bpriv->ops->dev_init(bal_dev_ctx->bus_dev_ctx);
 
@@ -152,6 +193,13 @@ unsigned int wifi_nrf_bal_read_word(void *ctx,
 
 	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
+#ifdef RPU_SLEEP_SUPPORT
+#ifdef RPU_SLEEP_DBG
+	wifi_nrf_rpu_bal_sleep_chk(bal_dev_ctx,
+				   addr_offset);
+#endif	/* RPU_SLEEP_DBG */
+#endif  /* RPU_SLEEP_SUPPORT */
+
 	val = bal_dev_ctx->bpriv->ops->read_word(bal_dev_ctx->bus_dev_ctx,
 						 addr_offset);
 
@@ -166,6 +214,13 @@ void wifi_nrf_bal_write_word(void *ctx,
 	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 
 	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
+
+#ifdef RPU_SLEEP_SUPPORT
+#ifdef RPU_SLEEP_DBG
+	wifi_nrf_rpu_bal_sleep_chk(bal_dev_ctx,
+				   addr_offset);
+#endif	/* RPU_SLEEP_DBG */
+#endif  /* RPU_SLEEP_SUPPORT */
 
 	bal_dev_ctx->bpriv->ops->write_word(bal_dev_ctx->bus_dev_ctx,
 					    addr_offset,
@@ -182,6 +237,13 @@ void wifi_nrf_bal_read_block(void *ctx,
 
 	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
 
+#ifdef RPU_SLEEP_SUPPORT
+#ifdef RPU_SLEEP_DBG
+	wifi_nrf_rpu_bal_sleep_chk(bal_dev_ctx,
+				   src_addr_offset);
+#endif	/* RPU_SLEEP_DBG */
+#endif  /* RPU_SLEEP_SUPPORT */
+
 	bal_dev_ctx->bpriv->ops->read_block(bal_dev_ctx->bus_dev_ctx,
 					    dest_addr,
 					    src_addr_offset,
@@ -197,6 +259,13 @@ void wifi_nrf_bal_write_block(void *ctx,
 	struct wifi_nrf_bal_dev_ctx *bal_dev_ctx = NULL;
 
 	bal_dev_ctx = (struct wifi_nrf_bal_dev_ctx *)ctx;
+
+#ifdef RPU_SLEEP_SUPPORT
+#ifdef RPU_SLEEP_DBG
+	wifi_nrf_rpu_bal_sleep_chk(bal_dev_ctx,
+				   dest_addr_offset);
+#endif	/* RPU_SLEEP_DBG */
+#endif  /* RPU_SLEEP_SUPPORT */
 
 	bal_dev_ctx->bpriv->ops->write_block(bal_dev_ctx->bus_dev_ctx,
 					     dest_addr_offset,

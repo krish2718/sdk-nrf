@@ -146,8 +146,8 @@ enum wifi_nrf_status umac_cmd_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	umac_cmd_data->temp_vbat_config_params.temp_calib_bitmap = DEF_PHY_TEMP_CALIB;
 	umac_cmd_data->temp_vbat_config_params.vbat_calibp_bitmap = DEF_PHY_VBAT_CALIB;
 	umac_cmd_data->temp_vbat_config_params.temp_vbat_mon_period = TEMP_CALIB_PERIOD;
-	umac_cmd_data->temp_vbat_config_params.VthLow = VBAT_LOW;
-	umac_cmd_data->temp_vbat_config_params.VthHi = VBAT_HIGH;
+	umac_cmd_data->temp_vbat_config_params.vth_low = VBAT_LOW;
+	umac_cmd_data->temp_vbat_config_params.vth_hi = VBAT_HIGH;
 	umac_cmd_data->temp_vbat_config_params.temp_threshold = TEMP_CALIB_THRESHOLD;
 
 	status = wifi_nrf_hal_ctrl_cmd_send(fmac_dev_ctx->hal_dev_ctx,

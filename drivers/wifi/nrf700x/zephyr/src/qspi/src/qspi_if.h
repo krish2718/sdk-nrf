@@ -114,4 +114,9 @@ int func_irq_config(struct gpio_callback *irq_callback_data, void (*irq_handler)
 
 int qspi_RDSR1(const struct device *dev);
 
+#ifdef RPU_SLEEP_SUPPORT
+int func_rpu_sleep(void);
+int func_rpu_wake(void);
+int func_rpu_sleep_status(void);
+#endif /* RPU_SLEEP_SUPPORT */
 #endif /* __QSPI_IF_H__ */
