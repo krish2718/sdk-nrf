@@ -1,15 +1,21 @@
-.. _nrf5340dk_nrf5340:
+.. _nrf7002dk_nrf5340:
 
-nRF5340 DK
+nRF7002 DK
 ##########
 
 Overview
 ********
 
-The nRF5340 DK (PCA10095) is a single-board development kit for evaluation
-and development on the Nordic nRF5340 System-on-Chip (SoC).
+The nRF7002 DK (PCA10143) is a single-board development kit for evaluation
+and development on the Nordic nRF7002 Wi-Fi companion chip to Nordic
+nRF5340 System-on-Chip (SoC) host processor.
 
-The nRF5340 is a dual-core SoC based on the Arm® Cortex®-M33 architecture, with:
+The nRF7002 is a IEEE 802.11ax (Wi-Fi 6) complaint SoC which implements
+the Wi-Fi physical layer and MAC layer protocols. It implements the Wi-Fi
+driver software on the nRF5340 host processor communicating via QSPI bus.
+
+The nRF5340 host is a dual-core SoC based on the Arm® Cortex®-M33 architecture,
+with:
 
 * a full-featured Arm Cortex-M33F core with DSP instructions, FPU, and
   Armv8-M Security Extension, running at up to 128 MHz, referred to as
@@ -17,8 +23,8 @@ The nRF5340 is a dual-core SoC based on the Arm® Cortex®-M33 architecture, wit
 * a secondary Arm Cortex-M33 core, with a reduced feature set, running at
   a fixed 64 MHz, referred to as the **network core**.
 
-The nrf5340dk_nrf5340_cpuapp build target provides support for the application
-core on the nRF5340 SoC. The nrf5340dk_nrf5340_cpunet build target provides
+The nrf7002dk_nrf5340_cpuapp build target provides support for the application
+core on the nRF5340 SoC. The nrf7002dk_nrf5340_cpunet build target provides
 support for the network core on the nRF5340 SoC.
 
 nRF5340 SoC provides support for the following devices:
@@ -32,6 +38,7 @@ nRF5340 SoC provides support for the following devices:
 * :abbr:`MPU (Memory Protection Unit)`
 * :abbr:`NVIC (Nested Vectored Interrupt Controller)`
 * :abbr:`PWM (Pulse Width Modulation)`
+* Wi-Fi (Supporting up to 802.11ax in 2.4GHz and 5GHz bands)
 * RADIO (Bluetooth Low Energy and 802.15.4)
 * :abbr:`RTC (nRF RTC System Clock)`
 * Segger RTT (RTT Console)
@@ -40,15 +47,15 @@ nRF5340 SoC provides support for the following devices:
 * :abbr:`USB (Universal Serial Bus)`
 * :abbr:`WDT (Watchdog Timer)`
 
-.. figure:: img/nrf5340dk.jpg
+.. figure:: img/nrf7002dk.jpg
      :width: 711px
      :align: center
-     :alt: nRF5340 DK
+     :alt: nRF7002 DK
 
-     nRF5340 DK (Credit: Nordic Semiconductor)
+     nRF7002 DK (Credit: Nordic Semiconductor)
 
 More information about the board can be found at the
-`nRF5340 DK website`_.
+`nRF7002 DK website`_.
 The `Nordic Semiconductor Infocenter`_
 contains the processor's information and the datasheet.
 
@@ -56,14 +63,14 @@ contains the processor's information and the datasheet.
 Hardware
 ********
 
-nRF5340 DK has two external oscillators. The frequency of
+nRF7002 DK has two external oscillators. The frequency of
 the slow clock is 32.768 kHz. The frequency of the main clock
 is 32 MHz.
 
 Supported Features
 ==================
 
-The nrf5340dk_nrf5340_cpuapp board configuration supports the following
+The nrf7002dk_nrf5340_cpuapp board configuration supports the following
 hardware features:
 
 +-----------+------------+----------------------+
@@ -89,6 +96,10 @@ hardware features:
 +-----------+------------+----------------------+
 | RTT       | Segger     | console              |
 +-----------+------------+----------------------+
+| RADIO     | nrf7002    | Wi-Fi 6 (802.11ax)   |
++-----------+------------+----------------------+
+| QSPI      | on-chip    | qspi                 |
++-----------+------------+----------------------+
 | SPI(M/S)  | on-chip    | spi                  |
 +-----------+------------+----------------------+
 | SPU       | on-chip    | system protection    |
@@ -100,7 +111,7 @@ hardware features:
 | WDT       | on-chip    | watchdog             |
 +-----------+------------+----------------------+
 
-The nrf5340dk_nrf5340_cpunet board configuration supports the following
+The nrf7002dk_nrf5340_cpunet board configuration supports the following
 hardware features:
 
 +-----------+------------+----------------------+
@@ -125,6 +136,8 @@ hardware features:
 +-----------+------------+----------------------+
 | RTT       | Segger     | console              |
 +-----------+------------+----------------------+
+| QSPI      | on-chip    | qspi                 |
++-----------+------------+----------------------+
 | SPI(M/S)  | on-chip    | spi                  |
 +-----------+------------+----------------------+
 | UARTE     | on-chip    | serial               |
@@ -132,9 +145,9 @@ hardware features:
 | WDT       | on-chip    | watchdog             |
 +-----------+------------+----------------------+
 
-Other hardware features have not been enabled yet for this board.
+Other hardware features are not supported by the Zephyr kernel.
 See `Nordic Semiconductor Infocenter`_
-for a complete list of nRF5340 DK board hardware features.
+for a complete list of nRF7002 DK board hardware features.
 
 Connections and IOs
 ===================
@@ -142,19 +155,26 @@ Connections and IOs
 LED
 ---
 
-* LED1 (green) = P0.28
-* LED2 (green) = P0.29
-* LED3 (green) = P0.30
-* LED4 (green) = P0.31
+* LED1 (green) = P1.06
+* LED2 (green) = P1.07
 
 Push buttons
 ------------
 
-* BUTTON1 = SW1 = P0.23
-* BUTTON2 = SW2 = P0.24
-* BUTTON3 = SW3 = P0.8
-* BUTTON4 = SW4 = P0.9
+* BUTTON1 = SW1 = P1.08
+* BUTTON2 = SW2 = P1.09
 * BOOT = SW5 = boot/reset
+
+Wi-Fi Control
+-------------
+
+* BUCKEN = P0.12
+* IOVDD CONTROL = P0.31
+* HOST IRQ = P0.23
+* COEX_REQ = P0.28
+* COEX_STATUS0 = P0.30
+* COEX_STATUS1 = P0.29
+* COEX_GRANT = P0.24
 
 Security components
 ===================
@@ -170,7 +190,7 @@ Programming and Debugging
 *************************
 
 nRF5340 application core supports the Armv8-M Security Extension.
-Applications built for the nrf5340dk_nrf5340_cpuapp board by default
+Applications built for the nrf7002dk_nrf5340_cpuapp board by default
 boot in the Secure state.
 
 nRF5340 network core does not support the Armv8-M Security Extension.
@@ -199,7 +219,7 @@ The process to build the Secure firmware image using TF-M and the Non-Secure
 firmware image using Zephyr requires the following steps:
 
 1. Build the Non-Secure Zephyr application
-   for the application core using ``-DBOARD=nrf5340dk_nrf5340_cpuapp_ns``.
+   for the application core using ``-DBOARD=nrf7002dk_nrf5340_cpuapp_ns``.
    To invoke the building of TF-M the Zephyr build system requires the
    Kconfig option ``BUILD_WITH_TFM`` to be enabled, which is done by
    default when building Zephyr as a Non-Secure application.
@@ -217,7 +237,7 @@ firmware image using Zephyr requires the following steps:
    and sizes.
 
 2. Build the application firmware for the network core using
-   ``-DBOARD=nrf5340dk_nrf5340_cpunet``.
+   ``-DBOARD=nrf7002dk_nrf5340_cpunet``.
 
 
 Building the Secure firmware using Zephyr
@@ -227,14 +247,14 @@ The process to build the Secure and the Non-Secure firmware images
 using Zephyr requires the following steps:
 
 1. Build the Secure Zephyr application for the application core
-   using ``-DBOARD=nrf5340dk_nrf5340_cpuapp`` and
+   using ``-DBOARD=nrf7002dk_nrf5340_cpuapp`` and
    ``CONFIG_TRUSTED_EXECUTION_SECURE=y`` and ``CONFIG_BUILD_WITH_TFM=n``
    in the application project configuration file.
 2. Build the Non-Secure Zephyr application for the application core
-   using ``-DBOARD=nrf5340dk_nrf5340_cpuapp_ns``.
+   using ``-DBOARD=nrf7002dk_nrf5340_cpuapp_ns``.
 3. Merge the two binaries together.
 4. Build the application firmware for the network core using
-   ``-DBOARD=nrf5340dk_nrf5340_cpunet``.
+   ``-DBOARD=nrf7002dk_nrf5340_cpunet``.
 
 
 When building a Secure/Non-Secure application for the nRF5340 application core,
@@ -247,9 +267,9 @@ Building a Secure only application
 ==================================
 
 Build the Zephyr app in the usual way (see :ref:`build_an_application`
-and :ref:`application_run`), using ``-DBOARD=nrf5340dk_nrf5340_cpuapp`` for
+and :ref:`application_run`), using ``-DBOARD=nrf7002dk_nrf5340_cpuapp`` for
 the firmware running on the nRF5340 application core, and using
-``-DBOARD=nrf5340dk_nrf5340_cpunet`` for the firmware running
+``-DBOARD=nrf7002dk_nrf5340_cpunet`` for the firmware running
 on the nRF5340 network core.
 
 Flashing
@@ -274,7 +294,7 @@ applications as usual (:ref:`build_an_application` and
 
 .. note::
 
-   Flashing and debugging applications on the nRF5340 DK requires
+   Flashing and debugging applications on the nRF7002 DK requires
    upgrading the nRF Command Line Tools to version 10.12.0. Further
    information on how to install the nRF Command Line Tools can be
    found in :ref:`nordic_segger_flashing`.
@@ -288,14 +308,14 @@ First, run your favorite terminal program to listen for output.
 
    $ minicom -D <tty_device> -b 115200
 
-Replace :code:`<tty_device>` with the port where the board nRF5340 DK
+Replace :code:`<tty_device>` with the port where the board nRF7002 DK
 can be found. For example, under Linux, :code:`/dev/ttyACM0`.
 
 Then build and flash the application in the usual way.
 
 .. zephyr-app-commands::
    :zephyr-app: samples/hello_world
-   :board: nrf5340dk_nrf5340_cpuapp
+   :board: nrf7002dk_nrf5340_cpuapp
    :goals: build flash
 
 Debugging
@@ -305,7 +325,7 @@ Refer to the :ref:`nordic_segger` page to learn about debugging Nordic
 boards with a Segger IC.
 
 
-Testing the LEDs and buttons in the nRF5340 DK
+Testing the LEDs and buttons in the nRF7002 DK
 **********************************************
 
 There are 2 samples that allow you to test that the buttons (switches) and
@@ -316,7 +336,7 @@ LEDs on the board are working properly with Zephyr:
 
 You can build and flash the examples to make sure Zephyr is running correctly on
 your board. The button and LED definitions can be found in
-:zephyr_file:`boards/arm/nrf5340dk_nrf5340/nrf5340_cpuapp_common.dts`.
+:zephyr_file:`boards/arm/nrf7002dk_nrf5340/nrf5340_cpuapp_common.dts`.
 
 References
 **********
@@ -325,7 +345,7 @@ References
 
 .. _IDAU:
    https://developer.arm.com/docs/100690/latest/attribution-units-sau-and-idau
-.. _nRF5340 DK website:
-   https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-DK
+.. _nRF7002 DK website:
+   https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF7002-DK
 .. _Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
 .. _Trusted Firmware M: https://www.trustedfirmware.org/projects/tf-m/
