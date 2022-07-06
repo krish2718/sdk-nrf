@@ -12,7 +12,7 @@
 		status = "okay";
 		reg = <0>;
 		label = "NRF7002";
-		spi-max-frequency = <8000000>;
+		spi-max-frequency = <96000000>;
 
 		iovdd-ctrl-gpios = <&arduino_header 6 GPIO_ACTIVE_HIGH>;   /* D0 */
 		bucken-gpios = <&arduino_header 7 GPIO_ACTIVE_HIGH>;	   /* D1 */
