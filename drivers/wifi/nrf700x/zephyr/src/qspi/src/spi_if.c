@@ -49,7 +49,7 @@ static int spim_xfer_tx(unsigned int addr, void *data, unsigned int len)
 }
 
 
-static int spim_xfer_rx(unsigned int addr, void *data, unsigned int len)
+static int spim_xfer_rx(unsigned int addr, void *data, unsigned int len, unsigned int discard_bytes)
 {
 	uint8_t hdr[] = {
 		0x0b, /* FASTREAD opcode */
@@ -67,7 +67,7 @@ static int spim_xfer_rx(unsigned int addr, void *data, unsigned int len)
 	const struct spi_buf_set tx = { .buffers = tx_buf, .count = 2 };
 
 	const struct spi_buf rx_buf[] = {
-		{.buf = NULL,  .len = sizeof(hdr)},
+		{.buf = NULL,  .len = sizeof(hdr) + discard_bytes},
 		{.buf = data, .len = len },
 	};
 
@@ -254,7 +254,7 @@ int spim_read(unsigned int addr, void *data, int len)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_rx(addr, data, len);
+	status = spim_xfer_rx(addr, data, len, 0);
 
 	k_sem_give(&spim_config->lock);
 
@@ -263,29 +263,16 @@ int spim_read(unsigned int addr, void *data, int len)
 
 static int spim_hl_readw(unsigned int addr, void *data)
 {
-	uint8_t *rxb = NULL;
 	int status = -1;
 	int len = 4;
 
 	len = len + (4 * spim_config->qspi_slave_latency);
 
-	rxb = k_malloc(len);
-
-	if (rxb == NULL) {
-		LOG_ERR("%s: ERROR ENOMEM line %d\n", __func__, __LINE__);
-		return -ENOMEM;
-	}
-	memset(rxb, 0, len);
-
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_rx(addr, rxb, len);
+	status = spim_xfer_rx(addr, data, len, 4);
 
 	k_sem_give(&spim_config->lock);
-
-	*(uint32_t *)data = *(uint32_t *)(rxb + (len - 4));
-
-	k_free(rxb);
 
 	return status;
 }

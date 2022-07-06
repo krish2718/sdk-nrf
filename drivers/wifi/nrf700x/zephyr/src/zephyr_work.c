@@ -57,19 +57,23 @@ struct zep_work_item *work_alloc(void)
 	return &zep_work_item[free_work_index];
 }
 
+static int workqueue_init(const struct device *unused)
+{
+	(void)unused;
+
+	k_work_queue_init(&zep_wifi_drv_q);
+
+	k_work_queue_start(&zep_wifi_drv_q,
+						wq_stack_area,
+						K_THREAD_STACK_SIZEOF(wq_stack_area),
+						PRIORITY,
+						NULL);
+	return 0;
+}
+
 void work_init(struct zep_work_item *item, void (*callback)(unsigned long),
 		  unsigned long data)
 {
-	if (zep_wifi_drv_q.flags != K_WORK_QUEUE_STARTED) {
-		k_work_queue_init(&zep_wifi_drv_q);
-
-		k_work_queue_start(&zep_wifi_drv_q,
-						   wq_stack_area,
-						   K_THREAD_STACK_SIZEOF(wq_stack_area),
-						   PRIORITY,
-						   NULL);
-	}
-
 	item->callback = callback;
 	item->data = data;
 
@@ -91,3 +95,5 @@ void work_free(struct zep_work_item *item)
 {
 	item->in_use = 0;
 }
+
+SYS_INIT(workqueue_init, POST_KERNEL, 0);
