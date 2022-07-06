@@ -10,6 +10,7 @@
  */
 
 #include <zephyr.h>
+#include <init.h>
 #include <sys/printk.h>
 #include <logging/log.h>
 
