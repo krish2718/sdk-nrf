@@ -250,9 +250,9 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 #ifdef CONFIG_WPA_SUPP
 	SHELL_CMD(connect,
 		  NULL,
-		  "\"<SSID>\"\n<channel number (optional), "
-		  "0 means all>\n"
-		  "<PSK (optional: valid only for secured SSIDs)>",
+		  " \"<SSID>\""
+		  "\nPassphrase (optional: valid only for secured SSIDs)>"
+		  "\nKEY_MGMT (optional: 0-None, 1-WPA2, 2-WPA2-256, 3-WPA3)",
 		  cmd_supplicant_connect),
 	SHELL_CMD(add_network,
 		  NULL,
