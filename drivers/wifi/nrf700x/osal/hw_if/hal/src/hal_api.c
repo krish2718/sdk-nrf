@@ -301,7 +301,8 @@ enum wifi_nrf_status hal_rpu_ps_wake(struct wifi_nrf_hal_dev_ctx *hal_dev_ctx)
 
 
 	/* If the FW is not yet booted up (e.g. during the FW load stage of Host FW load)
-	 * then skip the RPU wake attempt since RPU sleep/wake kicks in only after FW boot */
+	 * then skip the RPU wake attempt since RPU sleep/wake kicks in only after FW boot
+	 */
 	if (!hal_dev_ctx->rpu_fw_booted)
 		return WIFI_NRF_STATUS_SUCCESS;
 

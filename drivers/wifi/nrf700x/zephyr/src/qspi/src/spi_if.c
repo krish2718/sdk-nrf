@@ -81,7 +81,7 @@ int spim_RDSR1(void)
 	int err;
 	uint8_t tx_buffer[6] = { 0x1f };
 
-	const struct spi_buf tx_buf = { 
+	const struct spi_buf tx_buf = {
 		.buf = tx_buffer,
 		.len = sizeof(tx_buffer)
 	};

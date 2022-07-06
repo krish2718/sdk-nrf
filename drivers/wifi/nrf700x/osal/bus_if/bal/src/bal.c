@@ -19,24 +19,24 @@
 static void wifi_nrf_rpu_bal_sleep_chk(struct wifi_nrf_bal_dev_ctx *bal_ctx,
 				       unsigned long addr)
 {
-        unsigned int sleep_reg_val = 0;
-        unsigned int rpu_ps_state_mask = 0;
-        unsigned long sleep_reg_addr = 0;
+	unsigned int sleep_reg_val = 0;
+	unsigned int rpu_ps_state_mask = 0;
+	unsigned long sleep_reg_addr = 0;
 
-        if (!bal_ctx->rpu_fw_booted)
-                return;
+	if (!bal_ctx->rpu_fw_booted)
+		return;
 
-        sleep_reg_addr = pal_rpu_ps_ctrl_reg_addr_get();
+	sleep_reg_addr = pal_rpu_ps_ctrl_reg_addr_get();
 
-        if (sleep_reg_addr == addr)
-                return;
+	if (sleep_reg_addr == addr)
+		return;
 
 	sleep_reg_val = bal_ctx->bpriv->ops->read_word(bal_ctx->bus_dev_ctx,
 						       sleep_reg_addr);
 
 	rpu_ps_state_mask = ((1 << RPU_REG_BIT_PS_STATE) |
 			     (1 << RPU_REG_BIT_READY_STATE));
-	
+
 	if ((sleep_reg_val & rpu_ps_state_mask) != rpu_ps_state_mask) {
 		wifi_nrf_osal_log_err(bal_ctx->bpriv->opriv,
 				      "%s:RPU is being accessed when it is not ready !!! (Reg val = 0x%X)\n",
