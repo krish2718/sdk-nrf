@@ -47,7 +47,7 @@ nRF5340 SoC provides support for the following devices:
 * :abbr:`USB (Universal Serial Bus)`
 * :abbr:`WDT (Watchdog Timer)`
 
-.. figure:: img/nrf7002dk.jpg
+.. figure:: images/nrf7002dk.jpg
      :width: 711px
      :align: center
      :alt: nRF7002 DK
@@ -56,8 +56,8 @@ nRF5340 SoC provides support for the following devices:
 
 More information about the board can be found at the
 `nRF7002 DK website`_.
-The `Nordic Semiconductor Infocenter`_
-contains the processor's information and the datasheet.
+The `Infocenter`_  contains the processor's information
+and the datasheet.
 
 
 Hardware
@@ -146,8 +146,6 @@ hardware features:
 +-----------+------------+----------------------+
 
 Other hardware features are not supported by the Zephyr kernel.
-See `Nordic Semiconductor Infocenter`_
-for a complete list of nRF7002 DK board hardware features.
 
 Connections and IOs
 ===================
@@ -198,8 +196,8 @@ nRF5340 IDAU may configure bus accesses by the nRF5340 network core
 to have Secure attribute set; the latter allows to build and run
 Secure only applications on the nRF5340 SoC.
 
-Building Secure/Non-Secure Zephyr applications with Arm |reg| TrustZone |reg|
-=============================================================================
+Building Secure/Non-Secure Zephyr applications with Arm TrustZone
+=================================================================
 
 Applications on the nRF5340 may contain a Secure and a Non-Secure firmware
 image for the application core. The Secure image can be built using either
@@ -313,10 +311,11 @@ can be found. For example, under Linux, :code:`/dev/ttyACM0`.
 
 Then build and flash the application in the usual way.
 
-.. zephyr-app-commands::
-   :zephyr-app: samples/hello_world
-   :board: nrf7002dk_nrf5340_cpuapp
-   :goals: build flash
+.. code-block:: console
+
+   zephyr-app: samples/hello_world
+   board: nrf7002dk_nrf5340_cpuapp
+   goals: build flash
 
 Debugging
 =========
@@ -336,7 +335,7 @@ LEDs on the board are working properly with Zephyr:
 
 You can build and flash the examples to make sure Zephyr is running correctly on
 your board. The button and LED definitions can be found in
-:zephyr_file:`boards/arm/nrf7002dk_nrf5340/nrf5340_cpuapp_common.dts`.
+:file:`boards/arm/nrf7002dk_nrf5340/nrf5340_cpuapp_common.dts`.
 
 References
 **********
@@ -347,5 +346,5 @@ References
    https://developer.arm.com/docs/100690/latest/attribution-units-sau-and-idau
 .. _nRF7002 DK website:
    https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF7002-DK
-.. _Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
+.. _Infocenter: https://infocenter.nordicsemi.com
 .. _Trusted Firmware M: https://www.trustedfirmware.org/projects/tf-m/
