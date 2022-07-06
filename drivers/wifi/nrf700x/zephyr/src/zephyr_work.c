@@ -15,22 +15,21 @@
 
 #include "zephyr_work.h"
 
-#define STACKSIZE 4096
 #define PRIORITY 0
-#define MAX_WORK_ITEMS 10
+#define CONFIG_NRF700X_WORKQ_MAX_ITEMS 10
 
 LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
-K_THREAD_STACK_DEFINE(wq_stack_area, STACKSIZE);
+K_THREAD_STACK_DEFINE(wq_stack_area, CONFIG_NRF700X_WORKQ_STACK_SIZE);
 struct k_work_q zep_wifi_drv_q;
 
-struct zep_work_item zep_work_item[MAX_WORK_ITEMS];
+struct zep_work_item zep_work_item[CONFIG_NRF700X_WORKQ_MAX_ITEMS];
 
 int get_free_work_item_index(void)
 {
 	unsigned int i;
 
-	for (i = 0; i < MAX_WORK_ITEMS; i++) {
+	for (i = 0; i < CONFIG_NRF700X_WORKQ_MAX_ITEMS; i++) {
 		if (zep_work_item[i].in_use)
 			continue;
 		return i;
