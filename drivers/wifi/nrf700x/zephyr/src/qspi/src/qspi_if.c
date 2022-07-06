@@ -216,7 +216,7 @@ nrfx_err_t nrfx_qspi_nondma_read(void *p_rx_buffer, size_t rx_buffer_length, uin
 #ifdef CONFIG_BOARD_NRF52840DK_NRF52840
 	uint32_t *ACCESSREQ = &p_reg->RESERVED4[0];
 	uint32_t *DATARW = &p_reg->RESERVED5[0];
-#elif defined(CONFIG_NRFX_QSPI)
+#elif defined(CONFIG_NRF700X_ON_QSPI)
 	uint32_t *ACCESSREQ = (uint32_t *)&p_reg->RESERVED8[0];
 	uint32_t *DATARW = (uint32_t *)&p_reg->RESERVED9[0];
 #endif
@@ -242,7 +242,7 @@ nrfx_err_t nrfx_qspi_nondma_write(void const *p_tx_buffer, size_t tx_buffer_leng
 #ifdef CONFIG_BOARD_NRF52840DK_NRF52840
 	uint32_t *ACCESSREQ = &p_reg->RESERVED4[0];
 	uint32_t *DATARW = &p_reg->RESERVED5[0];
-#elif defined(CONFIG_NRFX_QSPI)
+#elif defined(CONFIG_NRF700X_ON_QSPI)
 	uint32_t *ACCESSREQ = (uint32_t *)&p_reg->RESERVED8[0];
 	uint32_t *DATARW = (uint32_t *)&p_reg->RESERVED9[0];
 #endif
@@ -1008,7 +1008,7 @@ static int qspi_nor_init(const struct device *dev)
 	return qspi_nor_configure(dev);
 }
 
-#if defined(CONFIG_NRFX_QSPI)
+#if defined(CONFIG_NRF700X_ON_QSPI)
 static int qspi_cmd_encryption(const struct device *dev, nrf_qspi_encryption_t *p_cfg)
 {
 	const struct qspi_buf tx_buf = { .buf = (uint8_t *)&p_cfg->nonce[1],
@@ -1187,7 +1187,7 @@ int qspi_init(struct qspi_config *config)
 
 	qspi_config = config;
 
-#if defined(CONFIG_NRFX_QSPI)
+#if defined(CONFIG_NRF700X_ON_QSPI)
 	/* QSPIM (6-96Mhz) : 192Mhz / (2*(SCKFREQ + 1)) */
 	config->sckfreq = ((192 / config->freq) / 2) - 1;
 #endif
@@ -1204,7 +1204,7 @@ int qspi_init(struct qspi_config *config)
 
 	k_sem_init(&qspi_config->lock, 1, 1);
 
-#if defined(CONFIG_NRFX_QSPI)
+#if defined(CONFIG_NRF700X_ON_QSPI)
 	/* once encryption is enabled, do not reinit until bitfile re-load */
 	if (!config->enc_enabled) {
 		if (config->encryption)
@@ -1223,7 +1223,7 @@ int qspi_init(struct qspi_config *config)
 
 void qspi_update_nonce(unsigned int addr, int len, int hlread)
 {
-#if defined(CONFIG_NRFX_QSPI)
+#if defined(CONFIG_NRF700X_ON_QSPI)
 
 	NRF_QSPI_Type *p_reg = NRF_QSPI;
 

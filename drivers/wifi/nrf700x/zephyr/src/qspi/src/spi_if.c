@@ -10,7 +10,6 @@
  */
 
 #include <drivers/spi.h>
-#include <nrfx_spim.h>
 #include <string.h>
 
 #include "qspi_if.h"
@@ -22,12 +21,12 @@ LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF_LOG_LEVEL);
 
 #define NRF7002_NODE DT_NODELABEL(nrf7002)
 
-struct qspi_config *spim_config;
+static struct qspi_config *spim_config;
 
 static const struct spi_dt_spec spi_spec =
 SPI_DT_SPEC_GET(NRF7002_NODE, SPI_WORD_SET(8) | SPI_TRANSFER_MSB, 0);
 
-int spim_xfer_tx(unsigned int addr, void *data, unsigned int len)
+static int spim_xfer_tx(unsigned int addr, void *data, unsigned int len)
 {
 	int err;
 	uint8_t hdr[4] = {
@@ -49,16 +48,15 @@ int spim_xfer_tx(unsigned int addr, void *data, unsigned int len)
 	return err;
 }
 
-#define DUMMY_BYTES 5
 
-int spim_xfer_rx(unsigned int addr, void *data, unsigned int len)
+static int spim_xfer_rx(unsigned int addr, void *data, unsigned int len)
 {
-	uint8_t hdr[DUMMY_BYTES] = {
-		0x0b,
+	uint8_t hdr[] = {
+		0x0b, /* FASTREAD opcode */
 		(addr >> 16) & 0xFF,
 		(addr >> 8) & 0xFF,
 		addr & 0xFF,
-		0
+		0 /* dummy byte */
 	};
 
 	const struct spi_buf tx_buf[] = {
@@ -69,7 +67,7 @@ int spim_xfer_rx(unsigned int addr, void *data, unsigned int len)
 	const struct spi_buf_set tx = { .buffers = tx_buf, .count = 2 };
 
 	const struct spi_buf rx_buf[] = {
-		{.buf = hdr,  .len = sizeof(hdr)},
+		{.buf = NULL,  .len = sizeof(hdr)},
 		{.buf = data, .len = len },
 	};
 
@@ -175,9 +173,7 @@ int spim_validate_rpu_awake(void)
 int spim_cmd_rpu_wakeup(uint32_t data)
 {
 	int err;
-	uint8_t tx_buffer[] = { 0x3f, 0x1 };
-
-	tx_buffer[1] = data & 0xff;
+	uint8_t tx_buffer[] = { 0x3f, data & 0xff };
 
 	const struct spi_buf tx_buf = { .buf = tx_buffer, .len = sizeof(tx_buffer) };
 	const struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
@@ -265,7 +261,7 @@ int spim_read(unsigned int addr, void *data, int len)
 	return status;
 }
 
-int spim_hl_readw(unsigned int addr, void *data)
+static int spim_hl_readw(unsigned int addr, void *data)
 {
 	uint8_t *rxb = NULL;
 	int status = -1;

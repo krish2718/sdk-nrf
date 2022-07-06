@@ -80,7 +80,7 @@ void irq_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pi
 void print_memmap(void)
 {
 	for (int i = 0; i < NUM_MEM_BLOCKS; i++) {
-		LOG_DBG(" %-14s : 0x%06x - 0x%06x (%05d words)\n", blk_name[i], shk_memmap[i][0],
+		printk(" %-14s : 0x%06x - 0x%06x (%05d words)\n", blk_name[i], shk_memmap[i][0],
 		       shk_memmap[i][1], 1 + ((shk_memmap[i][1] - shk_memmap[i][0]) >> 2));
 	}
 }
@@ -324,7 +324,7 @@ static int cmd_memtest(const struct shell *shell, size_t argc, char **argv)
 
 void get_sleep_stats(uint32_t addr, uint32_t *buff, uint32_t wrd_len)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 	LOG_DBG("Waiting for RPU awake...\n");
 
@@ -507,7 +507,7 @@ static int cmd_qspi_init(const struct shell *shell, size_t argc, char **argv)
 
 int func_rpu_sleep(void)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	return qspi_cmd_sleep_rpu(&qspi_perip);
 #else
 	return spim_cmd_sleep_rpu_fn();
@@ -516,7 +516,7 @@ int func_rpu_sleep(void)
 
 int func_rpu_wake(void)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	return qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 #else
 	return spim_cmd_rpu_wakeup_fn(0x1);
@@ -525,7 +525,7 @@ int func_rpu_wake(void)
 
 int func_rpu_sleep_status(void)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	return qspi_RDSR1(&qspi_perip);
 #else
 	return spim_RDSR1();
@@ -537,7 +537,7 @@ int func_rpu_sleep_status(void)
 
 int func_rpuwake(void)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	qspi_cmd_wakeup_rpu(&qspi_perip, 0x1);
 	LOG_DBG("exited qspi_cmd_wakeup_rpu()\n");
 
@@ -568,7 +568,7 @@ static int cmd_rpuwake(const struct shell *shell, size_t argc, char **argv)
 
 static int func_wrsr2(uint8_t data)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	qspi_cmd_wakeup_rpu(&qspi_perip, data);
 #else
 	spim_cmd_rpu_wakeup_fn(data);
@@ -591,7 +591,7 @@ static int cmd_wrsr2(const struct shell *shell, size_t argc, char **argv)
 /* -------------------------------------------------------------------------------------- */
 static int func_rdsr2(void)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	qspi_validate_rpu_wake_writecmd(&qspi_perip);
 #else
 	spim_validate_rpu_awake_fn();
@@ -610,7 +610,7 @@ static int cmd_rdsr2(const struct shell *shell, size_t argc, char **argv)
 
 static int func_rdsr1(void)
 {
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	qspi_wait_while_rpu_awake(&qspi_perip);
 #else
 	spim_wait_while_rpu_awake_fn();
@@ -721,7 +721,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 	shell_print(shell, "         reads them back and validates them");
 	shell_print(shell, "  ");
 	shell_print(shell, "uart:~$ nrf700x_shell wifi_on  ");
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	shell_print(shell, "         - Configures all gpio pins ");
 	shell_print(
 		shell,
@@ -738,7 +738,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 #endif
 	shell_print(shell, "  ");
 	shell_print(shell, "uart:~$ nrf700x_shell wifi_off ");
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	shell_print(
 		shell,
 		"         This writes 0 to IOVDD Control (P0.31) and then writes 0 to BUCKEN Control (P0.12)");
@@ -753,7 +753,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 		    "         This continuously does the RPU sleep/wake cycle and displays stats ");
 	shell_print(shell, "  ");
 	shell_print(shell, "uart:~$ nrf700x_shell gpio_config ");
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	shell_print(
 		shell,
 		"         Configures BUCKEN(P0.12) as o/p, IOVDD control (P0.31) as output and HOST_IRQ (P0.23) as input");
@@ -814,7 +814,7 @@ static void cmd_help(const struct shell *shell, size_t argc, char **argv)
 static int cmd_ver(const struct shell *shell, size_t argc, char **argv)
 {
 	shell_print(shell, "nrf700x_shell Version: %s", SW_VER);
-#if CONFIG_NRFX_QSPI
+#if CONFIG_NRF700X_ON_QSPI
 	shell_print(shell, "Build for QSPI interface on nRF7002 board");
 #else
 	shell_print(shell,
