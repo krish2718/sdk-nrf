@@ -270,7 +270,7 @@ static int spim_hl_readw(unsigned int addr, void *data)
 
 	k_sem_take(&spim_config->lock, K_FOREVER);
 
-	status = spim_xfer_rx(addr, data, len, 4);
+	status = spim_xfer_rx(addr, data, len, len-4);
 
 	k_sem_give(&spim_config->lock);
 
