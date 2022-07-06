@@ -24,15 +24,10 @@
 
 struct qspi_config *qspi_config;
 unsigned int nonce_last_addr;
-unsigned int nonce_cnt;
+static unsigned int nonce_cnt;
 
 /* Main config structure */
 static nrfx_qspi_config_t QSPIconfig;
-
-/* Status register bits */
-#define QSPI_SECTOR_SIZE SPI_NOR_SECTOR_SIZE
-#define QSPI_BLOCK_SIZE SPI_NOR_BLOCK_SIZE
-
 
 #define INST_0_SCK_FREQUENCY DT_INST_PROP(0, sck_frequency)
 BUILD_ASSERT(INST_0_SCK_FREQUENCY >= (NRF_QSPI_BASE_CLOCK_FREQ / 16), "Unsupported SCK frequency.");
@@ -111,8 +106,6 @@ struct qspi_nor_data {
 	volatile bool ready;
 #endif /* CONFIG_MULTITHREADING */
 };
-
-static int qspi_nor_write_protection_set(const struct device *dev, bool write_protect);
 
 static inline int qspi_get_mode(bool cpol, bool cpha)
 {
@@ -210,70 +203,13 @@ static inline nrf_qspi_addrmode_t qspi_get_address_size(bool addr_size)
 	return addr_size ? NRF_QSPI_ADDRMODE_32BIT : NRF_QSPI_ADDRMODE_24BIT;
 }
 
-nrfx_err_t nrfx_qspi_nondma_read(void *p_rx_buffer, size_t rx_buffer_length, uint32_t src_address)
-{
-	NRF_QSPI_Type *p_reg = NRF_QSPI;
-#ifdef CONFIG_BOARD_NRF52840DK_NRF52840
-	uint32_t *ACCESSREQ = &p_reg->RESERVED4[0];
-	uint32_t *DATARW = &p_reg->RESERVED5[0];
-#elif defined(CONFIG_NRF700X_ON_QSPI)
-	uint32_t *ACCESSREQ = (uint32_t *)&p_reg->RESERVED8[0];
-	uint32_t *DATARW = (uint32_t *)&p_reg->RESERVED9[0];
-#endif
-	unsigned int count;
-
-	ACCESSREQ[0] = src_address;
-	ACCESSREQ[1] = rx_buffer_length;
-	ACCESSREQ[2] = 0;
-
-	for (count = 0; count < rx_buffer_length; count += 4) {
-		while (!(nrf_qspi_status_reg_get(p_reg) & 0x1))
-			;
-		memcpy(((char *)p_rx_buffer + count), &DATARW[0], sizeof(uint32_t));
-	}
-
-	return NRFX_SUCCESS;
-}
-
-nrfx_err_t nrfx_qspi_nondma_write(void const *p_tx_buffer, size_t tx_buffer_length,
-				  uint32_t dst_address)
-{
-	NRF_QSPI_Type *p_reg = NRF_QSPI;
-#ifdef CONFIG_BOARD_NRF52840DK_NRF52840
-	uint32_t *ACCESSREQ = &p_reg->RESERVED4[0];
-	uint32_t *DATARW = &p_reg->RESERVED5[0];
-#elif defined(CONFIG_NRF700X_ON_QSPI)
-	uint32_t *ACCESSREQ = (uint32_t *)&p_reg->RESERVED8[0];
-	uint32_t *DATARW = (uint32_t *)&p_reg->RESERVED9[0];
-#endif
-	unsigned int count;
-
-	ACCESSREQ[0] = dst_address;
-	ACCESSREQ[1] = tx_buffer_length;
-	ACCESSREQ[2] = 1;
-
-	for (count = 0; count < tx_buffer_length; count += 4) {
-		memcpy(&DATARW[0], ((char *)p_tx_buffer + count), sizeof(uint32_t));
-		while (!(nrf_qspi_status_reg_get(p_reg) & 0x2))
-			;
-	}
-
-	return NRFX_SUCCESS;
-}
-
 nrfx_err_t _nrfx_qspi_read(void *p_rx_buffer, size_t rx_buffer_length, uint32_t src_address)
 {
-	if (!qspi_config->easydma)
-		return nrfx_qspi_nondma_read(p_rx_buffer, rx_buffer_length, src_address);
-
 	return nrfx_qspi_read(p_rx_buffer, rx_buffer_length, src_address);
 }
 
 nrfx_err_t _nrfx_qspi_write(void const *p_tx_buffer, size_t tx_buffer_length, uint32_t dst_address)
 {
-	if (!qspi_config->easydma)
-		return nrfx_qspi_nondma_write(p_tx_buffer, tx_buffer_length, dst_address);
-
 	return nrfx_qspi_write(p_tx_buffer, tx_buffer_length, dst_address);
 }
 
@@ -312,12 +248,6 @@ nrf_qspi_frequency_t _qspi_get_sckfreq(void)
 {
 	return qspi_config->sckfreq;
 }
-
-/**
- * @brief Test whether offset is aligned.
- */
-#define QSPI_IS_SECTOR_ALIGNED(_ofs) (((_ofs) & (QSPI_SECTOR_SIZE - 1U)) == 0)
-#define QSPI_IS_BLOCK_ALIGNED(_ofs) (((_ofs) & (QSPI_BLOCK_SIZE - 1U)) == 0)
 
 /**
  * @brief Main configuration structure
@@ -925,47 +855,25 @@ static int qspi_nor_write(const struct device *dev, int addr, const void *src, s
 
 	qspi_trans_lock(dev);
 
-	res = qspi_nor_write_protection_set(dev, false);
-
 	qspi_lock(dev);
 
-	if (!res) {
-		if (size < 4U)
-			res = write_sub_word(dev, addr, src, size);
-		else if (!nrfx_is_in_ram(src))
-			res = write_from_nvmc(dev, addr, src, size);
-		else {
-			res = _nrfx_qspi_write(src, size, addr);
-			_qspi_wait_for_completion(dev, res);
-		}
+	if (size < 4U)
+		res = write_sub_word(dev, addr, src, size);
+	else if (!nrfx_is_in_ram(src))
+		res = write_from_nvmc(dev, addr, src, size);
+	else {
+		res = _nrfx_qspi_write(src, size, addr);
+		_qspi_wait_for_completion(dev, res);
 	}
 
 	qspi_unlock(dev);
 
-	int res2 = qspi_nor_write_protection_set(dev, true);
-
 	qspi_trans_unlock(dev);
-
-	if (!res)
-		res = res2;
 
 	rc = qspi_get_zephyr_ret_code(res);
 out:
 	ANOMALY_122_UNINIT(dev);
 	return rc;
-}
-
-static int qspi_nor_write_protection_set(const struct device *dev, bool write_protect)
-{
-	int ret = 0;
-	struct qspi_cmd cmd = {
-		.op_code = ((write_protect) ? SPI_NOR_CMD_WRDI : SPI_NOR_CMD_WREN),
-	};
-
-	if (qspi_send_cmd(dev, &cmd, false) != 0)
-		ret = -EIO;
-
-	return ret;
 }
 
 /**
@@ -995,7 +903,7 @@ static int qspi_nor_configure(const struct device *dev)
  */
 static int qspi_nor_init(const struct device *dev)
 {
-#if defined(CONFIG_SOC_SERIES_NRF53X)
+#if defined(CONFIG_NRF700X_ON_QSPI)
 	/* Make sure the PCLK192M clock, from which the SCK frequency is
 	 * derived, is not prescaled (the default setting after reset is
 	 * "divide by 4").
@@ -1190,8 +1098,7 @@ int qspi_init(struct qspi_config *config)
 #if defined(CONFIG_NRF700X_ON_QSPI)
 	/* QSPIM (6-96Mhz) : 192Mhz / (2*(SCKFREQ + 1)) */
 	config->sckfreq = ((192 / config->freq) / 2) - 1;
-#endif
-#ifdef CONFIG_BOARD_NRF52840DK_NRF52840
+#else
 	/* QSPIM (2-32Mhz): 32 MHz / (SCKFREQ + 1) */
 	config->sckfreq = (32 / config->freq) - 1;
 #endif
