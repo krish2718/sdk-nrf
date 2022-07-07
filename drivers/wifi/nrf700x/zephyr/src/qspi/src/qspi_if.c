@@ -22,8 +22,8 @@
 
 #include "qspi_if.h"
 
-struct qspi_config *qspi_config;
-unsigned int nonce_last_addr;
+static struct qspi_config *qspi_config;
+static unsigned int nonce_last_addr;
 static unsigned int nonce_cnt;
 
 /* Main config structure */
