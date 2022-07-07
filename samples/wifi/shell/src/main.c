@@ -11,7 +11,7 @@
 
 void main(void)
 {
-#ifdef CONFIG_BOARD_NRF5340DK_NRF5340_CPUAPP
+#ifdef CLOCK_FEATURE_HFCLK_DIVIDE_PRESENT
 	/* For now hardcode to 128MHz */
 	nrfx_clock_divider_set(NRF_CLOCK_DOMAIN_HFCLK,
 			       NRF_CLOCK_HFCLK_DIV_1);
