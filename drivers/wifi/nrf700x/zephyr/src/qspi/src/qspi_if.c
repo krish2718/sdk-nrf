@@ -903,7 +903,7 @@ static int qspi_nor_configure(const struct device *dev)
  */
 static int qspi_nor_init(const struct device *dev)
 {
-#if defined(CONFIG_NRF700X_ON_QSPI)
+#if NRF_CLOCK_HAS_HFCLK192M
 	/* Make sure the PCLK192M clock, from which the SCK frequency is
 	 * derived, is not prescaled (the default setting after reset is
 	 * "divide by 4").
@@ -916,7 +916,7 @@ static int qspi_nor_init(const struct device *dev)
 	return qspi_nor_configure(dev);
 }
 
-#if defined(CONFIG_NRF700X_ON_QSPI)
+#if defined(CONFIG_SOC_SERIES_NRF53X)
 static int qspi_cmd_encryption(const struct device *dev, nrf_qspi_encryption_t *p_cfg)
 {
 	const struct qspi_buf tx_buf = { .buf = (uint8_t *)&p_cfg->nonce[1],
@@ -1095,7 +1095,7 @@ int qspi_init(struct qspi_config *config)
 
 	qspi_config = config;
 
-#if defined(CONFIG_NRF700X_ON_QSPI)
+#if defined(CONFIG_SOC_SERIES_NRF53X)
 	/* QSPIM (6-96Mhz) : 192Mhz / (2*(SCKFREQ + 1)) */
 	config->sckfreq = ((192 / config->freq) / 2) - 1;
 #else
@@ -1111,7 +1111,7 @@ int qspi_init(struct qspi_config *config)
 
 	k_sem_init(&qspi_config->lock, 1, 1);
 
-#if defined(CONFIG_NRF700X_ON_QSPI)
+#if defined(CONFIG_SOC_SERIES_NRF53X)
 	/* once encryption is enabled, do not reinit until bitfile re-load */
 	if (!config->enc_enabled) {
 		if (config->encryption)
@@ -1130,7 +1130,7 @@ int qspi_init(struct qspi_config *config)
 
 void qspi_update_nonce(unsigned int addr, int len, int hlread)
 {
-#if defined(CONFIG_NRF700X_ON_QSPI)
+#if defined(CONFIG_SOC_SERIES_NRF53X)
 
 	NRF_QSPI_Type *p_reg = NRF_QSPI;
 
