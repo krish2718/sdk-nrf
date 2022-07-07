@@ -33,8 +33,6 @@ manifest:
       url-base: https://github.com/NordicSemiconductor
     - name: memfault
       url-base: https://github.com/memfault
-    - name: sr1dh48r
-      url-base: https://github.com/sr1dh48r
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -103,8 +101,7 @@ manifest:
     - name: sdk-hostap
       repo-path: sdk-hostap
       path: modules/lib/hostap
-      remote: sr1dh48r
-      revision: sheliak-dev
+      revision: main
     - name: mcuboot
       repo-path: sdk-mcuboot
       revision: 132a537bf94044be93240a43b7622b3040bd017e
