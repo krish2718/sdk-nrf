@@ -3,33 +3,42 @@
 Wi-Fi sample
 ############
 
-Overview
-********
+This sample allows testing Nordic Wi-Fi driver for various boards by enabling the Wi-Fi supplicant module that provides the ``scan``, ``connect``, and ``disconnect`` commands.
+It also enables the :ref:`zephyr:net_shell` module to verify ``net_if`` settings.
 
-This sample allows testing Nordic Wi-Fi driver for various boards by
-enabling the Wi-Fi supplicant module that provides a set of commands:
-scan, connect, and disconnect.  It also enables the net_shell module
-to verify net_if settings.
+Requirements
+************
+
+The sample supports the following development kits:
+
+.. table-from-rows:: /includes/sample_board_rows.txt
+   :header: heading:
+   :rows: nrf7002dk_nrf5340_cpuapp
 
 Building and Running
 ********************
 
+.. |sample path| replace:: :file:`samples/wifi/shell`
+
+.. include:: /includes/build_and_run_ns.txt
+
 Currently, the following configurations are supported:
 
-7002 DK + QSPI
-7002 EK + SPIM
+* 7002 DK + QSPI
+* 7002 EK + SPIM
 
-You can build for the DK by using the following command
+You can build for the nRF7002 DK by using the following command::
 
-west build -b nrf7002dk_nrf5340_cpuapp
+   west build -b nrf7002dk_nrf5340_cpuapp
 
+You can build for the nRF7002 EK by using the following command::
 
-You can build for the EK by using the following command
-
-west build -b nrf5340dk_nrf5340_cpuapp -- -DSHIELD=nrf7002_ek
+   west build -b nrf5340dk_nrf5340_cpuapp -- -DSHIELD=nrf7002_ek
 
 Sample console interaction
 ==========================
+
+The following an example of a console interaction:
 
 .. code-block:: console
 
@@ -68,3 +77,10 @@ Sample console interaction
    28 bytes from 142.250.74.46 to 192.168.50.199: icmp_seq=1 ttl=113 time=190 ms
    28 bytes from 142.250.74.46 to 192.168.50.199: icmp_seq=2 ttl=113 time=190 ms
    28 bytes from 142.250.74.46 to 192.168.50.199: icmp_seq=3 ttl=113 time=192 ms
+
+Dependencies
+============
+
+This sample uses the following Zephyr module:
+
+* :ref:`zephyr:net_shell`

@@ -243,6 +243,8 @@
 
 .. _`nRF Connect SDK v1.9.0 webinar`: https://www.nordicsemi.com/Events/2022/Webinar-Exciting-new-features-in-nRF-Connect-SDK-v19?utm_campaign=2022%20Webinars&utm_source=developer.nordicsemi.com&utm_medium=In-line%20text%20%7C%20nRF%20Connect%20SDK%20v1.9%20%7C%20Link%20to%20webinar
 
+.. _`Nordic Semiconductor WiFi products`: https://www.nordicsemi.com/Products/WiFi
+
 .. ### Source: infocenter.nordicsemi.com
 
 .. _`Nordic Semiconductor Infocenter`: https://infocenter.nordicsemi.com/index.jsp
@@ -678,6 +680,7 @@
 
 .. _`ARM TrustZone`: https://developer.arm.com/documentation/100690/0200/ARM-TrustZone-technology?lang=en
 .. _`GNU Arm Embedded Toolchain`: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads
+.. _`IDAU`: https://developer.arm.com/docs/100690/latest/attribution-units-sau-and-idau
 
 .. _`Kconfig language`: https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html
 
@@ -723,6 +726,7 @@
 .. _`Platform Security Architecture (PSA)`: https://www.psacertified.org/what-is-psa-certified/
 
 .. _`Mbed TLS`: https://developer.trustedfirmware.org/w/mbed-tls/
+.. _`Trusted Firmware M`: https://www.trustedfirmware.org/projects/tf-m/
 
 .. _`Nanopb`: https://jpa.kapsi.fi/nanopb/
 .. _`Nanopb Downloads`: https://jpa.kapsi.fi/nanopb/download/
