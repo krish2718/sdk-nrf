@@ -44,7 +44,7 @@ static struct {
 
 static uint32_t scan_result;
 
-int cli_main (int argc, const char **argv);
+int cli_main(int argc, const char **argv);
 extern struct wpa_supplicant *wpa_s_0;
 struct wpa_ssid *ssid_0;
 
@@ -615,8 +615,8 @@ static int cmd_supplicant_set_network(const struct shell *shell, size_t argc,
 		if (parse_bssid(value, bssid)) {
 			return zephyr_supp_set_bssid(id, value);
 		} else {
-			shell_fprintf(context.shell,
-			      SHELL_ERROR, "Invalid BSSID '%s'.", value);
+			shell_fprintf(context.shell,SHELL_ERROR, 
+					"Invalid BSSID '%s'.", value);
 			return -1;
 		}
 	} else if (os_strcmp(param, "scan_freq") == 0) {
@@ -683,7 +683,7 @@ static int cmd_supplicant_status(const struct shell *shell, size_t argc,
 
 	status_buf = os_zalloc(sizeof(char) * buflen);
 
-	if (!status_buf){
+	if (!status_buf) {
 		printf("Failed to allocate memory\n");
 		return -1;
 	}
