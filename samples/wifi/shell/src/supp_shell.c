@@ -16,11 +16,11 @@
 #include <ctype.h>
 
 #include <net/net_if.h>
-#include <net/wifi_mgmt.h>
 #include <net/net_event.h>
 #include "common.h"
 #include "zephyr_fmac_main.h"
 #ifdef CONFIG_WPA_SUPP
+#include "zephyr/src/zephyr_supp_api.h"
 #include "drivers/driver_zephyr.h"
 #include "utils/common.h"
 #include "config.h"
@@ -104,8 +104,12 @@ static int cmd_supplicant_scan(const struct shell *shell,
 
 	context.shell = shell;
 
+#ifdef CONFIG_WPA_SUPP
+	return zephyr_supp_scan("wlan0", scan_result_cb);
+#else
 	return dev_ops->off_api.disp_scan(dev,
 					  scan_result_cb);
+#endif
 }
 
 
@@ -140,6 +144,17 @@ static int __wifi_args_to_params(size_t argc,
 	return 0;
 }
 
+int status_check(int status)
+{
+	if (status == WPA_COMPLETED){
+		wpa_printf(MSG_INFO, "CONNECTED\n");
+	} else {
+		wpa_printf(MSG_INFO, "FAILED TO CONNECT\n");
+	}
+
+	return 0;
+}
+
 
 static int cmd_supplicant_connect(const struct shell *shell,
 				  size_t argc,
@@ -149,6 +164,8 @@ static int cmd_supplicant_connect(const struct shell *shell,
 	struct wifi_connect_req_params *params;
 	struct wpa_ssid *ssid = NULL;
 	bool pmf = true;
+	int status = WPA_DISCONNECTED;
+	struct wpa_status_check status_cb;
 
 	if (__wifi_args_to_params(argc - 1,
 				  &argv[1],
@@ -158,72 +175,11 @@ static int cmd_supplicant_connect(const struct shell *shell,
 	}
 
 	params = &cnx_params;
+	status_cb.cb = status_check;
 
-	if (!wpa_s_0) {
-		shell_fprintf(context.shell,
-			      SHELL_ERROR,
-			      "%s: wpa_supplicant is not initialized, dropping connect\n",
-			      __func__);
-		return -1;
-	}
+	status = zephyr_supp_connect(params, "wlan0", &status_cb);
 
-	ssid = wpa_supplicant_add_network(wpa_s_0);
-	ssid->ssid = os_zalloc(sizeof(u8) * MAX_SSID_LEN);
-
-	memcpy(ssid->ssid, params->ssid, params->ssid_length);
-	ssid->ssid_len = params->ssid_length;
-	ssid->disabled = 1;
-	ssid->key_mgmt = WPA_KEY_MGMT_NONE;
-
-	wpa_s_0->conf->filter_ssids = 1;
-	wpa_s_0->conf->ap_scan = 1;
-
-	if (params->psk) {
-		// TODO: Extend enum wifi_security_type
-		if (params->security == 3) {
-			ssid->key_mgmt = WPA_KEY_MGMT_SAE;
-			str_clear_free(ssid->sae_password);
-			ssid->sae_password = dup_binstr(params->psk, params->psk_length);
-
-			if (ssid->sae_password == NULL) {
-				shell_fprintf(context.shell,
-					      SHELL_ERROR,
-					      "%s:Failed to copy sae_password\n",
-					      __func__);
-				return -1;
-			}
-		} else {
-			if (params->security == 2)
-				ssid->key_mgmt = WPA_KEY_MGMT_PSK_SHA256;
-			else
-				ssid->key_mgmt = WPA_KEY_MGMT_PSK;
-
-			str_clear_free(ssid->passphrase);
-			ssid->passphrase = dup_binstr(params->psk, params->psk_length);
-
-			if (ssid->passphrase == NULL) {
-				shell_fprintf(context.shell,
-					      SHELL_ERROR,
-					      "%s:Failed to copy passphrase\n",
-					      __func__);
-				return -1;
-			}
-		}
-
-		wpa_config_update_psk(ssid);
-
-		if (pmf)
-			ssid->ieee80211w = 1;
-
-	}
-
-	wpa_supplicant_enable_network(wpa_s_0,
-				      ssid);
-
-	wpa_supplicant_select_network(wpa_s_0,
-				      ssid);
-
-	return 0;
+	return status;	
 }
 
 

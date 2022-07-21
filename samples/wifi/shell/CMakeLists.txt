@@ -18,9 +18,11 @@ endif()
 target_include_directories(mbedcrypto_common
 	INTERFACE
 	${CMAKE_SOURCE_DIR}
+	${WPA_SUPP_BASE}
 )
 
 target_sources(app PRIVATE
 	src/wifi_main.c
-	src/wifi_shell.c
+	#src/wifi_shell.c
+	src/supp_shell.c
 )
