@@ -615,7 +615,7 @@ static int cmd_supplicant_set_network(const struct shell *shell, size_t argc,
 		if (parse_bssid(value, bssid)) {
 			return zephyr_supp_set_bssid(id, value);
 		} else {
-			shell_fprintf(context.shell,SHELL_ERROR, 
+			shell_fprintf(context.shell, SHELL_ERROR,
 					"Invalid BSSID '%s'.", value);
 			return -1;
 		}
