@@ -548,7 +548,7 @@ static int cmd_supplicant_set_network(const struct shell *shell, size_t argc,
 		return zephyr_supp_set_psk(id, value);
 	} else if (os_strcmp(param, "key_mgmt") == 0) {
 		key_mgmt = parse_key_mgmt(value);
-		return zephyr_supp_set_key_mgmt(id, value);
+		return zephyr_supp_set_key_mgmt(id, key_mgmt);
 	} else if (os_strcmp(param, "pairwise") == 0) {
 		pairwise = wpa_parse_cipher(value);
 		if (pairwise == -1)
@@ -569,7 +569,7 @@ static int cmd_supplicant_set_network(const struct shell *shell, size_t argc,
 		return zephyr_supp_set_scan_ssid(id, atoi(value));
 	} else if (os_strcmp(param, "bssid") == 0) {
 		if (parse_bssid(value, bssid)) {
-			return zephyr_supp_set_bssid(id, value);
+			return zephyr_supp_set_bssid(id, bssid);
 		} else {
 			shell_fprintf(context.shell, SHELL_ERROR,
 					"Invalid BSSID '%s'.", value);
