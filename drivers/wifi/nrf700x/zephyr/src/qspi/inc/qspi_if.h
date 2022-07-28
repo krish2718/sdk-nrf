@@ -99,9 +99,9 @@ int qspi_RDSR1(const struct device *dev, uint8_t *rdsr1);
 int qspi_RDSR2(const struct device *dev, uint8_t *rdsr2);
 int qspi_WRSR2(const struct device *dev, const uint8_t wrsr2);
 
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 int func_rpu_sleep(void);
 int func_rpu_wake(void);
 int func_rpu_sleep_status(void);
-#endif /* RPU_SLEEP_SUPPORT */
+#endif /* CONFIG_NRF700x_LOW_POWER_MODE */
 #endif /* __QSPI_IF_H__ */

@@ -152,9 +152,9 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 						  unsigned char if_idx,
 						  unsigned char *rf_params,
 						  bool rf_params_valid,
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 						  int sleep_type,
-#endif /* RPU_SLEEP_SUPPORT */
+#endif /* CONFIG_NRF700x_LOW_POWER_MODE */
 						  unsigned int phy_calib)
 {
 	unsigned long start_time_us = 0;
@@ -191,9 +191,9 @@ static enum wifi_nrf_status wifi_nrf_fmac_fw_init(struct wifi_nrf_fmac_dev_ctx *
 			       if_idx,
 			       rf_params,
 			       rf_params_valid,
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 			       sleep_type,
-#endif /* RPU_SLEEP_SUPPORT */
+#endif /* CONFIG_NRF700x_LOW_POWER_MODE */
 			       fmac_dev_ctx->fpriv->data_config,
 			       phy_calib);
 
@@ -347,9 +347,9 @@ enum wifi_nrf_status wifi_nrf_fmac_dev_init(struct wifi_nrf_fmac_dev_ctx *fmac_d
 				       params->def_vif_idx,
 				       params->rf_params,
 				       params->rf_params_valid,
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 				       params->sleep_type,
-#endif /* RPU_SLEEP_SUPPORT */
+#endif /* CONFIG_NRF700x_LOW_POWER_MODE */
 				       params->phy_calib);
 
 	if (status == WIFI_NRF_STATUS_FAIL) {

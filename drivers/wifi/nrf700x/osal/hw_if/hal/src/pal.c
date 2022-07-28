@@ -46,7 +46,7 @@ out:
 
 
 
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 unsigned long pal_rpu_ps_ctrl_reg_addr_get(void)
 {
 	return SOC_MMAP_ADDR_RPU_PS_CTRL;

@@ -595,7 +595,7 @@ static void zep_shim_bus_qspi_deinit(void *os_qspi_priv)
 	k_free(qspi_priv);
 }
 
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 static int zep_shim_bus_qspi_ps_sleep(void *os_qspi_priv)
 {
 	rpu_sleep();
@@ -689,7 +689,7 @@ static void zep_shim_bus_qspi_intr_unreg(void *os_qspi_dev_ctx)
 {
 }
 
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 static void *zep_shim_timer_alloc(void)
 {
 	struct timer_list *timer = NULL;
@@ -796,7 +796,7 @@ static const struct wifi_nrf_osal_ops wifi_nrf_os_zep_ops = {
 	.bus_qspi_dev_intr_unreg = zep_shim_bus_qspi_intr_unreg,
 	.bus_qspi_dev_host_map_get = zep_shim_bus_qspi_dev_host_map_get,
 
-#ifdef RPU_SLEEP_SUPPORT
+#ifdef CONFIG_NRF700x_LOW_POWER_MODE
 	.timer_alloc = zep_shim_timer_alloc,
 	.timer_init = zep_shim_timer_init,
 	.timer_free = zep_shim_timer_free,

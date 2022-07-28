@@ -32,4 +32,8 @@ config NRF700X_WORKQ_MAX_ITEMS
 	int "Maximum work items for workqueue"
 	default 10
 
+config NRF700x_LOW_POWER_MODE
+	bool "Enable low power mode in nrf700x"
+	default n
+
 endif
