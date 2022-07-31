@@ -101,7 +101,7 @@ manifest:
     # changes.
     - name: sdk-hostap
       path: modules/lib/hostap
-      revision: 204d51056749e9fa630986609cf6f87717257b95
+      revision: nrf700x-test
     - name: mcuboot
       repo-path: sdk-mcuboot
       revision: 6097de22bd1f1b499e599bfef618a235de7073b2
