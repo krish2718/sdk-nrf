@@ -303,6 +303,10 @@ int rpu_enable(void)
 	rpu_gpio_config();
 	rpu_pwron();
 	rpu_qspi_init();
+	/* WAR for EK boards to wait longer for RPU to be ready after
+	 * powering it on.
+	 */
+	k_msleep(8);
 	rpu_wakeup();
 	rpu_clks_on();
 
