@@ -114,127 +114,6 @@ static int cmd_wifi_scan(const struct shell *shell,
 
 
 #ifdef CONFIG_WPA_SUPP
-static int __wifi_args_to_params(size_t argc,
-				 const char *argv[],
-				 struct wifi_connect_req_params *params)
-{
-	char *endptr;
-	int idx = 1;
-
-	if (argc < 1) {
-		return -EINVAL;
-	}
-
-	/* SSID */
-	params->ssid = (char *)argv[0];
-	params->ssid_length = strlen(params->ssid);
-
-	/* PSK (optional) */
-	if (idx < argc) {
-		params->psk = (char *)argv[idx];
-		params->psk_length = strlen(argv[idx]);
-		params->security = WIFI_SECURITY_TYPE_PSK;
-		idx++;
-
-		if ((idx < argc) && (strlen(argv[idx]) <= 2)) {
-			params->security = strtol(argv[idx], &endptr, 10);
-		}
-	} else {
-		params->security = WIFI_SECURITY_TYPE_NONE;
-	}
-
-	return 0;
-}
-
-
-static int cmd_supplicant_connect(const struct shell *shell,
-				  size_t argc,
-				  const char *argv[])
-{
-	static struct wifi_connect_req_params cnx_params;
-	struct wifi_connect_req_params *params;
-	struct wpa_ssid *ssid = NULL;
-	bool pmf = true;
-	struct wpa_supplicant *wpa_s;
-
-	if (__wifi_args_to_params(argc - 1,
-				  &argv[1],
-				  &cnx_params)) {
-		shell_help(shell);
-		return -ENOEXEC;
-	}
-
-	params = &cnx_params;
-
-	wpa_s = wpa_supplicant_get_iface(global, if_name);
-	if (!wpa_s) {
-		shell_fprintf(context.shell,
-			      SHELL_ERROR,
-			      "%s: wpa_supplicant is not initialized, dropping connect\n",
-			      __func__);
-		return -1;
-	}
-
-	ssid = wpa_supplicant_add_network(wpa_s);
-	ssid->ssid = os_zalloc(sizeof(u8) * MAX_SSID_LEN);
-
-	memcpy(ssid->ssid, params->ssid, params->ssid_length);
-	ssid->ssid_len = params->ssid_length;
-	ssid->disabled = 1;
-	ssid->key_mgmt = WPA_KEY_MGMT_NONE;
-
-	wpa_s->conf->filter_ssids = 1;
-	wpa_s->conf->ap_scan = 1;
-
-	if (params->psk) {
-		// TODO: Extend enum wifi_security_type
-		if (params->security == 3) {
-			ssid->key_mgmt = WPA_KEY_MGMT_SAE;
-			str_clear_free(ssid->sae_password);
-			ssid->sae_password = dup_binstr(params->psk, params->psk_length);
-
-			if (ssid->sae_password == NULL) {
-				shell_fprintf(context.shell,
-					      SHELL_ERROR,
-					      "%s:Failed to copy sae_password\n",
-					      __func__);
-				return -1;
-			}
-		} else {
-			if (params->security == 2)
-				ssid->key_mgmt = WPA_KEY_MGMT_PSK_SHA256;
-			else
-				ssid->key_mgmt = WPA_KEY_MGMT_PSK;
-
-			str_clear_free(ssid->passphrase);
-			ssid->passphrase = dup_binstr(params->psk, params->psk_length);
-
-			if (ssid->passphrase == NULL) {
-				shell_fprintf(context.shell,
-					      SHELL_ERROR,
-					      "%s:Failed to copy passphrase\n",
-					      __func__);
-				return -1;
-			}
-		}
-
-		wpa_config_update_psk(ssid);
-
-		if (pmf)
-			ssid->ieee80211w = 1;
-
-	}
-
-	wpa_supplicant_enable_network(wpa_s,
-				      ssid);
-
-	wpa_supplicant_select_network(wpa_s,
-				      ssid);
-
-	return 0;
-}
-
-
 static int cmd_supplicant(const struct shell *shell,
 			  size_t argc,
 			  const char *argv[])
@@ -262,12 +141,6 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 		  "Scan AP",
 		  cmd_wifi_scan),
 #ifdef CONFIG_WPA_SUPP
-	SHELL_CMD(connect,
-		  NULL,
-		  " \"<SSID>\""
-		  "\nPassphrase (optional: valid only for secured SSIDs)>"
-		  "\nKEY_MGMT (optional: 0-None, 1-WPA2, 2-WPA2-256, 3-WPA3)",
-		  cmd_supplicant_connect),
 	SHELL_CMD(add_network,
 		  NULL,
 		  "\"Add Network network id/number\"",
@@ -335,7 +208,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
  */
 SHELL_CMD_REGISTER(wpa_cli,
 		   &wpa_cli_cmds,
-		   "Wi-Fi commands",
+		   "wpa_supplicant commands (only for internal use)",
 		   NULL);
 
 
