@@ -49,6 +49,13 @@ enum wifi_nrf_status wifi_nrf_if_state_chg(void *os_vif_ctx, enum wifi_nrf_fmac_
 
 	vif_ctx_zep->if_state = if_state;
 
+	if (if_state == WIFI_NRF_FMAC_IF_STATE_UP) {
+		/* No carrier UP, we only have IF_UP */
+		net_if_up(vif_ctx_zep->zep_net_if_ctx);
+	} else if (if_state == WIFI_NRF_FMAC_IF_STATE_DOWN) {
+		net_if_carrier_down(vif_ctx_zep->zep_net_if_ctx);
+	}
+
 	return WIFI_NRF_STATUS_SUCCESS;
 }
 
