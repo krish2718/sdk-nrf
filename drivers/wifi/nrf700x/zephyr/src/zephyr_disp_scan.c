@@ -106,10 +106,7 @@ void wifi_nrf_event_proc_disp_scan_res_zep(void *vif_ctx,
 		res.channel = r->nwk_channel;
 		res.security = WIFI_SECURITY_TYPE_NONE;
 
-		/* TODO : show other security modes as PSK */
-		if (r->security_type != IMG_OPEN) {
-			res.security = WIFI_SECURITY_TYPE_PSK;
-		}
+		res.security = r->security_type;
 
 		memcpy(res.ssid,
 		       r->ssid.img_ssid,

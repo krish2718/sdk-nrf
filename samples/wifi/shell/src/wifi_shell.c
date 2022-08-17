@@ -85,7 +85,33 @@ static void scan_result_cb(struct net_if *iface,
 			      "\n%-4s | %-32s %-5s | %-4s | %-4s | %-8s | %-12s\n", "Num", "SSID",
 			      "(len)", "Chan", "RSSI", "Sec", "BSSID");
 	}
-
+	const char *s = "";
+	switch (entry->security) {
+	case IMG_WEP:
+	        s = "WEP";
+	        break;
+	case IMG_WPA:
+	        s = "WPA";
+	        break;
+	case IMG_WPA2:
+	        s = "WPA2";
+	        break;
+	case IMG_WPA3:
+	        s = "WPA3";
+	        break;
+	case IMG_WAPI:
+	        s = "WAPI";
+	        break;
+	case IMG_OPEN:
+	        s = "OPEN";
+	        break;
+	case IMG_EAP:
+	        s = "EAP";
+	        break;
+	default:
+	        s = "";
+	        break;
+	}
 	shell_fprintf(context.shell,
 		      SHELL_NORMAL,
 		      "%-4d | %-32s %-5u | %-4u | %-4d | %-8s | "
@@ -95,7 +121,8 @@ static void scan_result_cb(struct net_if *iface,
 		      entry->ssid_length,
 		      entry->channel,
 		      entry->rssi,
-		      (entry->security == WIFI_SECURITY_TYPE_PSK ? "WPA/WPA2" : "Open"),
+			  s,
+		      //(entry->security == WIFI_SECURITY_TYPE_PSK ? "WPA/WPA2" : "Open"),
 			  entry->mac[0],entry->mac[1],
 			  entry->mac[2], entry->mac[3],
 			  entry->mac[4], entry->mac[5]);
