@@ -25,6 +25,7 @@
 #include <src/utils/common.h>
 #include <wpa_supplicant/config.h>
 #include <wpa_supplicant/wpa_supplicant_i.h>
+#include "supp_main.h"
 #endif /* CONFIG_WPA_SUPP */
 
 static struct {
@@ -264,6 +265,8 @@ static int cmd_supplicant_connect(const struct shell *shell,
 	wpa_supplicant_select_network(wpa_s,
 				      ssid);
 
+	set_dummy_socket_ready();
+
 	return 0;
 }
 
@@ -272,6 +275,7 @@ static int cmd_supplicant(const struct shell *shell,
 			  size_t argc,
 			  const char *argv[])
 {
+	int ret;
 	struct wpa_supplicant *wpa_s = wpa_supplicant_get_iface(global, if_name);
 
 	if (!wpa_s) {
@@ -282,8 +286,10 @@ static int cmd_supplicant(const struct shell *shell,
 		return -1;
 	}
 
-	return cli_main(argc,
-			argv);
+	ret =  cli_main(argc, argv);
+	if (!ret) {
+		set_dummy_socket_ready();
+	}
 }
 #endif /* CONFIG_WPA_SUPP */
 
