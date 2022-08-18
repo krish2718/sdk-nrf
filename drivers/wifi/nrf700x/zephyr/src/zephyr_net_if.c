@@ -49,14 +49,24 @@ enum wifi_nrf_status wifi_nrf_if_state_chg(void *os_vif_ctx, enum wifi_nrf_fmac_
 
 	vif_ctx_zep->if_state = if_state;
 
-	if (if_state == WIFI_NRF_FMAC_IF_STATE_UP) {
-		/* No carrier UP, we only have IF_UP */
-		net_if_up(vif_ctx_zep->zep_net_if_ctx);
-	} else if (if_state == WIFI_NRF_FMAC_IF_STATE_DOWN) {
-		net_if_carrier_down(vif_ctx_zep->zep_net_if_ctx);
+	if (vif_ctx_zep->zep_net_if_ctx) {
+		if (if_state == WIFI_NRF_FMAC_IF_STATE_UP) {
+			net_eth_carrier_on(vif_ctx_zep->zep_net_if_ctx);
+		} else if (if_state == WIFI_NRF_FMAC_IF_STATE_DOWN) {
+			net_eth_carrier_off(vif_ctx_zep->zep_net_if_ctx);
+		}
 	}
+	LOG_DBG("%s: state: %d", __func__, if_state);
 
 	return WIFI_NRF_STATUS_SUCCESS;
+}
+
+void notify_iface_up_work(struct k_work *work)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = CONTAINER_OF(work, struct wifi_nrf_vif_ctx_zep, iface_iup_work);
+
+	net_if_up(vif_ctx_zep->zep_net_if_ctx);
+	LOG_DBG("%s: posted NET_IF_UP", __func__);
 }
 
 void wifi_nrf_if_init(struct net_if *iface)
@@ -81,6 +91,8 @@ void wifi_nrf_if_init(struct net_if *iface)
 
 	net_if_set_link_addr(iface, (unsigned char *)&rpu_ctx_zep->mac_addr,
 			     sizeof(rpu_ctx_zep->mac_addr), NET_LINK_ETHERNET);
+
+	k_work_submit_to_queue(&k_sys_work_q,&vif_ctx_zep->iface_iup_work);
 }
 
 enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev)

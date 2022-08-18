@@ -374,6 +374,7 @@ static int wifi_nrf_drv_main_zep(const struct device *dev)
 	callbk_fns.deauth_callbk_fn = wifi_nrf_wpa_supp_event_proc_deauth;
 	callbk_fns.disassoc_callbk_fn = wifi_nrf_wpa_supp_event_proc_disassoc;
 #endif /* CONFIG_WPA_SUPP */
+	k_work_init(&vif_ctx_zep->iface_iup_work, notify_iface_up_work);
 
 	rpu_drv_priv_zep.fmac_priv = wifi_nrf_fmac_init(&data_config,
 							rx_buf_pools,

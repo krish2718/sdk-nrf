@@ -40,6 +40,7 @@ struct wifi_nrf_vif_ctx_zep {
 #ifdef CONFIG_WPA_SUPP
 	struct zep_wpa_supp_dev_callbk_fns supp_callbk_fns;
 #endif /* CONFIG_WPA_SUPP */
+	struct k_work iface_iup_work;
 };
 
 struct wifi_nrf_vif_ctx_map {

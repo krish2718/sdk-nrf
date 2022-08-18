@@ -19,6 +19,7 @@
 void wifi_nrf_if_init(struct net_if *iface);
 enum ethernet_hw_caps wifi_nrf_if_caps_get(const struct device *dev);
 int wifi_nrf_if_send(const struct device *dev, struct net_pkt *pkt);
+void notify_iface_up_work(struct k_work *work);
 
 void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm);
 
