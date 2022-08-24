@@ -22,6 +22,8 @@ LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_LOG_LEVEL);
 
 /* TODO: Move this to driver_zephyr.c */
 extern struct wpa_supplicant *wpa_s_0;
+struct wpa_signal_info *signal_info;
+int cmd_processed;
 
 static int get_wifi_nrf_auth_type(int wpa_auth_alg)
 {
@@ -853,5 +855,119 @@ int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid)
 	}
 
 	return wifi_nrf_fmac_chg_sta(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, &chg_sta_info);
+}
+
+int wifi_nrf_wpa_supp_signal_poll(void *if_priv, struct wpa_signal_info *si, unsigned char *bssid)
+{
+	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = NULL;
+	struct img_umac_cmd_get_sta *sta_info;
+	int ret = -1;
+	int i = 0;
+
+	if (!if_priv) {
+		LOG_ERR("%s: Invalid params\n", __func__);
+		goto out;
+	}
+
+	vif_ctx_zep = if_priv;
+	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
+	fmac_dev_ctx = rpu_ctx_zep->rpu_ctx;
+
+	signal_info = si;
+	ret = wifi_nrf_fmac_get_station(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx, bssid);
+
+	cmd_processed = 0;
+
+	while (cmd_processed == 0 && i < 5) {
+		wifi_nrf_osal_sleep_ms(fmac_dev_ctx->fpriv->opriv, 100);
+		i++;
+	}
+
+	ret = wifi_nrf_fmac_get_interface(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx);
+
+	cmd_processed = 0;
+
+	while (cmd_processed == 0 && i < 5) {
+		wifi_nrf_osal_sleep_ms(fmac_dev_ctx->fpriv->opriv, 100);
+		i++;
+	}
+	signal_info->frequency = vif_ctx_zep->assoc_freq;
+out:
+	return ret;
+}
+
+void wifi_nrf_wpa_supp_event_proc_signal_poll(void *if_priv,
+					   struct img_umac_event_new_station *info,
+					   unsigned int event_len)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+
+	vif_ctx_zep = if_priv;
+
+	if (info->sta_info.valid_fields & IMG_STA_INFO_SIGNAL_VALID) {
+		signal_info->current_signal = info->sta_info.signal;
+	}
+
+	if (info->sta_info.valid_fields & IMG_STA_INFO_SIGNAL_AVG_VALID) {
+		signal_info->avg_signal = info->sta_info.signal_avg;
+	} else {
+		signal_info->avg_signal = 0;
+	}
+
+	if (info->sta_info.valid_fields & IMG_STA_INFO_RX_BEACON_SIGNAL_AVG_VALID) {
+		signal_info->avg_beacon_signal = info->sta_info.rx_beacon_signal_avg;
+	} else {
+		signal_info->avg_beacon_signal = 0;
+	}
+
+	signal_info->current_txrate = 0;
+
+	if (info->sta_info.valid_fields & IMG_STA_INFO_TX_BITRATE_VALID) {
+		if (info->sta_info.tx_bitrate.valid_fields & IMG_IMG_RATE_INFO_BITRATE_VALID) {
+			signal_info->current_txrate = info->sta_info.tx_bitrate.bitrate * 100;
+		}
+	}
+
+	cmd_processed = 1;
+}
+
+enum chan_width convert2width(int width)
+{
+	switch (width) {
+	case IMG_CHAN_WIDTH_20_NOHT:
+		return CHAN_WIDTH_20_NOHT;
+	case IMG_CHAN_WIDTH_20:
+		return CHAN_WIDTH_20;
+	case IMG_CHAN_WIDTH_40:
+		return CHAN_WIDTH_40;
+	case IMG_CHAN_WIDTH_80:
+		return CHAN_WIDTH_80;
+	case IMG_CHAN_WIDTH_80P80:
+		return CHAN_WIDTH_80P80;
+	case IMG_CHAN_WIDTH_160:
+		return CHAN_WIDTH_160;
+	}
+	return CHAN_WIDTH_UNKNOWN;
+}
+
+
+void wifi_nrf_wpa_supp_event_proc_get_interface(void *if_priv,
+					   struct img_interface_info *info,
+					   unsigned int event_len)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	struct img_chan_definition *chan_def_info = NULL;
+
+	vif_ctx_zep = if_priv;
+
+	chan_def_info = (struct img_chan_definition *)(&info->chan_def);
+	signal_info->chanwidth = convert2width(chan_def_info->width);
+	signal_info->center_frq1 = chan_def_info->center_frequency1;
+	signal_info->center_frq2 = chan_def_info->center_frequency2;
+
+	cmd_processed = 1;
 }
 #endif /* CONFIG_WPA_SUPP */

@@ -35,6 +35,9 @@ int wifi_nrf_wpa_supp_associate(void *if_priv, struct wpa_driver_associate_param
 
 int wifi_nrf_wpa_set_supp_port(void *if_priv, int authorized, char *bssid);
 
+int wifi_nrf_wpa_supp_signal_poll(void *if_priv, struct wpa_signal_info *si,
+				 unsigned char *bssid);
+
 int wifi_nrf_wpa_supp_set_key(void *if_priv,
 			   const unsigned char *ifname,
 			   enum wpa_alg alg,
@@ -72,6 +75,14 @@ void wifi_nrf_wpa_supp_event_proc_deauth(void *if_priv,
 
 void wifi_nrf_wpa_supp_event_proc_disassoc(void *if_priv,
 					   struct img_umac_event_mlme *disassoc,
+					   unsigned int event_len);
+
+void wifi_nrf_wpa_supp_event_proc_signal_poll(void *if_priv,
+					   struct img_umac_event_new_station *info,
+					   unsigned int event_len);
+
+void wifi_nrf_wpa_supp_event_proc_get_interface(void *if_priv,
+					   struct img_interface_info *info,
 					   unsigned int event_len);
 #endif /* CONFIG_WPA_SUPP */
 #endif /*  __ZEPHYR_WPA_SUPP_IF_H__ */
