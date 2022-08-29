@@ -434,6 +434,7 @@ static const struct wifi_nrf_dev_ops dev_ops = {
 	.if_api.send = wifi_nrf_if_send,
 
 	.off_api.disp_scan = wifi_nrf_disp_scan_zep,
+	.off_api.get_stats = wifi_nrf_stats_get,
 };
 
 

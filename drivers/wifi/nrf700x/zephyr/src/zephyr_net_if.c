@@ -102,3 +102,34 @@ int wifi_nrf_if_send(const struct device *dev, struct net_pkt *pkt)
 	return wifi_nrf_fmac_start_xmit(rpu_ctx_zep->rpu_ctx, vif_ctx_zep->vif_idx,
 					net_pkt_to_nbuf(pkt));
 }
+
+int wifi_nrf_stats_get(const struct device *dev, struct rpu_op_stats *stats)
+{
+	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = NULL;
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
+	int ret = -1;
+
+	vif_ctx_zep = dev->data;
+	if (!vif_ctx_zep) {
+		LOG_ERR("%s: vif_ctx_zep is NULL\n", __func__);
+		goto out;
+	}
+
+	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
+	if (!rpu_ctx_zep) {
+		LOG_ERR("%s: rpu_ctx_zep is NULL\n", __func__);
+		goto out;
+	}
+
+	status = wifi_nrf_fmac_stats_get(rpu_ctx_zep->rpu_ctx, stats);
+	if (status != WIFI_NRF_STATUS_SUCCESS) {
+		LOG_ERR("%s: wifi_nrf_fmac_stats_get failed\n", __func__);
+		goto out;
+	}
+
+	ret = 0;
+
+out:
+	return ret;
+}

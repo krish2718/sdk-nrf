@@ -218,13 +218,37 @@ static int wifi_iface_stats(uint32_t mgmt_request, struct net_if *iface,
 {
 	void *src = NULL;
 	const struct device *dev = net_if_get_device(iface);
+
+#ifdef CONFIG_WPA_SUPP
+	struct net_stats_wifi *stats;
+	int status = -1;
+
+	stats = os_zalloc(sizeof(*stats));
+	if (!stats){
+		return -ENOMEM;
+	}
+
+	memset(stats, 0, sizeof(*stats));
+	status = zephyr_supp_stats(dev, stats);
+
+	if (!status) {
+		memcpy(data, &stats, len);
+		free(stats);
+		return 0;
+	}
+	free(stats);
+	return -1;
+#else
 	struct net_wifi_mgmt_offload *off_api =
 		(struct net_wifi_mgmt_offload *) dev->api;
+	
+
 
 	if (off_api == NULL || off_api->get_stats == NULL) {
 		return -ENOTSUP;
 	}
 	src = off_api->get_stats(dev);
+#endif
 
 	if (len != sizeof(struct net_stats_wifi) || !src)
 		return -EINVAL;

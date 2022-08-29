@@ -64,6 +64,8 @@ struct wifi_nrf_drv_priv_zep {
 struct wifi_nrf_dev_offload_ops {
 	int (*disp_scan)(const struct device *dev,
 			 scan_result_cb_t cb);
+	int (*get_stats)(const struct device *dev,
+			 struct rpu_op_stats *stats);
 };
 
 struct wifi_nrf_dev_ops {

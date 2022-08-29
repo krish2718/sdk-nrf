@@ -24,4 +24,6 @@ void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm);
 
 enum wifi_nrf_status wifi_nrf_if_state_chg(void *os_vif_ctx, enum wifi_nrf_fmac_if_state if_state);
 
+int wifi_nrf_stats_get(const struct device *dev, struct rpu_op_stats *stats);
+
 #endif /* __ZEPHYR_NET_IF_H__ */
