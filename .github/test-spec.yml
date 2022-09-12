@@ -425,4 +425,4 @@
 
 "CI-wifi":
   - "drivers/wifi/**/*"
-  - "sample/**/*"
+  - "samples/wf/.../**/*"
