@@ -64,3 +64,7 @@ zephyr_library_sources_ifdef(CONFIG_NRF700X_ON_QSPI
 zephyr_library_sources_ifdef(CONFIG_NRF700X_ON_SPI
 	zephyr/src/qspi/src/spi_if.c
 )
+
+zephyr_library_sources_ifdef(CONFIG_NRF_WIFI_UTIL
+	zephyr/src/nrf_wifi_util_shell.c
+)

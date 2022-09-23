@@ -18,6 +18,8 @@ config WIFI_NRF700X
 config NRF_WIFI_LOW_POWER
 	bool "Enable low power mode in nRF Wi-Fi chipsets"
 
+config NRF_WIFI_UTIL
+	bool "nRF Wi-Fi utility shell"
 if WIFI_NRF700X
 
 config NRF700X_ON_QSPI
@@ -43,3 +45,4 @@ config NRF700x_MAX_TX_PENDING_QLEN
 config NRF700X_RADIO_TEST
 	bool "Radio test mode of the nRF700x driver"
 endif
+
