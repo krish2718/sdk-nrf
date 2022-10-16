@@ -25,7 +25,6 @@
 LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_LOG_LEVEL);
 
 #define NRF7002_NODE DT_NODELABEL(nrf7002)
-
 static const struct gpio_dt_spec host_irq_spec =
 GPIO_DT_SPEC_GET(NRF7002_NODE, host_irq_gpios);
 
@@ -34,6 +33,10 @@ GPIO_DT_SPEC_GET(NRF7002_NODE, iovdd_ctrl_gpios);
 
 static const struct gpio_dt_spec bucken_spec =
 GPIO_DT_SPEC_GET(NRF7002_NODE, bucken_gpios);
+
+#define NRF_RADIO_COEX_NODE DT_NODELABEL(nrf_radio_coex)
+static const struct gpio_dt_spec btrf_switch_spec =
+GPIO_DT_SPEC_GET(NRF_RADIO_COEX_NODE, btrf_switch_gpios);
 
 char blk_name[][15] = { "SysBus",   "ExtSysBus",	   "PBus",	   "PKTRAM",
 			       "GRAM",	   "LMAC_ROM",	   "LMAC_RET_RAM", "LMAC_SRC_RAM",
@@ -128,6 +131,19 @@ int rpu_irq_config(struct gpio_callback *irq_callback_data, void (*irq_handler)(
 	return 0;
 }
 
+int ble_gpio_config(void)
+{
+	int ret;
+
+	if (!device_is_ready(btrf_switch_spec.port)) {
+		return -ENODEV;
+	}
+
+	ret = gpio_pin_configure_dt(&btrf_switch_spec, GPIO_OUTPUT);
+
+	return ret;
+}
+
 int rpu_gpio_config(void)
 {
 	int ret;
@@ -163,6 +179,12 @@ int rpu_pwron(void)
 
 	return 0;
 }
+
+int ble_ant_switch(unsigned int ant_switch)
+{
+	return gpio_pin_set_dt(&btrf_switch_spec, ant_switch & 0x1);
+}
+
 
 int rpu_qspi_init(void)
 {
@@ -273,6 +295,7 @@ int rpu_clks_on(void)
 int rpu_enable(void)
 {
 	rpu_gpio_config();
+	ble_gpio_config();
 	rpu_pwron();
 	rpu_qspi_init();
 	rpu_wakeup();

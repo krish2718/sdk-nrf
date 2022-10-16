@@ -913,6 +913,23 @@ static int nrf_wifi_radio_test_set_rx(const struct shell *shell,
 	return 0;
 }
 
+static int nrf_wifi_radio_test_ble_ant_switch_ctrl(const struct shell *shell,
+					     size_t argc,
+					     const char *argv[])
+{
+	unsigned int val;
+
+	if (argc < 2) {
+		shell_fprintf(shell, SHELL_ERROR, "invalid # of args : %d\n", argc);
+		return -ENOEXEC;
+	}
+
+	val  = strtoul(argv[1], NULL, 0);
+
+	return ble_ant_switch(val);
+}
+
+
 
 static int nrf_wifi_radio_test_show_cfg(const struct shell *shell,
 					size_t argc,
@@ -1287,6 +1304,13 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 		      "0 - Disable RX\n"
 		      "1 - Enable RX",
 		      nrf_wifi_radio_test_set_rx,
+		      2,
+		      0),
+	SHELL_CMD_ARG(ble_ant_switch_ctrl,
+		      NULL,
+		      "0 - Switch set to use the BLE antenna\n"
+		      "1 - Switch set to use the shared Wi-Fi antenna",
+		      nrf_wifi_radio_test_ble_ant_switch_ctrl,
 		      2,
 		      0),
 	SHELL_CMD_ARG(show_config,

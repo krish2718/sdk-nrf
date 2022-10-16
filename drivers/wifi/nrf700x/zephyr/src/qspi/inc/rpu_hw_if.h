@@ -55,5 +55,6 @@ int rpu_clks_on(void);
 
 int rpu_enable(void);
 int rpu_disable(void);
+int ble_ant_switch(unsigned int ant_switch);
 
 #endif /* __RPU_HW_IF_H_ */
