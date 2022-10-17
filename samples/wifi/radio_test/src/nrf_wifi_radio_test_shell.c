@@ -1103,6 +1103,48 @@ static int nrf_wifi_radio_test_get_stats(const struct shell *shell,
 	return 0;
 }
 
+#ifndef CONFIG_NRF700X_REV_A
+static int nrf_wifi_radio_test_wlan_switch_ctrl(const struct shell *shell,
+				 size_t argc,
+				 const char *argv[])
+{
+	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
+	char *ptr = NULL;
+	struct rpu_btcoex params = { 0 };
+
+	if (argc < 2) {
+		shell_fprintf(shell,
+			      SHELL_ERROR,
+			      "Invalid number of parameters\n");
+		shell_help(shell);
+		return -ENOEXEC;
+	}
+
+	params.rpu_msg_id = 7;
+	params.switch_A = strtoul(argv[1], &ptr, 10);
+
+	if (params.switch_A > 1) {
+		shell_fprintf(shell,
+			      SHELL_ERROR,
+			      "Invalid WLAN switch config (%d)\n",
+			      params.switch_A);
+		shell_help(shell);
+		return -ENOEXEC;
+	}
+
+	status = wifi_nrf_fmac_conf_btcoex(ctx->rpu_ctx,
+					   &params);
+
+	if (status != WIFI_NRF_STATUS_SUCCESS) {
+		shell_fprintf(shell,
+			      SHELL_ERROR,
+			      "WLAN switch configuration failed\n");
+		return -ENOEXEC;
+	}
+
+	return 0;
+}
+#endif
 
 SHELL_STATIC_SUBCMD_SET_CREATE(
 	nrf_wifi_radio_test_subcmds,
@@ -1259,6 +1301,14 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 		      nrf_wifi_radio_test_get_stats,
 		      1,
 		      0),
+#ifndef CONFIG_NRF700X_REV_A
+	SHELL_CMD_ARG(wlan_ant_switch_ctrl,
+		      NULL,
+		      "Configure WLAN Antenna switch (0-separate/1-shared)",
+		      nrf_wifi_radio_test_wlan_switch_ctrl,
+		      2,
+		      0),
+#endif
 	SHELL_SUBCMD_SET_END);
 
 
