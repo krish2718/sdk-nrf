@@ -95,8 +95,8 @@ void tx_desc_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 
 	fmac_dev_ctx->tx_config.outstanding_descs[queue]--;
 
-	if (desc >= (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
-		switch (desc % (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
+	if (desc >= (fpriv->spare_token_start)) {
+		switch (desc % (fpriv->spare_token_start)) {
 		case 0:
 			fmac_dev_ctx->tx_config.spare_desc_queue_map &= 0xfff0;
 			break;
@@ -151,7 +151,7 @@ unsigned int tx_desc_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	 * (only for non beacon queues)
 	 */
 	if (cnt == fpriv->num_tx_tokens_per_ac) {
-		for (desc = fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX;
+		for (desc = fpriv->spare_token_start;
 		     desc < fpriv->num_tx_tokens;
 		     desc++) {
 			curr_bit = (desc % TX_DESC_BUCKET_BOUND);
@@ -176,8 +176,7 @@ unsigned int tx_desc_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 				 * Fourth nibble represent second spare desc
 				 * (B15B14B13B12 : V0-VI-BE-BK)
 				 */
-				switch (desc % (fpriv->num_tx_tokens_per_ac *
-						WIFI_NRF_FMAC_AC_MAX)) {
+				switch (desc % (fpriv->spare_token_start)) {
 				case 0:
 					fmac_dev_ctx->tx_config.spare_desc_queue_map |=
 						(1 << queue);
@@ -824,15 +823,15 @@ unsigned int tx_buff_req_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 
 	/* Determine the Queue from the descriptor */
 	/* Reserved desc */
-	if (desc < (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
+	if (desc < (fpriv->spare_token_start)) {
 		/* Derive the queue here as it is not given by UMAC.
 		 * tx_done_q = desc
 		 */
 		tx_done_q = (desc % WIFI_NRF_FMAC_AC_MAX);
 		start_ac = end_ac = tx_done_q;
 	} else {
-		if (desc >= (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
-			switch (desc %  (fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX)) {
+		if (desc >= (fpriv->spare_token_start)) {
+			switch (desc %  (fpriv->spare_token_start)) {
 			case 0:
 				tx_done_q = (queue_map & 0x0f);
 				break;

@@ -444,6 +444,7 @@ struct wifi_nrf_fmac_priv *wifi_nrf_fmac_init(struct nrf_wifi_data_config_params
 	fpriv->num_tx_tokens = MAX_TX_TOKENS;
 	fpriv->num_tx_tokens_per_ac = (fpriv->num_tx_tokens / WIFI_NRF_FMAC_AC_MAX);
 	fpriv->num_tx_tokens_spare = (fpriv->num_tx_tokens % WIFI_NRF_FMAC_AC_MAX);
+	fpriv->spare_token_start = fpriv->num_tx_tokens_per_ac * WIFI_NRF_FMAC_AC_MAX;
 
 	wifi_nrf_osal_mem_cpy(opriv,
 			      fpriv->rx_buf_pools,
