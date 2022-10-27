@@ -131,9 +131,9 @@ unsigned int tx_desc_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 	/* First search for a reserved desc */
 
 	for (cnt = 0; cnt < fpriv->num_tx_tokens_per_ac; cnt++) {
-		curr_bit = ((queue + (WIFI_NRF_FMAC_AC_MAX * cnt)));
-		curr_bit = ((queue + (WIFI_NRF_FMAC_AC_MAX * cnt)) % TX_DESC_BUCKET_BOUND);
-		pool_id = ((queue + (WIFI_NRF_FMAC_AC_MAX * cnt)) / TX_DESC_BUCKET_BOUND);
+		curr_bit = ((queue + (fpriv->max_ac * cnt)));
+		curr_bit = ((queue + (fpriv->max_ac * cnt)) % TX_DESC_BUCKET_BOUND);
+		pool_id = ((queue + (fpriv->max_ac * cnt)) / TX_DESC_BUCKET_BOUND);
 
 		if ((((fmac_dev_ctx->tx_config.buf_pool_bmp_p[pool_id] >>
 		       curr_bit)) & 1)) {
@@ -141,7 +141,7 @@ unsigned int tx_desc_get(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 		} else {
 			fmac_dev_ctx->tx_config.buf_pool_bmp_p[pool_id] |=
 				(1 << curr_bit);
-			desc = queue + (WIFI_NRF_FMAC_AC_MAX * cnt);
+			desc = queue + (fpriv->max_ac * cnt);
 			fmac_dev_ctx->tx_config.outstanding_descs[queue]++;
 			break;
 		}
@@ -827,7 +827,7 @@ unsigned int tx_buff_req_free(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
 		/* Derive the queue here as it is not given by UMAC.
 		 * tx_done_q = desc
 		 */
-		tx_done_q = (desc % WIFI_NRF_FMAC_AC_MAX);
+		tx_done_q = (desc % fpriv->max_ac);
 		start_ac = end_ac = tx_done_q;
 	} else {
 		if (desc >= (fpriv->spare_token_start)) {
@@ -1110,7 +1110,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 		goto out;
 	}
 
-	for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+	for (i = 0; i < fpriv->max_ac; i++) {
 		for (j = 0; j < MAX_SW_PEERS; j++) {
 			fmac_dev_ctx->tx_config.data_pending_txq[j][i] =
 				wifi_nrf_utils_q_alloc(fpriv->opriv);
@@ -1144,7 +1144,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 				      "%s: Unable to allocate pkt_info_p\n",
 				      __func__);
 
-		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+		for (i = 0; i < fpriv->max_ac; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
 				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
 
@@ -1170,7 +1170,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 			wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 					       fmac_dev_ctx->tx_config.pkt_info_p);
 
-			for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+			for (i = 0; i < fpriv->max_ac; i++) {
 				for (j = 0; j < MAX_SW_PEERS; j++) {
 					q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
 
@@ -1186,7 +1186,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 		}
 	}
 
-	for (j = 0; j < WIFI_NRF_FMAC_AC_MAX; j++) {
+	for (j = 0; j < fpriv->max_ac; j++) {
 		fmac_dev_ctx->tx_config.curr_peer_opp[j] = 0;
 	}
 
@@ -1208,7 +1208,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 		wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 				       fmac_dev_ctx->tx_config.pkt_info_p);
 
-		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+		for (i = 0; i < fpriv->max_ac; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
 				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
 
@@ -1251,7 +1251,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 		wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 				       fmac_dev_ctx->tx_config.pkt_info_p);
 
-		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+		for (i = 0; i < fpriv->max_ac; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
 				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
 
@@ -1290,7 +1290,7 @@ enum wifi_nrf_status tx_init(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 		wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 				       fmac_dev_ctx->tx_config.pkt_info_p);
 
-		for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+		for (i = 0; i < fpriv->max_ac; i++) {
 			for (j = 0; j < MAX_SW_PEERS; j++) {
 				q_ptr = fmac_dev_ctx->tx_config.data_pending_txq[j][i];
 
@@ -1340,7 +1340,7 @@ void tx_deinit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 	wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 			       fmac_dev_ctx->tx_config.pkt_info_p);
 
-	for (i = 0; i < WIFI_NRF_FMAC_AC_MAX; i++) {
+	for (i = 0; i < fpriv->max_ac; i++) {
 		for (j = 0; j < MAX_SW_PEERS; j++) {
 			wifi_nrf_utils_q_free(fpriv->opriv,
 					      fmac_dev_ctx->tx_config.data_pending_txq[j][i]);
@@ -1374,11 +1374,16 @@ static int map_ac_from_tid(int tid)
 }
 
 
-static int get_ac(unsigned int tid,
+static int get_ac(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+		  unsigned int tid,
 		  unsigned char *ra)
 {
 	if (wifi_nrf_util_is_multicast_addr(ra)) {
 		return WIFI_NRF_FMAC_AC_MC;
+	}
+
+	if (fmac_dev_ctx->fpriv->max_ac == 1) {
+		return WIFI_NRF_FMAC_AC_BK;
 	}
 
 	return map_ac_from_tid(tid);
@@ -1424,7 +1429,7 @@ enum wifi_nrf_status wifi_nrf_fmac_start_xmit(void *dev_ctx,
 	} else {
 		if (fmac_dev_ctx->tx_config.peers[peer_id].qos_supported) {
 			tid = wifi_nrf_util_get_tid(fmac_dev_ctx, nbuf);
-			ac = get_ac(tid, ra);
+			ac = get_ac(fmac_dev_ctx, tid, ra);
 		} else {
 			ac = WIFI_NRF_FMAC_AC_BE;
 		}

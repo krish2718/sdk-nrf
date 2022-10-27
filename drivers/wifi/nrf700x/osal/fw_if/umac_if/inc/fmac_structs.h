@@ -361,6 +361,7 @@ struct wifi_nrf_fmac_priv {
 	unsigned char num_tx_tokens;
 	unsigned char num_tx_tokens_per_ac;
 	unsigned char spare_token_start;
+	unsigned char max_ac;
 	unsigned char num_tx_tokens_spare;
 	struct rx_buf_pool_params rx_buf_pools[MAX_NUM_OF_RX_QUEUES];
 	unsigned int rx_desc[MAX_NUM_OF_RX_QUEUES];
