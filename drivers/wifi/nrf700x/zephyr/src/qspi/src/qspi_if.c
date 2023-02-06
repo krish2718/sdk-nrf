@@ -21,7 +21,6 @@
 #include <soc.h>
 #include <nrfx_qspi.h>
 #include <hal/nrf_clock.h>
-#include <hal/nrf_gpio.h>
 
 #include "spi_nor.h"
 #include "qspi_if.h"
@@ -44,8 +43,17 @@ BUILD_ASSERT(INST_0_SCK_FREQUENCY >= (NRF_QSPI_BASE_CLOCK_FREQ / 16), "Unsupport
 #define INST_0_QER                                                                                 \
 	_CONCAT(JESD216_DW15_QER_, DT_ENUM_TOKEN(DT_DRV_INST(0), quad_enable_requirements))
 
-static int qspi_device_init(const struct device *dev);
-static void qspi_device_uninit(const struct device *dev);
+#if NRF52_ERRATA_122_PRESENT
+#include <hal/nrf_gpio.h>
+static int anomaly_122_init(const struct device *dev);
+static void anomaly_122_uninit(const struct device *dev);
+
+#define ANOMALY_122_INIT(dev) anomaly_122_init(dev)
+#define ANOMALY_122_UNINIT(dev) anomaly_122_uninit(dev)
+#else
+#define ANOMALY_122_INIT(dev) 0
+#define ANOMALY_122_UNINIT(dev)
+#endif
 
 #define QSPI_SCK_DELAY 0
 #define WORD_SIZE 4
@@ -91,8 +99,10 @@ struct qspi_nor_data {
 	struct k_sem sem;
 	/* The semaphore to indicate that transfer has completed. */
 	struct k_sem sync;
+#if NRF52_ERRATA_122_PRESENT
 	/* The semaphore to control driver init/uninit. */
 	struct k_sem count;
+#endif
 #else /* CONFIG_MULTITHREADING */
 	/* A flag that signals completed transfer when threads are
 	 * not enabled.
@@ -247,7 +257,9 @@ static struct qspi_nor_data qspi_nor_memory_data = {
 	.trans = Z_SEM_INITIALIZER(qspi_nor_memory_data.trans, 1, 1),
 	.sem = Z_SEM_INITIALIZER(qspi_nor_memory_data.sem, 1, 1),
 	.sync = Z_SEM_INITIALIZER(qspi_nor_memory_data.sync, 0, 1),
+#if NRF52_ERRATA_122_PRESENT
 	.count = Z_SEM_INITIALIZER(qspi_nor_memory_data.count, 0, K_SEM_MAX_LIMIT),
+#endif
 #endif /* CONFIG_MULTITHREADING */
 };
 
@@ -384,18 +396,22 @@ static void qspi_handler(nrfx_qspi_evt_t event, void *p_context)
 		_qspi_complete(dev_data);
 }
 
+#if NRF52_ERRATA_122_PRESENT
 static bool qspi_initialized;
 
-static int qspi_device_init(const struct device *dev)
+static int anomaly_122_init(const struct device *dev)
 {
 	struct qspi_nor_data *dev_data = get_dev_data(dev);
 	nrfx_err_t res;
 	int ret = 0;
 
+	if (!nrf52_errata_122())
+		return 0;
+
 	qspi_lock(dev);
 
-	/* In multithreading, driver can call qspi_device_init more than once
-	 * before calling qspi_device_uninit. Keepping count, so QSPI is
+	/* In multithreading, driver can call anomaly_122_init more than once
+	 * before calling anomaly_122_uninit. Keepping count, so QSPI is
 	 * uninitialized only at the last call (count == 0).
 	 */
 #ifdef CONFIG_MULTITHREADING
@@ -414,9 +430,12 @@ static int qspi_device_init(const struct device *dev)
 	return ret;
 }
 
-static void qspi_device_uninit(const struct device *dev)
+static void anomaly_122_uninit(const struct device *dev)
 {
 	bool last = true;
+
+	if (!nrf52_errata_122())
+		return;
 
 	qspi_lock(dev);
 
@@ -435,19 +454,17 @@ static void qspi_device_uninit(const struct device *dev)
 			else
 				k_busy_wait(50000);
 		}
-
-		nrfx_qspi_uninit();
-
 #ifndef CONFIG_PINCTRL
 		nrf_gpio_cfg_output(QSPI_PROP_AT(csn_pins, 0));
 		nrf_gpio_pin_set(QSPI_PROP_AT(csn_pins, 0));
 #endif
-
+		nrfx_qspi_uninit();
 		qspi_initialized = false;
 	}
 
 	qspi_unlock(dev);
 }
+#endif /* NRF52_ERRATA_122_PRESENT */
 
 /* QSPI send custom command.
  *
@@ -738,7 +755,7 @@ static int qspi_nor_read(const struct device *dev, int addr, void *dest, size_t 
 	if (!size)
 		return 0;
 
-	int rc = qspi_device_init(dev);
+	int rc = ANOMALY_122_INIT(dev);
 
 	if (rc != 0)
 		goto out;
@@ -752,7 +769,7 @@ static int qspi_nor_read(const struct device *dev, int addr, void *dest, size_t 
 	rc = qspi_get_zephyr_ret_code(res);
 
 out:
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 	return rc;
 }
 
@@ -793,7 +810,7 @@ static int qspi_nor_write(const struct device *dev, int addr, const void *src, s
 
 	nrfx_err_t res = NRFX_SUCCESS;
 
-	int rc = qspi_device_init(dev);
+	int rc = ANOMALY_122_INIT(dev);
 
 	if (rc != 0)
 		goto out;
@@ -815,7 +832,7 @@ static int qspi_nor_write(const struct device *dev, int addr, const void *src, s
 
 	rc = qspi_get_zephyr_ret_code(res);
 out:
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 	return rc;
 }
 
@@ -833,7 +850,7 @@ static int qspi_nor_configure(const struct device *dev)
 	if (ret != 0)
 		return ret;
 
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 
 	return 0;
 }
@@ -877,12 +894,12 @@ static int qspi_cmd_encryption(const struct device *dev, nrf_qspi_encryption_t *
 		.tx_buf = &tx_buf,
 	};
 
-	int ret = qspi_device_init(dev);
+	int ret = ANOMALY_122_INIT(dev);
 
 	if (ret == 0)
 		ret = qspi_send_cmd(dev, &cmd, false);
 
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0)
 		LOG_DBG("cmd_encryption failed %d\n", ret);
@@ -905,11 +922,9 @@ int qspi_RDSR2(const struct device *dev, uint8_t *rdsr2)
 		.rx_buf = &sr_buf,
 	};
 
-	ret = qspi_device_init(dev);
-
 	ret = qspi_send_cmd(dev, &cmd, false);
 
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 
 	LOG_DBG("RDSR2 = 0x%x\n", sr);
 
@@ -950,11 +965,11 @@ int qspi_RDSR1(const struct device *dev, uint8_t *rdsr1)
 		.rx_buf = &sr_buf,
 	};
 
-	ret = qspi_device_init(dev);
+	ret = ANOMALY_122_INIT(dev);
 
 	ret = qspi_send_cmd(dev, &cmd, false);
 
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 
 	LOG_DBG("RDSR2 = 0x%x\n", sr);
 
@@ -1009,12 +1024,12 @@ int qspi_wait_while_firmware_awake(const struct device *dev)
 	for (int ii = 0; ii < 10; ii++) {
 		int ret;
 
-		ret = qspi_device_init(dev);
+		ret = ANOMALY_122_INIT(dev);
 
 		if (ret == 0)
 			ret = qspi_send_cmd(dev, &cmd, false);
 
-		qspi_device_uninit(dev);
+		ANOMALY_122_UNINIT(dev);
 
 		if ((ret < 0) || (sr != 0x6)) {
 			LOG_DBG("ret val = 0x%x\t RDSR1 = 0x%x\n", ret, sr);
@@ -1039,12 +1054,12 @@ int qspi_WRSR2(const struct device *dev, uint8_t data)
 		.op_code = 0x3f,
 		.tx_buf = &tx_buf,
 	};
-	int ret = qspi_device_init(dev);
+	int ret = ANOMALY_122_INIT(dev);
 
 	if (ret == 0)
 		ret = qspi_send_cmd(dev, &cmd, false);
 
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0)
 		LOG_ERR("cmd_wakeup RPU failed %d\n", ret);
@@ -1220,13 +1235,13 @@ int qspi_cmd_sleep_rpu(const struct device *dev)
 		.tx_buf = &tx_buf,
 	};
 
-	int ret = qspi_device_init(dev);
+	int ret = ANOMALY_122_INIT(dev);
 
 	if (ret == 0) {
 		ret = qspi_send_cmd(dev, &cmd, false);
 	}
 
-	qspi_device_uninit(dev);
+	ANOMALY_122_UNINIT(dev);
 
 	if (ret < 0) {
 		LOG_ERR("cmd_wakeup RPU failed: %d\n", ret);
