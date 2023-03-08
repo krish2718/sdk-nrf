@@ -23,11 +23,42 @@ LOG_MODULE_REGISTER(sta, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/net/wifi_mgmt.h>
 #include <zephyr/net/net_event.h>
 #include <zephyr/drivers/gpio.h>
+#include <net/download_client.h>
 
 #include <qspi_if.h>
 
 #include "net_private.h"
 
+
+#define URL CONFIG_SAMPLE_FILE_URL
+#define SEC_TAG CONFIG_SAMPLE_SEC_TAG
+
+#define PROGRESS_WIDTH 50
+#define STARTING_OFFSET 0
+
+#if CONFIG_SAMPLE_SECURE_SOCKET
+static const char cert[] = {
+	#include CONFIG_SAMPLE_CERT_FILE
+};
+BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
+#endif
+
+static struct download_client downloader;
+static struct download_client_cfg config = {
+#if CONFIG_SAMPLE_SECURE_SOCKET
+	.sec_tag_count = 1,
+	.sec_tag_list = SEC_TAG,
+#else
+	.sec_tag_count = 0,
+#endif
+};
+
+#if CONFIG_SAMPLE_COMPUTE_HASH
+#include <mbedtls/sha256.h>
+static mbedtls_sha256_context sha256_ctx;
+#endif
+
+static int64_t ref_time;
 #define WIFI_SHELL_MODULE "wifi"
 
 #define WIFI_SHELL_MGMT_EVENTS (NET_EVENT_WIFI_CONNECT_RESULT |		\
@@ -51,6 +82,8 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 static struct net_mgmt_event_callback wifi_shell_mgmt_cb;
 static struct net_mgmt_event_callback net_shell_mgmt_cb;
+
+K_SEM_DEFINE(dhcp_wait, 0, 1);
 
 static struct {
 	const struct shell *sh;
@@ -196,6 +229,7 @@ static void print_dhcp_ip(struct net_mgmt_event_callback *cb)
 	net_addr_ntop(AF_INET, addr, dhcp_info, sizeof(dhcp_info));
 
 	LOG_INF("DHCP IP address: %s", dhcp_info);
+	k_sem_give(&dhcp_wait);
 }
 static void net_mgmt_event_handler(struct net_mgmt_event_callback *cb,
 				    uint32_t mgmt_event, struct net_if *iface)
@@ -280,6 +314,162 @@ int bytes_from_str(const char *str, uint8_t *bytes, size_t bytes_len)
 	return 0;
 }
 
+
+#if CONFIG_SAMPLE_SECURE_SOCKET
+/* Provision certificate to modem */
+static int cert_provision(void)
+{
+	int err;
+	bool exists;
+
+	err = modem_key_mgmt_exists(SEC_TAG,
+				    MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN,
+				    &exists);
+	if (err) {
+		printk("Failed to check for certificates err %d\n", err);
+		return err;
+	}
+
+	if (exists) {
+		printk("Certificate ");
+		/* Let's compare the existing credential */
+		err = modem_key_mgmt_cmp(SEC_TAG,
+					 MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN,
+					 cert, sizeof(cert) - 1);
+		printk("%s\n", err ? "mismatch" : "match");
+		if (!err) {
+			return 0;
+		}
+	}
+
+	printk("Provisioning certificate\n");
+
+	/*  Provision certificate to the modem */
+	err = modem_key_mgmt_write(SEC_TAG,
+				   MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN,
+				   cert, sizeof(cert) - 1);
+	if (err) {
+		printk("Failed to provision certificate, err %d\n", err);
+		return err;
+	}
+
+	return 0;
+}
+#endif
+
+static void progress_print(size_t downloaded, size_t file_size)
+{
+	const int percent = (downloaded * 100) / file_size;
+	size_t lpad = (percent * PROGRESS_WIDTH) / 100;
+	size_t rpad = PROGRESS_WIDTH - lpad;
+
+	printk("\r[ %3d%% ] |", percent);
+	for (size_t i = 0; i < lpad; i++) {
+		printk("=");
+	}
+	for (size_t i = 0; i < rpad; i++) {
+		printk(" ");
+	}
+	printk("| (%d/%d bytes)", downloaded, file_size);
+}
+
+static int callback(const struct download_client_evt *event)
+{
+	static size_t downloaded;
+	static size_t file_size;
+	uint32_t speed;
+	int64_t ms_elapsed;
+
+	if (downloaded == 0) {
+		download_client_file_size_get(&downloader, &file_size);
+		downloaded += STARTING_OFFSET;
+	}
+
+	switch (event->id) {
+	case DOWNLOAD_CLIENT_EVT_FRAGMENT:
+		downloaded += event->fragment.len;
+		if (file_size) {
+			progress_print(downloaded, file_size);
+		} else {
+			printk("\r[ %d bytes ] ", downloaded);
+		}
+
+#if CONFIG_SAMPLE_COMPUTE_HASH
+		mbedtls_sha256_update(&sha256_ctx,
+			event->fragment.buf, event->fragment.len);
+#endif
+		return 0;
+
+	case DOWNLOAD_CLIENT_EVT_DONE:
+		ms_elapsed = k_uptime_delta(&ref_time);
+		speed = ((float)file_size / ms_elapsed) * MSEC_PER_SEC;
+		printk("\nDownload completed in %lld ms @ %d bytes per sec, total %d bytes\n",
+		       ms_elapsed, speed, downloaded);
+
+#if CONFIG_SAMPLE_COMPUTE_HASH
+		uint8_t hash[32];
+		uint8_t hash_str[64 + 1];
+
+		mbedtls_sha256_finish(&sha256_ctx, hash);
+		mbedtls_sha256_free(&sha256_ctx);
+
+		bin2hex(hash, sizeof(hash), hash_str, sizeof(hash_str));
+
+		printk("SHA256: %s\n", hash_str);
+
+#if CONFIG_SAMPLE_COMPARE_HASH
+		if (strcmp(hash_str, CONFIG_SAMPLE_SHA256_HASH)) {
+			printk("Expect: %s\n", CONFIG_SAMPLE_SHA256_HASH);
+			printk("SHA256 mismatch!\n");
+		}
+#endif /* CONFIG_SAMPLE_COMPARE_HASH */
+#endif /* CONFIG_SAMPLE_COMPUTE_HASH */
+
+		printk("Bye\n");
+		return 0;
+
+	case DOWNLOAD_CLIENT_EVT_ERROR:
+		printk("Error %d during download\n", event->error);
+		if (event->error == -ECONNRESET) {
+			/* With ECONNRESET, allow library to attempt a reconnect by returning 0 */
+		} else {
+			/* Stop download */
+			return -1;
+		}
+
+	case DOWNLOAD_CLIENT_EVT_CLOSED:
+		printk("Connection closed\n");
+		return 0;
+	}
+
+	return 0;
+}
+
+
+void file_download()
+{
+	int err = download_client_init(&downloader, callback);
+	if (err) {
+		printk("Failed to initialize the client, err %d", err);
+		return;
+	}
+
+#if CONFIG_SAMPLE_COMPUTE_HASH
+	mbedtls_sha256_init(&sha256_ctx);
+	mbedtls_sha256_starts(&sha256_ctx, false);
+#endif
+
+	err = download_client_get(&downloader, URL, &config, URL, STARTING_OFFSET);
+	if (err) {
+		printk("Failed to connect, err %d", err);
+		return;
+	}
+
+	ref_time = k_uptime_get();
+
+	printk("%lld: Downloading %s\n", ref_time, URL);
+}
+
 int main(void)
 {
 	int i;
@@ -310,7 +500,7 @@ int main(void)
 		ret = bytes_from_str(CONFIG_NRF700X_QSPI_ENCRYPTION_KEY, key, sizeof(key));
 		if (ret) {
 			LOG_ERR("Failed to parse encryption key: %d\n", ret);
-			return 0;
+			return -1;
 		}
 
 		LOG_DBG("QSPI Encryption key: ");
@@ -322,7 +512,7 @@ int main(void)
 		ret = qspi_enable_encryption(key);
 		if (ret) {
 			LOG_ERR("Failed to enable encryption: %d\n", ret);
-			return 0;
+			return -1;
 		}
 		LOG_INF("QSPI Encryption enabled");
 	} else {
@@ -346,6 +536,8 @@ int main(void)
 			}
 		}
 		if (context.connected) {
+			k_sem_take(&dhcp_wait, K_SECONDS(DHCP_TIMEOUT));
+			file_download();
 			k_sleep(K_FOREVER);
 		} else if (!context.connect_result) {
 			LOG_ERR("Connection Timed Out");
