@@ -140,8 +140,7 @@ void wifi_nrf_wpa_supp_event_proc_scan_done(void *if_priv,
 
 void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 					struct nrf_wifi_umac_event_new_scan_results *scan_res,
-					unsigned int event_len,
-					bool more_res)
+					unsigned int event_len)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = NULL;
 	struct wpa_scan_res *r = NULL;
@@ -150,8 +149,12 @@ void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 	unsigned int ie_len = 0;
 	unsigned int beacon_ie_len = 0;
 	unsigned char *pos = NULL;
+	bool more_res;
 
 	vif_ctx_zep = if_priv;
+
+	if (scan_res->umac_hdr.seq != 0)
+		more_res = true;
 
 	if (scan_res->valid_fields & NRF_WIFI_EVENT_NEW_SCAN_RESULTS_IES_VALID) {
 		ie = scan_res->ies;

@@ -24,6 +24,8 @@
 #include "fmac_bb.h"
 #include "util.h"
 
+struct wifi_nrf_fmac_callbk_fns *callbk_fns;
+
 #ifdef CONFIG_NRF700X_RADIO_TEST
 #define RADIO_CMD_STATUS_TIMEOUT 5000
 #endif
@@ -83,6 +85,58 @@ static void wifi_nrf_fmac_deinit_tx(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 
 	wifi_nrf_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 			       fmac_dev_ctx->tx_buf_info);
+}
+
+static enum wifi_nrf_status
+wifi_nrf_fmac_if_carr_state_event_proc(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx,
+				       unsigned char *umac_head,
+				       enum wifi_nrf_fmac_if_carr_state carr_state)
+{
+	enum wifi_nrf_status status = WIFI_NRF_STATUS_FAIL;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = NULL;
+	unsigned char if_idx = 0;
+
+	if (!fmac_dev_ctx || !umac_head) {
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Invalid parameters\n",
+				      __func__);
+
+		goto out;
+	}
+
+	if (!callbk_fns.if_carr_state_chg_callbk_fn) {
+		wifi_nrf_osal_log_dbg(fmac_dev_ctx->fpriv->opriv,
+				      "%s: No callback handler registered\n",
+				      __func__);
+
+		status = WIFI_NRF_STATUS_SUCCESS;
+		goto out;
+	}
+
+	if_idx = ((struct nrf_wifi_data_carrier_state *)umac_head)->wdev_id;
+
+	if (if_idx >= MAX_NUM_VIFS) {
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Invalid wdev_id recd from UMAC %d\n",
+				      __func__,
+				      if_idx);
+		goto out;
+	}
+
+	vif_ctx = fmac_dev_ctx->vif_ctx[if_idx];
+
+	status = callbk_fns.if_carr_state_chg_callbk_fn(vif_ctx->os_vif_ctx,
+					carr_state);
+
+	if (status != WIFI_NRF_STATUS_SUCCESS) {
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Interface carrier state change callback function failed for VIF idx = %d\n",
+				      __func__,
+				      if_idx);
+		goto out;
+	}
+out:
+	return status;
 }
 
 #endif /* CONFIG_NRF700X_DATA_TX */
@@ -446,6 +500,146 @@ void wifi_nrf_fmac_dev_deinit(struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx)
 	wifi_nrf_fmac_fw_deinit(fmac_dev_ctx);
 }
 
+/* OSAL internal callbacks */
+#ifdef CONFIG_WPA_SUPP
+static void umac_event_connect(void *vif_ctx,
+			       void *event_data, unsigned int len)
+{
+	unsigned char if_index = 0;
+	int peer_id = -1;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx = vif_ctx;
+	struct nrf_wifi_umac_event_new_station *event = NULL;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = vif_ctx->fmac_dev_ctx;
+
+	event = (struct nrf_wifi_umac_event_new_station *)event_data;
+
+	if_index = event->umac_hdr.ids.wdev_id;
+
+	vif_ctx = fmac_dev_ctx->vif_ctx[if_index];
+	if (if_index >= MAX_NUM_VIFS) {
+		wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Invalid wdev_id recd from UMAC %d\n",
+				      __func__,
+				      if_index);
+		return;
+	}
+
+	if (event->umac_hdr.cmd_evnt == NRF_WIFI_UMAC_EVENT_NEW_STATION) {
+		if (vif_ctx->if_type == 2) {
+			wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+					      vif_ctx->bssid,
+					      event->mac_addr,
+					      NRF_WIFI_ETH_ADDR_LEN);
+		}
+		peer_id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
+
+		if (peer_id == -1) {
+			peer_id = wifi_nrf_fmac_peer_add(fmac_dev_ctx,
+							 if_index,
+							 event->mac_addr,
+							 event->is_sta_legacy,
+							 event->wme);
+
+			if (peer_id == -1) {
+				wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+						      "%s:Can't add new station.\n",
+						      __func__);
+				return;
+			}
+		}
+	} else if (event->umac_hdr.cmd_evnt == NRF_WIFI_UMAC_EVENT_DEL_STATION) {
+		peer_id = wifi_nrf_fmac_peer_get_id(fmac_dev_ctx, event->mac_addr);
+		if (peer_id != -1) {
+			wifi_nrf_fmac_peer_remove(fmac_dev_ctx,
+						  if_index,
+						  peer_id);
+		}
+	}
+
+	return;
+
+}
+#endif /* CONFIG_WPA_SUPP */
+
+static void umac_event_if_flags_status(void *os_vif_ctx,
+			void *event_data, unsigned int len)
+{
+	struct nrf_wifi_umac_event_vif_state *evnt_vif_state = event_data;
+	struct wifi_nrf_fmac_vif_ctx *vif_ctx= os_vif_ctx;
+
+	if (evnt_vif_state->status < 0)
+		return;
+
+	vif_ctx->ifflags = true;
+}
+
+static void umac_event_no_op(void *vif_ctx,
+			void *event_data, unsigned int len)
+{
+	ARG_UNUSED(vif_ctx);
+	ARG_UNUSED(event_data);
+	ARG_UNUSED(len);
+}
+
+
+static const struct {
+	int event_id;
+	void (*handler)(void *vif_ctx, void *data, unsigned int len);
+} fmac_internal_ctrl_event_handlers[] = {
+	{
+		NRF_WIFI_UMAC_EVENT_IFFLAGS_STATUS,
+		umac_event_if_flags_status,
+	},
+	{
+		NRF_WIFI_UMAC_EVENT_NEW_STATION,
+		umac_event_connect,
+	},
+	{
+		NRF_WIFI_UMAC_EVENT_DEL_STATION,
+		umac_event_connect,
+	},
+	{
+		NRF_WIFI_UMAC_EVENT_CMD_STATUS,
+		umac_event_no_op,
+	},
+	{
+		NRF_WIFI_UMAC_EVENT_BEACON_HINT,
+		umac_event_no_op,
+	},
+	{
+		NRF_WIFI_UMAC_EVENT_CONNECT,
+		umac_event_no_op,
+	},
+	{
+		NRF_WIFI_UMAC_EVENT_DISCONNECT,
+		umac_event_no_op,
+	}
+};
+
+const struct {
+	int event_id;
+	enum wifi_nrf_status (*handler)(void *vif_ctx, void *data, unsigned int len);
+} fmac_internal_data_event_handlers[] = {
+	{
+		NRF_WIFI_CMD_RX_BUFF,
+		wifi_nrf_fmac_rx_event_process,
+	},
+#ifdef CONFIG_NRF700X_DATA_TX
+	{
+		NRF_WIFI_CMD_CARRIER_ON,
+		wifi_nrf_fmac_if_carr_state_event_proc,
+	},
+	{
+		NRF_WIFI_CMD_CARRIER_OFF,
+		wifi_nrf_fmac_if_carr_state_event_proc,
+	},
+	{
+		NRF_WIFI_CMD_TX_BUFF_DONE,
+		wifi_nrf_fmac_tx_done_event_process,
+	},
+#endif /* CONFIG_NRF700X_DATA_TX */
+};
+
 
 #ifdef CONFIG_NRF700X_RADIO_TEST
 struct wifi_nrf_fmac_priv *wifi_nrf_fmac_init(void)
@@ -491,6 +685,8 @@ struct wifi_nrf_fmac_priv *wifi_nrf_fmac_init(struct nrf_wifi_data_config_params
 			      &fpriv->callbk_fns,
 			      callbk_fns,
 			      sizeof(fpriv->callbk_fns));
+
+	callbk_fns = &fpriv->callbk_fns;
 
 	wifi_nrf_osal_mem_cpy(opriv,
 			      &fpriv->data_config,

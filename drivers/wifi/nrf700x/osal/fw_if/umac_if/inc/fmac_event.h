@@ -11,6 +11,7 @@
 
 #ifndef __FMAC_EVENT_H__
 #define __FMAC_EVENT_H__
+extern struct wifi_nrf_fmac_callbk_fns *callbk_fns;
 
 /**
  * wifi_nrf_fmac_event_callback() - RPU event classifier and handler.

@@ -70,8 +70,7 @@ void wifi_nrf_wpa_supp_event_proc_scan_done(void *if_priv,
 
 void wifi_nrf_wpa_supp_event_proc_scan_res(void *if_priv,
 					struct nrf_wifi_umac_event_new_scan_results *scan_res,
-					unsigned int event_len,
-					bool more_res);
+					unsigned int event_len);
 
 void wifi_nrf_wpa_supp_event_proc_auth_resp(void *if_priv,
 					    struct nrf_wifi_umac_event_mlme *auth_resp,
