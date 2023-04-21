@@ -17,6 +17,7 @@ target_include_directories(app
 	${ZEPHYR_BASE}/subsys/net/ip
 	${WIFI_NRF_DRV_BASE}/inc
 	${CMAKE_SOURCE_DIR}/inc
+	${ZEPHYR_BASE}/include/zephyr/posix
 	)
 
 #zephyr_library_compile_definitions(
