@@ -98,6 +98,13 @@ extern char *chan_buf2;
 
 extern char e2eResults[];
 
+K_SEM_DEFINE(sem_scan, 0, 1);
+#define SCAN_RESULTS_TIMEOUT 10
+#define MAX_SCAN_RESULT_SIZE 256
+char scan_results_buffer[MAX_SCAN_RESULT_SIZE];
+size_t scan_result_index = 0;
+size_t scan_result_offset = 0;
+
 static enum net_verdict handle_ipv4_echo_reply(struct net_pkt *pkt,
 					       struct net_ipv4_hdr *ip_hdr,
 					       struct net_icmp_hdr *icmp_hdr);
@@ -2938,35 +2945,31 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 	return WFA_SUCCESS;
 }
 
-
-char *scan_buffer = NULL;
-int length = 0;
-K_SEM_DEFINE(sem_scan, 0, 1);
-
 static void handle_wfa_scan_result(struct net_mgmt_event_callback *cb)
 {
 	const struct wifi_scan_result *entry =
 		(const struct wifi_scan_result *)cb->info;
 	uint8_t mac_string_buf[sizeof("xx:xx:xx:xx:xx:xx")];
-
 	int ret = 0;
-	static int i = 1;
+
 	if (!entry) {
 		return;
-	} else {
-		if(length == 0) {
-			i = 1;
-		}
-		if ((length < 1024) && (i < 10)) {
-
-			ret = sprintf(scan_buffer + length, "SSID%d,%s,BSSID%d,%s,", i, entry->ssid,
-					i, ((entry->mac_length) ?
-						net_sprint_ll_addr_buf(entry->mac, WIFI_MAC_ADDR_LEN, mac_string_buf,
-							sizeof(mac_string_buf)) : ""));
-			length += ret;
-			i++;
-		}
 	}
+
+	scan_result_offset = snprintf(scan_results_buffer + scan_result_offset,
+				MAX_SCAN_RESULT_SIZE - scan_result_offset,
+				"SSID%d,%s,BSSID%d,%s,",
+				scan_result_index,
+				entry->ssid,
+				scan_result_index,
+				entry->mac_length ?
+					net_sprint_ll_addr_buf(entry->mac, WIFI_MAC_ADDR_LEN, mac_string_buf, sizeof(mac_string_buf)) :
+					"00:00:00:00:00:00");
+	if (scan_result_offset < 0) {
+		printf("Failed to print scan results: %d\n", scan_result_offset);
+		return;
+	}
+	scan_result_index++;
 }
 
 static void handle_wfa_scan_done(struct net_mgmt_event_callback *cb)
@@ -2979,7 +2982,8 @@ static void handle_wfa_scan_done(struct net_mgmt_event_callback *cb)
 	} else {
 		printf("Scan request done\n");
 	}
-	length = 0;
+	scan_result_index = 0;
+	scan_result_offset = 0;
 	k_sem_give(&sem_scan);
 }
 
@@ -3004,8 +3008,7 @@ static int wfa_scan(void)
 
 	if (net_mgmt(NET_REQUEST_WIFI_SCAN, iface, NULL, 0)) {
 		printf("Scan request failed\n");
-
-		return 0;
+		return -1;
 	}
 
 	printf("Scan requested\n");
@@ -3016,35 +3019,24 @@ static int wfa_scan(void)
 int wfaStaScan(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 {
 	dutCmdResponse_t *infoResp = &gGenericResp;
-	caStaScan_t *staScan = (caStaScan_t *)caCmdBuf;  //comment if not used
+	caStaScan_t *staScan = (caStaScan_t *)caCmdBuf;
+	int ret = 0;
+
 	printf("\n Entry wfaStaScan ...\n ");
 
-	scan_buffer = malloc(1024);
-	if(!scan_buffer)
-		printf("Malloc failed\n");
-
-	memset(scan_buffer, 0, 1024);
+	memset(scan_results_buffer, 0, ARRAY_SIZE(scan_results_buffer));
 	memset(infoResp->cmdru.execAction.scan_res_buf, 0, 256);
-	wfa_scan();
-	sleep(3);
+	ret = wfa_scan();
 
-	if (k_sem_take(&sem_scan, K_SECONDS(5)) == -EAGAIN) {
+	if (ret || !k_sem_take(&sem_scan, K_SECONDS(SCAN_RESULTS_TIMEOUT))) {
 		infoResp->status = STATUS_ERROR;
-		goto exit;
 	} else {
-		if(strlen(scan_buffer)) {
-			memcpy(infoResp->cmdru.execAction.scan_res_buf, scan_buffer, 256);
-			infoResp->status = STATUS_COMPLETE;
-			goto exit;
-		}
+		memcpy(infoResp->cmdru.execAction.scan_res_buf, scan_results_buffer, ARRAY_SIZE(scan_results_buffer));
+		infoResp->status = STATUS_COMPLETE;
 	}
 
-exit:
 	wfaEncodeTLV(WFA_STA_SCAN_RESP_TLV, sizeof(*infoResp), (BYTE *)infoResp, respBuf);
 	*respLen = WFA_TLV_HDR_LEN + sizeof(*infoResp);
-
-	free(scan_buffer);
-	scan_buffer = NULL;
 
 	return WFA_SUCCESS;
 }
