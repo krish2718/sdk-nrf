@@ -83,24 +83,3 @@ void main(void)
 
 	net_config_init_app(dev, "Initializing network");
 }
-
-#include <zephyr/shell/shell.h>
-
-extern int g_num_pkts;
-extern int g_count;
-
-static int debug_rx(const struct shell *sh, size_t argc, const char *argv[])
-{
-	if(g_count == 0) {
-		return 0;
-	}
-
-	printk("%s : %d \n", __func__, g_num_pkts / g_count);
-
-	g_num_pkts = 0;
-	g_count = 0;
-
-	return 0;
-}
-
-SHELL_CMD_REGISTER(debug_rx, NULL, "Rx pkts per event avg.", debug_rx);
