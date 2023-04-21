@@ -70,6 +70,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/wifi_mgmt.h>
 #include <zephyr/net/net_event.h>
+#include "icmpv4.h"
 
 #include "zephyr_fmac_main.h"
 extern struct wifi_nrf_drv_priv_zep rpu_drv_priv_zep;
@@ -79,7 +80,7 @@ extern struct wifi_nrf_drv_priv_zep rpu_drv_priv_zep;
 
 #define WFA_ENABLED 1
 int stmp;
-extern int count_seq;
+int count_seq;
 extern struct wpa_global *global;
 extern unsigned short wfa_defined_debug;
 int wfaExecuteCLI(char *CLI);
@@ -96,6 +97,52 @@ extern char *chan_buf1;
 extern char *chan_buf2;
 
 extern char e2eResults[];
+
+static enum net_verdict handle_ipv4_echo_reply(struct net_pkt *pkt,
+					       struct net_ipv4_hdr *ip_hdr,
+					       struct net_icmp_hdr *icmp_hdr);
+
+static struct net_icmpv4_handler ping4_handler = {
+	.type = NET_ICMPV4_ECHO_REPLY,
+	.code = 0,
+	.handler = handle_ipv4_echo_reply,
+};
+
+static inline void remove_ipv4_ping_handler(void)
+{
+	net_icmpv4_unregister_handler(&ping4_handler);
+}
+
+static enum net_verdict handle_ipv4_echo_reply(struct net_pkt *pkt,
+					       struct net_ipv4_hdr *ip_hdr,
+					       struct net_icmp_hdr *icmp_hdr)
+{
+	NET_PKT_DATA_ACCESS_CONTIGUOUS_DEFINE(icmp_access,
+					      struct net_icmpv4_echo_req);
+	uint32_t cycles;
+	struct net_icmpv4_echo_req *icmp_echo;
+
+	icmp_echo = (struct net_icmpv4_echo_req *)net_pkt_get_data(pkt,
+								&icmp_access);
+	if (icmp_echo == NULL) {
+		return -NET_DROP;
+	}
+
+	net_pkt_skip(pkt, sizeof(*icmp_echo));
+
+	if (net_pkt_remaining_data(pkt) >= sizeof(uint32_t)) {
+		if (net_pkt_read_be32(pkt, &cycles)) {
+			return -NET_DROP;
+		}
+		cycles = k_cycle_get_32() - cycles;
+	}
+
+    count_seq = ntohs(icmp_echo->sequence);
+
+	net_pkt_unref(pkt);
+	return NET_OK;
+}
+
 
 FILE *e2efp = NULL;
 int chk_ret_status()
@@ -2706,6 +2753,7 @@ void wfaSendPing(tgPingStart_t *staPing, float *interval, int streamid)
 	int ret;
 	printf("duration = %d frameRate = %d\n",staPing->duration,staPing->frameSize);
 	stmp = (int)staPing->duration;
+    net_icmpv4_register_handler(&ping4_handler);
     	printf("Printing PING OUTPUT\n");
 	sprintf(gCmdStr, "net ping -s %d -c %d %s", frameSize, duration, addr);
 	ret = shell_execute_cmd(NULL, gCmdStr);
@@ -2717,13 +2765,15 @@ int wfaStopPing(dutCmdResponse_t *stpResp, int streamid)
     char strout[256];
     FILE *tmpfile = NULL;
     char cmdStr[128];
-  printf("\nIn func %s :: stream id=%d\n", __func__,streamid);
+    printf("\nIn func %s :: stream id=%d\n", __func__,streamid);
 
-            stpResp->cmdru.pingStp.sendCnt = stmp-1;
-            stpResp->cmdru.pingStp.repliedCnt = count_seq;
+    stpResp->cmdru.pingStp.sendCnt = stmp-1;
+    stpResp->cmdru.pingStp.repliedCnt = count_seq;
     printf("\nCount of the seq_num from NET SHELL is  %d",count_seq);
     printf("wfaStopPing send count %i\n", stpResp->cmdru.pingStp.sendCnt);
     printf("wfaStopPing replied count %i\n", stpResp->cmdru.pingStp.repliedCnt);
+    remove_ipv4_ping_handler();
+    count_seq = 0;
     return WFA_SUCCESS;
 }
 
