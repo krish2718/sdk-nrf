@@ -1789,14 +1789,24 @@ int wfaStaSetUAPSD(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 int wifi_nrf_get_fw_ver(char *fw_ver, int len)
 {
     int ret = 0;
+	unsigned int umac_ver, lmac_ver;
     struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = rpu_drv_priv_zep.rpu_ctx_zep.rpu_ctx;
 
-    ret = wifi_nrf_fmac_get_version(fmac_dev_ctx, 0, fw_ver, len);
+    ret = wifi_nrf_fmac_ver_get(fmac_dev_ctx, &umac_ver, &lmac_ver);
     if (ret) {
         DPRINT_ERR(WFA_ERR, "Failed to get firmware version: %d\n", ret);
         return -1;
     }
-
+    ret = snprintf(fw_ver, len,
+            "version: %d.%d.%d.%d",
+                NRF_WIFI_UMAC_VER(umac_ver),
+                NRF_WIFI_UMAC_VER_MAJ(umac_ver),
+                NRF_WIFI_UMAC_VER_MIN(umac_ver),
+                NRF_WIFI_UMAC_VER_EXTRA(umac_ver));
+    if (ret < 0) {
+        DPRINT_ERR(WFA_ERR, "Failed to get firmware version: %d\n", ret);
+        return -1;
+    }
     return 0;
 }
 
