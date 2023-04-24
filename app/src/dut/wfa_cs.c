@@ -2930,6 +2930,8 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
                        sret = shell_execute_cmd(NULL, gCmdStr);
 
                }
+		int ppdu_len = strlen(rfeat->ppdutxtype);
+		if(ppdu_len!='\0')
 		if(rfeat->ppdutxtype)
 		{
 			int ppdutype,rualloctone;
