@@ -100,7 +100,6 @@ extern char e2eResults[];
 
 K_SEM_DEFINE(sem_scan, 0, 1);
 #define SCAN_RESULTS_TIMEOUT 10
-#define MAX_SCAN_RESULT_SIZE 256
 char scan_results_buffer[MAX_SCAN_RESULT_SIZE];
 size_t scan_result_index = 0;
 size_t scan_result_offset = 0;
@@ -3077,7 +3076,7 @@ int wfaStaScan(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 	printf("\n Entry wfaStaScan ...\n ");
 
 	memset(scan_results_buffer, 0, ARRAY_SIZE(scan_results_buffer));
-	memset(infoResp->cmdru.execAction.scan_res_buf, 0, 256);
+	memset(infoResp->cmdru.execAction.scan_res_buf, 0, MAX_SCAN_RESULT_SIZE);
 	ret = wfa_scan();
 
 	if (ret || k_sem_take(&sem_scan, K_SECONDS(SCAN_RESULTS_TIMEOUT))) {

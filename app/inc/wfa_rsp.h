@@ -280,9 +280,10 @@ typedef struct ca_sta_invoke_cmd_resp
 } caStaInvokeCmdResp_t;
 /* WFDS */
 
+#define MAX_SCAN_RESULT_SIZE 1024
 typedef struct ca_sta_exec_action_resp
 {
-	char scan_res_buf[256];
+	char scan_res_buf[MAX_SCAN_RESULT_SIZE];
 } caStaExecActionResp_t;
 
 typedef struct ca_sta_get_events_resp
