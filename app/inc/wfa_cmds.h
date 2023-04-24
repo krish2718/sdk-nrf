@@ -1571,6 +1571,8 @@ typedef struct ca_sta_rfeature
     char prog[8];
     char ppdutxtype[WFA_PPDU_SIZE];
     int rualloctone;
+    float he_ltf;
+    float he_gi;
     int twt_ndppagingind;
     int twt_resppmmode;
     int twt_negotiationtype;

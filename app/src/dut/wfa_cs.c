@@ -2892,6 +2892,44 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 		DPRINT_INFO(WFA_OUT, "Inside HE ...\n");
 		printf("%s\n",rfeat->prog);
 		printf("%s\n",rfeat->ppdutxtype);
+		if((rfeat->he_ltf) && (rfeat->he_gi))
+               {
+                       int ltf,gi;
+                       sprintf(gCmdStr, "wifi_util set_he_ltf_gi 1");
+                       printf("\n------------%s--------\n", gCmdStr);
+                       sret = shell_execute_cmd(NULL, gCmdStr);
+                       if((rfeat->he_ltf) == 3.2f)
+                       {
+                               ltf = 0;
+                       }
+                       else if((rfeat->he_ltf) == 6.4f)
+                       {
+                               ltf = 1;
+                       }
+                       else if((rfeat->he_ltf) == 12.8f)
+                       {
+                               ltf = 2;
+                       }
+                       sprintf(gCmdStr, "wifi_util he_ltf %d",ltf);
+                       printf("\n------------%s--------\n", gCmdStr);
+                       sret = shell_execute_cmd(NULL, gCmdStr);
+                       if((rfeat->he_gi) == 0.8f)
+                       {
+                               gi = 0;
+                       }
+                       else if((rfeat->he_gi) == 1.6f)
+                       {
+                               gi = 1;
+                       }
+                       else if((rfeat->he_gi) == 3.2f)
+                       {
+                               gi = 2;
+                       }
+                       sprintf(gCmdStr, "wifi_util he_gi %d",gi);
+                       printf("\n------------%s--------\n", gCmdStr);
+                       sret = shell_execute_cmd(NULL, gCmdStr);
+
+               }
 		if(rfeat->ppdutxtype)
 		{
 			int ppdutype,rualloctone;
