@@ -249,6 +249,7 @@ int wfaStaAssociate(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 	ret = shell_execute_cmd(NULL, gCmdStr);
     	printf("\n %s \n", gCmdStr);
     }
+    ret = shell_execute_cmd(NULL, "wifi reg_domain US -f");
     ret = shell_execute_cmd(NULL, "wpa_cli select_network 0");
     staAssocResp->status = STATUS_COMPLETE;
     wfaEncodeTLV(WFA_STA_ASSOCIATE_RESP_TLV, 4, (BYTE *)staAssocResp, respBuf);
