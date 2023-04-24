@@ -211,26 +211,20 @@ int wfaTGSendPing(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 		case WFA_PING_ICMP_ECHO:
 #ifndef WFA_PING_UDP_ECHO_ONLY
 			duration = staPing->duration;
-			//wfaSendPing(staPing,frameRate,duration,streamId);
-			if (staPing->duration < 100) {
-				wfaSendPing(staPing, &interval, streamId);
-			} else {
-
-				async_ping.staPing = wMALLOC(sizeof(*async_ping.staPing));
-				if (!async_ping.staPing) {
-					printf("MALLOC failed: size: %d\n", sizeof(*async_ping.staPing));
-					break;
-				}
-				memcpy(async_ping.staPing, staPing, sizeof(*async_ping.staPing));
-				async_ping.interval = &interval;
-				async_ping.streamId = streamId;
-				async_ping.thread_active = true;
-				k_tid_t async_ping_thread = k_thread_create(&async_ping.thread, async_ping_stack,
-						K_THREAD_STACK_SIZEOF(async_ping_stack),
-						wfaSendPingAsync, NULL, NULL, NULL,
-						K_PRIO_PREEMPT(5), 0, K_FOREVER);
-				k_thread_start(async_ping_thread);
+			async_ping.staPing = wMALLOC(sizeof(*async_ping.staPing));
+			if (!async_ping.staPing) {
+				printf("MALLOC failed: size: %d\n", sizeof(*async_ping.staPing));
+				break;
 			}
+			memcpy(async_ping.staPing, staPing, sizeof(*async_ping.staPing));
+			async_ping.interval = &interval;
+			async_ping.streamId = streamId;
+			async_ping.thread_active = true;
+			k_tid_t async_ping_thread = k_thread_create(&async_ping.thread, async_ping_stack,
+					K_THREAD_STACK_SIZEOF(async_ping_stack),
+					wfaSendPingAsync, NULL, NULL, NULL,
+					K_PRIO_PREEMPT(5), 0, K_FOREVER);
+			k_thread_start(async_ping_thread);
 			spresp->status = STATUS_COMPLETE;
 			spresp->streamId = streamid;
 #else
