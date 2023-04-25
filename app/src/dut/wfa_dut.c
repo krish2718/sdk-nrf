@@ -226,7 +226,11 @@ void *main_thread_handler()
 				printf("%02x ", xcCmdBuf[i]);
 				}
 				printf("\n");
-				wfaDecodeTLV(xcCmdBuf, nbytes, &xcCmdTag, &cmdLen, parmsVal);
+				int ret = wfaDecodeTLV(xcCmdBuf, nbytes, &xcCmdTag, &cmdLen, parmsVal);
+				if (ret != WFA_SUCCESS) {
+					printf("Error in decoding the command...!\n");
+					continue;
+				}
 				memset(respBuf, 0, WFA_RESP_BUF_SZ);
 				respLen = 0;
 
@@ -383,7 +387,13 @@ int commandHandle(unsigned char *pcmdBuf)
 		printf("%x", pcmdBuf[i]);
 	}
 	printf("\n");
-	wfaDecodeTLV(pcmdBuf, WFA_BUFF_1K, &xcCmdTag, &cmdLen, parmsVal);
+	ret = wfaDecodeTLV(pcmdBuf, WFA_BUFF_1K, &xcCmdTag, &cmdLen, parmsVal);
+	if (ret == WFA_FAILURE) {
+		printf("%s DDEBUG: %s, %d\n", __FILE__, __func__, __LINE__);
+		DPRINT_WARNING(WFA_WNG, "Incorrect command syntax\n");
+		return -1;
+	}
+
 	memset(respBuf, 0, WFA_RESP_BUF_SZ);
 	respLen = 0;
 
