@@ -282,11 +282,6 @@ int wfaCtrlSend(int sock, unsigned char *buf, int bufLen)
 	   DPRINT_WARNING(WFA_WNG, "Error sending tcp packet\n");
 	}
 	printf("Sending RESP from DUT to CA from netusb sock: %d\n", bufLen);
-	printf("Printing RespBuf START\n");
-	for (i = 0; i < bufLen; i++) {
-		printf("%02x ", buf[i]);
-	}
-	printf("Printing RespBuf DONE\n");
 #endif
 #ifdef WFA_DUT_UART
 	printf("Sending RESP to CA: %d\n", bufLen);
