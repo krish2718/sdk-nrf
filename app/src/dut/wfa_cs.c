@@ -216,22 +216,22 @@ int wfaStaAssociate(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         /* use 'ifconfig' command to bring down the interface (linux specific) */
      //	sprintf(gCmdStr, "ifconfig %s down", ifname);
-      //	sret = shell_execute_cmd(NULL,gCmdStr);
+      //	sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
         /* use 'ifconfig' command to bring up the interface (linux specific) */
       	//sprintf(gCmdStr, "ifconfig %s up", ifname);
-        //sret = shell_execute_cmd(NULL,gCmdStr);
+        //sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
         /*
          *  use 'wpa_cli' command to force a 802.11 re/associate
          *  (wpa_supplicant specific)
          */
 //sprintf(gCmdStr, "wpa_cli -i%s select_network 0", ifname);
-  //     sret = shell_execute_cmd(NULL,gCmdStr);
+  //     sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     }
    //sprintf(gCmdStr, "wpa_cli select_network 0", ifname);
 //		printf("\n %s \n", gCmdStr);
-  // sret = shell_execute_cmd(NULL,gCmdStr);
+  // sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
    //sleep(2);
 
     /*
@@ -245,11 +245,11 @@ int wfaStaAssociate(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     if(k!='\0')
     {
 	sprintf(gCmdStr, "wpa_cli bssid 0 '\"%s\"'", setassoc->bssid);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
     	printf("\n %s \n", gCmdStr);
     }
-    ret = shell_execute_cmd(NULL, "wifi reg_domain US -f");
-    ret = shell_execute_cmd(NULL, "wpa_cli select_network 0");
+    ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wifi reg_domain US -f");
+    ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli select_network 0");
     staAssocResp->status = STATUS_COMPLETE;
     wfaEncodeTLV(WFA_STA_ASSOCIATE_RESP_TLV, 4, (BYTE *)staAssocResp, respBuf);
     *respLen = WFA_TLV_HDR_LEN + 4;
@@ -290,7 +290,7 @@ int wfaStaReAssociate(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         /* use 'ifconfig' command to bring down the interface (linux specific) */
         //sprintf(gCmdStr, "ifconfig %s down", ifname);
-        //sret = shell_execute_cmd(NULL,gCmdStr);
+        //sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
         /* use 'ifconfig' command to bring up the interface (linux specific) */
         //sprintf(gCmdStr, "ifconfig %s up", ifname);
@@ -300,10 +300,10 @@ int wfaStaReAssociate(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
          *  (wpa_supplicant specific)
          */
         //sprintf(gCmdStr, "wpa_cli -i%s reassociate", ifname);
-        //sret = shell_execute_cmd(NULL,gCmdStr);
+        //sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     }
 
-	ret = shell_execute_cmd(NULL, "wpa_cli reassociate");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli reassociate");
     /*
      * Then report back to control PC for completion.
      * This does not have failed/error status. The result only tells
@@ -334,7 +334,7 @@ int wfaStaIsConnected(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
 #ifdef WFA_NEW_CLI_FORMAT
     sprintf(gCmdStr, "wfa_chkconnect %s\n", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     if(chk_ret_status() == WFA_SUCCESS)
         staConnectResp->cmdru.connected = 1;
@@ -345,7 +345,7 @@ int wfaStaIsConnected(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * use 'wpa_cli' command to check the interface status
      * none, scanning or complete (wpa_supplicant specific)
      */
-	ret = shell_execute_cmd(NULL, "wpa_cli status");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli status");
 	wpa_s = wpa_supplicant_get_iface(global, ifname);
 	if (!wpa_s) {
 		printf("Unable to find the interface: %s, quitting", ifname);
@@ -469,7 +469,7 @@ int wfaStaGetIpConfig(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      */
     sprintf(gCmdStr, "getipconfig.sh /tmp/ipconfig.txt %s\n", ifname);
 
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /* open the output result and scan/retrieve the info */
     tmpfd = fopen("/tmp/ipconfig.txt", "r+");
@@ -630,22 +630,22 @@ int wfaStaSetIpConfig(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * (Linux specific).
      *
     *sprintf(gCmdStr, "/sbin/ifconfig %s %s netmask %s > /dev/null 2>&1 ", ipconfig->intf, ipconfig->ipaddr, ipconfig->mask);
-     * sret = shell_execute_cmd(NULL,gCmdStr);
+     * sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
      * 
      * use command 'route add' to set set gatewway (linux specific) */
     /* if(ipconfig->defGateway[0] != '\0')
     {
         sprintf(gCmdStr, "/sbin/route add default gw %s > /dev/null 2>&1", ipconfig->defGateway);
-        sret = shell_execute_cmd(NULL,gCmdStr);
+        sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     }
  */
     /* set dns (linux specific) */
     /* sprintf(gCmdStr, "cp /etc/resolv.conf /tmp/resolv.conf.bk");
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "echo nameserv %s > /etc/resolv.conf", ipconfig->pri_dns);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "echo nameserv %s >> /etc/resolv.conf", ipconfig->sec_dns);
-     sret = shell_execute_cmd(NULL,gCmdStr);
+     sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 	*/
     /*
      * report status
@@ -688,7 +688,7 @@ int wfaStaVerifyIpConnection(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBu
     /* execute the ping command  and pipe the result to a tmp file */
 #if 1
     sprintf(gCmdStr, "ping %s -c 3 -W %u | grep loss | cut -f3 -d, 1>& /tmp/pingout.txt", verip->cmdsu.verifyIp.dipaddr, verip->cmdsu.verifyIp.timeout);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /* scan/check the output */
     tmpfile = fopen("/tmp/pingout.txt", "r+");
@@ -880,28 +880,28 @@ int wfaSetEncryption1(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     /*
      * disable the network first
      */
-	ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
-	ret = shell_execute_cmd(NULL, "wpa_cli add disable_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli add_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli add disable_network 0");
 
     /*
      * set SSID
      */
 	sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", setEncryp->ssid);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
     /*
      * Tell the supplicant for infrastructure mode (1)
      */
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 mode 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 mode 0");
 
     /*
      * set Key management to NONE (NO WPA) for plaintext or WEP
      */
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt NONE");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt NONE");
 
      //IMG
-	ret = shell_execute_cmd(NULL, "wpa_cli sta_autoconnect 1");
-	ret = shell_execute_cmd(NULL, "wpa_cli enable_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli sta_autoconnect 1");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli enable_network 0");
 
 
     setEncrypResp->status = STATUS_COMPLETE;
@@ -925,25 +925,25 @@ int wfaSetEncryption(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * disable the network first
      */
 
-	ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
-	ret = shell_execute_cmd(NULL, "wpa_cli disable_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli add_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli disable_network 0");
 
     /*
      * set SSID
      */
 	sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", setEncryp->ssid);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
 
     /*
      * Tell the supplicant for infrastructure mode (1)
      */
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 mode 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 mode 0");
 
     /*
      * set Key management to NONE (NO WPA) for plaintext or WEP
      */
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt NONE");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt NONE");
 
     /* set keys */
     if(setEncryp->encpType == 1)
@@ -953,7 +953,7 @@ int wfaSetEncryption(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
             if(setEncryp->keys[i][0] != '\0')
             {
 		sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", setEncryp->ssid);
-		ret = shell_execute_cmd(NULL, gCmdStr);
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
             }
         }
 
@@ -962,7 +962,7 @@ int wfaSetEncryption(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
         if(setEncryp->keys[i][0] != '\0')
         {
 		sprintf(gCmdStr, "wpa_cli set_network 0 wep_tx_keyid %i",i, setEncryp->activeKeyIdx);
-		ret = shell_execute_cmd(NULL, gCmdStr);
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
         }
     }
     else /* clearly remove the keys -- reported by p.schwann */
@@ -971,14 +971,14 @@ int wfaSetEncryption(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
         for(i = 0; i < 4; i++)
         {
             	sprintf(gCmdStr, "wpa_cli set_network 0 wep_key %i ", i);
-		ret = shell_execute_cmd(NULL, gCmdStr);
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
         }
     }
 
      //IMG
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 scan_ssid 1 ");
-	ret = shell_execute_cmd(NULL, "wpa_cli sta_autoconnect 1");
-//	ret = shell_execute_cmd(NULL, "wpa_cli select_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 scan_ssid 1 ");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli sta_autoconnect 1");
+//	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli select_network 0");
 
 
 
@@ -1004,12 +1004,12 @@ int wfaStaSetSecurity(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
 	int ret;
 
-ret = shell_execute_cmd(NULL, "wpa_cli remove_network 0");
-ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
+ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli remove_network 0");
+ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli add_network 0");
 
 
 	sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", setsec->ssid);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
 	printf("\n Interface = %s \n",setSecurity->intf );
 	printf("\n keyMgmType = %s \n",setsec->keyMgmtType );
@@ -1024,125 +1024,125 @@ ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
 if(setsec->type == SEC_TYPE_PSKSAE)
                 {
                         printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_PSKSAE");
-			ret = shell_execute_cmd(NULL, "wpa_cli SAE_PWE 2");
-			ret = shell_execute_cmd(NULL, "wpa_cli disable_network 0");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 pairwise CCMP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli SAE_PWE 2");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli disable_network 0");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 pairwise CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group CCMP");
 
 
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK SAE");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK SAE");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
 			sprintf(gCmdStr, "wpa_cli set_network 0 sae_password '\"%s\"'", setsec->secu.passphrase);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			sprintf(gCmdStr, "wpa_cli set_network 0 psk '\"%s\"'",  setsec->secu.passphrase);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
                         sprintf(gCmdStr, "wpa_cli set_network 0 key_mgmt WPA-PSK SAE", ifname);
-			ret = shell_execute_cmd(NULL, gCmdStr);
-			ret = shell_execute_cmd(NULL, "wpa_cli enable_network 0");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli enable_network 0");
                    }
 	
 		if(setsec->type == SEC_TYPE_SAE)
 		{
 			printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_SAE");
-			ret = shell_execute_cmd(NULL, "wpa_cli SAE_PWE 2");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0  pairwise CCMP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group CCMP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt SAE");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli SAE_PWE 2");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0  pairwise CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt SAE");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
 			sprintf(gCmdStr, "wpa_cli set_network 0 sae_password '\"%s\"'", setsec->secu.passphrase);
-			ret = shell_execute_cmd(NULL, gCmdStr);
-			ret = shell_execute_cmd(NULL, "wpa_cli enable_network 0");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli enable_network 0");
 
 		}
 		else if(setsec->type == SEC_TYPE_PSKSAE)
 		{
 			printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_PSKSAE");
 			
-			ret = shell_execute_cmd(NULL, "wpa_cli SAE_PWE 2");
-			ret = shell_execute_cmd(NULL, "wpa_cli disable_network 0");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0  pairwise CCMP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group CCMP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK SAE");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli SAE_PWE 2");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli disable_network 0");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0  pairwise CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK SAE");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
 			sprintf(gCmdStr, "wpa_cli set_network 0 sae_password '\"%s\"'", setsec->secu.passphrase);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			sprintf(gCmdStr, "wpa_cli set_network 0 psk '\"%s\"'", setsec->secu.passphrase);
-			ret = shell_execute_cmd(NULL, gCmdStr);
-			ret = shell_execute_cmd(NULL, "wpa_cli enable_network 0");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli enable_network 0");
 	   	}
 		else if(setsec->type == SEC_TYPE_PSK)
 		{
 			printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_PSK");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 auth_alg OPEN");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group CCMP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 pairwise CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 auth_alg OPEN");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group CCMP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 pairwise CCMP");
 			sprintf(gCmdStr, "wpa_cli set_network 0 ieee80211w %d", setsec->pmf);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			sprintf(gCmdStr, "wpa_cli set pmf %d", setsec->pmf);
-			ret = shell_execute_cmd(NULL, gCmdStr);
-			ret = shell_execute_cmd(NULL, "wpa_cli sta_autoconnect 1");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli sta_autoconnect 1");
 			sprintf(gCmdStr, "wpa_cli set_network 0 psk '\"%s\"'", setsec->secu.passphrase);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
                 }
 		else if(setsec->type == SEC_TYPE_EAPTLS)
 		{
 			printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_EAPTLS");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-EAP");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 eap TLS");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 identity '\"user@example.com\"'");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-EAP");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 eap TLS");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 identity '\"user@example.com\"'");
 			sprintf(gCmdStr, "wpa_cli set_network 0 ca_cert '\"/etc/wpa_supplicant/%s\"'", setsec->trustedRootCA);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			sprintf(gCmdStr, "wpa_cli set_network 0 client_cert '\"/etc/wpa_supplicant/%s\"'", setsec->clientCertificate);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			sprintf(gCmdStr, "wpa_cli set_network 0 private_key '\"/etc/wpa_supplicant/%s\"'", setsec->clientCertificate);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		}
 		else if(setsec->type == 0)
                 {
                         printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_OPEN");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt NONE");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt NONE");
                 }
 
 		if(setsec->ecGroupID[0] != '\0')
 		{
 			sprintf(gCmdStr, "wpa_cli SET sae_groups %s", setsec->ecGroupID);
-			ret = shell_execute_cmd(NULL, gCmdStr);
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			printf("\n %s \n", gCmdStr);
 		}
 	
 	if(strcasecmp(setsec->keyMgmtType, "OWE") == 0)	
 	{
 		printf("\n IMG DEBUG >>>>>>> IN OWE");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt OWE");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group CCMP");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 pairwise CCMP");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 proto RSN");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt OWE");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group CCMP");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 pairwise CCMP");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 proto RSN");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
 	}
 	else if(strcasecmp(setsec->keyMgmtType, "SuiteB") == 0)	
 	{
 		printf("\n IMG DEBUG >>>>>>> IN SuiteB");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-EAP-SUITE-B-192");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 pairwise GCMP-256");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group GCMP-256");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 eap TLS");
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 identity '\"user@example.com\"'");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-EAP-SUITE-B-192");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 pairwise GCMP-256");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group GCMP-256");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 eap TLS");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 identity '\"user@example.com\"'");
 		sprintf(gCmdStr, "wpa_cli set_network 0 ca_cert '\"/etc/wpa_supplicant/%s\"'", setsec->trustedRootCA);
-		ret = shell_execute_cmd(NULL, gCmdStr);
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		sprintf(gCmdStr, "wpa_cli set_network 0 client_cert '\"/etc/wpa_supplicant/%s\"'", setsec->clientCertificate);
-		ret = shell_execute_cmd(NULL, gCmdStr);
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		sprintf(gCmdStr, "wpa_cli set_network 0 private_key '\"/etc/wpa_supplicant/%s\"'", setsec->clientCertificate);
-		ret = shell_execute_cmd(NULL, gCmdStr);
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group_mgmt BIP-GMAC-256");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group_mgmt BIP-GMAC-256");
 		if(strcasecmp(setsec->certType, "ecc") == 0)
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 openssl_ciphers '\"ECDHE-ECDSA-AES256-GCM-SHA384\"'");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 openssl_ciphers '\"ECDHE-ECDSA-AES256-GCM-SHA384\"'");
 		else if(strcasecmp(setsec->certType, "rsa") == 0)
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 openssl_ciphers '\"ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384\"'");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 openssl_ciphers '\"ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384\"'");
 
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
 	}
 
 	else
@@ -1150,16 +1150,16 @@ if(setsec->type == SEC_TYPE_PSKSAE)
 		 if(setsec->type == 0)
                 {
                         printf("\n IMG DEBUG >>>>>>> IN SEC_TYPE_OPEN");
-			ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
+			ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
                 }
 		
 	}
                 printf("\n IMG DEBUG >>>>>>> IN STA_AUTO_CONNECT");
-		ret = shell_execute_cmd(NULL, "wpa_cli sta_autoconnect 1 ");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli sta_autoconnect 1 ");
 
-		ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 scan_ssid 1 ");
+		ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 scan_ssid 1 ");
 
-		//ret = shell_execute_cmd(NULL, "wpa_cli select_network 0");
+		//ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli select_network 0");
 	sleep(2);
 	infoResp.status = STATUS_COMPLETE;
 	wfaEncodeTLV(WFA_STA_SET_SECURITY_RESP_TLV, sizeof(infoResp), (BYTE *)&infoResp, respBuf);
@@ -1191,15 +1191,15 @@ int wfaStaSetEapTLS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      */
 #ifdef WFA_NEW_CLI_FORMAT
 	sprintf(gCmdStr, "wfa_set_eaptls -i '\"%s\"' '\"%s\"' '\"%s\"' '\"%s\"'",ifname, setTLS->ssid, setTLS->trustedRootCA, setTLS->clientCertificate);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 #else
 
-	ret = shell_execute_cmd(NULL, "wpa_cli remove_network 0");
-	ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
-	/*ret = shell_execute_cmd(NULL, "wpa_cli disable_network 0");*/
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli remove_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli add_network 0");
+	/*ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli disable_network 0");*/
     /* ssid */
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", ifname, setTLS->ssid);
-    ret = shell_execute_cmd(NULL, gCmdStr);
+    ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
     /* key management */
     if(strcasecmp(setTLS->keyMgmtType, "wpa2-sha256") == 0)
@@ -1214,15 +1214,15 @@ int wfaStaSetEapTLS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     }
     else if(strcasecmp(setTLS->keyMgmtType, "wpa") == 0)
     {
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-EAP");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 proto WPA");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-EAP");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 proto WPA");
     }
     else if(strcasecmp(setTLS->keyMgmtType, "wpa2") == 0)
     {
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-EAP");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 pairwise CCMP");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 group CCMP");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 proto WPA2");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-EAP");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 pairwise CCMP");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 group CCMP");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 proto WPA2");
  
         // to take all and device to pick any one supported.
     }
@@ -1230,23 +1230,23 @@ int wfaStaSetEapTLS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         // ??
 
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-EAP WPA-EAP-SHA256");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-EAP WPA-EAP-SHA256");
     }
 
     /* if PMF enable */
     if(setTLS->pmf == WFA_ENABLED || setTLS->pmf == WFA_OPTIONAL)
     {
 
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
     }
     else if(setTLS->pmf == WFA_REQUIRED)
     {
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
     }
     else if(setTLS->pmf == WFA_F_REQUIRED)
     {
 
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
    } 
     else if(setTLS->pmf == WFA_F_DISABLED)
     {
@@ -1258,36 +1258,36 @@ int wfaStaSetEapTLS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
 /*    sprintf(gCmdStr, "wpa_cli set_network 0 iee80211w 0", setTLS->intf);
 		printf("\n %s \n", gCmdStr);
-   sret = shell_execute_cmd(NULL,gCmdStr);
+   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
  */    /* protocol WPA */
 
      } 
     
     //sprintf(gCmdStr, "wpa_cli set_network 0 proto WPA", ifname);
-    //sret = shell_execute_cmd(NULL,gCmdStr);
+    //sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 eap TLS");
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 identity '\"wifiuser\"'");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 eap TLS");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 identity '\"wifiuser\"'");
 
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 password '\"test%11\"'");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 password '\"test%11\"'");
 
 
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ca_cert '\"/usr/test/cas.pem\"'");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ca_cert '\"/usr/test/cas.pem\"'");
 
    /* sprintf(gCmdStr, "wpa_cli set_network 0 private_key '\"/etc/wpa_supplicant/wifiuser.pem\"'", ifname);//IMG EDITED */
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 private_key '\"/usr/test/wifiuser.pem\"'");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 private_key '\"/usr/test/wifiuser.pem\"'");
 
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 private_key_passwd '\"wifi\"'");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 private_key_passwd '\"wifi\"'");
 
    /* sprintf(gCmdStr, "wpa_cli set_network 0 client_cert '\"/etc/wpa_supplicant/wifiuser.pem\"'", ifname);//IMG EDITED */
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 client_cert '\"/usr/test/wifiuser.pem\"'");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 client_cert '\"/usr/test/wifiuser.pem\"'");
    
    //IMG
- 	 ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 scan_ssid 1 ");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 scan_ssid 1 ");
 
     DPRINT_INFO(WFA_OUT, "Entering sta_autoconnect ...\n");
- 	 ret = shell_execute_cmd(NULL, "wpa_cli sta_autoconnect 1");
- 	 //ret = shell_execute_cmd(NULL, "wpa_cli select_network 0");
+ 	 ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli sta_autoconnect 1");
+ 	 //ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli select_network 0");
 
    sleep(2);
 #endif
@@ -1316,32 +1316,32 @@ int wfaStaSetPSK(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     caStaSetPSK_t *setPSK = (caStaSetPSK_t *)caCmdBuf;
 #ifdef WFA_NEW_CLI_FORMAT
     sprintf(gCmdStr, "wfa_set_psk '\"%s\"' '\"%s\"' '\"%s\"'", setPSK->intf, setPSK->ssid, setPSK->passphrase);
-    ret = shell_execute_cmd(NULL, gCmdStr);
+    ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 #else
 
-ret = shell_execute_cmd(NULL, "wpa_cli remove_network 0");
-ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
+ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli remove_network 0");
+ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli add_network 0");
     
 
 
 	sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", setPSK->ssid);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
   if(strcasecmp(setPSK->keyMgmtType, "wpa2-sha256") == 0)
      {
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
      }
     else if(strcasecmp(setPSK->keyMgmtType, "wpa2") == 0)
     {
      // take all and device to pick it supported.
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0  proto WPA2");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 pairwise CCMP");
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0  group CCMP TKIP");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0  proto WPA2");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 pairwise CCMP");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0  group CCMP TKIP");
     }
     else if(strcasecmp(setPSK->keyMgmtType, "wpa2-psk") == 0)
     {
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
     }
     else if(strcasecmp(setPSK->keyMgmtType, "wpa2-ft") == 0)
     {
@@ -1352,30 +1352,30 @@ ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
 
     }
     else
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 key_mgmt WPA-PSK WPA-PSK-SHA256");
 
 	sprintf(gCmdStr, "wpa_cli set_network 0 psk '\"%s\"'", setPSK->passphrase);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 scan_ssid 1");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 scan_ssid 1");
  
-	ret = shell_execute_cmd(NULL, "wpa_cli sta_autoconnect 1 ");
-	ret = shell_execute_cmd(NULL, "wpa_cli enable_network 0");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli sta_autoconnect 1 ");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli enable_network 0");
 
 
     /* if PMF enable */
     if(setPSK->pmf == WFA_ENABLED || setPSK->pmf == WFA_OPTIONAL)
     {
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
     }
     else if(setPSK->pmf == WFA_REQUIRED)
     {
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
     }
     else if(setPSK->pmf == WFA_F_REQUIRED)
     {
 
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 2");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 2");
    } 
     else if(setPSK->pmf == WFA_F_DISABLED)
     {
@@ -1384,9 +1384,9 @@ ret = shell_execute_cmd(NULL, "wpa_cli add_network 0");
     else
     {
         /* Disable PMF */
-	ret = shell_execute_cmd(NULL, "wpa_cli set_network 0 ieee80211w 1");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set_network 0 ieee80211w 1");
     }
-	//ret = shell_execute_cmd(NULL, "wpa_cli select_network 0");
+	//ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli select_network 0");
     sleep(2);
 #endif
 
@@ -1439,25 +1439,25 @@ int wfaStaSetEapTTLS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
 #ifdef WFA_NEW_CLI_FORMAT
     sprintf(gCmdStr, "wfa_set_eapttls %s %s %s %s %s", ifname, setTTLS->ssid, setTTLS->username, setTTLS->passwd, setTTLS->trustedRootCA);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #else
 
    sprintf(gCmdStr, "wpa_cli add_network 0 ", ifname); 
-   sret = shell_execute_cmd(NULL,gCmdStr);
+   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "wpa_cli disable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", ifname, setTTLS->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 identity '\"%s\"'", ifname, setTTLS->username);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 password '\"%s\"'", ifname, setTTLS->passwd);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 key_mgmt WPA-EAP", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /* This may not need to set. if it is not set, default to take all */
 //   sprintf(cmdStr, "wpa_cli set_network 0 pairwise '\"%s\"", ifname, setTTLS->encrptype);
@@ -1475,38 +1475,38 @@ int wfaStaSetEapTTLS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
 
       sprintf(gCmdStr, "wpa_cli set_network 0 key_mgmt WPA-EAP", ifname);//IMG EDITED
-      sret = shell_execute_cmd(NULL,gCmdStr);//IMG EDITED
+      sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);//IMG EDITED
       sprintf(gCmdStr, "wpa_cli set_network 0 proto WPA", ifname);//IMG EDITED
-      sret = shell_execute_cmd(NULL,gCmdStr);//IMG EDITED
+      sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);//IMG EDITED
     }
     else if(strcasecmp(setTTLS->keyMgmtType, "wpa2") == 0)
     {
         // to take all and device to pick one it supported
       sprintf(gCmdStr, "wpa_cli set_network 0 key_mgmt WPA-EAP", ifname);//IMG EDITED
-      sret = shell_execute_cmd(NULL,gCmdStr);//IMG EDITED
+      sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);//IMG EDITED
       sprintf(gCmdStr, "wpa_cli set_network 0 proto WPA2", ifname);//IMG EDITED
-      sret = shell_execute_cmd(NULL,gCmdStr);//IMG EDITED
+      sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);//IMG EDITED
     }
     else
     {
         // ??
     }
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 eap TTLS", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
    sprintf(gCmdStr, "wpa_cli set_network 0 ca_cert '\"/etc/wpa_supplicant/cas.pem\"'", ifname);
-   sret = shell_execute_cmd(NULL,gCmdStr);
+   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 phase2 '\"auth=MSCHAPV2\"'", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
      //IMG
  sprintf(gCmdStr, "wpa_cli sta_autoconnect 0 ", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "wpa_cli enable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #endif
 
     setEapTtlsResp->status = STATUS_COMPLETE;
@@ -1533,36 +1533,36 @@ int wfaStaSetEapSIM(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
 #ifdef WFA_NEW_CLI_FORMAT
     sprintf(gCmdStr, "wfa_set_eapsim %s %s %s %s", ifname, setSIM->ssid, setSIM->username, setSIM->encrptype);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #else
 
    sprintf(gCmdStr, "wpa_cli add_network 0 ", ifname); 
-   sret = shell_execute_cmd(NULL,gCmdStr);
+   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "wpa_cli disable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", ifname, setSIM->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
 
     sprintf(gCmdStr, "wpa_cli set_network 0 identity '\"%s\"'", ifname, setSIM->username);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 pairwise '\"%s\"'", ifname, setSIM->encrptype);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 eap SIM", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 proto WPA", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
      //IMG
     sprintf(gCmdStr, "wpa_cli sta_autoconnect 0 ", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli enable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     if(strcasecmp(setSIM->keyMgmtType, "wpa2-sha256") == 0)
     {
@@ -1588,7 +1588,7 @@ int wfaStaSetEapSIM(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         // ??
     }
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
 #endif
 
@@ -1622,35 +1622,35 @@ int wfaStaSetPEAP(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
             setPEAP->passwd, setPEAP->trustedRootCA,
             setPEAP->encrptype, setPEAP->peapVersion,
             setPEAP->innerEAP);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #else
 
    sprintf(gCmdStr, "wpa_cli add_network 0 ", ifname); 
-   sret = shell_execute_cmd(NULL,gCmdStr);
+   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "wpa_cli disable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", ifname, setPEAP->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 eap PEAP", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 anonymous_identity '\"anonymous\"' ", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 identity '\"%s\"'", ifname, setPEAP->username);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 password '\"%s\"'", ifname, setPEAP->passwd);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
    sprintf(gCmdStr, "wpa_cli set_network 0 ca_cert '\"/etc/wpa_supplicant/cas.pem\"'", ifname);
-   sret = shell_execute_cmd(NULL,gCmdStr);
+   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
    /* if this not set, default to set support all */
    //sprintf(gCmdStr, "wpa_cli set_network 0 pairwise '\"%s\"'", ifname, setPEAP->encrptype);
-   //sret = shell_execute_cmd(NULL,gCmdStr);
+   //sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     if(strcasecmp(setPEAP->keyMgmtType, "wpa2-sha256") == 0)
     {
@@ -1676,20 +1676,20 @@ int wfaStaSetPEAP(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         // ??
     }
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 phase1 '\"peaplabel=%i\"'", ifname, setPEAP->peapVersion);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 phase2 '\"auth=%s\"'", ifname, setPEAP->innerEAP);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
      //IMG
     sprintf(gCmdStr, "wpa_cli sta_autoconnect 0 ", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli enable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #endif
 
     setPeapResp->status = STATUS_COMPLETE;
@@ -1732,12 +1732,12 @@ int wfaStaSetUAPSD(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * bring down the interface
      */
     sprintf(gCmdStr, "ifconfig %s down",ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     /*
      * Unload the Driver
      */
     sprintf(gCmdStr, "rmmod rt61");
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #ifndef WFA_WMM_AC
     if(setUAPSD->acBE != 1)
         acBE=setUAPSD->acBE = 0;
@@ -1761,10 +1761,10 @@ int wfaStaSetUAPSD(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
     sprintf(tmpStr,"%d;%d;%d;%d",setUAPSD->acBE,setUAPSD->acBK,setUAPSD->acVI,setUAPSD->acVO);
     sprintf(gCmdStr, "sed -e \"s/APSDCapable=.*/APSDCapable=%d/g\" -e \"s/APSDAC=.*/APSDAC=%s/g\" %s/rt61sta.dat >/tmp/wfa_tmp",APSDCapable,tmpStr,pathl);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "mv /tmp/wfa_tmp %s/rt61sta.dat",pathl);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     pipe = popen("uname -r", "r");
     /* Read into line the output of uname*/
     fscanf(pipe,"%s",line);
@@ -1774,10 +1774,10 @@ int wfaStaSetUAPSD(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * load the Driver
      */
     sprintf(gCmdStr, "insmod /lib/modules/%s/extra/rt61.ko",line);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "ifconfig %s up",ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #endif
 
     setUAPSDResp->status = STATUS_COMPLETE;
@@ -1940,7 +1940,7 @@ int wfaStaGetBSSID(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     DPRINT_INFO(WFA_OUT, "Entering wfaStaGetBSSID ...\n");
     /* retrieve the BSSID */
 	int ret;	
-	ret = shell_execute_cmd(NULL, "wpa_cli status");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli status");
 
 
 	wpa_s = wpa_supplicant_get_iface(global, ifname);
@@ -1986,31 +1986,31 @@ int wfaStaSetIBSS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * disable the network first
      */
     sprintf(gCmdStr, "wpa_cli disable_network 0", setIBSS->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /*
      * set SSID
      */
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", setIBSS->intf, setIBSS->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /*
      * Set channel for IBSS
      */
     sprintf(gCmdStr, "iwconfig %s channel %i", setIBSS->intf, setIBSS->channel);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /*
      * Tell the supplicant for IBSS mode (1)
      */
     sprintf(gCmdStr, "wpa_cli set_network 0 mode 1", setIBSS->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /*
      * set Key management to NONE (NO WPA) for plaintext or WEP
      */
     sprintf(gCmdStr, "wpa_cli set_network 0 key_mgmt NONE", setIBSS->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     if(setIBSS->encpType == 1)
     {
@@ -2020,7 +2020,7 @@ int wfaStaSetIBSS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
             {
                 sprintf(gCmdStr, "wpa_cli set_network 0 wep_key%i \"%s\"",
                         setIBSS->intf, i, setIBSS->keys[i]);
-                sret = shell_execute_cmd(NULL,gCmdStr);
+                sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
             }
         }
 
@@ -2029,16 +2029,16 @@ int wfaStaSetIBSS(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
         {
             sprintf(gCmdStr, "wpa_cli set_network 0 wep_tx_keyidx %i",
                     setIBSS->intf, setIBSS->activeKeyIdx);
-            sret = shell_execute_cmd(NULL,gCmdStr);
+            sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
         }
     }
 
      //IMG
     sprintf(gCmdStr, "wpa_cli sta_autoconnect 0 ", setIBSS->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli enable_network 0", setIBSS->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     setIbssResp->status = STATUS_COMPLETE;
     wfaEncodeTLV(WFA_STA_SET_IBSS_RESP_TLV, 4, (BYTE *)setIbssResp, respBuf);
@@ -2070,13 +2070,13 @@ int wfaStaSetMode(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * bring down the interface
      */
     sprintf(gCmdStr, "ifconfig %s down",setmode->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /*
      * distroy the interface
      */
     sprintf(gCmdStr, "wlanconfig %s destroy",setmode->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
 
     /*
@@ -2087,7 +2087,7 @@ int wfaStaSetMode(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     else
         sprintf(gCmdStr, "wlanconfig %s create wlandev wifi0 wlanmode managed",setmode->intf);
 
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     if(setmode->encpType == ENCRYPT_WEP)
     {
         int j = setmode->activeKeyIdx;
@@ -2097,13 +2097,13 @@ int wfaStaSetMode(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
             {
                 sprintf(gCmdStr, "iwconfig  %s key  s:%s",
                         setmode->intf, setmode->keys[i]);
-                sret = shell_execute_cmd(NULL,gCmdStr);
+                sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
             }
             /* set active key */
             if(setmode->keys[j][0] != '\0')
                 sprintf(gCmdStr, "iwconfig  %s key  s:%s",
                         setmode->intf, setmode->keys[j]);
-            sret = shell_execute_cmd(NULL,gCmdStr);
+            sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
         }
 
     }
@@ -2113,7 +2113,7 @@ int wfaStaSetMode(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     if(setmode->channel)
     {
         sprintf(gCmdStr, "iwconfig %s channel %i", setmode->intf, setmode->channel);
-        sret = shell_execute_cmd(NULL,gCmdStr);
+        sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     }
 
 
@@ -2121,13 +2121,13 @@ int wfaStaSetMode(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      * set SSID
      */
     sprintf(gCmdStr, "iwconfig %s essid %s", setmode->intf, setmode->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     /*
      * bring up the interface
      */
     sprintf(gCmdStr, "ifconfig %s up",setmode->intf);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     SetModeResp->status = STATUS_COMPLETE;
     wfaEncodeTLV(WFA_STA_SET_MODE_RESP_TLV, 4, (BYTE *)SetModeResp, respBuf);
@@ -2142,7 +2142,7 @@ int wfaStaSetPwrSave(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     dutCmdResponse_t *SetPSResp = &gGenericResp;
 
     sprintf(gCmdStr, "wifi ps %s", setps->mode);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     printf("\n %s \n",gCmdStr);
 
@@ -2315,7 +2315,7 @@ int wfaStaSetWMM(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
             //tspec should be set here.
 
-            sret = shell_execute_cmd(NULL,gCmdStr);
+            sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
         }
         else if (setwmm->action == WMMAC_DELTS)
         {
@@ -2329,15 +2329,15 @@ int wfaStaSetWMM(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
         sprintf(gCmdStr, "iwconfig %s rts %d",
                 ifname,setwmm->actions.config.rts_thr);
 
-        sret = shell_execute_cmd(NULL,gCmdStr);
+        sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
         sprintf(gCmdStr, "iwconfig %s frag %d",
                 ifname,setwmm->actions.config.frag_thr);
 
-        sret = shell_execute_cmd(NULL,gCmdStr);
+        sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
         sprintf(gCmdStr, "iwpriv %s wmmcfg %d",
                 ifname, setwmm->actions.config.wmm);
 
-        sret = shell_execute_cmd(NULL,gCmdStr);
+        sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
         setwmmResp->status = STATUS_COMPLETE;
         break;
 
@@ -2380,22 +2380,22 @@ int wfaStaSetEapFAST(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     sprintf(gCmdStr, "wfa_set_eapfast %s %s %s %s %s %s", ifname, setFAST->ssid, setFAST->username,
             setFAST->passwd, setFAST->pacFileName,
             setFAST->innerEAP);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #else
 
     sprintf(gCmdStr, "wpa_cli add_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "wpa_cli disable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", ifname, setFAST->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 identity '\"%s\"'", ifname, setFAST->username);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 password '\"%s\"'", ifname, setFAST->passwd);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     if(strcasecmp(setFAST->keyMgmtType, "wpa2-sha256") == 0)
     {
@@ -2419,31 +2419,31 @@ int wfaStaSetEapFAST(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         // ??
     }
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 eap FAST", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 pac_file '\"%s/%s\"'", ifname, CERTIFICATES_PATH,     setFAST->pacFileName);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 anonymous_identity '\"anonymous\"'", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 phase1 '\"fast_provisioning=1\"'", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 phase2 '\"auth=%s\"'", ifname,setFAST->innerEAP);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     //IMG
     sprintf(gCmdStr, "wpa_cli sta_autoconnect 0 ", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
 
 
     sprintf(gCmdStr, "wpa_cli enable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #endif
 
     setEapFastResp->status = STATUS_COMPLETE;
@@ -2461,14 +2461,14 @@ int wfaStaSetEapAKA(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
 #ifdef WFA_NEW_CLI_FORMAT
     sprintf(gCmdStr, "wfa_set_eapaka %s %s %s %s", ifname, setAKA->ssid, setAKA->username, setAKA->passwd);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #else
 
     sprintf(gCmdStr, "wpa_cli disable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 ssid '\"%s\"'", ifname, setAKA->ssid);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     if(strcasecmp(setAKA->keyMgmtType, "wpa2-sha256") == 0)
     {
@@ -2492,31 +2492,31 @@ int wfaStaSetEapAKA(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     {
         // ??
     }
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 proto WPA2", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     sprintf(gCmdStr, "wpa_cli set_network 0 pairwise CCMP", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 eap AKA", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 phase1 \"result_ind=1\"", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 identity '\"%s\"'", ifname, setAKA->username);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli set_network 0 password '\"%s\"'", ifname, setAKA->passwd);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
      //IMG
     sprintf(gCmdStr, "wpa_cli sta_autoconnect 0 ", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "wpa_cli enable_network 0", ifname);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 #endif
 
     setEapAkaResp->status = STATUS_COMPLETE;
@@ -2534,10 +2534,10 @@ int wfaStaSetSystime(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     DPRINT_INFO(WFA_OUT, "Entering wfaStaSetSystime ...\n");
 
     sprintf(gCmdStr, "date %d-%d-%d",systime->month,systime->date,systime->year);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     sprintf(gCmdStr, "time %d:%d:%d", systime->hours,systime->minutes,systime->seconds);
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     setSystimeResp->status = STATUS_COMPLETE;
     wfaEncodeTLV(WFA_STA_SET_SYSTIME_RESP_TLV, 4, (BYTE *)setSystimeResp, respBuf);
@@ -2553,7 +2553,7 @@ int wfaStaPresetParams(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     int i,ret;
     caStaPresetParameters_t *preset = (caStaPresetParameters_t *)caCmdBuf;
     char *ifname = preset->intf;
-	ret = shell_execute_cmd(NULL, "wpa_cli set mbo_cell_capa 1");
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli set mbo_cell_capa 1");
     DPRINT_INFO(WFA_OUT, "Inside wfaStaPresetParameters function ...\n");
     if((preset->Ch_Op_Class)!=0)
    {
@@ -2562,7 +2562,7 @@ int wfaStaPresetParams(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
      printf("\n Channel Pref= %d \n",preset->Ch_Pref);
      printf("\n Reason code=%d \n",preset->Ch_Reason_Code);
 	sprintf(gCmdStr, "wpa_cli -i wlan0 set non_pref_chan=%d:%d:%d:%d", preset->Ch_Op_Class,preset->Ch_Pref_Num,preset->Ch_Pref,preset->Ch_Reason_Code);
-	ret = shell_execute_cmd(NULL, gCmdStr);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
    }
     // Implement the function and its sub commands
     infoResp.status = STATUS_COMPLETE;
@@ -2648,17 +2648,17 @@ int wfaStaResetDefault(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
     // need to make your own command available for this, here is only an example
 //    sprintf(gCmdStr, "myresetdefault %s program %s", reset->intf, reset->prog);
-   // sret = shell_execute_cmd(NULL,"killall -9 wpa_supplicant");
+   // sret = shell_execute_cmd(shell_backend_uart_get_ptr(),"killall -9 wpa_supplicant");
 //    sprintf(gCmdStr,"wpa_supplicant -Dnl80211 -c /etc/no_cfg.conf -i %s -d -K -f log_CALDER_SAE.txt &",reset->intf);
-  //  sret=shell_execute_cmd(NULL,gCmdStr);
+  //  sret=shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     //sprintf(gCmdStr, "wpa_cli disable_network 0", reset->intf);
-    //sret = shell_execute_cmd(NULL,gCmdStr);
+    //sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
     //printf("\n %s \n",gCmdStr);
     sprintf(gCmdStr, " 'wpa_cli disconnect'", reset->intf);
-    sret = shell_execute_cmd(NULL, gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
     printf("\n %s \n",gCmdStr);
     sprintf(gCmdStr, " 'wpa_cli set mbo_cell_capa 1'", reset->intf);
-    sret = shell_execute_cmd(NULL, gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
     printf("\n %s \n",gCmdStr);
 
 
@@ -2694,7 +2694,7 @@ int wfaStaDevSendFrame(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
     DPRINT_INFO(WFA_OUT, "Inside wfaStaDevSendFrame function ...\n");
     /* processing the frame */
-    sret = shell_execute_cmd(NULL, "wpa_cli wnm_bss_query 1");
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(), "wpa_cli wnm_bss_query 1");
 
     devSendResp->status = STATUS_COMPLETE;
     wfaEncodeTLV(WFA_STA_DEV_SEND_FRAME_RESP_TLV, 4, (BYTE *)devSendResp, respBuf);
@@ -2730,7 +2730,7 @@ int wfaStaDisconnect(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 
     sprintf(gCmdStr, "wpa_cli disconnect");
 	printf("\n %s \n", gCmdStr);		
-    sret = shell_execute_cmd(NULL,gCmdStr);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);
 
     staDiscResp->status = STATUS_COMPLETE;
 
@@ -2745,7 +2745,7 @@ int wfaExecuteCLI(char *CLI)
 {
     char *retstr;
 
-    sret = shell_execute_cmd(NULL,CLI);
+    sret = shell_execute_cmd(shell_backend_uart_get_ptr(),CLI);
 
     retstr = getenv("WFA_CLI_STATUS");
     printf("cli status %s\n", retstr);
@@ -2771,10 +2771,16 @@ void wfaSendPing(tgPingStart_t *staPing, float *interval, int streamid)
 	printf("duration = %d frameRate = %d\n",staPing->duration,staPing->frameSize);
 	stmp = (int)staPing->duration;
     net_icmpv4_register_handler(&ping4_handler);
-    	printf("Printing PING OUTPUT\n");
 	sprintf(gCmdStr, "net ping -s %d -c %d %s", frameSize, duration, addr);
-	ret = shell_execute_cmd(NULL, gCmdStr);
-    	printf("Printing PING OUTPUT DONE: %d\n", ret);
+	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+    if (ret != 0)
+    {
+        printf("net ping failed: %d\n", ret);
+    }
+    else
+    {
+        printf("net ping success\n");
+    }
 }
 
 int wfaStopPing(dutCmdResponse_t *stpResp, int streamid)
@@ -2820,7 +2826,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 		printf("\n------------INSIDE MBO--------\n");
 		printf("\n------------rfeat->cellulardatacap =%d--------\n", rfeat->cellulardatacap);
 		sprintf(gCmdStr, "wpa_cli set mbo_cell_capa %d", rfeat->cellulardatacap);
-		sret = shell_execute_cmd(NULL, gCmdStr);
+		sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		printf("\n %s \n ",gCmdStr);
 		sleep(5);
 		if (chan_buf2 != NULL)
@@ -2828,7 +2834,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 			sprintf(gCmdStr, "wpa_cli set non_pref_chan %s %s",
 					chan_buf1, chan_buf2);
 			printf("\n %s \n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			wFREE(chan_buf1);
 			chan_buf1 = NULL;
 			wFREE(chan_buf2);
@@ -2838,9 +2844,9 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 		   rfeat->ch_op_class, rfeat->ch_pref_num, rfeat->ch_pref,
 		   rfeat->ch_reason_code);//AJAY
 		   sprintf(gCmdStr, "wpa_cli set non_pref_chan 115:48:0:0", ifname);
-		   sret = shell_execute_cmd(NULL, gCmdStr);
+		   sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		   sprintf(gCmdStr, "wpa_cli set non_pref_chan 115:44:1:1", ifname);
-		   sret = shell_execute_cmd(NULL,gCmdStr);*/
+		   sret = shell_execute_cmd(shell_backend_uart_get_ptr(),gCmdStr);*/
 	}
 	else if (rfeat->prog == 11)
 	{
@@ -2858,13 +2864,13 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 					rfeat->Twt_Config.FlowType, twt_wake_interval_ms,
 					twt_interval_ms);
 			printf("\n------------%s--------\n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		}
 		else if (rfeat->Twt_Config.Twt_Setup == WFA_TWT_TEARDOWN) {
 			sprintf(gCmdStr, "wifi twt teardown %d 0 1 %d", rfeat->Twt_Config.NegotiationType,
 					rfeat->Twt_Config.FlowID);
 			printf("\n------------%s--------\n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		}
 	}
 #endif
@@ -2873,7 +2879,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 	if(strcmp(rfeat->prog, "mbo") == 0){
 		DPRINT_INFO(WFA_OUT, "Inside MBO ...\n");
 		sprintf(gCmdStr, "wpa_cli set mbo_cell_capa %d", rfeat->cellulardatacap);
-		sret = shell_execute_cmd(NULL, gCmdStr);
+		sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		printf("\n %s \n ",gCmdStr);
 		sleep(5);
 		if (chan_buf2 != NULL)
@@ -2881,7 +2887,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 			sprintf(gCmdStr, "wpa_cli set non_pref_chan %s %s",
 					chan_buf1, chan_buf2);
 			printf("\n %s \n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 			wFREE(chan_buf1);
 			chan_buf1 = NULL;
 			wFREE(chan_buf2);
@@ -2897,7 +2903,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
                        int ltf,gi;
                        sprintf(gCmdStr, "wifi_util set_he_ltf_gi 1");
                        printf("\n------------%s--------\n", gCmdStr);
-                       sret = shell_execute_cmd(NULL, gCmdStr);
+                       sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
                        if((rfeat->he_ltf) == 3.2f)
                        {
                                ltf = 0;
@@ -2912,7 +2918,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
                        }
                        sprintf(gCmdStr, "wifi_util he_ltf %d",ltf);
                        printf("\n------------%s--------\n", gCmdStr);
-                       sret = shell_execute_cmd(NULL, gCmdStr);
+                       sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
                        if((rfeat->he_gi) == 0.8f)
                        {
                                gi = 0;
@@ -2927,7 +2933,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
                        }
                        sprintf(gCmdStr, "wifi_util he_gi %d",gi);
                        printf("\n------------%s--------\n", gCmdStr);
-                       sret = shell_execute_cmd(NULL, gCmdStr);
+                       sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
                }
 		int ppdu_len = strlen(rfeat->ppdutxtype);
@@ -2962,7 +2968,7 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 			}
 			sprintf(gCmdStr, "wifi_util tx_rate %d %d",ppdutype,rfeat->rualloctone);
 			printf("\n------------%s--------\n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 
 		}
 		if(strcmp(rfeat->twt_setup, "request") == 0){
@@ -2978,13 +2984,13 @@ int wfaStaSetRFeature(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
 					rfeat->twt_flowtype, twt_wake_interval_ms,
 					twt_interval_ms);
 			printf("\n------------%s--------\n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		}
 		else if(strcmp(rfeat->twt_setup, "teardown") == 0){
 			sprintf(gCmdStr, "wifi twt teardown %d 0 1 %d", rfeat->twt_negotiationtype,
 					rfeat->twt_flowid);
 			printf("\n------------%s--------\n", gCmdStr);
-			sret = shell_execute_cmd(NULL, gCmdStr);
+			sret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
 		}
 
 	}
