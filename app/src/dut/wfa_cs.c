@@ -342,7 +342,7 @@ int wfaStaAssociate(int len, BYTE *caCmdBuf, int *respLen, BYTE *respBuf)
     printf("\n%d\n",k);
     if(k!='\0')
     {
-	sprintf(gCmdStr, "wpa_cli bssid 0 '\"%s\"'", setassoc->bssid);
+	sprintf(gCmdStr, "wpa_cli bssid 0 %s", setassoc->bssid);
 	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
     	printf("\n %s \n", gCmdStr);
     }
