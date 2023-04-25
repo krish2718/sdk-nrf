@@ -104,22 +104,118 @@ char scan_results_buffer[MAX_SCAN_RESULT_SIZE];
 size_t scan_result_index = 0;
 size_t scan_result_offset = 0;
 
-static enum net_verdict handle_ipv4_echo_reply(struct net_pkt *pkt,
+static struct ping_context {
+	struct k_work_delayable work;
+	struct net_addr addr;
+	struct net_if *iface;
+
+	/* Ping parameters */
+	uint32_t count;
+	uint32_t interval;
+	uint32_t sequence;
+	uint16_t payload_size;
+	uint8_t tos;
+} ping_ctx;
+
+static void ping_done(struct ping_context *ctx);
+
+
+static enum net_verdict wfa_handle_ipv4_echo_reply(struct net_pkt *pkt,
 					       struct net_ipv4_hdr *ip_hdr,
 					       struct net_icmp_hdr *icmp_hdr);
 
-static struct net_icmpv4_handler ping4_handler = {
+static struct net_icmpv4_handler wfa_ping4_handler = {
 	.type = NET_ICMPV4_ECHO_REPLY,
 	.code = 0,
-	.handler = handle_ipv4_echo_reply,
+	.handler = wfa_handle_ipv4_echo_reply,
 };
 
 static inline void remove_ipv4_ping_handler(void)
 {
-	net_icmpv4_unregister_handler(&ping4_handler);
+	net_icmpv4_unregister_handler(&wfa_ping4_handler);
 }
 
-static enum net_verdict handle_ipv4_echo_reply(struct net_pkt *pkt,
+
+static void ping_cleanup()
+{
+	remove_ipv4_ping_handler();
+}
+
+static void ping_done(struct ping_context *ctx)
+{
+	k_work_cancel_delayable(&ctx->work);
+	ping_cleanup();
+}
+
+static void ping_work(struct k_work *work)
+{
+	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
+	struct ping_context *ctx =
+			CONTAINER_OF(dwork, struct ping_context, work);
+	int ret;
+
+	ctx->sequence++;
+
+	if (ctx->sequence > ctx->count) {
+		printf("Ping timeout\n");
+		ping_done(ctx);
+		return;
+	}
+
+	printf("Sending ping %d\n", ctx->sequence);
+	ret = net_icmpv4_send_echo_request(ctx->iface,
+						&ctx->addr.in_addr,
+						0xFE,
+						ctx->sequence,
+						ctx->tos,
+						NULL,
+						ctx->payload_size);
+
+	if (ret != 0) {
+		printf("Failed to send ping, err: %d", ret);
+		return;
+	}
+
+	if (ctx->sequence < ctx->count) {
+		k_work_reschedule(&ctx->work, K_MSEC(ctx->interval));
+	} else {
+		k_work_reschedule(&ctx->work, K_SECONDS(2));
+	}
+}
+
+int zephyr_send_ping(size_t count, size_t interval, size_t payload_size,
+              size_t tos, const char *host)
+{
+	int ret;
+
+    memset(&ping_ctx, 0, sizeof(ping_ctx));
+
+	k_work_init_delayable(&ping_ctx.work, ping_work);
+
+	ping_ctx.count = count;
+	ping_ctx.interval = interval;
+	ping_ctx.tos = tos;
+	ping_ctx.payload_size = payload_size;
+
+	ret = net_addr_pton(AF_INET, host, &ping_ctx.addr.in_addr);
+	if (ret < 0) {
+		printf("Invalid address: %s", host);
+		return ret;
+	}
+	ping_ctx.addr.family = AF_INET;
+	net_icmpv4_register_handler(&wfa_ping4_handler);
+
+
+	ping_ctx.iface = net_if_get_default();
+
+	printf("PING %s\n", host);
+
+	k_work_reschedule(&ping_ctx.work, K_NO_WAIT);
+
+	return 0;
+}
+
+static enum net_verdict wfa_handle_ipv4_echo_reply(struct net_pkt *pkt,
 					       struct net_ipv4_hdr *ip_hdr,
 					       struct net_icmp_hdr *icmp_hdr)
 {
@@ -142,6 +238,8 @@ static enum net_verdict handle_ipv4_echo_reply(struct net_pkt *pkt,
 		}
 		cycles = k_cycle_get_32() - cycles;
 	}
+
+	printf("wfa_handle_ipv4_echo_reply called:sent %d, received %d\n", count_seq, ntohs(icmp_echo->sequence));
 
     count_seq = ntohs(icmp_echo->sequence);
 
@@ -2770,9 +2868,7 @@ void wfaSendPing(tgPingStart_t *staPing, float *interval, int streamid)
 	int ret;
 	printf("duration = %d frameRate = %d\n",staPing->duration,staPing->frameSize);
 	stmp = (int)staPing->duration;
-    net_icmpv4_register_handler(&ping4_handler);
-	sprintf(gCmdStr, "net ping -s %d -c %d %s", frameSize, duration, addr);
-	ret = shell_execute_cmd(shell_backend_uart_get_ptr(), gCmdStr);
+	ret = zephyr_send_ping(totalpkts, duration, frameSize, 0, addr);
     if (ret != 0)
     {
         printf("net ping failed: %d\n", ret);
@@ -2795,8 +2891,8 @@ int wfaStopPing(dutCmdResponse_t *stpResp, int streamid)
     printf("\nCount of the seq_num from NET SHELL is  %d",count_seq);
     printf("wfaStopPing send count %i\n", stpResp->cmdru.pingStp.sendCnt);
     printf("wfaStopPing replied count %i\n", stpResp->cmdru.pingStp.repliedCnt);
-    remove_ipv4_ping_handler();
     count_seq = 0;
+	ping_cleanup();
     return WFA_SUCCESS;
 }
 
