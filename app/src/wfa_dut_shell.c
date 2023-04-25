@@ -22,15 +22,6 @@
 extern int dut_init;
 
 
-static int cmd_wfa_dut_test(const struct shell *shell,
-		size_t argc,
-		const char *argv[])
-{
-	printf("arg0: %s\n", argv[0]);
-	return dut_main(argc,
-			argv);
-}
-
 unsigned char cmdBuf[WFA_BUFF_512] = {0};
 
 static int wfa_dut_execute(const struct shell *shell,
@@ -60,10 +51,6 @@ static int wfa_dut_execute(const struct shell *shell,
 
 SHELL_STATIC_SUBCMD_SET_CREATE(
 		wfa_dut_cmds,
-		SHELL_CMD(dut_test_setup,
-			NULL,
-			"\"Start DUT\"",
-			cmd_wfa_dut_test),
 		SHELL_CMD(dut_command,
 			NULL,
 			"\"Sets Traffic params or runs traffic\"",

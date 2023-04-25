@@ -16,6 +16,8 @@
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/net/net_config.h>
 
+#include "dut/wfa_dut.h"
+
 
 #ifdef CONFIG_USB_DEVICE_STACK
 #define CONFIG_NET_CONFIG_USB_IPV4_ADDR "192.168.251.150"
@@ -82,4 +84,6 @@ void main(void)
 	net_if_set_default(wifi_iface);
 
 	net_config_init_app(dev, "Initializing network");
+
+	dut_main();
 }

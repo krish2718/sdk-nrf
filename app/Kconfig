@@ -33,3 +33,11 @@ config WFA_WMM_THREAD_PRIO_RX
     int "WMM priority for RX"
     default 0
     range 0 15
+
+config WFA_DUT_IFACE
+    string "Primary DUT interface"
+    default "wlan0"
+
+config WFA_DUT_PORT
+    int "DUT port"
+    default 8000

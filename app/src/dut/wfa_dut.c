@@ -431,8 +431,7 @@ int commandHandle(unsigned char *pcmdBuf)
 
 }
 
-	int
-dut_main(int argc, char **argv)
+int dut_main()
 {
 	int	      nfds, maxfdn1 = -1, nbytes = 0, cmdLen = 0, isExit = 1;
 	int       respLen, ret;
@@ -448,11 +447,6 @@ dut_main(int argc, char **argv)
 
 	struct sched_param ptSchedParam;
 
-	if (argc < 3)              /* Test for correct number of arguments */
-	{
-		DPRINT_ERR(WFA_ERR, "Usage:  %s <command interface> <Local Control Port> \n", argv[0]);
-		exit(1);
-	}
 #ifdef WFA_PC_CONSOLE
 	else if(argc > 3)
 	{
@@ -474,21 +468,9 @@ dut_main(int argc, char **argv)
 	}
 #endif
 
-	if(isString(argv[1]) == WFA_FAILURE)
-	{
-		DPRINT_ERR(WFA_ERR, "incorrect network interface\n");
-		exit(1);
-	}
+	strncpy(gnetIf, CONFIG_WFA_DUT_IFACE, WFA_BUFF_32 - 1);
 
-	strncpy(gnetIf, argv[1], 31);
-
-	if(isNumber(argv[2]) == WFA_FAILURE)
-	{
-		DPRINT_ERR(WFA_ERR, "incorrect port number\n");
-		exit(1);
-	}
-
-	locPortNo = atoi(argv[2]);
+	locPortNo = CONFIG_WFA_DUT_PORT;
 
 	adj_latency = wfa_estimate_timer_latency() + 4000; /* four more mini */
 

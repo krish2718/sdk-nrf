@@ -18,3 +18,5 @@
 
 
 #define WFA_DUT_AGENT
+
+int dut_main();
