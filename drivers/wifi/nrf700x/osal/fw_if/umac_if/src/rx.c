@@ -271,10 +271,36 @@ enum wifi_nrf_status wifi_nrf_fmac_rx_event_process(struct wifi_nrf_fmac_dev_ctx
 		if (config->rx_pkt_type == NRF_WIFI_RX_PKT_DATA) {
 			switch (config->rx_buff_info[i].pkt_type) {
 			case PKT_TYPE_MPDU:
+				// allocate a new packet and copy the packet
+				// to the new packet
+				void *new_nwb = wifi_nrf_osal_nbuf_alloc(fmac_dev_ctx->fpriv->opriv,
+							       pkt_len);
+				if (!new_nwb) {
+					wifi_nrf_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+							      "%s: No space for allocating RX buffer\n",
+							      __func__);
+					status = WIFI_NRF_STATUS_FAIL;
+					goto out;
+				}
+
+				wifi_nrf_osal_nbuf_data_put(fmac_dev_ctx->fpriv->opriv,
+							    new_nwb,
+							    pkt_len);
+				void *new_nwb_data = wifi_nrf_osal_nbuf_data_get(fmac_dev_ctx->fpriv->opriv,
+									     new_nwb);
+
+				wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
+						      new_nwb_data,
+						      nwb_data,
+						      pkt_len);
+
 				wifi_nrf_osal_mem_cpy(fmac_dev_ctx->fpriv->opriv,
 						      &hdr,
 						      nwb_data,
 						      sizeof(struct wifi_nrf_fmac_ieee80211_hdr));
+
+				fmac_dev_ctx->fpriv->callbk_fns.rx_frm_sniffer_callbk_fn(vif_ctx->os_vif_ctx,
+					new_nwb);
 
 				eth_type = wifi_nrf_util_rx_get_eth_type(fmac_dev_ctx,
 									 ((char *)nwb_data +

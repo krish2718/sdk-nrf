@@ -395,6 +395,7 @@ static int wifi_nrf_drv_main_zep(const struct device *dev)
 	data_config.rate_protection_type = rate_protection_type;
 	callbk_fns.if_carr_state_chg_callbk_fn = wifi_nrf_if_carr_state_chg;
 	callbk_fns.rx_frm_callbk_fn = wifi_nrf_if_rx_frm;
+	callbk_fns.rx_frm_sniffer_callbk_fn = wifi_nrf_if_rx_frm_capture;
 #endif
 	rx_buf_pools[0].num_bufs = rx1_num_bufs;
 	rx_buf_pools[1].num_bufs = rx2_num_bufs;

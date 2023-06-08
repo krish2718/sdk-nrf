@@ -36,6 +36,9 @@ int wifi_nrf_if_send(const struct device *dev,
 void wifi_nrf_if_rx_frm(void *os_vif_ctx,
 			void *frm);
 
+void wifi_nrf_if_rx_frm_capture(void *os_vif_ctx,
+			void *frm);
+
 enum wifi_nrf_status wifi_nrf_if_carr_state_chg(void *os_vif_ctx,
 						enum wifi_nrf_fmac_if_carr_state carr_state);
 

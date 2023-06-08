@@ -34,6 +34,27 @@ static struct net_mgmt_event_callback ip_maddr4_cb;
 static struct net_mgmt_event_callback ip_maddr6_cb;
 
 #ifdef CONFIG_NRF700X_DATA_TX
+void wifi_nrf_if_rx_frm_capture(void *os_vif_ctx, void *frm)
+{
+	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = os_vif_ctx;
+	struct net_if *iface = vif_ctx_zep->zep_net_if_ctx;
+	struct net_pkt *pkt;
+	int status;
+	struct wifi_nrf_ctx_zep *rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
+	struct wifi_nrf_fmac_dev_ctx *fmac_dev_ctx = rpu_ctx_zep->rpu_ctx;
+	struct rpu_host_stats *host_stats = &fmac_dev_ctx->host_stats;
+
+	pkt = net_pkt_from_nbuf(iface, frm);
+	if (!pkt) {
+		LOG_DBG("Failed to allocate net_pkt");
+		return;
+	}
+
+	net_capture_pkt(iface, pkt);
+
+	net_pkt_unref(pkt);
+}
+
 void wifi_nrf_if_rx_frm(void *os_vif_ctx, void *frm)
 {
 	struct wifi_nrf_vif_ctx_zep *vif_ctx_zep = os_vif_ctx;

@@ -150,6 +150,9 @@ struct wifi_nrf_fmac_callbk_fns {
 	void (*rx_frm_callbk_fn)(void *os_vif_ctx,
 				 void *frm);
 
+	void (*rx_frm_sniffer_callbk_fn)(void *os_vif_ctx,
+				 void *frm);
+
 	void (*scan_start_callbk_fn)(void *os_vif_ctx,
 				     struct nrf_wifi_umac_event_trigger_scan *scan_start_event,
 				     unsigned int event_len);
