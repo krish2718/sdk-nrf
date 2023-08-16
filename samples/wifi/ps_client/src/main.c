@@ -32,4 +32,14 @@ int main()
     }
 
     setup_twt();
+
+    struct traffic_gen_config tg_config = {
+        .type = CONFIG_WIFI_TWT_UDP,
+        .role = CONFIG_WIFI_TWT_CLIENT,
+        .dut_ip = CONFIG_DUT_IP,
+    }
+
+    traffic_gen_start(tg_config);
+    traffic_gen_wait_for_completion();
+    traffic_gen_get_result();
 }
