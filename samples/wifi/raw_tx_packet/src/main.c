@@ -25,6 +25,8 @@ LOG_MODULE_REGISTER(raw_tx_packet, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/net/socket.h>
 #include <zephyr/drivers/gpio.h>
 
+#include <fmac_structs.h>
+
 #include "net_private.h"
 
 #define WIFI_SHELL_MODULE "wifi"
@@ -52,6 +54,50 @@ static struct {
 		uint8_t all;
 	};
 } context;
+
+struct beacon {
+	uint16_t frame_control;
+	uint16_t duration;
+	uint8_t da[6];
+	uint8_t sa[6];
+	uint8_t bssid[6];
+	uint16_t seq_ctrl;
+	uint8_t payload[256];
+};
+
+static struct beacon test_beacon_frame = {
+	.frame_control = htons(0X8000),
+	.duration = 0X0000,
+	.da = {0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff},
+	/* Transmitter Address: a0:69:60:e3:52:15 */
+	.sa = {0Xa0, 0X69, 0X60, 0Xe3, 0X52, 0X15},
+	.bssid = {0Xa0, 0X69, 0X60, 0Xe3, 0X52, 0X15},
+	.seq_ctrl = 0X0001,
+	/* SSID: NRF_RAW_TX_PACKET_APP */
+	.payload = {
+		0X0c, 0Xa2, 0X28, 0X00, 0X00, 0X00, 0X00, 0X00, 0X64, 0X00,
+		0X11, 0X04, 0X00, 0X15, 0X4E, 0X52, 0X46, 0X5f, 0X52, 0X41,
+		0X57, 0X5f, 0X54, 0X58, 0X5f, 0X50, 0X41, 0X43, 0X4b, 0X45,
+		0X54, 0X5f, 0X41, 0X50, 0X50, 0X01, 0X08, 0X82, 0X84, 0X8b,
+		0X96, 0X0c, 0X12, 0X18, 0X24, 0X03, 0X01, 0X06, 0X05, 0X04,
+		0X00, 0X02, 0X00, 0X00, 0X2a, 0X01, 0X04, 0X32, 0X04, 0X30,
+		0X48, 0X60, 0X6c, 0X30, 0X14, 0X01, 0X00, 0X00, 0X0f, 0Xac,
+		0X04, 0X01, 0X00, 0X00, 0X0f, 0Xac, 0X04, 0X01, 0X00, 0X00,
+		0X0f, 0Xac, 0X02, 0X0c, 0X00, 0X3b, 0X02, 0X51, 0X00, 0X2d,
+		0X1a, 0X0c, 0X00, 0X17, 0Xff, 0Xff, 0X00, 0X00, 0X00, 0X00,
+		0X00, 0X00, 0X00, 0X2c, 0X01, 0X01, 0X00, 0X00, 0X00, 0X00,
+		0X00, 0X00, 0X00, 0X00, 0X00, 0X3d, 0X16, 0X06, 0X00, 0X00,
+		0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+		0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X7f, 0X08, 0X04, 0X00,
+		0X00, 0X02, 0X00, 0X00, 0X00, 0X40, 0Xff, 0X1a, 0X23, 0X01,
+		0X78, 0X10, 0X1a, 0X00, 0X00, 0X00, 0X20, 0X0e, 0X09, 0X00,
+		0X09, 0X80, 0X04, 0X01, 0Xc4, 0X00, 0Xfa, 0Xff, 0Xfa, 0Xff,
+		0X61, 0X1c, 0Xc7, 0X71, 0Xff, 0X07, 0X24, 0Xf0, 0X3f, 0X00,
+		0X81, 0Xfc, 0Xff, 0Xdd, 0X18, 0X00, 0X50, 0Xf2, 0X02, 0X01,
+		0X01, 0X01, 0X00, 0X03, 0Xa4, 0X00, 0X00, 0X27, 0Xa4, 0X00,
+		0X00, 0X42, 0X43, 0X5e, 0X00, 0X62, 0X32, 0X2f, 0X00
+	}
+};
 
 static int cmd_wifi_status(void)
 {
@@ -316,6 +362,97 @@ static void wifi_set_mode(void)
 	}
 }
 
+static int setup_raw_pkt_socket(int *sockfd, struct sockaddr_ll *sa)
+{
+	struct net_if *iface = NULL;
+	int ret;
+
+	*sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+	if (*sockfd < 0) {
+		LOG_ERR("Unable to create a socket %d", errno);
+		return -1;
+	}
+
+	iface = net_if_get_first_wifi();
+	if (!iface) {
+		LOG_ERR("Failed to get Wi-Fi interface");
+		return -1;
+	}
+
+	sa->sll_family = AF_PACKET;
+	sa->sll_ifindex = net_if_get_by_iface(iface);
+
+	/* Bind the socket */
+	ret = bind(*sockfd, (struct sockaddr *)sa, sizeof(struct sockaddr_ll));
+	if (ret < 0) {
+		LOG_ERR("Error: Unable to bind socket to the network interface:%d", errno);
+		close(*sockfd);
+		return -1;
+	}
+
+	return 0;
+}
+
+static void fill_raw_tx_pkt_hdr(struct raw_tx_pkt_header *raw_tx_pkt)
+{
+	/* Raw Tx Packet header */
+	raw_tx_pkt->magic_num = NRF_WIFI_MAGIC_NUM_RAWTX;
+	raw_tx_pkt->data_rate = CONFIG_RAW_TX_PACKET_SAMPLE_RATE_VALUE;
+	raw_tx_pkt->packet_length = sizeof(test_beacon_frame);
+	raw_tx_pkt->tx_mode = CONFIG_RAW_TX_PACKET_SAMPLE_RATE_FLAGS;
+	raw_tx_pkt->queue = CONFIG_RAW_TX_PACKET_SAMPLE_QUEUE_NUM;
+	/* The byte is reserved and used by the driver */
+	raw_tx_pkt->raw_tx_flag = 0;
+}
+
+int wifi_send_raw_tx_pkt(int sockfd, char *test_frame,
+			size_t buf_length, struct sockaddr_ll *sa)
+{
+	int ret = sendto(sockfd, test_frame, buf_length, 0,
+			(struct sockaddr *)sa, sizeof(*sa));
+	return ret;
+}
+
+static void wifi_send_raw_tx_packets(void)
+{
+	struct sockaddr_ll sa;
+	int sockfd, ret;
+	struct raw_tx_pkt_header packet;
+	char *test_frame = NULL;
+	int buf_length;
+
+	ret = setup_raw_pkt_socket(&sockfd, &sa);
+	if (ret < 0) {
+		LOG_ERR("Setting socket for raw pkt transmission failed %d", errno);
+		return;
+	}
+
+	fill_raw_tx_pkt_hdr(&packet);
+
+	test_frame = malloc(sizeof(struct raw_tx_pkt_header) + sizeof(test_beacon_frame));
+	if (!test_frame) {
+		LOG_ERR("Malloc failed for send buffer %d", errno);
+		return;
+	}
+
+	buf_length = sizeof(struct raw_tx_pkt_header) + sizeof(test_beacon_frame);
+	memcpy(test_frame, &packet, sizeof(struct raw_tx_pkt_header));
+	memcpy(test_frame + sizeof(struct raw_tx_pkt_header),
+				&test_beacon_frame, sizeof(test_beacon_frame));
+
+	ret = wifi_send_raw_tx_pkt(sockfd, test_frame, buf_length, &sa);
+	if (ret < 0) {
+		LOG_ERR("Unable to send beacon frame: %s", strerror(errno));
+		close(sockfd);
+		free(test_frame);
+		return;
+	}
+
+	/* close the socket */
+	close(sockfd);
+	free(test_frame);
+}
+
 int main(void)
 {
 	memset(&context, 0, sizeof(context));
@@ -352,6 +489,7 @@ int main(void)
 #else
 	wifi_set_channel();
 #endif
+	wifi_send_raw_tx_packets();
 
 	return 0;
 }
