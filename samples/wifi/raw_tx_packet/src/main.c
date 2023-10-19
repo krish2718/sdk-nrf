@@ -177,6 +177,7 @@ static void net_mgmt_event_handler(struct net_mgmt_event_callback *cb,
 	}
 }
 
+#ifdef CONFIG_RAW_TX_PACKET_SAMPLE_CONNECTION_MODE
 static int __wifi_args_to_params(struct wifi_connect_req_params *params)
 {
 	params->timeout = SYS_FOREVER_MS;
@@ -254,6 +255,7 @@ static int try_wifi_connect(void)
 
 	return 0;
 }
+#endif
 
 static void wifi_set_mode(void)
 {
@@ -280,8 +282,6 @@ static void wifi_set_mode(void)
 
 int main(void)
 {
-	int status;
-
 	memset(&context, 0, sizeof(context));
 
 	net_mgmt_init_event_callback(&wifi_shell_mgmt_cb,
@@ -306,9 +306,14 @@ int main(void)
 
 	wifi_set_mode();
 
+#ifdef CONFIG_RAW_TX_PACKET_SAMPLE_CONNECTION_MODE
+	int status;
+
 	status = try_wifi_connect();
 	if (status < 0) {
 		return status;
 	}
+#endif
+
 	return 0;
 }

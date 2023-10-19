@@ -47,4 +47,18 @@ config RAW_TX_PACKET_SAMPLE_PASSWORD
 	help
 	  Specify the Password to connect
 
+choice RAW_TX_PACKET_SAMPLE_OPERATION_MODE
+	prompt "Choose Wi-Fi operation mode"
+
+config RAW_TX_PACKET_SAMPLE_CONNECTION_MODE
+	bool "Connected Station mode"
+	help
+	  Enable the option to select Connected Station mode.
+
+config RAW_TX_PACKET_SAMPLE_IDLE_MODE
+	bool "Non-connected Station mode"
+	help
+	  Enable the option to select non-connected Station mode.
+endchoice
+
 endmenu
