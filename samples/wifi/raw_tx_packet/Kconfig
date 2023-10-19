@@ -61,4 +61,11 @@ config RAW_TX_PACKET_SAMPLE_IDLE_MODE
 	  Enable the option to select non-connected Station mode.
 endchoice
 
+config RAW_TX_PACKET_SAMPLE_CHANNEL
+	int "Channel for Station-Idle mode"
+	range 1 233
+	help
+	  Specify the Wi-Fi channel for transmitting raw TX packets in Station-Idle mode.
+	  The valid channel range is 1 to 233.
+
 endmenu
