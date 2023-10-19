@@ -255,6 +255,29 @@ static int try_wifi_connect(void)
 	return 0;
 }
 
+static void wifi_set_mode(void)
+{
+	int ret;
+	struct net_if *iface = NULL;
+	struct wifi_mode_info mode_info = {0};
+
+	mode_info.oper = WIFI_MGMT_SET;
+
+	iface = net_if_get_first_wifi();
+	if (iface == NULL) {
+		LOG_ERR("Failed to get Wi-Fi iface");
+		return;
+	}
+	mode_info.if_index = net_if_get_by_iface(iface);
+
+	mode_info.mode =  WIFI_STA_MODE | WIFI_TX_INJECTION_MODE;
+
+	ret = net_mgmt(NET_REQUEST_WIFI_MODE, iface, &mode_info, sizeof(mode_info));
+	if (ret) {
+		LOG_ERR("Mode setting failed %d", ret);
+	}
+}
+
 int main(void)
 {
 	int status;
@@ -280,6 +303,8 @@ int main(void)
 		CONFIG_NET_CONFIG_MY_IPV4_ADDR,
 		CONFIG_NET_CONFIG_MY_IPV4_NETMASK,
 		CONFIG_NET_CONFIG_MY_IPV4_GW);
+
+	wifi_set_mode();
 
 	status = try_wifi_connect();
 	if (status < 0) {
