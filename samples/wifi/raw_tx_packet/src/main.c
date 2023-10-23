@@ -39,6 +39,9 @@ LOG_MODULE_REGISTER(raw_tx_packet, CONFIG_LOG_DEFAULT_LEVEL);
 #define CONNECTION_TIMEOUT  100
 #define STATUS_POLLING_MS   300
 
+#define CONTINUOUS_MODE_TRANSMISSION 0
+#define FIXED_MODE_TRANSMISSION 1
+
 static struct net_mgmt_event_callback wifi_shell_mgmt_cb;
 static struct net_mgmt_event_callback net_shell_mgmt_cb;
 
@@ -72,7 +75,7 @@ static struct beacon test_beacon_frame = {
 	/* Transmitter Address: a0:69:60:e3:52:15 */
 	.sa = {0Xa0, 0X69, 0X60, 0Xe3, 0X52, 0X15},
 	.bssid = {0Xa0, 0X69, 0X60, 0Xe3, 0X52, 0X15},
-	.seq_ctrl = 0X0001,
+	.seq_ctrl = 0X0010,
 	/* SSID: NRF_RAW_TX_PACKET_APP */
 	.payload = {
 		0X0c, 0Xa2, 0X28, 0X00, 0X00, 0X00, 0X00, 0X00, 0X64, 0X00,
@@ -413,13 +416,40 @@ int wifi_send_raw_tx_pkt(int sockfd, char *test_frame,
 	return ret;
 }
 
+static int get_pkt_transmit_count(int *num_tx_pkts)
+{
+#if defined(CONFIG_RAW_TX_PACKET_SAMPLE_FIXED_NUM_PACKETS)
+	*num_tx_pkts = CONFIG_RAW_TX_PACKET_SAMPLE_FIXED_NUM_PACKETS;
+	if (*num_tx_pkts == 0) {
+		LOG_ERR("Can't send %d number of raw tx packets", *num_tx_pkts);
+		return -1;
+	}
+	LOG_INF("Sending %d number of raw tx packets", *num_tx_pkts);
+#else
+	*num_tx_pkts = -1;
+	LOG_INF("Sending raw tx packets continuously");
+#endif
+	return 0;
+}
+
+static void increment_seq_control(void)
+{
+	uint16_t mask = 0x000F;
+
+	test_beacon_frame.seq_ctrl = (((test_beacon_frame.seq_ctrl >> 4) + 1) << 4
+					| (test_beacon_frame.seq_ctrl & mask));
+	if (test_beacon_frame.seq_ctrl > 0XFFF0) {
+		test_beacon_frame.seq_ctrl = 0X0010;
+	}
+}
+
 static void wifi_send_raw_tx_packets(void)
 {
 	struct sockaddr_ll sa;
 	int sockfd, ret;
 	struct raw_tx_pkt_header packet;
 	char *test_frame = NULL;
-	int buf_length;
+	int buf_length, num_pkts, transmission_mode;
 
 	ret = setup_raw_pkt_socket(&sockfd, &sa);
 	if (ret < 0) {
@@ -429,6 +459,12 @@ static void wifi_send_raw_tx_packets(void)
 
 	fill_raw_tx_pkt_hdr(&packet);
 
+	ret = get_pkt_transmit_count(&num_pkts);
+	if (ret < 0) {
+		close(sockfd);
+		return;
+	}
+
 	test_frame = malloc(sizeof(struct raw_tx_pkt_header) + sizeof(test_beacon_frame));
 	if (!test_frame) {
 		LOG_ERR("Malloc failed for send buffer %d", errno);
@@ -437,15 +473,45 @@ static void wifi_send_raw_tx_packets(void)
 
 	buf_length = sizeof(struct raw_tx_pkt_header) + sizeof(test_beacon_frame);
 	memcpy(test_frame, &packet, sizeof(struct raw_tx_pkt_header));
-	memcpy(test_frame + sizeof(struct raw_tx_pkt_header),
+
+	if (num_pkts == 1) {
+		memcpy(test_frame + sizeof(struct raw_tx_pkt_header),
 				&test_beacon_frame, sizeof(test_beacon_frame));
 
-	ret = wifi_send_raw_tx_pkt(sockfd, test_frame, buf_length, &sa);
-	if (ret < 0) {
-		LOG_ERR("Unable to send beacon frame: %s", strerror(errno));
-		close(sockfd);
-		free(test_frame);
-		return;
+		ret = wifi_send_raw_tx_pkt(sockfd, test_frame, buf_length, &sa);
+		if (ret < 0) {
+			LOG_ERR("Unable to send beacon frame: %s", strerror(errno));
+			close(sockfd);
+			free(test_frame);
+			return;
+		}
+	} else {
+		transmission_mode = CONFIG_RAW_TX_PACKET_SAMPLE_PACKET_TRANSMISSION_MODE;
+		while (1) {
+			memcpy(test_frame + sizeof(struct raw_tx_pkt_header),
+					&test_beacon_frame, sizeof(test_beacon_frame));
+
+			if (transmission_mode == FIXED_MODE_TRANSMISSION && num_pkts == 0) {
+				break;
+			}
+
+			ret = sendto(sockfd, test_frame, buf_length, 0,
+					(struct sockaddr *)&sa, sizeof(sa));
+			if (ret < 0) {
+				LOG_ERR("Unable to send beacon frame: %s", strerror(errno));
+				close(sockfd);
+				free(test_frame);
+				return;
+			}
+
+			if (transmission_mode == FIXED_MODE_TRANSMISSION && num_pkts > 0) {
+				num_pkts--;
+			}
+
+			increment_seq_control();
+
+			k_msleep(CONFIG_RAW_TX_PACKET_SAMPLE_INTER_FRAME_DELAY_MS);
+		}
 	}
 
 	/* close the socket */
