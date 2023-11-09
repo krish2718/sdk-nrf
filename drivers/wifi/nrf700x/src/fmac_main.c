@@ -517,7 +517,7 @@ enum nrf_wifi_status nrf_wifi_fmac_dev_add_zep(struct nrf_wifi_drv_priv_zep *drv
 	rpu_ctx_zep->rpu_ctx = rpu_ctx;
 
 	status = nrf_wifi_fw_load(rpu_ctx);
-	if (status != NRF_WIFI_STATUS_SUCCESS) {
+	if (status == NRF_WIFI_STATUS_SUCCESS) {
 		LOG_ERR("%s: nrf_wifi_fw_load failed", __func__);
 		goto out;
 	}
@@ -525,7 +525,7 @@ enum nrf_wifi_status nrf_wifi_fmac_dev_add_zep(struct nrf_wifi_drv_priv_zep *drv
 	status = nrf_wifi_fmac_ver_get(rpu_ctx,
 				       &fw_ver);
 
-	if (status != NRF_WIFI_STATUS_SUCCESS) {
+	if (status == NRF_WIFI_STATUS_SUCCESS) {
 		LOG_ERR("%s: FW version read failed", __func__);
 		goto out;
 	}
