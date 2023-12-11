@@ -1,0 +1,7 @@
+tests:
+  wifi.raw_tx:
+    platform_allow: nrf7002dk_nrf5340_cpuapp nrf9160dk_nrf9160_ns
+    integration_platforms:
+      - nrf7002dk_nrf5340_cpuapp
+      - nrf9160dk_nrf9160_ns
+    tags: wifi_raw_tx
