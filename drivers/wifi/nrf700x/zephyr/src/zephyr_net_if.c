@@ -469,7 +469,7 @@ int nrf_wifi_if_start_zep(const struct device *dev)
 			goto out;
 		}
 		fmac_dev_added = true;
-		LOG_DBG("%s: FMAC device added\n", __func__);
+		LOG_ERR("%s: FMAC device added\n", __func__);
 	}
 
 	fmac_dev_ctx = rpu_ctx_zep->rpu_ctx;
@@ -497,6 +497,10 @@ int nrf_wifi_if_start_zep(const struct device *dev)
 			__func__);
 		goto dev_rem;
 	}
+
+	LOG_ERR("%s: VIF added with index: %d\n",
+		__func__,
+		vif_ctx_zep->vif_idx);
 
 	/* Disallow if a valid mac address has not been configured for the interface
 	 * either from the OTP or by the user
@@ -650,11 +654,13 @@ int nrf_wifi_if_stop_zep(const struct device *dev)
 			__func__);
 		goto out;
 	}
+	LOG_ERR("%s: VIF deleted\n", __func__);
 
 	vif_ctx_zep->if_op_state = NRF_WIFI_FMAC_IF_OP_STATE_DOWN;
 
 	if (nrf_wifi_fmac_get_num_vifs(rpu_ctx_zep->rpu_ctx) == 0) {
 		nrf_wifi_fmac_dev_rem_zep(&rpu_drv_priv_zep);
+		LOG_ERR("%s: FMAC device removed\n", __func__);
 	}
 	ret = 0;
 out:

@@ -1464,8 +1464,18 @@ void nrf_wifi_wpa_supp_event_get_wiphy(void *if_priv,
 	struct nrf_wifi_ctx_zep *rpu_ctx_zep = NULL;
 	struct wpa_supp_event_supported_band band;
 
-	if (!if_priv || !wiphy_info || !event_len) {
-		LOG_ERR("%s: Invalid parameters\n", __func__);
+	if (!if_priv) {
+		LOG_ERR("%s: Invalid if_priv\n", __func__);
+		return;
+	}
+
+	if (!wiphy_info) {
+		LOG_ERR("%s: Invalid wiphy_info\n", __func__);
+		return;
+	}
+
+	if (!event_len) {
+		LOG_ERR("%s: Invalid event_len\n", __func__);
 		return;
 	}
 
@@ -1525,6 +1535,7 @@ int nrf_wifi_supp_get_wiphy(void *if_priv)
 		goto out;
 	}
 
+	LOG_ERR("%s: Get wiphy\n", __func__);
 	vif_ctx_zep = if_priv;
 	rpu_ctx_zep = vif_ctx_zep->rpu_ctx_zep;
 

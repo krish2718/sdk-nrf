@@ -183,12 +183,20 @@ static enum nrf_wifi_status umac_event_ctrl_process(struct nrf_wifi_fmac_dev_ctx
 	}
 
 	vif_ctx = def_dev_ctx->vif_ctx[if_id];
+	if (!vif_ctx) {
+		nrf_wifi_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Invalid vif_ctx",
+				      __func__);
+
+		goto out;
+	}
 	callbk_fns = &def_priv->callbk_fns;
 
-	nrf_wifi_osal_log_dbg(fmac_dev_ctx->fpriv->opriv,
-			      "%s: Event %d received from UMAC\n",
+	nrf_wifi_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+			      "%s: Event %d received from UMAC on VIF: %d\n",
 			      __func__,
-			      event_num);
+			      event_num,
+			      if_id);
 
 	switch (umac_hdr->cmd_evnt) {
 	case NRF_WIFI_UMAC_EVENT_TRIGGER_SCAN_START:
