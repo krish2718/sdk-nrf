@@ -2172,6 +2172,7 @@ out:
 	if (vif_ctx) {
 		nrf_wifi_osal_mem_free(fmac_dev_ctx->fpriv->opriv,
 				       vif_ctx);
+		def_dev_ctx->vif_ctx[if_idx] = NULL;
 	}
 
 	return status;
