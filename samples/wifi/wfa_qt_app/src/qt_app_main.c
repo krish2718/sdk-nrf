@@ -16,6 +16,19 @@
 #include <zephyr/device.h>
 #include <zephyr/net/net_config.h>
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+
+#include <zephyr/net/net_ip.h>
+
+#include <ctrl_iface_zephyr.h>
+#include <supp_main.h>
+
+#include <utils.h>
+#include <common/wpa_ctrl.h>
+
 #ifdef CONFIG_USB_DEVICE_STACK
 #include <zephyr/usb/usb_device.h>
 
@@ -32,6 +45,78 @@ int init_usb(void)
 	return 0;
 }
 #endif /* CONFIG_USB_DEVICE_STACK */
+
+static int run_qt_command(const char *cmd)
+{
+	char buffer[64] = {0}, response[16] = {0};
+	struct wpa_ctrl *w = NULL;
+	struct wpa_supplicant *wpa_s = NULL;
+	size_t resp_len = sizeof(response);
+	int status = 0;
+	int retry_count = 0;
+	int ret;
+
+retry:
+	wpa_s = z_wpas_get_handle_by_ifname("wlan0");
+	if (!wpa_s && retry_count++ < 5) {
+		indigo_logger(LOG_LEVEL_ERROR,
+			      "%s: Unable to get wpa_s handle for %s\n",
+			      __func__, "wlan0");
+		goto retry;
+	}
+
+	if (!wpa_s) {
+		goto done;
+	}
+
+	w = wpa_ctrl_open(wpa_s->ctrl_iface->sock_pair[0]);
+	if (!w) {
+		indigo_logger(LOG_LEVEL_ERROR, "Failed to connect to wpa_supplicant");
+		goto done;
+	}
+
+	ret = snprintf(buffer, sizeof(buffer), "%s", cmd);
+	if (ret < 0 || ret >= (int)sizeof(buffer)) {
+		indigo_logger(LOG_LEVEL_ERROR, "Failed to execute command");
+		goto done;
+	}
+
+	wpa_ctrl_request(w, buffer, sizeof(buffer), response, &resp_len, NULL);
+	if (resp_len == 0) {
+		indigo_logger(LOG_LEVEL_ERROR, "Failed to execute command");
+		goto done;
+	}
+
+	indigo_logger(LOG_LEVEL_DEBUG, "Response: %s", response);
+
+done:
+	return status;
+}
+
+
+int qt_wpa3_assoc_tb(void)
+{
+	char buffer[512];
+
+	BUILD_ASSERT_MSG(sizeof(CONFIG_WIFI_SSID) > 1, "Invalid SSID");
+	BUILD_ASSERT_MSG(sizeof(CONFIG_WIFI_PSK) > 1, "Invalid PSK");
+
+	run_qt_command("REMOVE_NETWORK all");
+	run_qt_command("ADD_NETWORK");
+	snprintf(buffer, sizeof(buffer), "SET_NETWORK 0 ssid \"%s\"", CONFIG_WIFI_SSID);
+	run_qt_command(buffer);
+	run_qt_command("SET_NETWORK 0 key_mgmt SAE");
+	snprintf(buffer, sizeof(buffer), "SET_NETWORK 0 psk \"%s\"", CONFIG_WIFI_PSK);
+	run_qt_command(buffer);
+	run_qt_command("SET_NETWORK 0 proto RSN");
+	run_qt_command("SET_NETWORK 0 pairwise CCMP");
+	run_qt_command("SET_NETWORK 0 group CCMP");
+	run_qt_command("SET_NETWORK 0 ieee80211w 2");
+	run_qt_command("ENABLE_NETWORK 0");
+	run_qt_command("SELECT_NETWORK 0");
+
+	return 0;
+}
 
 int main(void)
 {
@@ -134,5 +219,31 @@ int main(void)
 	net_config_init_app(dev, "Initializing network");
 #endif
 
+	k_sleep(K_MSEC(1000));
+
+	qt_wpa3_assoc_tb();
+
 	return 0;
 }
+
+
+#include <zephyr/kernel.h>
+#include <zephyr/shell/shell.h>
+#include <zephyr/init.h>
+
+#include "wpa_cli_zephyr.h"
+
+static int cmd_wpa_cli(const struct shell *sh,
+			  size_t argc,
+			  const char *argv[])
+{
+	malloc_stats();
+}
+
+/* Persisting with "wpa_cli" naming for compatibility with Wi-Fi
+ * certification applications and scripts.
+ */
+SHELL_CMD_REGISTER(ms,
+		   NULL,
+		   "ms commands (only for internal use)",
+		   cmd_wpa_cli);
