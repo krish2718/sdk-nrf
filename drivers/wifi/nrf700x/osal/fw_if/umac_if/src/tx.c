@@ -1053,6 +1053,10 @@ enum nrf_wifi_status tx_done_process(struct nrf_wifi_fmac_dev_ctx *fmac_dev_ctx,
 		goto out;
 	}
 
+	nrf_wifi_osal_log_info(fmac_dev_ctx->fpriv->opriv,
+			       "TX_DONE: desc = %d\n",
+			       desc);
+
 	pkt_info = &def_dev_ctx->tx_config.pkt_info_p[desc];
 	nwb_list = pkt_info->pkt;
 
@@ -1062,6 +1066,10 @@ enum nrf_wifi_status tx_done_process(struct nrf_wifi_fmac_dev_ctx *fmac_dev_ctx,
 		desc_id = (desc * def_priv->data_config.max_tx_aggregation) + frame;
 
 		tx_buf_info = &def_dev_ctx->tx_buf_info[desc_id];
+
+		nrf_wifi_osal_log_info(fmac_dev_ctx->fpriv->opriv,
+				       "TX_STATUS = %d\n",
+				       config->tx_status_code[frame]);
 
 		if (!tx_buf_info->mapped) {
 			nrf_wifi_osal_log_err(fmac_dev_ctx->fpriv->opriv,
@@ -1247,6 +1255,12 @@ enum nrf_wifi_fmac_tx_status nrf_wifi_fmac_tx(struct nrf_wifi_fmac_dev_ctx *fmac
 	status = tx_pending_process(fmac_dev_ctx,
 				    desc,
 				    ac);
+
+	if (status  == NRF_WIFI_STATUS_SUCCESS) {
+		nrf_wifi_osal_log_info(fmac_dev_ctx->fpriv->opriv,
+				       "TX desc %d\n",
+				       desc);
+	}
 out:
 	nrf_wifi_osal_spinlock_rel(fmac_dev_ctx->fpriv->opriv,
 				   def_dev_ctx->tx_config.tx_lock);
