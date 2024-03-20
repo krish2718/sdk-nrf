@@ -19,5 +19,8 @@ add_subdirectory(src/modules/network)
 add_subdirectory(src/modules/transport)
 add_subdirectory(src/modules/error)
 
+
 # Optional modules
 add_subdirectory_ifdef(CONFIG_MQTT_SAMPLE_LED src/modules/led)
+
+target_sources(app PRIVATE src/main.c)

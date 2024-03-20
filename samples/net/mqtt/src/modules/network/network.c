@@ -25,6 +25,8 @@ LOG_MODULE_REGISTER(network, CONFIG_MQTT_SAMPLE_NETWORK_LOG_LEVEL);
 static struct net_mgmt_event_callback l4_cb;
 static struct net_mgmt_event_callback conn_cb;
 
+extern void set_wifi_listen_interval(void);
+
 static void l4_event_handler(struct net_mgmt_event_callback *cb,
 			     uint32_t event,
 			     struct net_if *iface)
@@ -36,6 +38,7 @@ static void l4_event_handler(struct net_mgmt_event_callback *cb,
 	case NET_EVENT_L4_CONNECTED:
 		LOG_INF("Network connectivity established");
 		status = NETWORK_CONNECTED;
+		set_wifi_listen_interval();
 		break;
 	case NET_EVENT_L4_DISCONNECTED:
 		LOG_INF("Network connectivity lost");
