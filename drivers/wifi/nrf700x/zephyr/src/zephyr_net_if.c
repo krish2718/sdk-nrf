@@ -12,6 +12,8 @@
 #include <stdlib.h>
 
 #include <zephyr/logging/log.h>
+#include <zephyr/shell/shell.h>
+#include <zephyr/shell/shell_uart.h>
 LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF700X_LOG_LEVEL);
 
 #include "net_private.h"
@@ -80,7 +82,8 @@ void nrf_wifi_if_rx_frm(void *os_vif_ctx, void *frm)
 	LOG_INF("Received frame: %p", frm);
 	pkt = net_pkt_from_nbuf(iface, frm);
 	if (!pkt) {
-		LOG_ERR("Failed to allocate net_pkt: %p\n");
+		LOG_ERR("Failed to allocate net_pkt: %p\n", frm);
+		shell_execute_cmd(shell_backend_uart_get_ptr(), "net allocs");
 		host_stats->total_rx_drop_pkts++;
 		return;
 	}
