@@ -77,17 +77,17 @@ void nrf_wifi_if_rx_frm(void *os_vif_ctx, void *frm)
 	host_stats = &def_dev_ctx->host_stats;
 	host_stats->total_rx_pkts++;
 
+	LOG_INF("Received frame: %p", frm);
 	pkt = net_pkt_from_nbuf(iface, frm);
 	if (!pkt) {
-		LOG_DBG("Failed to allocate net_pkt");
+		LOG_ERR("Failed to allocate net_pkt: %p\n");
 		host_stats->total_rx_drop_pkts++;
 		return;
 	}
 
 	status = net_recv_data(iface, pkt);
-
 	if (status < 0) {
-		LOG_DBG("RCV Packet dropped by NET stack: %d", status);
+		LOG_ERR("RCV Packet dropped by NET stack: %d", status);
 		host_stats->total_rx_drop_pkts++;
 		net_pkt_unref(pkt);
 	}
