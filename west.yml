@@ -87,6 +87,7 @@ manifest:
           - fatfs
           - hal_nordic
           - hal_st # required for ST sensors (unrelated to STM32 MCUs)
+          - hal_stm32
           - hal_wurthelektronik
           - liblc3
           - libmetal

@@ -80,8 +80,7 @@ config WPA_SUPP_CRYPTO_WEP
 
 choice WPA_SUPP_CRYPTO_BACKEND
 	prompt "WPA supplicant crypto implementation"
-	default WPA_SUPP_CRYPTO_PSA if BUILD_WITH_TFM
-	default WPA_SUPP_CRYPTO_LEGACY if !BUILD_WITH_TFM
+	default WPA_SUPP_CRYPTO_NONE
 	help
 	  Select the crypto implementation to use for WPA supplicant.
 
