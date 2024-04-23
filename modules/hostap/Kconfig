@@ -80,7 +80,7 @@ config WPA_SUPP_CRYPTO_WEP
 
 choice WPA_SUPP_CRYPTO_BACKEND
 	prompt "WPA supplicant crypto implementation"
-	default WPA_SUPP_CRYPTO_NONE
+	default WPA_SUPP_CRYPTO_LEGACY_MBEDTLS
 	help
 	  Select the crypto implementation to use for WPA supplicant.
 
