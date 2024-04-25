@@ -55,11 +55,15 @@ static void nrf_wifi_net_iface_work_handler(struct k_work *work)
 		return;
 	}
 
+	LOG_DBG("%s: Carrier state: %d\n", __func__, vif_ctx_zep->if_carr_state);
 	if (vif_ctx_zep->if_carr_state == NRF_WIFI_FMAC_IF_CARR_STATE_ON) {
+		LOG_DBG("%s: Dormant off\n", __func__);
 		net_if_dormant_off(vif_ctx_zep->zep_net_if_ctx);
 	} else if (vif_ctx_zep->if_carr_state == NRF_WIFI_FMAC_IF_CARR_STATE_OFF) {
+		LOG_DBG("%s: Dormant on\n", __func__);
 		net_if_dormant_on(vif_ctx_zep->zep_net_if_ctx);
 	}
+	LOG_DBG("%s: Work done\n", __func__);
 }
 
 void nrf_wifi_if_rx_frm(void *os_vif_ctx, void *frm)
@@ -99,6 +103,7 @@ enum nrf_wifi_status nrf_wifi_if_carr_state_chg(void *os_vif_ctx,
 	enum nrf_wifi_status status = NRF_WIFI_STATUS_FAIL;
 	struct nrf_wifi_vif_ctx_zep *vif_ctx_zep = NULL;
 
+	LOG_DBG("%s: Carrier state: %d\n", __func__, carr_state);
 	if (!os_vif_ctx) {
 		LOG_ERR("%s: Invalid parameters\n",
 			__func__);
@@ -109,7 +114,7 @@ enum nrf_wifi_status nrf_wifi_if_carr_state_chg(void *os_vif_ctx,
 
 	vif_ctx_zep->if_carr_state = carr_state;
 
-	LOG_DBG("%s: Carrier state: %d\n", __func__, carr_state);
+	LOG_DBG("%s: Submitting work\n", __func__);
 
 	k_work_submit(&vif_ctx_zep->nrf_wifi_net_iface_work);
 
@@ -586,6 +591,7 @@ int nrf_wifi_if_stop_zep(const struct device *dev)
 	struct nrf_wifi_umac_chg_vif_state_info vif_info;
 	int ret = -1;
 
+	LOG_DBG("%s: Stopping interface\n", __func__);
 	if (!dev) {
 		LOG_ERR("%s: Invalid parameters\n",
 			__func__);
@@ -632,6 +638,7 @@ int nrf_wifi_if_stop_zep(const struct device *dev)
 	       dev->name,
 	       strlen(dev->name));
 
+	LOG_DBG("%s: Changing interface state to DOWN\n", __func__);
 	status = nrf_wifi_fmac_chg_vif_state(rpu_ctx_zep->rpu_ctx,
 					     vif_ctx_zep->vif_idx,
 					     &vif_info);
@@ -642,6 +649,7 @@ int nrf_wifi_if_stop_zep(const struct device *dev)
 		goto out;
 	}
 
+	LOG_DBG("%s: Deleting interface\n", __func__);
 	status = nrf_wifi_fmac_del_vif(rpu_ctx_zep->rpu_ctx,
 				       vif_ctx_zep->vif_idx);
 
@@ -654,10 +662,12 @@ int nrf_wifi_if_stop_zep(const struct device *dev)
 	vif_ctx_zep->if_op_state = NRF_WIFI_FMAC_IF_OP_STATE_DOWN;
 
 	if (nrf_wifi_fmac_get_num_vifs(rpu_ctx_zep->rpu_ctx) == 0) {
+		LOG_DBG("%s: Removing FMAC device\n", __func__);
 		nrf_wifi_fmac_dev_rem_zep(&rpu_drv_priv_zep);
 	}
 	ret = 0;
 out:
+	LOG_DBG("%s: Interface stopped\n", __func__);
 	return ret;
 }
 
