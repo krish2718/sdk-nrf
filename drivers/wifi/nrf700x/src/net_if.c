@@ -732,6 +732,10 @@ int nrf_wifi_if_start_zep(const struct device *dev)
 	       dev->name,
 	       strlen(dev->name));
 
+	LOG_DBG("%s: Adding VIF %s with index %d",
+		__func__,
+		vif_ctx_zep->ifname,
+		vif_ctx_zep->vif_idx);
 	status = nrf_wifi_fmac_chg_vif_state(rpu_ctx_zep->rpu_ctx,
 					     vif_ctx_zep->vif_idx,
 					     &vif_info);
@@ -833,6 +837,10 @@ int nrf_wifi_if_stop_zep(const struct device *dev)
 	vif_info.state = NRF_WIFI_FMAC_IF_OP_STATE_DOWN;
 	vif_info.if_index = vif_ctx_zep->vif_idx;
 
+	LOG_DBG("%s: Stopping VIF %s with index %d",
+		__func__,
+		vif_ctx_zep->ifname,
+		vif_ctx_zep->vif_idx);
 	status = nrf_wifi_fmac_chg_vif_state(rpu_ctx_zep->rpu_ctx,
 					     vif_ctx_zep->vif_idx,
 					     &vif_info);
