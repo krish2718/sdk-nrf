@@ -568,7 +568,7 @@ enum nrf_wifi_status hal_rpu_irq_process(struct nrf_wifi_hal_dev_ctx *hal_dev_ct
 	 * likely indication that the RPU is stuck and this interrupt has been
 	 * raised by the watchdog
 	 */
-	if (!num_events) {
+         {
 		/* Check the if this interrupt has been raised by the
 		 * RPU watchdog
 		 */
