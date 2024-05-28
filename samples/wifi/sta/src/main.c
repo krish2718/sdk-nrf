@@ -25,6 +25,7 @@ LOG_MODULE_REGISTER(sta, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/drivers/gpio.h>
 
 #include <net/wifi_mgmt_ext.h>
+#include <net/library.h>
 
 #include <qspi_if.h>
 
@@ -247,7 +248,7 @@ int bytes_from_str(const char *str, uint8_t *bytes, size_t bytes_len)
 	return 0;
 }
 
-int main(void)
+int start_app(void)
 {
 	memset(&context, 0, sizeof(context));
 
@@ -314,6 +315,23 @@ int main(void)
 			k_sleep(K_FOREVER);
 		}
 	}
+
+	return 0;
+}
+
+int stop_app(void)
+{
+	return 0;
+}
+
+int main(void)
+{
+	app_callbacks_t callbacks = {
+		.start_app = start_app,
+		.stop_app = stop_app,
+	};
+
+	register_events(callbacks);
 
 	return 0;
 }

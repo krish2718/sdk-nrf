@@ -1,0 +1,19 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig WIFI_READY_EVENT_HANDLING
+	bool "WIFI ready event handling"
+	select EXPERIMENTAL
+	help
+	  Enable WiFi ready management subsystem.
+
+if WIFI_READY_EVENT_HANDLING
+
+module = WIFI_READY_EVENT_HANDLING
+module-str = wifi_ready_event_handling
+source "subsys/logging/Kconfig.template.log_config"
+
+endif
