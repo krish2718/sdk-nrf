@@ -24,6 +24,7 @@ static void handle_wpa_supp_ready(struct net_mgmt_event_callback *cb)
 static void wpa_supp_event_handler(struct net_mgmt_event_callback *cb,
 	uint32_t mgmt_event, struct net_if *iface)
 {
+	LOG_DBG("Event received: %d", mgmt_event);
 	/* TODO: Handle other events */
 	switch (mgmt_event) {
 	case NET_EVENT_WPA_SUPP_READY:

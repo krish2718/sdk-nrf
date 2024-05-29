@@ -317,6 +317,8 @@ static void iface_event_handler(struct net_mgmt_event_callback *cb,
 	char mgd_if_prefix[] = CONFIG_WPA_SUPP_MGD_IFACES_PREFIXES;
 	bool found = false;
 
+	wpa_printf(MSG_DEBUG, "Interface event: %d", mgmt_event);
+
 	if (sizeof(mgd_if_prefix) > 0) {
 		prefix = strtok(mgd_if_prefix, ",");
 
