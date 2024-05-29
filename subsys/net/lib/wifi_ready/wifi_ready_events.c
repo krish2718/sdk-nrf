@@ -5,9 +5,7 @@
  */
 
 #include <zephyr/net/net_event.h>
-#include <ctrl_iface_zephyr.h>
 #include <supp_events.h>
-#include <supp_main.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/kernel.h>
 #include <net/library.h>
