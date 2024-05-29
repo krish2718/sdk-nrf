@@ -53,6 +53,7 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static struct net_mgmt_event_callback wifi_shell_mgmt_cb;
 static struct net_mgmt_event_callback net_shell_mgmt_cb;
 
+K_SEM_DEFINE(wifi_ready_sem, 0, 1);
 static struct {
 	const struct shell *sh;
 	union {
@@ -324,14 +325,24 @@ int stop_app(void)
 	return 0;
 }
 
+void wifi_ready_cb(void)
+{
+	LOG_INF("WiFi ready");
+	k_sem_give(&wifi_ready_sem);
+}
+
 int main(void)
 {
 	app_callbacks_t callbacks = {
-		.start_app = start_app,
+		.start_app = wifi_ready_cb,
 		.stop_app = stop_app,
 	};
 
 	register_events(callbacks);
+
+	k_sem_take(&wifi_ready_sem, K_FOREVER);
+
+	start_app();
 
 	return 0;
 }
