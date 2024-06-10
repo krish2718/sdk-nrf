@@ -89,7 +89,7 @@ config NRF700X_PROMISC_DATA_RX
 
 config NRF700X_DATA_TX
 	bool "Enable TX data path in the driver"
-	default y if NRF700X_SYSTEM_MODE || NRF700X_SYSTEM_WITH_RAW_MODES
+	default y if NRF700X_SYSTEM_MODE
 
 config NRF_WIFI_IF_AUTO_START
 	bool "Enable Wi-Fi interface auto start on boot"
