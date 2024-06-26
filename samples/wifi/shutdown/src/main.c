@@ -185,6 +185,8 @@ int startup_wifi(struct net_if *iface)
 		LOG_INF("Interface up");
 	}
 
+	k_sleep(K_SECONDS(1));
+
 	wifi_scan();
 
 	return 0;
@@ -254,13 +256,13 @@ int main(void)
 
 	buttons_init();
 
-#ifdef CONFIG_NRF_WIFI_IF_AUTO_START
-	exit_shutdown_mode();
+	k_sleep(K_SECONDS(5));
 
-	enter_shutdown_mode();
-#endif
-
-	k_sleep(K_FOREVER);
+	while (1) {
+		exit_shutdown_mode();
+		enter_shutdown_mode();
+		k_sleep(K_SECONDS(3));
+	}
 
 	return 0;
 }
