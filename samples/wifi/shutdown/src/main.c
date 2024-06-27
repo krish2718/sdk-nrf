@@ -248,13 +248,20 @@ int main(void)
 							net_if_get_link_addr(iface)->len));
 	}
 
-	buttons_init();
+	//buttons_init();
+	// Wait till driver init is done
+	k_sleep(K_SECONDS(5));
+	if (!net_if_is_admin_up(net_if_get_default())) {
+		LOG_ERR("Failed to bring up iface");
+		return -1;
+	}
 
-	exit_shutdown_mode();
-
-	enter_shutdown_mode();
-
-	k_sleep(K_FOREVER);
+	while (1) {
+		exit_shutdown_mode();
+		k_sleep(K_SECONDS(1));
+		enter_shutdown_mode();
+		k_sleep(K_SECONDS(3));
+	}
 
 	return 0;
 }
