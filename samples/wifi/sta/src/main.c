@@ -105,6 +105,8 @@ static int cmd_wifi_status(void)
 	struct net_if *iface = net_if_get_default();
 	struct wifi_iface_status status = { 0 };
 
+	shell_execute_cmd(shell_backend_uart_get_ptr(), "kernel heap");
+
 	if (net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, &status,
 				sizeof(struct wifi_iface_status))) {
 		LOG_INF("Status request failed");
