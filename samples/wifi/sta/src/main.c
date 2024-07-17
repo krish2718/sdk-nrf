@@ -23,6 +23,7 @@ LOG_MODULE_REGISTER(sta, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/net/wifi_mgmt.h>
 #include <zephyr/net/net_event.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/shell/shell_uart.h>
 
 #include <net/wifi_mgmt_ext.h>
 #include <net/wifi_ready.h>
@@ -104,6 +105,8 @@ static int cmd_wifi_status(void)
 {
 	struct net_if *iface = net_if_get_default();
 	struct wifi_iface_status status = { 0 };
+
+	shell_execute_cmd(shell_backend_uart_get_ptr(), "kernel heap");
 
 	if (net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, &status,
 				sizeof(struct wifi_iface_status))) {
