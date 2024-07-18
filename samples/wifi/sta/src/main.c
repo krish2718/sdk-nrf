@@ -23,6 +23,7 @@ LOG_MODULE_REGISTER(sta, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/net/wifi_mgmt.h>
 #include <zephyr/net/net_event.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/shell/shell_uart.h>
 
 #include <net/wifi_mgmt_ext.h>
 #include <net/wifi_ready.h>
@@ -135,6 +136,26 @@ static int cmd_wifi_status(void)
 		LOG_INF("MFP: %s", wifi_mfp_txt(status.mfp));
 		LOG_INF("RSSI: %d", status.rssi);
 	}
+	return 0;
+}
+
+static int cmd_wifi_ps_off(void)
+{
+	struct net_if *iface = net_if_get_default();
+	struct wifi_ps_params params = { 0 };
+
+	params.enabled = WIFI_PS_DISABLED;
+	params.type = WIFI_PS_PARAM_STATE;
+
+	if (net_mgmt(NET_REQUEST_WIFI_PS, iface, &params, sizeof(params))) {
+		LOG_ERR("PS %s failed. Reason: %s\n",
+			    params.enabled ? "enable" : "disable",
+			    wifi_ps_get_config_err_code_str(params.fail_reason));
+		return -ENOEXEC;
+	}
+
+	LOG_INF("PS %s", wifi_ps_txt(params.enabled));
+
 	return 0;
 }
 
@@ -325,6 +346,11 @@ check_wifi_ready:
 
 		if (context.connected) {
 			cmd_wifi_status();
+#ifdef CONFIG_STA_SAMPLE_WIFI_RECOVERY_TEST
+			/* For IP and Ping tests */
+			k_sleep(K_SECONDS(5));
+			cmd_wifi_ps_off();
+#endif /* CONFIG_STA_SAMPLE_WIFI_RECOVERY_TEST */
 #ifdef CONFIG_WIFI_READY_LIB
 			ret = k_sem_take(&wifi_ready_state_changed_sem, K_FOREVER);
 			if (ret) {

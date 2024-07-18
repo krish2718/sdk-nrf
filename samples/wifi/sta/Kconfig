@@ -34,4 +34,10 @@ config STA_SAMPLE_START_WIFI_THREAD_STACK_SIZE
 	default 4096
 	help
 	  Set the stack size for the Wi-Fi start thread.
+
+config STA_SAMPLE_WIFI_RECOVERY_TEST
+	bool "Enable Wi-Fi recovery test"
+	help
+	  Enable Wi-Fi recovery test. This test will simulate a Wi-Fi recovery by stopping the Wi-Fi
+	  interface and starting it again.
 endmenu
