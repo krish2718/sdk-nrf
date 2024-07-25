@@ -815,12 +815,16 @@ struct nrf_wifi_cmd_sys_init {
 	struct nrf_wifi_tx_pwr_ctrl_params tx_pwr_ctrl_params;
 	/** Offload mgmt buffer refill to UMAC when enabled */
 	unsigned char mgmt_buff_offload;
-	/** Enable features from driver config */
+	/** To enable features from driver config */
 	unsigned int feature_flags;
 	/** To deactivate beamforming, By default the RPU enables the beamforming feature.
 	 *  If a user wishes to turn it off, they should set this parameter to 1.
 	 */
 	unsigned int disable_beamforming;
+	/** Mainly for struct alignment (discon_timeout is unused in patch) */
+	unsigned int unused_1;
+	/** The RPU uses this value to configure watchdog timer */
+	unsigned int watchdog_timer_val;
 } __NRF_WIFI_PKD;
 
 /**
