@@ -780,6 +780,19 @@ enum op_band {
 	BAND_24G
 };
 
+/**
+ * @brief This enum specifies the type of frames used to retrieve buffered data
+ *  from the AP in power save mode.
+ */
+enum data_retrieve_mechanism {
+	/** Retrieves data from the AP using a PS-Poll frame */
+	PS_POLL_FRAME,
+	/** Retrieves data from the AP using a QoS Null frame */
+	QOS_NULL_FRAME,
+	/** For future implementation. The RPU will decide which frame to use */
+	AUTOMATIC
+};
+
 #define TWT_EXTEND_SP_EDCA  0x1
 
 /**
@@ -821,8 +834,14 @@ struct nrf_wifi_cmd_sys_init {
 	 *  If a user wishes to turn it off, they should set this parameter to 1.
 	 */
 	unsigned int disable_beamforming;
-	/** Mainly for struct alignment (discon_timeout is unused in patch) */
-	unsigned int unused_1;
+	/** The RPU uses this value (in seconds) to decide how long to wait
+	 *  without receiving beacons before disconnection.
+	 */
+	unsigned int discon_timeout;
+	/** RPU uses QoS null frame or PS-Poll frame to retrieve buffered frames
+	 * from the AP in power save @ref data_retrieve_mechanism.
+	 */
+	unsigned char ps_data_retrieval_mech;
 	/** The RPU uses this value to configure watchdog timer */
 	unsigned int watchdog_timer_val;
 } __NRF_WIFI_PKD;
