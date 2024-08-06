@@ -780,8 +780,7 @@ enum op_band {
 	BAND_24G
 };
 
-#define TWT_EXTEND_SP_EDCA  0x1
-
+#define TWT_EXTEND_SP_EDCA 0x1
 /**
  * @brief This structure defines the command responsible for initializing the UMAC.
  *  After the host driver brings up, the host sends NRF_WIFI_CMD_INIT to the RPU.
@@ -821,8 +820,10 @@ struct nrf_wifi_cmd_sys_init {
 	 *  If a user wishes to turn it off, they should set this parameter to 1.
 	 */
 	unsigned int disable_beamforming;
-	/** Mainly for struct alignment (discon_timeout is unused in patch) */
-	unsigned int unused_1;
+	/** The RPU uses this value (in seconds) to decide how long to wait 
+	 *  without receiving beacons before disconnection.
+	 */
+	unsigned int discon_timeout;
 	/** The RPU uses this value to configure watchdog timer */
 	unsigned int watchdog_timer_val;
 } __NRF_WIFI_PKD;
