@@ -267,6 +267,23 @@ static void nrf_wifi_process_rssi_from_rx(void *vif_ctx,
 	vif_ctx_zep->rssi_record_timestamp_us =
 		nrf_wifi_osal_time_get_curr_us(fmac_dev_ctx->fpriv->opriv);
 }
+
+void nrf_wifi_lmac_debug_info(void *vif_ctx,
+			      struct nrf_wifi_umac_event_lmac_debug_info *lmac_debug_info,
+			      unsigned int len)
+{
+	int i;
+
+	(void)vif_ctx;
+	(void)len;
+
+	LOG_INF("%s: WDT Idle count", __func__);
+	for (i = 0; i < ARRAY_SIZE(lmac_debug_info->wdt_idle_cnt); i++) {
+		printk("%d ", lmac_debug_info->wdt_idle_cnt[i]);
+	}
+	printk("\n");
+}
+
 #endif /* CONFIG_NRF700X_STA_MODE */
 
 
@@ -688,6 +705,7 @@ static int nrf_wifi_drv_main_zep(const struct device *dev)
 	callbk_fns.event_get_wiphy = nrf_wifi_wpa_supp_event_get_wiphy;
 	callbk_fns.mgmt_rx_callbk_fn = nrf_wifi_wpa_supp_event_mgmt_rx_callbk_fn;
 	callbk_fns.get_conn_info_callbk_fn = nrf_wifi_supp_event_proc_get_conn_info;
+	callbk_fns.lmac_debug_info_callbk_fn = nrf_wifi_lmac_debug_info;
 #endif /* CONFIG_NRF700X_STA_MODE */
 
 	rpu_drv_priv_zep.fmac_priv = nrf_wifi_fmac_init(&data_config,

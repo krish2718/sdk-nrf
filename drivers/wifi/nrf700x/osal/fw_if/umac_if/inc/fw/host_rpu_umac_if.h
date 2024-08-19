@@ -237,7 +237,9 @@ enum nrf_wifi_umac_events {
 	/** send connection information @ref nrf_wifi_umac_event_conn_info. */
 	NRF_WIFI_UMAC_EVENT_GET_CONNECTION_INFO,
 	/** @ref nrf_wifi_umac_event_power_save_info */
-	NRF_WIFI_UMAC_EVENT_GET_POWER_SAVE_INFO
+	NRF_WIFI_UMAC_EVENT_GET_POWER_SAVE_INFO,
+	/** @ref nrf_wifi_umac_event_lmac_debug_info */
+	NRF_WIFI_UMAC_EVENT_LMAC_DEBUG_INFO
 };
 
 /**
@@ -3467,6 +3469,13 @@ struct nrf_wifi_umac_event_cmd_status {
 	unsigned int cmd_id;
 	/** Status codes */
 	unsigned int cmd_status;
+} __NRF_WIFI_PKD;
+
+struct nrf_wifi_umac_event_lmac_debug_info {
+	/** Header @ref nrf_wifi_umac_hdr */
+	struct nrf_wifi_umac_hdr umac_hdr;
+	/** wdt idle count */
+	unsigned int wdt_idle_cnt[10];
 } __NRF_WIFI_PKD;
 
 #endif /* __HOST_RPU_UMAC_IF_H */

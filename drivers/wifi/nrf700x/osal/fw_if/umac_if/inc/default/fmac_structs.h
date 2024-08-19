@@ -251,6 +251,10 @@ struct nrf_wifi_fmac_callbk_fns {
 	/** Callback function to be called when rssi is to be processed from the received frame. */
 	void (*process_rssi_from_rx)(void *os_vif_ctx,
 				     signed short signal);
+
+	void (*lmac_debug_info_callbk_fn)(void *os_vif_ctx,
+		  struct nrf_wifi_umac_event_lmac_debug_info *lmac_debug_info,
+		  unsigned int event_len);
 #endif /* CONFIG_NRF700X_STA_MODE */
 };
 

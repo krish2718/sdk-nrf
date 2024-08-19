@@ -147,6 +147,8 @@ static bool hal_rpu_irq_wdog_chk(struct nrf_wifi_hal_dev_ctx *hal_dev_ctx)
 	}
 
 	if (val & (1 << RPU_REG_BIT_MIPS_WATCHDOG_INT_STATUS)) {
+		nrf_wifi_osal_log_info(hal_dev_ctx->hpriv->opriv,
+				       "IRQ status: 0x%x\n", val);
 		ret = true;
 	}
 out:
