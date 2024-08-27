@@ -286,6 +286,11 @@ void nrf_wifi_event_proc_disp_scan_res_zep(void *vif_ctx,
 	unsigned int i = 0;
 	scan_result_cb_t cb = NULL;
 
+	if (!vif_ctx || !scan_res) {
+		LOG_ERR("%s: Invalid parameters\n", __func__);
+		return;
+	}
+
 	vif_ctx_zep = vif_ctx;
 
 	cb = (scan_result_cb_t)vif_ctx_zep->disp_scan_cb;

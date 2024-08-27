@@ -183,6 +183,13 @@ static enum nrf_wifi_status umac_event_ctrl_process(struct nrf_wifi_fmac_dev_ctx
 	}
 
 	vif_ctx = def_dev_ctx->vif_ctx[if_id];
+	if (!vif_ctx) {
+		nrf_wifi_osal_log_err(fmac_dev_ctx->fpriv->opriv,
+				      "%s: Invalid vif_ctx\n",
+				      __func__);
+
+		goto out;
+	}
 	callbk_fns = &def_priv->callbk_fns;
 
 	nrf_wifi_osal_log_dbg(fmac_dev_ctx->fpriv->opriv,
