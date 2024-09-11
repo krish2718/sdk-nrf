@@ -422,7 +422,6 @@ config NRF_WIFI_RPU_MIN_TIME_TO_ENTER_SLEEP_MS
 
 config NRF_WIFI_RPU_RECOVERY_DEBUG
 	bool "Enable RPU recovery debug logs"
-	default y
 	help
 		Enable RPU recovery debug logs to help debug RPU recovery mechanism.
 
