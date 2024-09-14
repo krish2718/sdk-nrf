@@ -1,0 +1,12 @@
+# Configuration opions for Wi-Fi test
+
+# Copyright (c) 2023 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+
+source "Kconfig.zephyr"
+
+# The purpose of this Kconfig is to select the hidden symbol
+config WIFI_MEM_TEST_ENABLE
+	bool "Enable Wi-Fi memory test"
+	default y

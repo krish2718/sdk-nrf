@@ -1,0 +1,5 @@
+tests:
+  wifi.memtest:
+    integration_platforms:
+      - nrf7002dk/nrf5340/cpuapp
+    tags: wifi
