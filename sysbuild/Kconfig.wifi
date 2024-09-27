@@ -28,6 +28,9 @@ config WIFI_NRF70_SCAN_ONLY
 config WIFI_NRF70_RADIO_TEST
 	bool "Radio test mode of the nRF700x driver"
 
+config WIFI_NRF70_OFFLOADED_RAW_TX
+	bool "Offloaded raw tx mode of the nRF700x driver"
+
 config WIFI_NRF70_SYSTEM_WITH_RAW_MODES
 	bool "Enable nRF70 system mode with raw modes"
 	help
