@@ -308,6 +308,9 @@ static int wpas_add_and_config_network(struct wpa_supplicant *wpa_s,
 	_wpa_cli_cmd_v("set_network %d scan_ssid 1", resp.network_id);
 	_wpa_cli_cmd_v("set_network %d key_mgmt NONE", resp.network_id);
 	_wpa_cli_cmd_v("set_network %d ieee80211w 0", resp.network_id);
+	/* 11n only */
+	_wpa_cli_cmd_v("set_network %d disable_he 1", resp.network_id);
+	_wpa_cli_cmd_v("set_network %d disable_vht 1", resp.network_id);
 	if (params->band != WIFI_FREQ_BAND_UNKNOWN) {
 		ret = wpa_supp_supported_channels(wpa_s, params->band, &chan_list);
 		if (ret < 0) {
