@@ -129,7 +129,7 @@ static enum nrf_wifi_status hal_rpu_irq_ack(struct nrf_wifi_hal_dev_ctx *hal_dev
 }
 
 
-static bool hal_rpu_irq_wdog_chk(struct nrf_wifi_hal_dev_ctx *hal_dev_ctx)
+static bool hal_rpu_irq_wdog_chk(struct nrf_wifi_hal_dev_ctx *hal_dev_ctx, unsigned int *uccp_int_val)
 {
 	enum nrf_wifi_status status = NRF_WIFI_STATUS_FAIL;
 	unsigned int val = 0;
@@ -167,6 +167,7 @@ static bool hal_rpu_irq_wdog_chk(struct nrf_wifi_hal_dev_ctx *hal_dev_ctx)
 	}
 
 	if (val & (1 << RPU_REG_BIT_MIPS_WATCHDOG_INT_STATUS)) {
+		*uccp_int_val = val;
 		ret = true;
 	}
 out:
@@ -601,6 +602,7 @@ enum nrf_wifi_status hal_rpu_irq_process(struct nrf_wifi_hal_dev_ctx *hal_dev_ct
 		bool *do_rpu_recovery)
 {
 	enum nrf_wifi_status status = NRF_WIFI_STATUS_FAIL;
+	unsigned int uccp_int_val = 0;
 
 	/* Get all the events in the queue. It is possible that there are no
 	 * events in the queue. This is a valid scenario as per our present
@@ -618,9 +620,10 @@ enum nrf_wifi_status hal_rpu_irq_process(struct nrf_wifi_hal_dev_ctx *hal_dev_ct
 	/* Check the if this interrupt has been raised by the
 	 * RPU watchdog
 	 */
-	if (hal_rpu_irq_wdog_chk(hal_dev_ctx)) {
+	if (hal_rpu_irq_wdog_chk(hal_dev_ctx, &uccp_int_val)) {
 		nrf_wifi_osal_log_err(hal_dev_ctx->hpriv->opriv,
-						"Received watchdog interrupt");
+						"Received watchdog interrupt: 0x%X",
+						uccp_int_val);
 
 		status = hal_rpu_process_wdog(hal_dev_ctx, do_rpu_recovery);
 		if (status == NRF_WIFI_STATUS_FAIL) {
