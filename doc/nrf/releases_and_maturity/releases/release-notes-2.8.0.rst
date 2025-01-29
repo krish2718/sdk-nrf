@@ -486,6 +486,7 @@ Wi-Fi
 
   * The WPA supplicant is now switched to Zephyr upstream's fork instead of |NCS|.
   * The WPA supplicant now uses ``kernel heap`` instead of ``application (libc) heap``.
+    This means there is an increase in the kernel heap usage but a corresponding decrease in the application heap usage.
 
 Applications
 ============
