@@ -408,10 +408,38 @@ static int wifi_setup_net_capture(void)
 }
 #endif
 
+static void wait_for_debugger(void)
+{
+	volatile int wait = 1;
+
+	LOG_INF("Waiting for debugger to attach...");
+	while (wait) {
+		/* Spin forever */
+	}
+}
+
+
+#if defined(CONFIG_USB_DEVICE_STACK_NEXT)
+#include <sample_usbd.h>
+
+static int enable_usb_device_next(void)
+{
+	struct usbd_context *sample_usbd = sample_usbd_init_device(NULL);
+
+	if (sample_usbd == NULL) {
+		printk("Failed to initialize USB device");
+		return -ENODEV;
+	}
+
+	return usbd_enable(sample_usbd);
+}
+#endif /* CONFIG_USB_DEVICE_STACK_NEXT */
+
 int main(void)
 {
 	int ret;
 
+//	wait_for_debugger();
 #ifdef CONFIG_USB_DEVICE_STACK
 	init_usb();
 
@@ -428,18 +456,17 @@ int main(void)
 	net_if_ipv4_set_netmask_by_addr(iface, &addr, &mask);
 #endif
 
+#if defined(CONFIG_USB_DEVICE_STACK_NEXT)
+	ret = enable_usb_device_next();
+#else
+	ret = usb_enable(NULL);
+#endif
+	if (ret != 0) {
+		printk("Failed to enable USB");
+		return 0;
+	}
 #ifdef CONFIG_NET_CONFIG_SETTINGS
-	/* Without this, DHCPv4 starts on first interface and if that is not Wi-Fi or
-	 * only supports IPv6, then its an issue. (E.g., OpenThread)
-	 *
-	 * So, we start DHCPv4 on Wi-Fi interface always, independent of the ordering.
-	 */
-	const struct device *dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_wifi));
-	struct net_if *wifi_iface = net_if_lookup_by_dev(dev);
-
-	/* As both are Ethernet, we need to set specific interface*/
-	net_if_set_default(wifi_iface);
-
+	// AUTO INIT doesn't with USB
 	net_config_init_app(NULL, "Initializing network");
 #endif
 #if 0

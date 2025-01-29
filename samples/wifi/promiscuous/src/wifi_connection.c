@@ -22,9 +22,11 @@ LOG_MODULE_REGISTER(wifi_connect, CONFIG_LOG_DEFAULT_LEVEL);
 				NET_EVENT_WIFI_DISCONNECT_RESULT)
 
 K_SEM_DEFINE(wait_for_wifi_connection, 0, 1);
+#ifdef CONFIG_NET_DHCPV4
 K_SEM_DEFINE(wait_for_dhcp, 0, 1);
-static struct net_mgmt_event_callback wifi_shell_mgmt_cb;
 static struct net_mgmt_event_callback net_shell_mgmt_cb;
+#endif /* CONFIG_NET_DHCPV4 */
+static struct net_mgmt_event_callback wifi_shell_mgmt_cb;
 
 static struct {
 	const struct shell *sh;
@@ -140,6 +142,7 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb,
 	}
 }
 
+#ifdef CONFIG_NET_DHCPV4
 static void print_dhcp_ip(struct net_mgmt_event_callback *cb)
 {
 	/* Get DHCP info from struct net_if_dhcpv4 and print */
@@ -164,6 +167,7 @@ static void net_mgmt_event_handler(struct net_mgmt_event_callback *cb,
 		break;
 	}
 }
+#endif /* CONFIG_NET_DHCPV4 */
 
 static int wifi_connect(void)
 {
@@ -197,12 +201,13 @@ int try_wifi_connect(void)
 
 	net_mgmt_add_event_callback(&wifi_shell_mgmt_cb);
 
+#ifdef CONFIG_NET_DHCPV4
 	net_mgmt_init_event_callback(&net_shell_mgmt_cb,
 				     net_mgmt_event_handler,
 				     NET_EVENT_IPV4_DHCP_BOUND);
 
 	net_mgmt_add_event_callback(&net_shell_mgmt_cb);
-
+#endif /* CONFIG_NET_DHCPV4 */
 	k_sleep(K_SECONDS(1));
 
 	LOG_INF("Static IP address (overridable): %s/%s -> %s",
@@ -219,8 +224,10 @@ int try_wifi_connect(void)
 	}
 
 	if (context.connected) {
+#ifdef CONFIG_NET_DHCPV4
 		k_sem_take(&wait_for_dhcp,
 			   K_SECONDS(CONFIG_PROMISCUOUS_SAMPLE_DHCP_TIMEOUT_S));
+#endif /* CONFIG_NET_DHCPV4 */
 		cmd_wifi_status();
 	} else if (context.connect_result) {
 		LOG_ERR("Connection unsuccessful with reason (%d)", context.connect_result);
