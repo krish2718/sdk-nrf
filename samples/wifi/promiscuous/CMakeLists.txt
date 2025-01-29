@@ -11,6 +11,8 @@ project(nrf_wifi_promiscuous)
 
 target_include_directories(app PUBLIC ${ZEPHYR_BASE}/subsys/net/ip)
 
+include(${ZEPHYR_BASE}/samples/subsys/usb/common/common.cmake)
+
 target_sources(app PRIVATE
 	src/main.c
 	src/wifi_connection.c)

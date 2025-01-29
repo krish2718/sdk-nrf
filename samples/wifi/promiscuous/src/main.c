@@ -440,9 +440,9 @@ int main(void)
 	/* As both are Ethernet, we need to set specific interface*/
 	net_if_set_default(wifi_iface);
 
-	net_config_init_app(dev, "Initializing network");
+	net_config_init_app(NULL, "Initializing network");
 #endif
-
+#if 0
 	if (wifi_set_mode(true)) {
 		return -1;
 	}
@@ -462,6 +462,6 @@ int main(void)
 #endif
 
 	k_thread_start(receiver_thread_id);
-
+#endif
 	return 0;
 }
