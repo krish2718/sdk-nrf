@@ -1,0 +1,14 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+ &nrf70 {
+	iovdd-ctrl-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+	bucken-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+	host-irq-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+ };
+
+&gpio1 {
+	status = "okay";
+};

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2024 Nordic Semiconductor ASA
+ * Copyright (c) 2025 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 #include <freq.h>
 
@@ -11,21 +11,15 @@
 	};
 };
 
-&spi130 {
+&wifi_spi {
 	status = "okay";
 
 	nrf70: nrf7000-spi@0 {
 		compatible = "nordic,nrf7000-spi";
 		status = "okay";
-		reg = <0>;
-		spi-max-frequency = <DT_FREQ_M(8)>;
 
 		/* Include common nRF70 overlays */
 		#include "nrf7002eb2_common.dtsi"
 		#include "nrf7002eb2_common_5g.dtsi"
 	};
-};
-
-&gpio0 {
-	status = "okay";
 };

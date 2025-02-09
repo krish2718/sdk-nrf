@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2024 Nordic Semiconductor
+ * Copyright (c) 2025 Nordic Semiconductor
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
-	
+
+ #include "../nrf7002eb2_pins_2.dtsi"
 
 &pinctrl {
 	spi130_default: spi130_default {
@@ -33,7 +34,6 @@
 	memory-regions = <&cpuapp_dma_region>;
 };
 
-#include "../nrf7002eb2_map_2.dtsi"
 
 &uart135 {
 	status = "disabled";

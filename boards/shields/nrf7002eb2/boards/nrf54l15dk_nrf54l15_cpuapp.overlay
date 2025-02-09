@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2024 Nordic Semiconductor
+ * Copyright (c) 2025 Nordic Semiconductor
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
+
+ #include "../nrf7002eb2_pins_1.dtsi"
 
 &pinctrl {
 	spi22_default: spi22_default {
@@ -31,4 +33,10 @@
 	pinctrl-names = "default", "sleep";
 };
 
-#include "../nrf7002eb2_map_1.dtsi"
+&uart20 {
+	status = "disabled";
+};
+
+&uart30 {
+	status = "okay";
+};

@@ -1,10 +1,12 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
 /* Common assignments for nRF70 EB-II shield */
+reg = <0>;
+spi-max-frequency = <DT_FREQ_M(8)>;
 
 /* Maximum TX power limits for 2.4 GHz */
 wifi-max-tx-pwr-2g-dsss = <21>;
