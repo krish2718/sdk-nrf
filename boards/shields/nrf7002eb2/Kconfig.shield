@@ -1,0 +1,23 @@
+# Copyright (c) 2024 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+config SHIELD_NRF7002EB2_NRF54L
+	def_bool $(shields_list_contains,nrf7002eb2_nrf54l)
+
+config SHIELD_NRF7002EB2_NRF54H
+	def_bool $(shields_list_contains,nrf7002eb2_nrf54h)
+
+config SHIELD_NRF7002EB2_NRF7001_NRF54L
+	def_bool $(shields_list_contains,nrf7002eb2_nrf7001_nrf54l)
+
+config SHIELD_NRF7002EB2_NRF7001_NRF54H
+	def_bool $(shields_list_contains,nrf7002eb2_nrf7001_nrf54h)
+
+config SHIELD_NRF7002EB2_NRF7000_NRF54L
+	def_bool $(shields_list_contains,nrf7002eb2_nrf7000_nrf54l)
+
+config SHIELD_NRF7002EB2_NRF7000_NRF54H
+	def_bool $(shields_list_contains,nrf7002eb2_nrf7000_nrf54H)
+
+config SHIELD_NRF7002EB2_COEX
+	def_bool $(shields_list_contains,nrf7002eb2_coex)

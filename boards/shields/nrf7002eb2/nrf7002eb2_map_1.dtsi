@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/ {
+        chosen {
+                zephyr,wifi = &wlan0;
+		zephyr,console = &uart30;
+		zephyr,shell-uart = &uart30;
+        	zephyr,uart-mcumgr = &uart30;
+        	zephyr,bt-mon-uart = &uart30;
+        	zephyr,bt-c2h-uart = &uart30;
+        };
+
+        nrf_radio_coex: coex {
+                compatible = "nordic,nrf7002-coex";
+                status = "okay";
+
+                status0-gpios = <&gpio1 8 GPIO_ACTIVE_HIGH>;
+                req-gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+                grant-gpios = <&gpio1 13 (GPIO_PULL_DOWN | GPIO_ACTIVE_LOW)>;
+        };
+
+
+};
+
+&uart20 {
+        status = "disabled";
+};
+
+&uart30 {
+        status = "okay";
+};
+

@@ -1,0 +1,29 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+#include <freq.h>
+
+&spi22 {
+	status = "okay";
+
+	nrf70: nrf7002-spi@0 {
+		compatible = "nordic,nrf7002-spi";
+		status = "okay";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
+
+		iovdd-ctrl-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+		bucken-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		host-irq-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+
+		/* Include common nRF70 overlays */
+		#include "nrf7002eb2_common.dtsi"
+		#include "nrf7002eb2_common_5g.dtsi"
+	};
+};
+
+&gpio1 {
+	status = "okay";
+};
