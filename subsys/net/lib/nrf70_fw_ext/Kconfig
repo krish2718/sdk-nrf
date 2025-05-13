@@ -32,6 +32,8 @@ config NRF_WIFI_PATCHES_EXT_FLASH_XIP
 	select BUILD_NO_GAP_FILL
 	select CODE_DATA_RELOCATION
 	select HAVE_CUSTOM_LINKER_SCRIPT
+	select MBEDLTS_SHA256_C
+
 
 config NRF_WIFI_PATCHES_EXT_FLASH_STORE
 	bool "Store nRF700x FW patches in external memory but execute from RAM"

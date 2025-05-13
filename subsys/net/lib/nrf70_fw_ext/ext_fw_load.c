@@ -243,6 +243,7 @@ enum nrf_wifi_status nrf_wifi_fw_load(void *rpu_ctx)
 {
 	enum nrf_wifi_status status = NRF_WIFI_STATUS_FAIL;
 	struct nrf_wifi_fmac_fw_info fw_info = { 0 };
+	uint8_t checksum[32]; /* SHA-256 produces a 32-byte hash */
 #if defined(CONFIG_NORDIC_QSPI_NOR)
 	const struct device *flash_dev = DEVICE_DT_GET(DT_INST(0, nordic_qspi_nor));
 #endif /* CONFIG_NRF_WIFI_PATCHES_EXT_FLASH_XIP */
@@ -250,6 +251,15 @@ enum nrf_wifi_status nrf_wifi_fw_load(void *rpu_ctx)
 #if defined(CONFIG_NORDIC_QSPI_NOR)
 	nrf_qspi_nor_xip_enable(flash_dev, true);
 #endif /* CONFIG_NRF_WIFI */
+
+	/* Calculate checksum of the FW patch contents */
+	mbedtls_sha256((const unsigned char *)nrf70_fw_patch, sizeof(nrf70_fw_patch), checksum, 0); /* 0 for SHA-256 (not SHA-224) */
+
+	LOG_INF("FW patch checksum (SHA-256):");
+	for (int i = 0; i < sizeof(checksum); i++) {
+		printk("%02x", checksum[i]);
+	}
+	printk("\n");
 
 	status = nrf_wifi_fmac_fw_parse(rpu_ctx,
 			  nrf70_fw_patch,
