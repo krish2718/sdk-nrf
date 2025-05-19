@@ -1,0 +1,175 @@
+# Copyright (c) 2024 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+description: Nordic Wi-Fi chip PCB/antenna configuration
+
+properties:
+  wifi-ant-gain-2g:
+    type: int
+    description: Antenna gain for 2.4 GHz band
+    required: true
+
+  wifi-ant-gain-5g-band1:
+    type: int
+    description: Antenna gain for 5 GHz band1 (5150-5350 MHz)
+    required: true
+
+  wifi-ant-gain-5g-band2:
+    type: int
+    description: Antenna gain for 5 GHz band2 (5470-5730 MHz)
+    required: true
+
+  wifi-ant-gain-5g-band3:
+    type: int
+    description: Antenna gain for 5 GHz band3 (5730-5895 MHz)
+    required: true
+
+  wifi-band-edge-2g-lo-dss:
+    type: int
+    description: DSSS Transmit power backoff (in dB) for lower edge of 2.4 GHz band
+    required: true
+
+  wifi-band-edge-2g-lo-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for lower edge of 2.4 GHz band
+    required: true
+
+  wifi-band-edge-2g-lo-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for lower edge of 2.4 GHz band
+    required: true
+
+  wifi-band-edge-2g-hi-dsss:
+    type: int
+    description: DSSS Transmit power backoff (in dB) for upper edge of 2.4 GHz band
+    required: true
+
+  wifi-band-edge-2g-hi-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for upper edge of 2.4 GHz band
+    required: true
+
+  wifi-band-edge-2g-hi-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for upper edge of 2.4 GHz band
+    required: true
+
+  wifi-band-edge-5g-unii-1-lo-ht:
+    type: int
+    description: HT Transmit power backoff (in dB) for lower edge of UNII-1 band
+    required: true
+
+  wifi-band-edge-5g-unii-1-lo-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for lower edge of UNII-1 band
+    required: true
+
+  wifi-band-edge-5g-unii-1-hi-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for upper edge of UNII-1 band
+    required: true
+
+  wifi-band-edge-5g-unii-1-hi-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for upper edge of UNII-1 band
+    required: true
+
+  wifi-band-edge-5g-unii-2a-lo-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for lower edge of UNII-2A band
+    required: true
+
+  wifi-band-edge-5g-unii-2a-lo-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for lower edge of UNII-2A band
+    required: true
+
+  wifi-band-edge-5g-unii-2a-hi-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for upper edge of UNII-2A band
+    required: true
+
+  wifi-band-edge-5g-unii-2a-hi-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for upper edge of UNII-2A band
+    required: true
+
+  wifi-band-edge-5g-unii-2c-lo-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for lower edge of UNII-2C band
+    required: true
+
+  wifi-band-edge-5g-unii-2c-lo-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for lower edge of UNII-2C band
+    required: true
+
+  wifi-band-edge-5g-unii-2c-hi-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for upper edge of UNII-2C band
+    required: true
+
+  wifi-band-edge-5g-unii-2c-hi-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for upper edge of UNII-2C band
+    required: true
+
+  wifi-band-edge-5g-unii-3-lo-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for lower edge of UNII-3 band
+    required: true
+
+  wifi-band-edge-5g-unii-3-lo-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for lower edge of UNII-3 band
+    required: true
+
+  wifi-band-edge-5g-unii-3-hi-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for upper edge of UNII-3 band
+    required: true
+
+  wifi-band-edge-5g-unii-3-hi-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for upper edge of UNII-3 band
+    required: true
+
+  wifi-band-edge-5g-unii-4-lo-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for lower edge of UNII-4 band
+    required: true
+
+  wifi-band-edge-5g-unii-4-lo-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for lower edge of UNII-4 band
+    required: true
+
+  wifi-band-edge-5g-unii-4-hi-ht:
+    type: int
+    description: HT/VHT Transmit power backoff (in dB) for upper edge of UNII-4 band
+    required: true
+
+  wifi-band-edge-5g-unii-4-hi-he:
+    type: int
+    description: HE Transmit power backoff (in dB) for upper edge of UNII-4 band
+    required: true
+
+  wifi-pcb-loss-2g:
+    type: int
+    description: PCB loss for 2.4 GHz band
+    required: true
+
+  wifi-pcb-loss-5g-band1:
+    type: int
+    description: PCB loss for 5 GHz band (5150 MHz - 5350 MHz)
+    required: true
+
+  wifi-pcb-loss-5g-band2:
+    type: int
+    description: PCB loss for 5 GHz band (5470 MHz - 5730 MHz)
+    required: true
+
+  wifi-pcb-loss-5g-band3:
+    type: int
+    description: PCB loss for 5 GHz band (5730 MHz - 5895 MHz)
+    required: true

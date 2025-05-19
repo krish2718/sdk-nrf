@@ -20,6 +20,7 @@ rsource "mspi/Kconfig"
 rsource "net/Kconfig"
 rsource "sensor/Kconfig"
 rsource "serial/Kconfig"
+rsource "nrf_wifi71/Kconfig.nrfwifi"
 
 config HPF
 	bool

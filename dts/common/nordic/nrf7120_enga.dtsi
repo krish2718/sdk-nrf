@@ -873,9 +873,45 @@
 		wifi-max-tx-pwr-5g-mid-mcs7 = <13>;
 		wifi-max-tx-pwr-5g-high-mcs0 = <12>;
 		wifi-max-tx-pwr-5g-high-mcs7 = <12>;
+		wifi-ant-gain-2g = <0>;
+		wifi-ant-gain-5g-band1 = <0>;
+		wifi-ant-gain-5g-band2 = <0>;
+		wifi-ant-gain-5g-band3 = <0>;
+		wifi-band-edge-2g-lo-dss = <0>;
+		wifi-band-edge-2g-lo-ht = <0>;
+		wifi-band-edge-2g-lo-he = <0>;
+		wifi-band-edge-2g-hi-dsss = <0>;
+		wifi-band-edge-2g-hi-ht = <0>;
+		wifi-band-edge-2g-hi-he = <0>;
+		wifi-band-edge-5g-unii-1-lo-ht = <0>;
+		wifi-band-edge-5g-unii-1-lo-he = <0>;
+		wifi-band-edge-5g-unii-1-hi-ht = <0>;
+		wifi-band-edge-5g-unii-1-hi-he = <0>;
+		wifi-band-edge-5g-unii-2a-lo-ht = <0>;
+		wifi-band-edge-5g-unii-2a-lo-he = <0>;
+		wifi-band-edge-5g-unii-2a-hi-ht = <0>;
+		wifi-band-edge-5g-unii-2a-hi-he = <0>;
+		wifi-band-edge-5g-unii-2c-lo-ht = <0>;
+		wifi-band-edge-5g-unii-2c-lo-he = <0>;
+		wifi-band-edge-5g-unii-2c-hi-ht = <0>;
+		wifi-band-edge-5g-unii-2c-hi-he = <0>;
+		wifi-band-edge-5g-unii-3-lo-ht = <0>;
+		wifi-band-edge-5g-unii-3-lo-he = <0>;
+		wifi-band-edge-5g-unii-3-hi-ht = <0>;
+		wifi-band-edge-5g-unii-3-hi-he = <0>;
+		wifi-band-edge-5g-unii-4-lo-ht = <0>;
+		wifi-band-edge-5g-unii-4-lo-he = <0>;
+		wifi-band-edge-5g-unii-4-hi-ht = <0>;
+		wifi-band-edge-5g-unii-4-hi-he = <0>;
+		wifi-pcb-loss-2g = <0>;
+		wifi-pcb-loss-5g-band1 = <0>;
+		wifi-pcb-loss-5g-band2 = <0>;
+		wifi-pcb-loss-5g-band3 = <0>;
 
 		wlan0: wlan0 {
 			compatible = "nordic,wlan";
 		};
+
+
 	};
 };
