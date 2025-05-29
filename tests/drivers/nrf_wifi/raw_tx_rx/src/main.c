@@ -1,10 +1,10 @@
 /* main.c - Application main entry point */
 
 /*
-* Copyright (c) 2025 Nordic Semiconductor ASA
-*
-* SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
-*/
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
 
 #define NET_LOG_LEVEL CONFIG_NET_L2_ETHERNET_LOG_LEVEL
 
@@ -45,7 +45,7 @@ struct packet_data {
 };
 
 struct packet_data test_packet;
-#define STACK_SIZE	CONFIG_RX_THREAD_STACK_SIZE
+#define STACK_SIZE CONFIG_RX_THREAD_STACK_SIZE
 struct sockaddr_ll sa;
 struct sockaddr_ll dst;
 
@@ -53,8 +53,8 @@ static unsigned int total_tx_bytes;
 static unsigned int first_pkt_timestamp;
 static unsigned int last_pkt_timestamp;
 
-#define RDW(addr)           (*(volatile unsigned int *)(addr))
-#define WRW(addr, data)     (*(volatile unsigned int *)(addr) = (data))
+#define RDW(addr)	(*(volatile unsigned int *)(addr))
+#define WRW(addr, data) (*(volatile unsigned int *)(addr) = (data))
 
 struct beacon {
 	uint16_t frame_control;
@@ -68,21 +68,21 @@ struct beacon {
 
 typedef struct {
 	/* Standard 802.11 frame header fields */
-	uint16_t frame_control;  /* Frame control field (including subtype: QoS data) */
+	uint16_t frame_control; /* Frame control field (including subtype: QoS data) */
 	uint16_t duration;
-	uint8_t  address1[6];  /* Receiver address */
-	uint8_t  address2[6];  /* Transmitter address */
-	uint8_t  address3[6];  /* BSSID */
+	uint8_t address1[6];	   /* Receiver address */
+	uint8_t address2[6];	   /* Transmitter address */
+	uint8_t address3[6];	   /* BSSID */
 	uint16_t sequence_control; /* Sequence control field */
 
 	/* QoS specific fields */
 	uint16_t QoS;
 	/* Data payload */
-	uint8_t  data[QOS_PAYLOAD_LENGTH];
+	uint8_t data[QOS_PAYLOAD_LENGTH];
 	uint32_t frame_check_sequence;
 } wifi_qos_packet;
 
-static struct beacon test_beacon_frame  = {
+static struct beacon test_beacon_frame = {
 	.frame_control = htons(0X8000),
 	.duration = 0X0000,
 	.da = {0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF},
@@ -118,31 +118,33 @@ void configurePlayoutCapture(uint32_t pktLen, uint32_t holdOff, uint32_t flushBy
 	};
 
 	const struct playout_capture_setting settings[] = {
-	#ifdef CONFIG_RAW_TX_RX_LOOPBACK
+#ifdef CONFIG_RAW_TX_RX_LOOPBACK
 		{0x0, 0x2, "WRW setting to value 0x02"},
 		{0x4, holdOff, "WRW setting to value 0x04"},
 		{0x8, (pktLen + holdOff + flushBytes), "WRW setting to value 0x08"},
-	#endif
-	#ifdef CONFIG_RAW_RX_BURST
+#endif
+#ifdef CONFIG_RAW_RX_BURST
 		{0x0, 0x3, "WRW setting to value 0x03"},
 		{0x4, holdOff, "WRW setting to value 0x04"},
 		{0x8, (pktLen + holdOff + flushBytes), "WRW setting to value 0x08"},
-	#endif
-	#ifdef CONFIG_RAW_TX_BURST
+#endif
+#ifdef CONFIG_RAW_TX_BURST
 		{0x0, 0x3, "WRW setting to value 0x03"},
 		{0x4, 0x7F, "WRW setting to value 0x04"},
 		{0x8, 0, "WRW setting to value 0x08"},
-	#endif
-		{0xC, 0x1, "Switch to the RF playout"}
-	};
+#endif
+		{0xC, 0x1, "Switch to the RF playout"}};
 
 	LOG_INF("%s: Setting Playout capture settings", __func__);
 	NRF_WIFICORE_RPURFBUS->RFCTRL.AXIMASTERACCESS = 0x31;
-	while (NRF_WIFICORE_RPURFBUS->RFCTRL.AXIMASTERACCESS != 0x31);
+	while (NRF_WIFICORE_RPURFBUS->RFCTRL.AXIMASTERACCESS != 0x31)
+		;
 
 	for (size_t i = 0; i < ARRAY_SIZE(settings); i++) {
-		WRW((uintptr_t)NRF_WIFICORE_RPURFBUS + settings[i].address_offset, settings[i].value);
-		unsigned int value = RDW((uintptr_t)NRF_WIFICORE_RPURFBUS + settings[i].address_offset);
+		WRW((uintptr_t)NRF_WIFICORE_RPURFBUS + settings[i].address_offset,
+		    settings[i].value);
+		unsigned int value =
+			RDW((uintptr_t)NRF_WIFICORE_RPURFBUS + settings[i].address_offset);
 		LOG_INF("%s: %s is 0x%x", __func__, settings[i].description, value);
 	}
 
@@ -156,26 +158,26 @@ void configurePlayoutCapture(uint32_t pktLen, uint32_t holdOff, uint32_t flushBy
 
 static void wifi_set_mode(int mode_val)
 {
-int ret;
-struct net_if *iface = NULL;
-struct wifi_mode_info mode_info = {0};
+	int ret;
+	struct net_if *iface = NULL;
+	struct wifi_mode_info mode_info = {0};
 
-mode_info.oper = WIFI_MGMT_SET;
+	mode_info.oper = WIFI_MGMT_SET;
 
-iface = net_if_get_first_wifi();
-if (iface == NULL) {
-	LOG_ERR("Failed to get Wi-Fi iface");
-	return;
-}
+	iface = net_if_get_first_wifi();
+	if (iface == NULL) {
+		LOG_ERR("Failed to get Wi-Fi iface");
+		return;
+	}
 
-mode_info.if_index = net_if_get_by_iface(iface);
-mode_info.mode = mode_val;
+	mode_info.if_index = net_if_get_by_iface(iface);
+	mode_info.mode = mode_val;
 
-ret = net_mgmt(NET_REQUEST_WIFI_MODE, iface, &mode_info, sizeof(mode_info));
-if (ret) {
-	LOG_ERR("Mode setting failed %d", ret);
-}
-LOG_INF("Mode setting set to mode_val = %d", mode_val);
+	ret = net_mgmt(NET_REQUEST_WIFI_MODE, iface, &mode_info, sizeof(mode_info));
+	if (ret) {
+		LOG_ERR("Mode setting failed %d", ret);
+	}
+	LOG_INF("Mode setting set to mode_val = %d", mode_val);
 }
 
 static int wifi_set_tx_injection_mode(void)
@@ -199,63 +201,61 @@ static int wifi_set_tx_injection_mode(void)
 
 static int wifi_set_channel(void)
 {
-struct net_if *iface;
-struct wifi_channel_info channel_info = {0};
-int ret;
+	struct net_if *iface;
+	struct wifi_channel_info channel_info = {0};
+	int ret;
 
-channel_info.oper = WIFI_MGMT_SET;
+	channel_info.oper = WIFI_MGMT_SET;
 
-iface = net_if_get_first_wifi();
-if (iface == NULL) {
-	LOG_ERR("Failed to get Wi-Fi iface");
-	return -1;
-}
+	iface = net_if_get_first_wifi();
+	if (iface == NULL) {
+		LOG_ERR("Failed to get Wi-Fi iface");
+		return -1;
+	}
 
-channel_info.if_index = net_if_get_by_iface(iface);
-channel_info.channel = CONFIG_NRF_WIFI_RAW_TX_PKT_SAMPLE_CHANNEL;
-if ((channel_info.channel < WIFI_CHANNEL_MIN) ||
-	(channel_info.channel > WIFI_CHANNEL_MAX)) {
-	LOG_ERR("Invalid channel number. Range is (1-233)");
-	return -1;
-}
+	channel_info.if_index = net_if_get_by_iface(iface);
+	channel_info.channel = CONFIG_NRF_WIFI_RAW_TX_PKT_SAMPLE_CHANNEL;
+	if ((channel_info.channel < WIFI_CHANNEL_MIN) ||
+	    (channel_info.channel > WIFI_CHANNEL_MAX)) {
+		LOG_ERR("Invalid channel number. Range is (1-233)");
+		return -1;
+	}
 
-ret = net_mgmt(NET_REQUEST_WIFI_CHANNEL, iface, &channel_info, sizeof(channel_info));
-if (ret) {
-	LOG_ERR(" Channel setting failed %d\n", ret);
-	return -1;
-}
+	ret = net_mgmt(NET_REQUEST_WIFI_CHANNEL, iface, &channel_info, sizeof(channel_info));
+	if (ret) {
+		LOG_ERR(" Channel setting failed %d\n", ret);
+		return -1;
+	}
 
-LOG_INF("Wi-Fi channel set to %d", channel_info.channel);
-return 0;
+	LOG_INF("Wi-Fi channel set to %d", channel_info.channel);
+	return 0;
 }
 
 static int setup_rawrecv_socket(struct sockaddr_ll *dst)
 {
-		int ret;
-		struct timeval timeo_optval = {
-				.tv_sec = 0,
-				.tv_usec = 10000,
-		};
+	int ret;
+	struct timeval timeo_optval = {
+		.tv_sec = 0,
+		.tv_usec = 10000,
+	};
 
 	rx_raw_socket_fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-		if (rx_raw_socket_fd < 0) {
-				LOG_ERR("Failed to create RAW socket : %d",
-								errno);
-				return -errno;
-		}
+	if (rx_raw_socket_fd < 0) {
+		LOG_ERR("Failed to create RAW socket : %d", errno);
+		return -errno;
+	}
 
-		dst->sll_ifindex = net_if_get_by_iface(net_if_get_first_wifi());
-		dst->sll_family = AF_PACKET;
+	dst->sll_ifindex = net_if_get_by_iface(net_if_get_first_wifi());
+	dst->sll_family = AF_PACKET;
 
-		ret = bind(rx_raw_socket_fd, (const struct sockaddr *)dst,
-						sizeof(struct sockaddr_ll));
-		if (ret < 0) {
-				LOG_ERR("Failed to bind packet socket : %d", errno);
-				return -errno;
-		}
+	ret = bind(rx_raw_socket_fd, (const struct sockaddr *)dst, sizeof(struct sockaddr_ll));
+	if (ret < 0) {
+		LOG_ERR("Failed to bind packet socket : %d", errno);
+		return -errno;
+	}
 
 	ret = setsockopt(rx_raw_socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeo_optval,
-				sizeof(timeo_optval));
+			 sizeof(timeo_optval));
 	if (ret < 0) {
 		LOG_ERR("Failed to set socket options : %s", strerror(errno));
 		return -errno;
@@ -325,10 +325,10 @@ int wifi_send_raw_tx_pkt(int sockfd, char *test_frame, size_t buf_length, struct
 }
 
 static int wifi_send_single_raw_tx_packet(int sockfd, char *test_frame, size_t buf_length,
-					struct sockaddr_ll *sa)
+					  struct sockaddr_ll *sa)
 {
 	memcpy(test_frame + sizeof(struct raw_tx_pkt_header), &test_beacon_frame,
-		sizeof(test_beacon_frame));
+	       sizeof(test_beacon_frame));
 
 	int ret = wifi_send_raw_tx_pkt(sockfd, test_frame, buf_length, sa);
 	if (ret < 0) {
@@ -406,7 +406,8 @@ static int process_single_rx_packet(struct packet_data *packet)
 	return 0;
 }
 
-static void initialize(void) {
+static void initialize(void)
+{
 	/* wait for supplicant Init */
 	k_sleep(K_MSEC(3));
 	/* MONITOR mode */
@@ -418,7 +419,8 @@ static void initialize(void) {
 	k_sleep(K_MSEC(10));
 }
 
-static void cleanup(void) {
+static void cleanup(void)
+{
 	close(raw_socket_fd);
 }
 
@@ -441,16 +443,16 @@ static int wifi_send_recv_tx_packets_serial(unsigned int num_pkts)
 	buf_length = sizeof(struct raw_tx_pkt_header) + sizeof(test_beacon_frame);
 	memcpy(test_frame, &packet, sizeof(struct raw_tx_pkt_header));
 	memcpy(test_frame + sizeof(struct raw_tx_pkt_header), &test_beacon_frame,
-		sizeof(test_beacon_frame));
+	       sizeof(test_beacon_frame));
 
 	for (int i = 0; i < num_pkts; i++) {
 		k_sleep(K_MSEC(3));
 		LOG_INF("sending packet to lower layer");
-		ret = sendto(raw_socket_fd, test_frame, buf_length, 0,
-				(struct sockaddr *)&sa, sizeof(sa));
+		ret = sendto(raw_socket_fd, test_frame, buf_length, 0, (struct sockaddr *)&sa,
+			     sizeof(sa));
 		if (ret < 0) {
 			LOG_ERR("Unable to send beacon frame: %s", strerror(errno));
-			return -1 ;
+			return -1;
 		}
 		process_single_rx_packet(&test_packet);
 	}
@@ -467,7 +469,8 @@ ZTEST(nrf_wifi, test_raw_tx_rx)
 	configurePlayoutCapture(0xCA60, 0x7f, 0x100);
 	setup_rawrecv_socket(&dst);
 	LOG_INF("TX count is set is %d", CONFIG_RAW_TX_RX_TRANSMIT_COUNT);
-	zassert_false(wifi_send_recv_tx_packets_serial(CONFIG_RAW_TX_RX_TRANSMIT_COUNT), "Failed to send raw tx packet");
+	zassert_false(wifi_send_recv_tx_packets_serial(CONFIG_RAW_TX_RX_TRANSMIT_COUNT),
+		      "Failed to send raw tx packet");
 }
 
 ZTEST(nrf_wifi, test_raw_tx)
@@ -484,18 +487,21 @@ ZTEST(nrf_wifi, test_raw_tx)
 	/* Send burst packets without querying for throughput */
 	LOG_INF("TX burst count is set to  %d", CONFIG_RAW_TX_TRANSMIT_COUNT);
 	wifi_send_raw_tx_packets_init();
-	while (count--)
-	{
+	while (count--) {
 		zassert_false(wifi_send_raw_tx_packets_tx(), "Failed to send raw tx packet");
 	}
 
-	LOG_INF("Total tx bytes sent is %d, duration is %d ms",
-		total_tx_bytes, (last_pkt_timestamp - first_pkt_timestamp));
-	uint32_t kbps = (total_tx_bytes * 8ULL * 1000) / (ONE_KB * (last_pkt_timestamp - first_pkt_timestamp));
-	uint32_t kbps_dec = ((total_tx_bytes * 8ULL * 1000 * 10) / (ONE_KB * (last_pkt_timestamp - first_pkt_timestamp))) % 10;
-	LOG_INF("Average transmit throughput in Kbps = %d.%d, Rate = %d, RateFlag = %d, PayloadLen = %d",
-			kbps, kbps_dec, CONFIG_RAW_TX_PKT_SAMPLE_RATE_VALUE,
-			CONFIG_RAW_TX_PKT_SAMPLE_RATE_FLAGS, sizeof(test_beacon_frame));
+	LOG_INF("Total tx bytes sent is %d, duration is %d ms", total_tx_bytes,
+		(last_pkt_timestamp - first_pkt_timestamp));
+	uint32_t kbps = (total_tx_bytes * 8ULL * 1000) /
+			(ONE_KB * (last_pkt_timestamp - first_pkt_timestamp));
+	uint32_t kbps_dec = ((total_tx_bytes * 8ULL * 1000 * 10) /
+			     (ONE_KB * (last_pkt_timestamp - first_pkt_timestamp))) %
+			    10;
+	LOG_INF("Average transmit throughput in Kbps = %d.%d, Rate = %d, RateFlag = %d, PayloadLen "
+		"= %d",
+		kbps, kbps_dec, CONFIG_RAW_TX_PKT_SAMPLE_RATE_VALUE,
+		CONFIG_RAW_TX_PKT_SAMPLE_RATE_FLAGS, sizeof(test_beacon_frame));
 
 	wifi_send_raw_tx_packets_deinit();
 	if (total_tx_bytes == 0) {
