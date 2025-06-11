@@ -1,0 +1,12 @@
+/{
+    /delete-node/ memory@20070000;
+
+    chosen {
+        zephyr,ipc_shm = <>;
+    };
+};
+
+
+&sram0_image {
+    reg = <0x20000000 DT_SIZE_K(512)>;
+};
