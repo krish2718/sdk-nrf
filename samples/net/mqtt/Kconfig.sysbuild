@@ -5,6 +5,7 @@
 #
 
 config WIFI_NRF70
-	default y if BOARD_NRF7002DK_NRF5340_CPUAPP_NS || BOARD_NRF54L15DK_NRF54L15_CPUAPP || BOARD_NRF7002DK_NRF5340_CPUAPP
+	# 5340 doesn't have a Wi-Fi, but we cannot use sheilds in sysbuild, so, we enable Wi-Fi for all.
+	default y if BOARD_NRF7002DK_NRF5340_CPUAPP_NS || BOARD_NRF54L15DK_NRF54L15_CPUAPP || BOARD_NRF7002DK_NRF5340_CPUAPP || BOARD_NRF5340DK_NRF5340_CPUAPP
 
 source "share/sysbuild/Kconfig"
