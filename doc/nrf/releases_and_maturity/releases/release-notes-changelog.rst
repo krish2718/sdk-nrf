@@ -700,6 +700,8 @@ Wi-Fi samples
 
   * Updated the sample to include both One-shot and Continuous modes of operations.
 
+* Added the :ref:`wifi_provisioning_internal_sample` sample that demonstrates the core Wi-Fi provisioning functionality independently of the transport layer (Bluetooth LE or Wi-Fi SoftAP).
+
 Other samples
 -------------
 
