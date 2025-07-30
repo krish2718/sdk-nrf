@@ -1090,7 +1090,7 @@ Bluetooth libraries and services
   * Removed the sysbuild control over the :kconfig:option:`CONFIG_BT_FAST_PAIR` Kconfig option that is defined in the main (default) image.
     Sysbuild no longer sets the value of this Kconfig option.
 
-* :ref:`wifi_prov_readme` library:
+* :ref:`lib_wifi_prov_ble` library:
 
   * Added a new section :ref:`wifi_provisioning_protocol`.
 

@@ -629,7 +629,7 @@ Wi-Fi samples
 * Updated:
 
   * The :ref:`wifi_shell_sample` sample now uses the Wi-Fi credentials and :ref:`wifi_mgmt_ext` libraries.
-  * The :ref:`wifi_provisioning` sample now uses the Wi-Fi credentials and :ref:`wifi_prov_readme` libraries.
+  * The :ref:`wifi_provisioning` sample now uses the Wi-Fi credentials and :ref:`lib_wifi_prov_ble` libraries.
 
 * Removed nRF7002 revision A support.
 
@@ -679,7 +679,7 @@ Bluetooth libraries and services
 --------------------------------
 
 * Added the :ref:`nsms_readme` library.
-* Added the :ref:`wifi_prov_readme` library.
+* Added the :ref:`lib_wifi_prov_ble` library.
 
 * :ref:`mds_readme` library:
 
