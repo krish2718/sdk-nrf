@@ -74,7 +74,7 @@ static void update_wifi_status_in_adv(void)
 	prov_svc_data[ADV_DATA_VERSION_IDX] = PROV_SVC_VER;
 
 	/* If no config, mark it as unprovisioned. */
-	if (!bt_wifi_prov_state_get()) {
+	if (!wifi_prov_state_get()) {
 		prov_svc_data[ADV_DATA_FLAG_IDX] &= ~ADV_DATA_FLAG_PROV_STATUS_BIT;
 	} else {
 		prov_svc_data[ADV_DATA_FLAG_IDX] |= ADV_DATA_FLAG_PROV_STATUS_BIT;
@@ -261,7 +261,7 @@ int main(void)
 
 	printk("Bluetooth initialized.\n");
 
-	rc = bt_wifi_prov_init();
+	rc = wifi_prov_init();
 	if (rc == 0) {
 		printk("Wi-Fi provisioning service starts successfully.\n");
 	} else {

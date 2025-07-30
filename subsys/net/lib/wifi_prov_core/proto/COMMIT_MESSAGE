@@ -1,0 +1,15 @@
+proto: improve error handling and validation in WiFi provisioning config generator
+
+- Rename generate_eap_tls_config.py to generate_wifi_prov_config.py for better clarity
+- Add proper copyright and license headers to Makefile and Python script
+- Improve error handling with detailed exception messages
+- Add validation for auth mode values to prevent invalid enumerator errors
+- Enhance documentation with proper Doxygen-style comments
+- Add validation for EAP-TLS specific auth modes
+- Improve code structure following Zephyr RTOS coding standards
+
+The script now properly validates auth mode values before attempting to
+create protobuf messages, preventing the "invalid enumerator" error
+that occurred when using auth mode 12 (EAP) for EAP-TLS configuration.
+
+Signed-off-by: Your Name <your.email@example.com> 

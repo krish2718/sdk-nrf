@@ -708,6 +708,10 @@ Bluetooth libraries and services
     As a result, the workaround for the FMDN clock value is no longer needed.
     For details, see the ``NCSDK-32268`` known issue in the :ref:`known_issues` page.
 
+  * Split the core Wi-Fi provisioning functionality into the :ref:`wifi_prov_core_readme` library.
+    The library is now a standalone library that can be used by applications to implement the Wi-Fi provisioning functionality independently of the Bluetooth stack.
+
+
 Common Application Framework
 ----------------------------
 

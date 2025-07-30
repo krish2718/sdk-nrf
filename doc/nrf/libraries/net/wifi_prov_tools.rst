@@ -1,5 +1,5 @@
 WiFi Provisioning Configuration Generator
-========================================
+=========================================
 
 This tool generates protobuf configuration messages for WiFi provisioning, supporting both EAP-TLS (Enterprise) and Personal (WPA2-PSK/WPA3-PSK) modes.
 
