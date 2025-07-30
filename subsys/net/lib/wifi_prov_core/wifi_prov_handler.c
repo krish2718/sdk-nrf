@@ -19,8 +19,18 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 
-#include <bluetooth/services/wifi_provisioning.h>
-#include "wifi_prov_internal.h"
+#include <net/wifi_prov/wifi_prov.h>
+
+/* Weak transport functions - can be overridden by transport layer */
+__weak int wifi_prov_send_rsp(struct net_buf_simple *rsp)
+{
+	return -ENOTSUP;
+}
+
+__weak int wifi_prov_send_result(struct net_buf_simple *result)
+{
+	return -ENOTSUP;
+}
 
 LOG_MODULE_REGISTER(wifi_prov, CONFIG_BT_WIFI_PROV_LOG_LEVEL);
 
@@ -252,8 +262,11 @@ static void prov_set_config_handler(Request *req, Response *rsp)
 				config.header.type = WIFI_SECURITY_TYPE_PSK_SHA256;
 			} else if (req->config.wifi.auth == AuthMode_WPA3_PSK) {
 				config.header.type = WIFI_SECURITY_TYPE_SAE;
+			}
+		}
+	} else {
 #if defined(CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE)
-			} else if (req->config.wifi.auth == AuthMode_WPA2_ENTERPRISE) {
+			if (req->config.wifi.auth == AuthMode_WPA2_ENTERPRISE) {
 				config.header.type = WIFI_SECURITY_TYPE_EAP_TLS;
 				if (req->config.has_certs == true) {
 					if (req->config.certs.has_ca_cert) {
@@ -293,10 +306,8 @@ static void prov_set_config_handler(Request *req, Response *rsp)
 							req->config.certs.private_key.size);
 					}
 				}
+			} else
 #endif /* CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE */
-			}
-		}
-	} else {
 		/* If no passphrase provided, ignore the auth field and regard it as open */
 		config.header.type = WIFI_SECURITY_TYPE_NONE;
 	}
@@ -647,7 +658,7 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb,
 	}
 }
 
-bool bt_wifi_prov_state_get(void)
+bool wifi_prov_state_get(void)
 {
 	struct wifi_credentials_personal config = { 0 };
 
@@ -659,7 +670,7 @@ bool bt_wifi_prov_state_get(void)
 	}
 }
 
-int bt_wifi_prov_init(void)
+int wifi_prov_init(void)
 {
 	net_mgmt_init_event_callback(&wifi_prov_mgmt_cb,
 				     wifi_mgmt_event_handler,

@@ -1,10 +1,10 @@
 WiFi Provisioning Configuration Generator
-========================================
+=========================================
 
 This tool generates protobuf configuration messages for WiFi provisioning, supporting both EAP-TLS (Enterprise) and Personal (WPA2-PSK/WPA3-PSK) modes.
 
 Prerequisites
-------------
+-------------
 
 1. Install protobuf compiler and Python dependencies:
 
@@ -44,7 +44,7 @@ Required certificate files in the cert directory:
 - ``client-key2.pem`` - Secondary client private key
 
 Personal Mode
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 For home/office networks using passphrase authentication:
 
@@ -59,7 +59,7 @@ For home/office networks using passphrase authentication:
        -w "mypassword" -a 6 -j -o wpa3_config.json
 
 Command Line Options
--------------------
+--------------------
 
 Positional Arguments:
 - ``ssid`` - WiFi network name
@@ -100,7 +100,7 @@ Generate EAP-TLS Configuration
        -d /path/to/certs
 
 Generate Personal Mode Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -118,7 +118,7 @@ Generate Personal Mode Configuration
        -j -o personal_5ghz_config.json
 
 Complete Example Workflow
-------------------------
+-------------------------
 
 1. Generate protobuf definitions:
 
@@ -170,7 +170,7 @@ When using the ``-o`` option, files are saved in the specified format:
 - ``-o file.bin`` - Save as binary protobuf file
 
 Configuration Details
--------------------
+---------------------
 
 The generated configuration includes:
 
@@ -184,7 +184,7 @@ The generated configuration includes:
 - **Passphrase**: WiFi password (for Personal mode, masked in output)
 
 Error Handling
--------------
+--------------
 
 The tool performs several validation checks:
 
@@ -200,7 +200,7 @@ Common error messages:
 - "Must specify either --cert-dir (EAP-TLS) or --passphrase (Personal)"
 
 Integration
-----------
+-----------
 
 The generated protobuf messages can be used with:
 
