@@ -163,17 +163,17 @@ In the ``Response`` message, the ``request_op_code`` is ``FORGET_CONFIG``, and t
 When the connection state changes or an attempt fails, the target will set up a ``Result`` message, and the ``state`` field indicates the current state of the Wi-Fi, and the ``reason`` field indicates the failure reason.
 
 Transport Interface
-*******************
+******************
 
 The core library provides a transport-agnostic interface through weak functions that can be overridden by transport layers:
 
 * `wifi_prov_send_rsp()`: Sends Response messages to the transport layer
 * `wifi_prov_send_result()`: Sends Result messages to the transport layer
 
-Transport layers must implement these functions to handle the actual message transmission (e.g., BLE indications/notifications, USB transfers, UART transmissions).
+Transport layers must implement these functions to handle the actual message transmission (for example, BLE indications/notifications, USB transfers, UART transmissions).
 
 Configuration management
-************************
+***********************
 
 The configuration management component manages Wi-Fi configurations.
 It uses the :ref:`Wi-Fi credentials <zephyr:lib_wifi_credentials>` library to handle the configurations in flash.
@@ -182,7 +182,7 @@ The component has one slot in RAM to save the configurations.
 You can save the configuration in flash or RAM during provisioning.
 
 Dependencies
-************
+***********
 
 The core library depends on:
 

@@ -86,7 +86,7 @@ The purpose of each characteristic is as follows:
 * ``Data Out``: For server to send ``Result`` message to the client.
 
 Transport Interface Implementation
-********************************
+**********************************
 
 The BLE transport layer implements the transport interface defined by the core Wi-Fi provisioning library:
 
