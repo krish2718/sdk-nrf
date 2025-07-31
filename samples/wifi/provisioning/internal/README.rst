@@ -26,7 +26,7 @@ Features
 - **Configurable Generation**: WiFi configuration generated from Kconfig options
 
 Architecture
------------
+------------
 
 The sample demonstrates the decoupled architecture:
 
@@ -36,7 +36,7 @@ The sample demonstrates the decoupled architecture:
 - **Configuration**: Generated from Kconfig options at build time
 
 Kconfig Options
-==============
+--------------
 
 The following Kconfig options are available for configuring the WiFi provisioning:
 
@@ -100,7 +100,7 @@ WiFi Bands
 - 3: 6 GHz
 
 Shell Commands
-=============
+--------------
 
 The sample provides several shell commands for testing WiFi provisioning functionality:
 
@@ -136,16 +136,18 @@ The sample provides several shell commands for testing WiFi provisioning functio
 Usage Examples
 -------------
 
-**Basic Testing**
-~~~~~~~~~~~~~~~~
+Basic Testing
+~~~~~~~~~~~~
 
 1. Build and flash the sample:
+
    .. code-block:: bash
 
        west build -b nrf7002dk/nrf5340/cpuapp samples/wifi/provisioning/internal
        west flash
 
 2. Connect to the device console and test basic commands:
+
    .. code-block:: text
 
        uart:~$ wifi_prov info
@@ -163,8 +165,8 @@ Usage Examples
        ===============================
        WiFi status request sent successfully
 
-**Advanced Testing**
-~~~~~~~~~~~~~~~~~~~
+Advanced Testing
+~~~~~~~~~~~~~~~
 
 Test custom protobuf messages:
 
@@ -178,8 +180,8 @@ Test custom protobuf messages:
     ===============================
     Raw data sent successfully
 
-**Protocol Testing**
-~~~~~~~~~~~~~~~~~~
+Protocol Testing
+~~~~~~~~~~~~~~~
 
 The sample automatically decodes and logs all protobuf messages:
 
@@ -208,6 +210,7 @@ Build and Run
 ------------
 
 1. **Configure the sample** (optional):
+
    .. code-block:: bash
 
        # Edit prj.conf or use west build with -D options
@@ -216,16 +219,19 @@ Build and Run
                -DCONFIG_WIFI_PROV_PASSPHRASE="mypassword"
 
 2. **Build the sample**:
+
    .. code-block:: bash
 
        west build -b nrf7002dk/nrf5340/cpuapp samples/wifi/provisioning/internal
 
 3. **Flash the device**:
+
    .. code-block:: bash
 
        west flash
 
 4. **Connect to console and test**:
+
    .. code-block:: bash
 
        # Connect to device console
