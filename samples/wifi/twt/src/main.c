@@ -410,6 +410,10 @@ int main(void)
 
 			LOG_INF("AP is TWT capable, establishing TWT");
 
+			/* Reset TWT response flags */
+			twt_resp_accept = false;
+			twt_resp_received = false;
+
 			ret = setup_twt();
 			if (ret) {
 				LOG_ERR("Failed to establish TWT flow: %d\n", ret);
