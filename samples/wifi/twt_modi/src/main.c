@@ -65,6 +65,7 @@ static struct {
 
 static bool twt_supported, twt_resp_received, twt_resp_accept;
 static uint32_t twt_flow_id = 1;
+static uint32_t dialog_token = 1;
 
 static bool wait_for_twt_resp_received(void)
 {
@@ -86,11 +87,10 @@ static int setup_twt(void)
 	struct wifi_twt_params params = { 0 };
 	int ret;
 
-	twt_flow_id = 1;
 	params.operation = WIFI_TWT_SETUP;
 	params.negotiation_type = WIFI_TWT_INDIVIDUAL;
 	params.setup_cmd = WIFI_TWT_SETUP_CMD_REQUEST;
-	params.dialog_token = 1;
+	params.dialog_token = dialog_token;
 	params.flow_id = twt_flow_id;
 	params.setup.responder = 0;
 	params.setup.trigger = IS_ENABLED(CONFIG_TWT_TRIGGER_ENABLE);
@@ -119,7 +119,7 @@ static int teardown_twt(void)
 	params.operation = WIFI_TWT_TEARDOWN;
 	params.negotiation_type = WIFI_TWT_INDIVIDUAL;
 	//params.setup_cmd = WIFI_TWT_SETUP_CMD_REQUEST;
-	params.dialog_token = 1;
+	params.dialog_token = dialog_token;
 	params.flow_id = twt_flow_id;
 
 	ret = net_mgmt(NET_REQUEST_WIFI_TWT, iface, &params, sizeof(params));
@@ -274,7 +274,7 @@ static void handle_wifi_twt_event(struct net_mgmt_event_callback *cb)
 
 		if (resp->teardown_status == WIFI_TWT_TEARDOWN_SUCCESS) {
 			
-			LOG_INF("TWT teardown success received for flow ID %d\n",
+			LOG_INF("TWT teardown success received for flow ID %d",
 				resp->flow_id);
 		} else {
 			LOG_INF("TWT teardown failed for flow ID %d\n",
@@ -432,7 +432,7 @@ int main(void)
 				return -1;
 			}
 
-			LOG_INF("AP is TWT capable, establishing TWT");
+			LOG_INF("AP is TWT capable, establishing TWT flow ID %d, dialog token %d", twt_flow_id, dialog_token);
 
 			ret = setup_twt();
 			if (ret) {
@@ -475,6 +475,8 @@ teardown:
 			}
 
 			k_sleep(K_SECONDS(10));
+			twt_flow_id = (twt_flow_id + 1) % 8;
+			dialog_token = (dialog_token + 1) % 256;
 		}
 	}
 
