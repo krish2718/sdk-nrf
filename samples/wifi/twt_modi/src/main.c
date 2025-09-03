@@ -244,7 +244,7 @@ static void print_twt_params(uint8_t dialog_token, uint8_t flow_id,
 	      twt_wake_interval);
 	LOG_INF("TWT interval: %lld us",
 	      twt_interval);
-	LOG_INF("========================");
+	LOG_INF("************************************************");
 }
 
 static void handle_wifi_twt_event(struct net_mgmt_event_callback *cb)
@@ -294,7 +294,8 @@ static void handle_wifi_twt_event(struct net_mgmt_event_callback *cb)
 		twt_resp_received = true;
 		twt_flow_id = resp->flow_id;
 
-		LOG_INF("== TWT negotiated parameters ==");
+		LOG_INF("TWT negotiated parameters");
+		LOG_INF("************************************************");
 		print_twt_params(resp->dialog_token,
 				 resp->flow_id,
 				 resp->negotiation_type,
@@ -386,6 +387,8 @@ static int wifi_connect(void)
 
 int main(void)
 {
+	int count = 1;
+
 	memset(&context, 0, sizeof(context));
 
 	net_mgmt_init_event_callback(&wifi_shell_mgmt_cb,
@@ -432,7 +435,8 @@ int main(void)
 				return -1;
 			}
 
-			LOG_INF("AP is TWT capable, establishing TWT flow ID %d, dialog token %d", twt_flow_id, dialog_token);
+			LOG_INF("AP is TWT capable, establishing TWT (count: %d) flow ID %d, dialog token %d",
+				count, twt_flow_id, dialog_token);
 
 			ret = setup_twt();
 			if (ret) {
@@ -477,6 +481,8 @@ teardown:
 			k_sleep(K_SECONDS(10));
 			twt_flow_id = (twt_flow_id + 1) % 8;
 			dialog_token = (dialog_token + 1) % 256;
+			count++;
+			LOG_INF("================================================");
 		}
 	}
 
