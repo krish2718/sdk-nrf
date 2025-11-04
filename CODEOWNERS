@@ -981,6 +981,7 @@
 /tests/tfm/                               @nrfconnect/ncs-aegir @magnev
 /tests/unity/                             @nordic-krch
 /tests/zephyr/arch/arm/                   @nrfconnect/ncs-low-level-test
+/tests/wifi/crypto/                       @adrianiainlam @krish2718
 /tests/zephyr/boards/nrf/                 @nrfconnect/ncs-low-level-test
 /tests/zephyr/drivers/adc/                @nrfconnect/ncs-low-level-test
 /tests/zephyr/drivers/audio/              @nrfconnect/ncs-low-level-test
