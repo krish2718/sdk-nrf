@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#include <freq.h>
+
+/ {
+	chosen {
+		zephyr,wifi = &wlan0;
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		softperipheral_ram: memory@2007c000 {
+			reg = <0x2007c000 0x4000>;
+			ranges = <0 0x2007c000 0x4000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			sqspi: sqspi@3b40 {
+				compatible = "nordic,nrf-sqspi";
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <0x3b40 0x200>;
+				status = "okay";
+				zephyr,pm-device-runtime-auto;
+
+				nrf70: nrf7002-sqspi@0 {
+					compatible = "nordic,nrf7002-sqspi";
+					status = "okay";
+					reg = <0>;
+
+					/* Include common nRF70 overlays */
+					#include "nrf7002eb2_sqspi_common.dtsi"
+					#include "nrf7002eb2_sqspi_common_5g.dtsi"
+
+					mspi-max-frequency = <DT_FREQ_M(24)>;
+					mspi-io-mode = "MSPI_IO_MODE_QUAD_1_4_4";
+					mspi-data-rate = "MSPI_DATA_RATE_SINGLE";
+					mspi-hardware-ce-num = <1>;
+					mspi-cpp-mode = "MSPI_CPP_MODE_0";
+					mspi-endian = "MSPI_BIG_ENDIAN";
+					mspi-ce-polarity = "MSPI_CE_ACTIVE_LOW";
+				};
+			};
+		};
+	};
+};

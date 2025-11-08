@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/* FLPR core overlay - sQSPI/MSPI configuration for nRF70 */
+
+#include <freq.h>
+
+&pinctrl {
+	sqspi_default: sqspi_default {
+		group1 {
+			psels = <NRF_PSEL(SDP_MSPI_SCK, 2, 1)>,
+				<NRF_PSEL(SDP_MSPI_CS0, 2, 5)>,
+				<NRF_PSEL(SDP_MSPI_DQ0, 2, 2)>;
+			nordic,drive-mode = <NRF_DRIVE_E0E1>;
+		};
+		group2 {
+			psels = <NRF_PSEL(SDP_MSPI_DQ1, 2, 4)>,
+				<NRF_PSEL(SDP_MSPI_DQ2, 2, 3)>,
+				<NRF_PSEL(SDP_MSPI_DQ3, 2, 0)>;
+			nordic,drive-mode = <NRF_DRIVE_E0E1>;
+			bias-pull-up;
+		};
+	};
+
+	sqspi_sleep: sqspi_sleep {
+		group1 {
+			low-power-enable;
+			psels = <NRF_PSEL(SDP_MSPI_SCK, 2, 1)>,
+				<NRF_PSEL(SDP_MSPI_CS0, 2, 5)>,
+				<NRF_PSEL(SDP_MSPI_DQ0, 2, 2)>,
+				<NRF_PSEL(SDP_MSPI_DQ1, 2, 4)>,
+				<NRF_PSEL(SDP_MSPI_DQ2, 2, 3)>,
+				<NRF_PSEL(SDP_MSPI_DQ3, 2, 0)>;
+		};
+	};
+};
+
+&cpuflpr_vpr {
+	pinctrl-0 = <&sqspi_default>;
+	pinctrl-1 = <&sqspi_sleep>;
+	pinctrl-names = "default", "sleep";
+	interrupts = <76 NRF_DEFAULT_IRQ_PRIORITY>;
+	status = "okay";
+};
+
+/* FLPR overlay only needs sQSPI pinctrl configuration */
