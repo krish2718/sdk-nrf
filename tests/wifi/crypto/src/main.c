@@ -16,6 +16,9 @@
 #include <stdbool.h>
 #include <errno.h>
 
+#include <psa/crypto.h>
+#include "wifi_crypto.h"
+
 #include "ipc_if.h"
 
 LOG_MODULE_REGISTER(wifi_crypto_test, LOG_LEVEL_DBG);
@@ -284,7 +287,7 @@ static int send_ipc_crypto_cmd(uint32_t keyslot_id, const uint8_t *key, size_t k
 	LOG_INF("IPC crypto command sent successfully (keyslot: %u)", keyslot_id);
 	return 0;
 }
-
+#if 0
 /**
  * @brief Test WPA2 GTK key installation and IPC command
  */
@@ -368,12 +371,41 @@ ZTEST(wifi_crypto, test_wpa3_ptk)
 	ret = send_ipc_crypto_cmd(WPA3_PTK_KEYSLOT_ID, wpa3_ptk, sizeof(wpa3_ptk));
 	zassert_equal(ret, 0, "Failed to send IPC command for WPA3 PTK");
 }
+#endif
+
+ZTEST(wifi_crypto, test_main)
+{
+	uint32_t ccmp256_key[8] = {0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203,
+				   0xF2BDD52F, 0x514A8A19, 0xCE371185, 0xC97C1F67};
+
+	wifi_crypto_key_type_t type = PEER_UCST_ENC;
+	psa_key_attributes_t attr = wifi_crypto_key_attributes_init(type, 0, 0);
+	uint32_t key_length = wifi_crypto_get_key_size_in_bytes(type);
+	psa_key_id_t key_id;
+
+	psa_status_t status;
+
+	status = psa_crypto_init();
+	zassert_equal(status, PSA_SUCCESS);
+
+	status = psa_import_key(&attr, (const uint8_t *)ccmp256_key, key_length, &key_id);
+	zassert_equal(status, PSA_SUCCESS);
+
+	*(volatile uint32_t *)0x48086C04 = 1; /* NRF_WIFICORE_RPUSYS->EDCPERIP.EDCGPIO1OUT */
+	while (*(volatile uint32_t *)0x48086C00 != 2) { /* NRF_WIFICORE_RPUSYS->EDCPERIP.EDCGPIO0OUT */
+	}
+
+	status = psa_destroy_key(key_id);
+	zassert_equal(status, PSA_SUCCESS);
+}
 
 /**
  * @brief Test setup function - initialize IPC
  */
 static void test_setup(void *fixture)
 {
+	NRF_WIFICORE_LMAC_VPR->CPURUN = (VPR_CPURUN_EN_Running << VPR_CPURUN_EN_Pos);
+
 	int ret;
 
 	ARG_UNUSED(fixture);

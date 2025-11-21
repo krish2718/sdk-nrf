@@ -20,6 +20,9 @@ if(CONFIG_MBEDTLS_PSA_CRYPTO_C)
     add_subdirectory(cracen)
   endif()
 
+  # TODO CONFIG_ ??
+  add_subdirectory(wifi_crypto)
+
   if(CONFIG_PSA_CRYPTO_DRIVER_OBERON)
     add_subdirectory(nrf_oberon)
   endif()
