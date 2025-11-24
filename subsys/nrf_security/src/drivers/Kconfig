@@ -42,6 +42,17 @@ config PSA_CRYPTO_DRIVER_IRONSIDE
 	  Internal option selected by IronSide firmware to enable
 	  the IronSide PSA crypto driver.
 
+config PSA_CRYPTO_DRIVER_WIFI_CRYPTO
+	bool "Wi-Fi Crypto PSA driver"
+	depends on MBEDTLS_PSA_CRYPTO_C
+	depends on CRACEN_LIB_KMU
+	depends on SOC_SERIES_NRF71X
+	default y if SOC_SERIES_NRF71X
+	help
+	  PSA crypto driver for Wi-Fi security key management.
+	  This driver handles cryptographic keys for Wi-Fi security
+	  using KMU (Key Management Unit) slots on nRF71 series devices.
+
 menu "Choose DRBG algorithm"
 config PSA_WANT_ALG_CTR_DRBG
 	prompt "CTR_DRBG"
@@ -286,5 +297,7 @@ rsource "nrf_cc3xx/Kconfig"
 rsource "cracen/Kconfig"
 
 rsource "nrf_oberon/Kconfig"
+
+rsource "wifi_crypto/Kconfig"
 
 rsource "zephyr/Kconfig"

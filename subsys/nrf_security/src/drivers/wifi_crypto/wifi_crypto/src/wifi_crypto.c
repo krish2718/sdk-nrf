@@ -1,6 +1,9 @@
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(wifi_crypto_driver, CONFIG_WIFI_CRYPTO_DRIVER_LOG_LEVEL);
+
 #include <stdint.h>
 #include <cracen/lib_kmu.h>
-#include "nrf.h"
+//#include "nrf.h"
 
 #include <zephyr/sys/__assert.h>
 
@@ -45,9 +48,11 @@ static uint32_t wifi_crypto_kmu_slot_id(wifi_crypto_key_type_t type, uint32_t db
 static int wifi_crypto_set_key_id(psa_key_attributes_t *attr, uint32_t db_id, uint32_t key_index)
 {
 	if (db_id >= 8) {
+		LOG_ERR("Invalid db_id: %d", db_id);
 		return 1;
 	}
-	if (key_index >= 4) {
+	if (key_index > 4) {
+		LOG_ERR("Invalid key_index: %d", key_index);
 		return 1;
 	}
 
@@ -56,7 +61,7 @@ static int wifi_crypto_set_key_id(psa_key_attributes_t *attr, uint32_t db_id, ui
 	 * then we need to implement a wifi_crypto_destroy_key function,
 	 * and extend psa_crypto_driver_wrappers.c psa_driver_wrapper_destroy_builtin_key
 	 * to call it. */
-	psa_key_id_t id = 0x3F000000 | ('W' << 16) | ('C' << 8) | (db_id << 2) | (key_index);
+	psa_key_id_t id = 0x3F000000 | ('A' << 16) | ('B' << 8) | (db_id << 2) | (key_index);
 	psa_set_key_id(attr, id);
 	return 0;
 }
@@ -122,15 +127,18 @@ static int wifi_crypto_kmu_provision_and_push(const uint32_t *key, wifi_crypto_k
 	src.rpolicy = LIB_KMU_REV_POLICY_ROTATING;
 	src.dest = wifi_crypto_get_key_start_addr(type, db_id, key_index);
 	if (src.dest == WIFI_CRYPTO_KEY_INDEX_INVALID) {
+		LOG_ERR("Invalid destination address (db_id: %d, key_index: %d)", db_id, key_index);
 		return 1;
 	}
 	src.metadata = 0;
 	int ret = lib_kmu_provision_slot(key_slot, &src);
 	if (ret) {
+		LOG_ERR("Failed to provision key (db_id: %d, key_index: %d): %d", db_id, key_index, ret);
 		return ret;
 	}
 	ret = lib_kmu_push_slot(key_slot);
 	if (ret) {
+		LOG_ERR("Failed to push key (db_id: %d, key_index: %d): %d", db_id, key_index, ret);
 		return ret;
 	}
 
@@ -181,21 +189,32 @@ psa_status_t wifi_crypto_import_key(const psa_key_attributes_t *attr, const uint
 	__ASSERT_NO_MSG(key_bits);
 
 	if (key_buffer_size == 0) {
+		LOG_ERR("Invalid key buffer size: %d", key_buffer_size);
+		printf("Invalid key buffer size: %d\n", key_buffer_size);
 		return PSA_ERROR_INVALID_ARGUMENT;
 	}
 
 	psa_key_lifetime_t lifetime = psa_get_key_lifetime(attr);
 	psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION(lifetime);
 	psa_key_persistence_t persistence = PSA_KEY_LIFETIME_GET_PERSISTENCE(lifetime);
+	mbedtls_svc_key_id_t key = psa_get_key_id(attr);
 
+	LOG_INF("Importing key to PSA, location: %d, persistence: %d, lifetime: %d key: 0x%08X", location, persistence, lifetime, key);
+	printf("Importing key to PSA, location: %d, persistence: %d, lifetime: %d key: 0x%08X\n", location, persistence, lifetime, key);
 	if (location == PSA_KEY_LOCATION_WIFI_CRYPTO) {
+		
 		wifi_crypto_key_type_t type = (wifi_crypto_key_type_t)psa_get_key_type(attr);
 		psa_key_id_t id = psa_get_key_id(attr);
 
 		uint32_t db_id = (id >> 2) & 0x7;
 		uint32_t key_index = id & 0x3;
 
+		LOG_INF("Key ID: %d, DB ID: %d, Key Index: %d", id, db_id, key_index);
+		printf("Key ID: %d, DB ID: %d, Key Index: %d\n", id, db_id, key_index);
+
 		if (data_length != wifi_crypto_get_key_size_in_bytes(type)) {
+			LOG_ERR("Invalid key data length: %d, expected: %d", data_length, wifi_crypto_get_key_size_in_bytes(type));
+			printf("Invalid key data length: %d, expected: %d\n", data_length, wifi_crypto_get_key_size_in_bytes(type));
 			return PSA_ERROR_INVALID_ARGUMENT;
 		}
 
@@ -207,11 +226,16 @@ psa_status_t wifi_crypto_import_key(const psa_key_attributes_t *attr, const uint
 
 		if (persistence == PSA_KEY_PERSISTENCE_DEFAULT) {
 			uint32_t key_slot = wifi_crypto_kmu_slot_id(type, db_id, key_index);
-			return wifi_crypto_kmu_provision_and_push((const uint32_t *)data, type,
+			int ret = wifi_crypto_kmu_provision_and_push((const uint32_t *)data, type,
 								  db_id, key_index, key_slot);
+			if (ret) {
+				LOG_ERR("Failed to provision and push key: %d", ret);
+			}
+			return ret;
 		} else {
+			LOG_ERR("Invalid persistence: %d", persistence);
 			return PSA_ERROR_INVALID_ARGUMENT;
 		}
 	}
-	return PSA_ERROR_NOT_SUPPORTED;
+	return PSA_ERROR_GENERIC_ERROR;
 }

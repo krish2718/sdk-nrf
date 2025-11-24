@@ -110,7 +110,7 @@ static inline NRF_SPU_Type *spu_instance_from_peripheral_addr(uint32_t periphera
 	return (NRF_SPU_Type *)(0x50000000 | apb_bus_number);
 }
 
-#ifdef CONFIG_BOARD_NRF7120DK_NRF7120_CPUAPP_EMU
+
 static void spu_peripheral_config_non_secure(const uint32_t periph_base_address, bool periph_lock)
 {
 	uint8_t periph_id = NRFX_PERIPHERAL_ID_GET(periph_base_address);
@@ -135,7 +135,7 @@ static void spu_peripheral_config_non_secure(const uint32_t periph_base_address,
 	nrf_spu_periph_perm_lock_enable(nrf_spu, index);
 #endif
 }
-#endif /* CONFIG_BOARD_NRF7120DK_NRF7120_CPUAPP_EMU */
+
 /* End of TF-M native driver */
 
 void wifi_mpc_configuration(void)
@@ -185,6 +185,11 @@ void wifi_setup(void)
 
 	grtc_configuration();
 
+#endif /* CONFIG_SOC_NRF7120_HAS_AMBIX03 */
+#ifndef CRYPTO_TEST
+	/* Make GRTC accessible from the WIFI-Core */
+	spu_peripheral_config_non_secure(NRF_GRTC_S_BASE, true);
+#endif
 	/* EMU platform uses UART 20 for the Wi-Fi console */
 #ifdef CONFIG_BOARD_NRF7120DK_NRF7120_CPUAPP_EMU
 	/* Wi-Fi VPR uses UART 20 (PORT 2 Pin 2 is for the TX) */
@@ -195,9 +200,15 @@ void wifi_setup(void)
 	/* Set permission for TXD */
 	nrf_spu_feature_secattr_set(NRF_SPU20, NRF_SPU_FEATURE_GPIO_PIN, 1, 4,
 				    SPU_FEATURE_GPIO_PIN_SECATTR_NonSecure);
-#endif
-#endif
+#endif /* CONFIG_BOARD_NRF7120PDK_NRF7120_CPUAPP_EMU */
 
+	/* Split security configuration to let Wi-Fi access GRTC */
+	nrf_spu_feature_secattr_set(NRF_SPU20, NRF_SPU_FEATURE_GRTC_CC, 15, 0, 0);
+	nrf_spu_feature_secattr_set(NRF_SPU20, NRF_SPU_FEATURE_GRTC_CC, 14, 0, 0);
+	nrf_spu_feature_secattr_set(NRF_SPU20, NRF_SPU_FEATURE_GRTC_INTERRUPT, 4, 0, 0);
+	nrf_spu_feature_secattr_set(NRF_SPU20, NRF_SPU_FEATURE_GRTC_INTERRUPT, 5, 0, 0);
+	nrf_spu_feature_secattr_set(NRF_SPU20, NRF_SPU_FEATURE_GRTC_SYSCOUNTER, 0, 0, 0);
+#ifdef CRYPTO_TEST
 	uint32_t lmacInitPc = 0x002e4000;
 	uint32_t lmacPatchStart = 0x002e0000;
 	uint32_t umacInitPc = 0x28180000;
@@ -212,12 +223,14 @@ void wifi_setup(void)
 	*(volatile uint32_t *)0x003FD004 = umacInitPc;
 	*(volatile uint32_t *)0x003FD008 = lmacPatchStart;
 	*(volatile uint32_t *)0x003FD00C = umacPatchStart;
-
+#endif
 	/* Kickstart the LMAC processor */
 	NRF_WIFICORE_LRCCONF_LRC0->POWERON =
 		(LRCCONF_POWERON_MAIN_AlwaysOn << LRCCONF_POWERON_MAIN_Pos);
 	NRF_WIFICORE_LMAC_VPR->INITPC = NRF_WICR->RESERVED[0];
-	// NRF_WIFICORE_LMAC_VPR->CPURUN = (VPR_CPURUN_EN_Running << VPR_CPURUN_EN_Pos);
+#ifndef CRYPTO_TEST
+	NRF_WIFICORE_LMAC_VPR->CPURUN = (VPR_CPURUN_EN_Running << VPR_CPURUN_EN_Pos);
+#endif
 }
 #endif
 
