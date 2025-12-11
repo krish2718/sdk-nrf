@@ -10,6 +10,7 @@ kconfig_check_and_set_base_to_one(PSA_CORE_OBERON)
 
 # Convert CRACEN driver configuration
 kconfig_check_and_set_base_to_one(PSA_CRYPTO_DRIVER_CRACEN)
+kconfig_check_and_set_base_to_one(PSA_CRYPTO_DRIVER_WIFI_CRYPTO)
 kconfig_check_and_set_base_to_one(PSA_NEED_CRACEN_CCM_AES)
 kconfig_check_and_set_base_to_one(PSA_NEED_CRACEN_GCM_AES)
 kconfig_check_and_set_base_to_one(PSA_NEED_CRACEN_CHACHA20_POLY1305)

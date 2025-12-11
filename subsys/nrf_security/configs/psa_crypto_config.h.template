@@ -259,6 +259,7 @@
  * NCSDK-20700: Make PSA CRACEN driver configurable.
  */
 #cmakedefine PSA_CRYPTO_DRIVER_CRACEN                           @PSA_CRYPTO_DRIVER_CRACEN@
+#cmakedefine PSA_CRYPTO_DRIVER_WIFI_CRYPTO                      @PSA_CRYPTO_DRIVER_WIFI_CRYPTO@
 #cmakedefine PSA_NEED_CRACEN_AEAD_DRIVER                        @PSA_NEED_CRACEN_AEAD_DRIVER@
 #cmakedefine PSA_NEED_CRACEN_CIPHER_DRIVER                      @PSA_NEED_CRACEN_CIPHER_DRIVER@
 #cmakedefine PSA_NEED_CRACEN_KEY_AGREEMENT_DRIVER               @PSA_NEED_CRACEN_KEY_AGREEMENT_DRIVER@

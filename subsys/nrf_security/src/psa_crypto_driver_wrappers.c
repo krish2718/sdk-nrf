@@ -471,6 +471,7 @@ psa_driver_wrapper_get_key_buffer_size_from_key_data(const psa_key_attributes_t 
 	*key_buffer_size = 0;
 	switch (location) {
 #if defined(PSA_CRYPTO_DRIVER_WIFI_CRYPTO)
+//#error "PSA_CRYPTO_DRIVER_WIFI_CRYPTO is not supported"
 	case PSA_KEY_LOCATION_WIFI_CRYPTO:
 		*key_buffer_size = 32; // ?? max key size in bytes
 		return PSA_SUCCESS;

@@ -191,7 +191,7 @@ psa_status_t wifi_crypto_import_key(const psa_key_attributes_t *attr, const uint
 	if (key_buffer_size == 0) {
 		LOG_ERR("Invalid key buffer size: %d", key_buffer_size);
 		printf("Invalid key buffer size: %d\n", key_buffer_size);
-		return PSA_ERROR_INVALID_ARGUMENT;
+		return -30;
 	}
 
 	psa_key_lifetime_t lifetime = psa_get_key_lifetime(attr);
@@ -215,7 +215,7 @@ psa_status_t wifi_crypto_import_key(const psa_key_attributes_t *attr, const uint
 		if (data_length != wifi_crypto_get_key_size_in_bytes(type)) {
 			LOG_ERR("Invalid key data length: %d, expected: %d", data_length, wifi_crypto_get_key_size_in_bytes(type));
 			printf("Invalid key data length: %d, expected: %d\n", data_length, wifi_crypto_get_key_size_in_bytes(type));
-			return PSA_ERROR_INVALID_ARGUMENT;
+			return -31;
 		}
 
 		/* I don't understand the purpose of these output paramenters.
@@ -234,8 +234,8 @@ psa_status_t wifi_crypto_import_key(const psa_key_attributes_t *attr, const uint
 			return ret;
 		} else {
 			LOG_ERR("Invalid persistence: %d", persistence);
-			return PSA_ERROR_INVALID_ARGUMENT;
+			return -32;
 		}
 	}
-	return PSA_ERROR_GENERIC_ERROR;
+	return -33;
 }
