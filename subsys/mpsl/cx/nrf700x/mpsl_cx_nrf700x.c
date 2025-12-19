@@ -31,6 +31,15 @@
 #include <gpiote_nrfx.h>
 
 /*
+ * Use devicetree GPIO API instead of direct register access for:
+ * - BSIM simulation targets
+ * - nRF54H20 (different GPIO architecture)
+ */
+#if defined(CONFIG_SOC_SERIES_BSIM_NRFXX) || defined(CONFIG_SOC_NRF54H20)
+#define MPSL_CX_NRF700X_GPIO_DT 1
+#endif
+
+/*
  * Typical part of device tree describing coex (sample port and pin numbers).
  *
  * / {
@@ -66,7 +75,7 @@ static const struct gpio_dt_spec req_spec     = GPIO_DT_SPEC_GET(CX_NODE, req_gp
 static const struct gpio_dt_spec status0_spec = GPIO_DT_SPEC_GET(CX_NODE, status0_gpios);
 static const struct gpio_dt_spec grant_spec   = GPIO_DT_SPEC_GET(CX_NODE, grant_gpios);
 
-#if !defined(CONFIG_SOC_SERIES_BSIM_NRFXX)
+#if !defined(MPSL_CX_NRF700X_GPIO_DT)
 /* Direct register access pointers for ISR-safe GPIO control from DT */
 static NRF_GPIO_Type *req_port =
 	((NRF_GPIO_Type *)DT_REG_ADDR(DT_GPIO_CTLR(CX_NODE, req_gpios)));
@@ -177,7 +186,7 @@ static int sig_dir_level_calc(mpsl_cx_op_map_t ops)
  */
 static int32_t gpio_drive_status0_to_dir(mpsl_cx_op_map_t ops)
 {
-#if defined(CONFIG_SOC_SERIES_BSIM_NRFXX)
+#if defined(MPSL_CX_NRF700X_GPIO_DT)
 	return gpio_pin_set_dt(&status0_spec, sig_dir_level_calc(ops));
 #else
 	if (status0_port == NULL) {
@@ -203,7 +212,7 @@ static int32_t gpio_drive_status0_to_dir(mpsl_cx_op_map_t ops)
  */
 static int32_t gpio_drive_request(int active)
 {
-#if defined(CONFIG_SOC_SERIES_BSIM_NRFXX)
+#if defined(MPSL_CX_NRF700X_GPIO_DT)
 	return gpio_pin_set_dt(&req_spec, active);
 #else
 	if (req_port == NULL) {
