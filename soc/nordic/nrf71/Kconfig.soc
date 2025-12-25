@@ -17,6 +17,7 @@ config SOC_NRF7120_ENGA
 
 config SOC_NRF7120_PREENG
 	bool
+	default y
 	select SOC_NRF7120
 	help
 	  NRF7120 PRE-ENG
