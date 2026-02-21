@@ -5,14 +5,21 @@
 #
 
 config HAS_HW_NRF_WIFI_KEYS
-	def_bool SOC_SERIES_NRF71X
+	def_bool SOC_SERIES_NRF71
 
 config WIFI_KEYS_KMU_HW_PRESENT
-	def_bool SOC_SERIES_NRF71X
+	def_bool SOC_SERIES_NRF71
+
+config WIFI_KEYS_KMU_VERIFY_COPY
+	bool "Verify KMU key copy to a readable buffer (test)"
+	help
+	  When enabled, the first 16-byte key push is also done to a k_malloc'd
+	  buffer so the host can read back and log the bytes KMU wrote. Use to
+	  verify byte order (no reverse). Secure RAM (0x28400000) is not readable
+	  from the host. Requires KMU to accept the test destination address.
 
 # Configure WIFI_KEYS_LOG_LEVEL
 module = WIFI_KEYS
-module-dep = LOG
 module-str = Log level for Wi-Fi Keys PSA driver
 module-help = Sets log level for Wi-Fi Keys PSA driver
 source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
