@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <zephyr/kernel.h>
@@ -121,19 +122,36 @@ static int cert_provision(void)
 		return err;
 	}
 #else /* CONFIG_MODEM_KEY_MGMT */
+	/* Replace stale credentials (e.g. protected storage). Skipping update on
+	 * -EEXIST can leave wrong PEM; verify then fails with NOT_TRUSTED (flags 0x08).
+	 */
+	err = tls_credential_delete(SEC_TAG, TLS_CREDENTIAL_CA_CERTIFICATE);
+	if (err < 0 && err != -ENOENT) {
+		printk("Failed to delete existing CA certificate: %d\n", err);
+		return err;
+	}
+
 	err = tls_credential_add(SEC_TAG,
 				 TLS_CREDENTIAL_CA_CERTIFICATE,
 				 cert,
 				 sizeof(cert));
-	if (err == -EEXIST) {
-		printk("CA certificate already exists, sec tag: %d\n", SEC_TAG);
-	} else if (err < 0) {
+	if (err < 0) {
 		printk("Failed to register CA certificate: %d\n", err);
 		return err;
 	}
 #endif /* !CONFIG_MODEM_KEY_MGMT */
 
 	return 0;
+}
+#endif
+
+#if CONFIG_SAMPLE_TLS_DIAG
+static void tls_diag_print_mbedtls_hint(void)
+{
+	printk("TLS diag: mbedTLS -9984 (-0x2700) is MBEDTLS_ERR_X509_CERT_VERIFY_FAILED\n");
+	printk("TLS diag: flags 0x08 => NOT_TRUSTED: CA in sec tag does not anchor the chain\n");
+	printk("TLS diag: (compare PEM to host: openssl s_client -connect <host>:443 -showcerts).\n");
+	printk("TLS diag: Other flags: 0x04 CN/SAN; 0x200 FUTURE; 0x01 EXPIRED.\n");
 }
 #endif
 
@@ -280,6 +298,14 @@ static int callback(const struct downloader_evt *event)
 			/* With ECONNRESET, allow library to attempt a reconnect by returning 0 */
 		} else {
 			printk("Error %d during download\n", event->error);
+#if CONFIG_SAMPLE_TLS_DIAG
+			if (IS_ENABLED(CONFIG_SAMPLE_SECURE_SOCKET)) {
+				if (event->error == -ECONNABORTED) {
+					printk("TLS diag: -ECONNABORTED often follows TLS handshake failure\n");
+				}
+				tls_diag_print_mbedtls_hint();
+			}
+#endif
 			/* Stop download */
 			return -1;
 		}

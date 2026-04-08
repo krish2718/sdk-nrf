@@ -9,7 +9,8 @@
 
 static int _mbedtls_init(void)
 {
-#if defined(CONFIG_MBEDTLS_DEBUG_LEVEL)
+#if defined(CONFIG_MBEDTLS_DEBUG) && defined(CONFIG_MBEDTLS_DEBUG_LEVEL) && \
+	defined(CONFIG_MBEDTLS_DEBUG_C)
 	mbedtls_debug_set_threshold(CONFIG_MBEDTLS_DEBUG_LEVEL);
 #endif
 

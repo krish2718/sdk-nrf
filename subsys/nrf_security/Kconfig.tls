@@ -84,6 +84,19 @@ config MBEDTLS_PKCS7_C
 
 endif # MBEDTLS_X509_LIBRARY
 
+# MBEDTLS_DEBUG_C is required to compile mbedtls/library/debug.c (mbedtls_debug_*).
+# It must be selectable without MBEDTLS_TLS_LIBRARY so X.509-only apps can trace verify.
+if MBEDTLS_X509_LIBRARY || MBEDTLS_TLS_LIBRARY
+
+config MBEDTLS_DEBUG_C
+	bool "mbed TLS debug API (MBEDTLS_DEBUG_C)"
+	select CBPRINTF_PACKAGE_LONGDOUBLE
+	help
+	  Enable mbed TLS debug module (debug.c). With MBEDTLS_TLS_LIBRARY, debug.c is
+	  linked into the TLS library; otherwise nrf_security links it into mbedx509.
+
+endif # MBEDTLS_X509_LIBRARY || MBEDTLS_TLS_LIBRARY
+
 menuconfig MBEDTLS_TLS_LIBRARY
 	bool "Create mbed TLS transport layer security library"
 	select MBEDTLS_X509_LIBRARY
@@ -155,26 +168,6 @@ config MBEDTLS_SSL_COOKIE_C
 	  This setting enables TLS server-side callbacks for session tickets
 
 endif # MBEDTLS_SSL_PROTO_TLS1_2
-
-config MBEDTLS_DEBUG_C
-	bool "Debug functions for TLS"
-	select CBPRINTF_PACKAGE_LONGDOUBLE
-	help
-	  Enable the debug functions for TLS.
-
-config MBEDTLS_DEBUG_LEVEL
-	int "mbed TLS default debug level"
-	depends on MBEDTLS_DEBUG_C
-	default 0
-	range 0 4
-	help
-	  Default mbed TLS debug logging level for Zephyr integration code
-	  (from ext/lib/crypto/mbedtls/include/mbedtls/debug.h):
-	  0 No debug
-	  1 Error
-	  2 State change
-	  3 Information
-	  4 Verbose
 
 config MBEDTLS_SSL_PROTO_DTLS
 	bool "DTLS"

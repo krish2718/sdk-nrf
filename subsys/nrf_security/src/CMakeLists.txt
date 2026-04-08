@@ -224,6 +224,14 @@ if(CONFIG_MBEDTLS_X509_LIBRARY)
     x509write_csr.c
   )
 
+  # debug.c is normally only linked with libmbedtls (TLS). X.509-only images need it
+  # for mbedtls_debug_set_threshold and mbedtls_debug_printf from verify paths.
+  if(CONFIG_MBEDTLS_DEBUG_C AND NOT CONFIG_MBEDTLS_TLS_LIBRARY)
+    append_with_prefix(src_x509 ${ARM_MBEDTLS_PATH}/library
+      debug.c
+    )
+  endif()
+
   add_library(mbedx509 STATIC
     ${src_x509}
   )

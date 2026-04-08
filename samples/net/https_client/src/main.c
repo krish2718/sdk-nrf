@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <errno.h>
 #include <string.h>
 #include <zephyr/kernel.h>
 #include <stdlib.h>
@@ -105,13 +106,21 @@ int cert_provision(void)
 		return err;
 	}
 #else /* CONFIG_MODEM_KEY_MGMT */
+	/* Replace stale credentials (e.g. from protected storage). The old -EEXIST path
+	 * skipped updates and could leave corrupt PEM; parse then fails as -0x2180
+	 * (MBEDTLS_ERR_X509_INVALID_FORMAT) in tls_check_cert().
+	 */
+	err = tls_credential_delete(TLS_SEC_TAG, TLS_CREDENTIAL_CA_CERTIFICATE);
+	if (err < 0 && err != -ENOENT) {
+		printk("Failed to delete existing CA certificate: %d\n", err);
+		return err;
+	}
+
 	err = tls_credential_add(TLS_SEC_TAG,
 				 TLS_CREDENTIAL_CA_CERTIFICATE,
 				 cert,
 				 sizeof(cert));
-	if (err == -EEXIST) {
-		printk("CA certificate already exists, sec tag: %d\n", TLS_SEC_TAG);
-	} else if (err < 0) {
+	if (err < 0) {
 		printk("Failed to register CA certificate: %d\n", err);
 		return err;
 	}

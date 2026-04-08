@@ -24,6 +24,13 @@ config SAMPLE_CERT_FILE
 	default "cert/file-example.pem"
 	depends on SAMPLE_PROVISION_CERT
 
+config SAMPLE_TLS_DIAG
+	bool "Print TLS verification hints on download errors"
+	default y
+	help
+	  On secure-socket download errors, print short hints for
+	  MBEDTLS_ERR_X509_CERT_VERIFY_FAILED (-0x2700) and verify flags.
+
 endif
 
 choice SAMPLE_FILE
