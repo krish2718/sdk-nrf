@@ -8,7 +8,7 @@ Wi-Fi Direct (P2P mode)
    :depth: 2
 
 Wi-Fi Direct® (also known as Wi-Fi P2P or peer-to-peer mode) enables direct device-to-device connections without requiring a traditional access point.
-The nRF70 Series devices support Wi-Fi Direct, allowing you to establish peer-to-peer connections with other Wi-Fi Direct-capable devices.
+The nRF Wi-Fi devices support Wi-Fi Direct, allowing you to establish peer-to-peer connections with other Wi-Fi Direct-capable devices.
 
 Building with Wi-Fi Direct support
 **********************************
