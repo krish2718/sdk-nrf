@@ -14,6 +14,21 @@
 		compatible = "zephyr,psa-crypto-rng";
 		status = "okay";
 	};
+
+	/* Disable LEDs on P4 */
+	leds {
+		status = "disabled";
+	};
+
+	/* Disable buttons on P4 */
+	buttons {
+		status = "disabled";
+	};
+
+	/* Disable PWM LEDs */
+	pwmleds {
+		status = "disabled";
+	};
 };
 
 &wifi {
