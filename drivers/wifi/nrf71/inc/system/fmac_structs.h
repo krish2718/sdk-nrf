@@ -396,8 +396,18 @@ struct tx_token_stats {
 	unsigned int reserved_token_get[NRF_WIFI_FMAC_AC_MAX];
 	/** Number of spare (shared) token acquisitions, per AC. */
 	unsigned int spare_token_get[NRF_WIFI_FMAC_AC_MAX];
-	/** Number of token acquisitions which failed (all tokens busy), per AC. */
-	unsigned int token_get_fail[NRF_WIFI_FMAC_AC_MAX];
+	/** Number of token requests which found all tokens busy, per AC.
+	 *
+	 * This is not an error: the packet is left on the pending queue and is
+	 * picked up when a token completes, so under sustained traffic almost
+	 * every request lands here while the tokens are in flight.
+	 */
+	unsigned int token_get_busy[NRF_WIFI_FMAC_AC_MAX];
+	/** Number of token requests which found no token while the AC had none
+	 *  in flight, per AC. Unlike @ref token_get_busy this is an anomaly:
+	 *  the AC can make no progress at all.
+	 */
+	unsigned int token_get_starved[NRF_WIFI_FMAC_AC_MAX];
 	/** Number of times a spare token was re-assigned to another AC on TX done. */
 	unsigned int spare_token_ac_switch;
 	/** Highest number of outstanding tokens seen, per AC. */

@@ -293,7 +293,8 @@ static void tx_token_stats_dump(const struct shell *sh,
 	unsigned int cap = sys_fpriv->avail_ampdu_len_per_token;
 	unsigned int max_aggr = sys_fpriv->data_config.max_tx_aggregation;
 	unsigned int total_gets = 0;
-	unsigned int total_fails = 0;
+	unsigned int total_busy = 0;
+	unsigned int total_starved = 0;
 	unsigned int aggr_stops;
 	unsigned int i;
 
@@ -428,33 +429,44 @@ static void tx_token_stats_dump(const struct shell *sh,
 		      ts->aggr_forced_single);
 
 	shell_fprintf(sh, SHELL_INFO,
-		      "\n--- Per-AC token accounting ---\n");
+		      "\n--- Per-AC token accounting ---\n"
+		      "a token is requested for every packet handed to the driver, so once\n"
+		      "the tokens of an AC are in flight every further request is 'busy'\n"
+		      "and the packet waits on the pending queue for a TX done; only\n"
+		      "'starved' (no token while the AC has nothing in flight) is a fault\n");
 	shell_fprintf(sh, SHELL_INFO,
-		      "%-4s %10s %10s %10s %10s %10s %10s\n",
-		      "ac", "reserved", "spare", "fail", "max_out", "max_qlen", "q_full");
+		      "%-4s %9s %7s %10s %8s %8s %9s %7s %7s\n",
+		      "ac", "reserved", "spare", "busy", "starved", "in_fl",
+		      "max_in_fl", "max_q", "q_full");
 
 	for (i = 0; i < NRF_WIFI_FMAC_AC_MAX; i++) {
 		total_gets += ts->reserved_token_get[i] + ts->spare_token_get[i];
-		total_fails += ts->token_get_fail[i];
+		total_busy += ts->token_get_busy[i];
+		total_starved += ts->token_get_starved[i];
 
 		shell_fprintf(sh, SHELL_INFO,
-			      "%-4s %10u %10u %10u %10u %10u %10u\n",
+			      "%-4s %9u %7u %10u %8u %8u %9u %7u %7u\n",
 			      ac_str(i),
 			      ts->reserved_token_get[i],
 			      ts->spare_token_get[i],
-			      ts->token_get_fail[i],
+			      ts->token_get_busy[i],
+			      ts->token_get_starved[i],
+			      sys_dev_ctx->tx_config.outstanding_descs[i],
 			      ts->max_outstanding_descs[i],
 			      ts->max_pending_qlen[i],
 			      ts->pend_q_full_drops[i]);
 	}
 
 	shell_fprintf(sh, SHELL_INFO,
-		      "token gets: %u, failures: %u (%u%% starved), spare AC switches: %u\n",
+		      "token gets: %u, busy: %u, starved: %u, spare AC switches: %u\n",
 		      total_gets,
-		      total_fails,
-		      (total_gets + total_fails) ?
-			      ((total_fails * 100U) / (total_gets + total_fails)) : 0U,
+		      total_busy,
+		      total_starved,
 		      ts->spare_token_ac_switch);
+	shell_fprintf(sh, SHELL_INFO,
+		      "token re-use: %u.%02u TX done(s) per token get\n",
+		      total_gets ? (ts->tx_dones / total_gets) : 0U,
+		      total_gets ? (((ts->tx_dones * 100U) / total_gets) % 100U) : 0U);
 
 	shell_fprintf(sh, SHELL_INFO,
 		      "\n--- Host TX path ---\n");

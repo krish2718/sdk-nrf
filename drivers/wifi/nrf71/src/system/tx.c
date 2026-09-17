@@ -401,8 +401,16 @@ unsigned int tx_desc_get(struct nrf_wifi_fmac_dev_ctx *fmac_dev_ctx,
 			&sys_dev_ctx->tx_config.token_stats.max_outstanding_descs[queue],
 			sys_dev_ctx->tx_config.outstanding_descs[queue]);
 	} else {
-		/* No token was available for this AC. */
-		sys_dev_ctx->tx_config.token_stats.token_get_fail[queue]++;
+		/* No token was available for this AC. This is the normal steady
+		 * state while the tokens of the AC are in flight: the packet
+		 * stays on the pending queue and is picked up from the TX done
+		 * path. It is only an anomaly if the AC has nothing in flight.
+		 */
+		sys_dev_ctx->tx_config.token_stats.token_get_busy[queue]++;
+
+		if (sys_dev_ctx->tx_config.outstanding_descs[queue] == 0) {
+			sys_dev_ctx->tx_config.token_stats.token_get_starved[queue]++;
+		}
 	}
 
 	return desc;
