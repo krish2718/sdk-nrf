@@ -420,10 +420,14 @@ struct tx_token_stats {
 	unsigned int pkts_queued;
 	/** Calls into the network interface TX entry point. */
 	unsigned int if_send_calls;
-	/** Network interface TX calls which ended up queued in the host. */
-	unsigned int if_send_queued;
-	/** Network interface TX calls which were passed to the RPU firmware. */
-	unsigned int if_send_xmit;
+	/** Network interface TX calls accepted by the FMAC TX path.
+	 *
+	 * Accepted only means the packet was taken over: nrf_wifi_fmac_tx()
+	 * reports a packet held on the pending queue as success, so use
+	 * @ref pkts_queued and the token counters to tell whether it was
+	 * handed to the RPU firmware straight away.
+	 */
+	unsigned int if_send_accepted;
 	/** Network interface TX drops due to network buffer allocation failure. */
 	unsigned int if_drop_no_nbuf;
 	/** Network interface TX drops due to an unknown peer. */

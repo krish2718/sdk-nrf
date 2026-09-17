@@ -513,10 +513,12 @@ int nrf_wifi_if_send(const struct device *dev,
 		TX_TOKEN_STAT_INC(sys_dev_ctx, if_drop_fmac_fail);
 		/* Could be many reasons, but likely no space in the queue */
 		ret = -ENOBUFS;
-	} else if (ret == NRF_WIFI_FMAC_TX_STATUS_QUEUED) {
-		TX_TOKEN_STAT_INC(sys_dev_ctx, if_send_queued);
 	} else {
-		TX_TOKEN_STAT_INC(sys_dev_ctx, if_send_xmit);
+		/* nrf_wifi_fmac_start_xmit() reports both "sent to the RPU" and
+		 * "queued in the host" as success, so this only tracks that the
+		 * packet was accepted.
+		 */
+		TX_TOKEN_STAT_INC(sys_dev_ctx, if_send_accepted);
 	}
 	goto unlock;
 drop:

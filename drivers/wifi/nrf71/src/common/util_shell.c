@@ -471,13 +471,15 @@ static void tx_token_stats_dump(const struct shell *sh,
 	shell_fprintf(sh, SHELL_INFO,
 		      "\n--- Host TX path ---\n");
 	shell_fprintf(sh, SHELL_INFO,
-		      "if_send calls: %u (xmit: %u, queued: %u)\n",
+		      "if_send calls: %u, accepted: %u\n",
 		      ts->if_send_calls,
-		      ts->if_send_xmit,
-		      ts->if_send_queued);
+		      ts->if_send_accepted);
 	shell_fprintf(sh, SHELL_INFO,
-		      "pkts held in host (no token/aggregating/PS): %u\n",
-		      ts->pkts_queued);
+		      "of which held on the pending queue (no token/aggregating/PS): %u "
+		      "(%u%%)\n",
+		      ts->pkts_queued,
+		      ts->if_send_accepted ?
+			      ((ts->pkts_queued * 100U) / ts->if_send_accepted) : 0U);
 	shell_fprintf(sh, SHELL_INFO,
 		      "if_send drops: no_nbuf: %u, unknown_peer: %u, not_ready: %u, "
 		      "fmac_fail: %u\n",
