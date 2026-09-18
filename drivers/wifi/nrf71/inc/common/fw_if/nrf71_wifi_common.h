@@ -979,7 +979,9 @@ enum lmac_fail_events {
 	CAPTURE_DMA_NOT_FINISHING,
 	FEED_DMA_NOT_FINISHING,
 	RF_PLL_RECOVERY_FAILED,
-	DEVICE_IS_ACTIVE_FOR_TOO_LONG
+	DEVICE_IS_ACTIVE_FOR_TOO_LONG,
+	/** No Wi-Fi frames received by LMAC for 2 seconds. */
+	LMAC_NO_RX_FRAME_2SEC
 };
 
 /**
@@ -994,6 +996,20 @@ struct nrf_wifi_umac_event_error_stats {
 	/** Error code, see &enum lmac_fail_events or &enum umac_fail_events */
 	unsigned int status_code;
 } __NRF_WIFI_PKD;
+
+/** LMAC error diagnostic counters in FW memory. */
+#define NRF71_WIFI_FW_ISR_CNT_ADDR              0x28003534UL
+#define NRF71_WIFI_FW_DSSS_CRC_FAIL_CNT_ADDR    0x28003544UL
+#define NRF71_WIFI_FW_DSSS_CRC_SUCCESS_CNT_ADDR 0x28003548UL
+#define NRF71_WIFI_FW_OFDM_CRC_SUCCESS_CNT_ADDR 0x2800354CUL
+#define NRF71_WIFI_FW_OFDM_CRC_FAIL_CNT_ADDR    0x28003550UL
+
+/** LMAC error diagnostic counters in HW registers. */
+#define NRF71_WIFI_HW_PKT_CNT_ADDR              0x4808E064UL
+#define NRF71_WIFI_HW_DSSS_CRC_FAIL_CNT_ADDR    0x4808E0BCUL
+#define NRF71_WIFI_HW_DSSS_CRC_SUCCESS_CNT_ADDR 0x4808E0B8UL
+#define NRF71_WIFI_HW_OFDM_CRC_SUCCESS_CNT_ADDR 0x4808E078UL
+#define NRF71_WIFI_HW_OFDM_CRC_FAIL_CNT_ADDR    0x4808E07CUL
 
 /**
  * @brief This structure represents the channel parameters to configure specific channel.

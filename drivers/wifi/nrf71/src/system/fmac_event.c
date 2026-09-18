@@ -23,6 +23,7 @@
 #include <system/fmac_event.h>
 #include <common/util.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/sys_io.h>
 
 LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF71_LOG_LEVEL);
 
@@ -319,7 +320,40 @@ static const struct error_stats_log_entry lmac_error_stats_log[] = {
 	{ FEED_DMA_NOT_FINISHING, "feed DMA not finishing" },
 	{ RF_PLL_RECOVERY_FAILED, "RF PLL recovery failed" },
 	{ DEVICE_IS_ACTIVE_FOR_TOO_LONG, "device active for too long" },
+	{ LMAC_NO_RX_FRAME_2SEC, "no RX frames received in 2 seconds" },
 };
+
+struct error_stats_diag_entry {
+	uintptr_t addr;
+	const char *label;
+};
+
+static const struct error_stats_diag_entry fw_error_stats_diag[] = {
+	{ NRF71_WIFI_FW_ISR_CNT_ADDR, "fw isr cnt" },
+	{ NRF71_WIFI_FW_DSSS_CRC_FAIL_CNT_ADDR, "fw DSSS CRC fail count" },
+	{ NRF71_WIFI_FW_DSSS_CRC_SUCCESS_CNT_ADDR, "fw DSSS CRC success count" },
+	{ NRF71_WIFI_FW_OFDM_CRC_SUCCESS_CNT_ADDR, "fw OFDM CRC success count" },
+	{ NRF71_WIFI_FW_OFDM_CRC_FAIL_CNT_ADDR, "fw OFDM CRC fail count" },
+};
+
+static const struct error_stats_diag_entry hw_error_stats_diag[] = {
+	{ NRF71_WIFI_HW_PKT_CNT_ADDR, "hw pkt cnt" },
+	{ NRF71_WIFI_HW_DSSS_CRC_FAIL_CNT_ADDR, "hw DSSS CRC fail count" },
+	{ NRF71_WIFI_HW_DSSS_CRC_SUCCESS_CNT_ADDR, "hw DSSS CRC success count" },
+	{ NRF71_WIFI_HW_OFDM_CRC_SUCCESS_CNT_ADDR, "hw OFDM CRC success count" },
+	{ NRF71_WIFI_HW_OFDM_CRC_FAIL_CNT_ADDR, "hw OFDM CRC fail count" },
+};
+
+static void log_error_stats_diag(const struct error_stats_diag_entry *table,
+				   size_t table_size)
+{
+	size_t i;
+
+	for (i = 0; i < table_size; i++) {
+		LOG_INF("  %s: %u", table[i].label,
+			sys_read32(table[i].addr));
+	}
+}
 
 static void log_error_stats(const char *func,
 			    const char *type,
@@ -333,12 +367,22 @@ static void log_error_stats(const char *func,
 		if (table[i].status_code == status_code) {
 			LOG_INF("%s: %s error: %s", func, type,
 					       table[i].msg);
+			log_error_stats_diag(fw_error_stats_diag,
+				sizeof(fw_error_stats_diag) /
+				sizeof(fw_error_stats_diag[0]));
+			log_error_stats_diag(hw_error_stats_diag,
+				sizeof(hw_error_stats_diag) /
+				sizeof(hw_error_stats_diag[0]));
 			return;
 		}
 	}
 
 	LOG_INF("%s: %s error stats: status_code=%u", func, type,
 			       status_code);
+	log_error_stats_diag(fw_error_stats_diag,
+		sizeof(fw_error_stats_diag) / sizeof(fw_error_stats_diag[0]));
+	log_error_stats_diag(hw_error_stats_diag,
+		sizeof(hw_error_stats_diag) / sizeof(hw_error_stats_diag[0]));
 }
 #endif /* WIFI_NRF71_LOG_LEVEL >= NRF_WIFI_LOG_LEVEL_INF */
 
