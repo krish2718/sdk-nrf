@@ -91,14 +91,29 @@ tests:
   sample.nrf7120.shutdown:
     sysbuild: true
     build_only: true
-    extra_args:
-      - SB_CONFIG_WIFI_NRF70=n
     integration_platforms:
       - nrf7120dk/nrf7120/cpuapp
       - nrf7120dk/nrf7120/cpuapp/ns
     platform_allow:
       - nrf7120dk/nrf7120/cpuapp
       - nrf7120dk/nrf7120/cpuapp/ns
+    tags:
+      - ci_build
+      - sysbuild
+      - ci_samples_nrf71_wifi
+  # Scan once, shut Wi-Fi down and idle forever (no buttons) with RAM
+  # powered down -- the low idle current measurement configuration.
+  sample.nrf7120.shutdown.idle_power:
+    sysbuild: true
+    build_only: true
+    extra_args:
+      - CONFIG_OPERATION_MODE_ONE_SHOT=y
+      - CONFIG_NRF71_IDLE_POWER=y
+      - CONFIG_NRF71_IDLE_POWER_RAM_RETAIN_UNUSED_ONLY=y
+    integration_platforms:
+      - nrf7120dk/nrf7120/cpuapp
+    platform_allow:
+      - nrf7120dk/nrf7120/cpuapp
     tags:
       - ci_build
       - sysbuild

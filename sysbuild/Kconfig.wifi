@@ -6,6 +6,14 @@ menu "Wi-Fi"
 
 menuconfig WIFI_NRF70
 	bool "nRF700x"
+	# nRF70 is a companion chip attached to a host SoC. SoCs with integrated
+	# Wi-Fi (nRF71) bring their own driver and firmware pipeline, so the
+	# companion support and its firmware-patch image must stay off there.
+	default y if !SOC_SERIES_NRF71
+	help
+	  Enable nRF70 Series companion-chip Wi-Fi support and its firmware-patch
+	  image in the build. Defaults on for host SoCs and off for SoCs with
+	  integrated Wi-Fi.
 
 if WIFI_NRF70
 

@@ -51,8 +51,6 @@ tests:
   sample.nrf7120.wifi_ble_radio_test_sd:
     sysbuild: true
     build_only: true
-    extra_args:
-      - SB_CONFIG_WIFI_NRF70=n
     integration_platforms:
       - nrf7120dk/nrf7120/cpuapp
       - nrf7120dk/nrf7120/cpuapp/ns
@@ -82,7 +80,6 @@ tests:
     sysbuild: true
     build_only: true
     extra_args:
-      - SB_CONFIG_WIFI_NRF70=n
       - single_domain_EXTRA_CONF_FILE=wifi_only-overlay.conf
     integration_platforms:
       - nrf7120dk/nrf7120/cpuapp
