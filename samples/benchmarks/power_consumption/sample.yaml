@@ -1,0 +1,27 @@
+sample:
+  name: Power consumption (System ON idle)
+common:
+  build_only: true
+  tags: power
+  platform_allow: nrf7120dk/nrf7120/cpuapp
+  integration_platforms:
+    - nrf7120dk/nrf7120/cpuapp
+tests:
+  sample.benchmarks.power_consumption.ram_retain_full:
+    extra_configs:
+      - CONFIG_POWER_CONSUMPTION_RAM_RETAIN_FULL=y
+  sample.benchmarks.power_consumption.ram_retain_64k:
+    extra_configs:
+      - CONFIG_POWER_CONSUMPTION_RAM_RETAIN_64K=y
+  sample.benchmarks.power_consumption.ram_retain_128k:
+    extra_configs:
+      - CONFIG_POWER_CONSUMPTION_RAM_RETAIN_128K=y
+  sample.benchmarks.power_consumption.ram_retain_256k:
+    extra_configs:
+      - CONFIG_POWER_CONSUMPTION_RAM_RETAIN_256K=y
+  sample.benchmarks.power_consumption.ram_retain_512k:
+    extra_configs:
+      - CONFIG_POWER_CONSUMPTION_RAM_RETAIN_512K=y
+  sample.benchmarks.power_consumption.ram_powerdown_unused:
+    extra_configs:
+      - CONFIG_POWER_CONSUMPTION_RAM_RETAIN_UNUSED_ONLY=y
