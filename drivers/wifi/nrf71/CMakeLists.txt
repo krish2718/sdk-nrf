@@ -13,7 +13,6 @@ zephyr_library_include_directories(
   ${ZEPHYR_BASE}/subsys/net/ip
 )
 
-zephyr_library_sources(src/system/wifi_pm.c)
 # ---- Common sources ----
 zephyr_library_sources(
   src/common/fmac_cmd_common.c
