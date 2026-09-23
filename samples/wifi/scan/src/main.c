@@ -17,7 +17,7 @@ LOG_MODULE_REGISTER(scan, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/shell/shell.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/init.h>
-
+#include <zephyr/pm/device.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/wifi_mgmt.h>
 #include <zephyr/net/wifi_utils.h>
@@ -277,6 +277,20 @@ int main(void)
 	k_sleep(K_SECONDS(1));
 	printk("Starting %s with CPU frequency: %d MHz\n", CONFIG_BOARD, SystemCoreClock / MHZ(1));
 
+#if defined(CONFIG_SERIAL)
+	/* Suspend the console (UART) before sleeping -- otherwise it
+	 * stays fully active (and keeps whatever clock it depends on
+	 * requested) for the whole "idle" window, which is the
+	 * single biggest cause of elevated idle current in a sample
+	 * like this.
+	 */
+	const struct device *const console = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
+	int err = pm_device_action_run(console, PM_DEVICE_ACTION_SUSPEND);
+	if (err != 0) {
+		printk("Failed to suspend console: %d\n", err);
+		return 0;
+	}
+#endif
 	/* Set MAC from DTS if interface has no valid MAC and DTS provides one */
 	if (!is_mac_addr_set(net_if_get_default())) {
 		if (!net_eth_is_addr_valid((struct net_eth_addr *)wifi_mac_addr)) {
