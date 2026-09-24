@@ -277,14 +277,19 @@ int main(void)
 	k_sleep(K_SECONDS(1));
 	printk("Starting %s with CPU frequency: %d MHz\n", CONFIG_BOARD, SystemCoreClock / MHZ(1));
 
-#if defined(CONFIG_SERIAL)
+#if 1 //defined(CONFIG_SERIAL)
+	const struct device *const console = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
+
+	if (!device_is_ready(console)) {
+		printk("Console not ready\n");
+		return -1;
+	}
 	/* Suspend the console (UART) before sleeping -- otherwise it
 	 * stays fully active (and keeps whatever clock it depends on
 	 * requested) for the whole "idle" window, which is the
 	 * single biggest cause of elevated idle current in a sample
 	 * like this.
 	 */
-	const struct device *const console = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
 	int err = pm_device_action_run(console, PM_DEVICE_ACTION_SUSPEND);
 	if (err != 0) {
 		printk("Failed to suspend console: %d\n", err);
@@ -327,7 +332,7 @@ int main(void)
 							net_if_get_link_addr(iface)->addr,
 							net_if_get_link_addr(iface)->len));
 	}
-
+	return 0;
 	while (1) {
 		wifi_scan();
 		k_sleep(K_SECONDS(CONFIG_WIFI_SCAN_INTERVAL_S));

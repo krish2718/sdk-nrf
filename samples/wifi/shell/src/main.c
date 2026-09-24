@@ -10,6 +10,18 @@
 
 #include <zephyr/sys/printk.h>
 #include <zephyr/kernel.h>
+#include <zephyr/pm/device.h>
+#include <zephyr/shell/shell.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/init.h>
+#include <zephyr/pm/device.h>
+#include <zephyr/net/net_if.h>
+#include <zephyr/net/wifi_mgmt.h>
+#include <zephyr/net/wifi_utils.h>
+#include <zephyr/net/net_event.h>
+#include <zephyr/net/ethernet.h>
+#include <zephyr/net/ethernet_mgmt.h>
+
 #if defined(CONFIG_NRFX_CLOCK_HFCLK) &&                                                            \
 	(defined(CLOCK_FEATURE_HFCLK_DIVIDE_PRESENT) || NRF_CLOCK_HAS_HFCLK192M)
 #include <nrfx_clock_hfclk.h>
@@ -46,6 +58,29 @@ int init_usb(void)
 	return 0;
 }
 #endif
+
+static int wifi_scan(void)
+{
+	struct net_if *iface = net_if_get_default();
+	int band_str_len;
+	struct wifi_scan_params params = { 0 };
+
+
+	params.dwell_time_passive = 130;
+	params.dwell_time_active = 50;
+	params.scan_type = WIFI_SCAN_TYPE_ACTIVE;
+
+
+	if (net_mgmt(NET_REQUEST_WIFI_SCAN, iface, &params,
+			sizeof(struct wifi_scan_params))) {
+		return -ENOEXEC;
+	}
+
+	printk("Scan requested\n");
+
+
+	return 0;
+}
 
 
 int main(void)
@@ -101,5 +136,24 @@ int main(void)
 	net_config_init_app(dev, "Initializing network");
 #endif
 
+#if 1
+	/* Suspend the console (UART) before sleeping -- otherwise it
+	 * stays fully active (and keeps whatever clock it depends on
+	 * requested) for the whole "idle" window, which is the
+	 * single biggest cause of elevated idle current in a sample
+	 * like this.
+	 */
+	const struct device *const console = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
+	int err = pm_device_action_run(console, PM_DEVICE_ACTION_SUSPEND);
+	if (err != 0) {
+		printk("Failed to suspend console: %d\n", err);
+		return 0;
+	}
+#endif
+	return 0;
+	while (1) {
+		wifi_scan();
+		k_sleep(K_SECONDS(10));
+	}
 	return 0;
 }
