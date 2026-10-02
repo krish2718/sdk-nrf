@@ -17,6 +17,10 @@
 #include <zephyr/device.h>
 #include <zephyr/net/net_config.h>
 
+#if defined(CONFIG_SAMPLE_SHELL_UART_POWER_BUTTONS)
+int uart_power_buttons_init(void);
+#endif
+
 #if defined(CONFIG_USB_DEVICE_STACK) && !defined(CONFIG_BOARD_THINGY91X_NRF5340_CPUAPP)
 #define USES_USB_ETH 1
 #else
@@ -99,6 +103,12 @@ int main(void)
 	net_if_set_default(wifi_iface);
 
 	net_config_init_app(dev, "Initializing network");
+#endif
+
+#if defined(CONFIG_SAMPLE_SHELL_UART_POWER_BUTTONS)
+	if (uart_power_buttons_init() != 0) {
+		printk("UART power buttons init failed\n");
+	}
 #endif
 
 	return 0;

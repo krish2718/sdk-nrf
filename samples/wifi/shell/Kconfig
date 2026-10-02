@@ -30,6 +30,13 @@ config NET_PKT_BUF_RX_DATA_POOL_SIZE
 
 endif
 
+config SAMPLE_SHELL_UART_POWER_BUTTONS
+	bool "Button control of console UART for power measurement"
+	depends on DK_LIBRARY
+	depends on NRF71_IDLE_POWER
+	help
+	  On boards with DK buttons, button 1 suspends the console UART and
+	  button 2 resumes it. Use while measuring System ON idle current.
 
 source "Kconfig.zephyr"
 

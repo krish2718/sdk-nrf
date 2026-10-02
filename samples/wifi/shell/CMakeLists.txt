@@ -20,3 +20,5 @@ target_sources_ifdef(CONFIG_NRF70_PROMISC_DATA_RX app PRIVATE src/wifi_promiscuo
 target_sources_ifdef(CONFIG_NRF71_PROMISC_DATA_RX app PRIVATE src/wifi_promiscuous_shell.c)
 
 target_sources(app PRIVATE src/main.c)
+target_sources_ifdef(CONFIG_SAMPLE_SHELL_UART_POWER_BUTTONS app
+		     PRIVATE src/uart_power_buttons.c)
