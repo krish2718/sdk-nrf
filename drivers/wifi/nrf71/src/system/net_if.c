@@ -35,6 +35,11 @@ LOG_MODULE_DECLARE(wifi_nrf, CONFIG_WIFI_NRF71_LOG_LEVEL);
 #include <system/net_if.h>
 #include <common/mac_addr.h>
 #include <system/wifi_pm.h>
+
+#if defined(CONFIG_NRF71_SR_COEX_DRIVER)
+#include <common/fw_if/nrf71_coex_if.h>
+#endif
+
 #ifdef CONFIG_NRF71_STA_MODE
 static struct net_if_mcast_monitor mcast_monitor;
 #endif /* CONFIG_NRF71_STA_MODE */
@@ -1191,9 +1196,14 @@ del_vif:
 	vif_ctx_zep->vif_idx = MAX_NUM_VIFS;
 dev_rem:
 	if (wifi_powered_on) {
+#if defined(CONFIG_NRF_WIFI_SUBSYSTEM_POWER_OFF)
+#if defined(CONFIG_NRF71_SR_COEX_DRIVER)
+		(void)coex_cd_wifi_power_notify(COEX_WIFI_PREPARE_POWER_DOWN);
+#endif
 		if (nrf_wifi_power_off()) {
 			LOG_ERR("%s: nrf_wifi_power_off failed", __func__);
 		}
+#endif /* CONFIG_NRF_WIFI_SUBSYSTEM_POWER_OFF */
 	}
 	/* Free only if we added above i.e., for 1st VIF */
 	if (fmac_dev_added) {
@@ -1289,9 +1299,14 @@ int nrf_wifi_if_stop_zep(const struct device *dev, struct net_if *iface __unused
 	vif_ctx_zep->vif_idx = MAX_NUM_VIFS;
 
 	if (nrf_wifi_fmac_get_num_vifs(rpu_ctx_zep->rpu_ctx) == 0) {
+#if defined(CONFIG_NRF_WIFI_SUBSYSTEM_POWER_OFF)
+#if defined(CONFIG_NRF71_SR_COEX_DRIVER)
+		(void)coex_cd_wifi_power_notify(COEX_WIFI_PREPARE_POWER_DOWN);
+#endif
 		if (nrf_wifi_power_off()) {
 			LOG_ERR("%s: nrf_wifi_power_off failed", __func__);
 		}
+#endif /* CONFIG_NRF_WIFI_SUBSYSTEM_POWER_OFF */
 		nrf_wifi_sys_fmac_dev_rem_zep(&rpu_drv_priv_zep);
 	}
 

@@ -52,6 +52,21 @@ config NRF71_IPC_SEND_RETRY_INTERVAL_US
 	help
 	  Delay between retries when the IPC busy queue is not ready.
 
+config NRF_WIFI_SUBSYSTEM_POWER_OFF
+	bool "Power off the Wi-Fi subsystem when the last interface goes down"
+	default y
+	help
+	  Call nrf_wifi_power_off() after the last VIF is removed during
+	  interface stop or failed first bring-up. This collapses WIFICORE for
+	  a cold restart on the next interface up.
+
+	  Leave this enabled. If disabled, the RPU stays powered while the
+	  host tears down IPC/FMAC and if_stop disables 802.11 power save,
+	  which draws far more than subsystem power-off (typically several
+	  mA). Lowest System ON idle with Wi-Fi is interface-up with driver
+	  PS (see CONFIG_SHUTDOWN_STAY_UP in the Wi-Fi shutdown sample), not
+	  net_if down without subsystem power-off.
+
 choice NRF71_OPER_MODES
 	bool "nRF70 operating modes"
 	default NRF71_SYSTEM_MODE if !WIFI_USAGE_MODE_SCAN_ONLY

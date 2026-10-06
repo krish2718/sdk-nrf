@@ -9,13 +9,16 @@
  * state of the Wi-Fi subsystem.
  */
 
+#include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/sys_io.h>
 
+#include <hal/nrf_gpio.h>
 #include <hal/nrf_lrcconf.h>
 #include <hal/nrf_vpr.h>
 #include <nrfx.h>
+#include <soc_nrf_common.h>
 
 #include <system/wifi_pm.h>
 
@@ -41,11 +44,54 @@ LOG_MODULE_REGISTER(wifi_pm, CONFIG_WIFI_NRF71_LOG_LEVEL);
 #define WIFI_ENABLE_ALL_TRIGGER         1UL
 #define WIFI_RF_CLOCK_INT_EXT           0x3UL
 
-/* System off token for Wi-Fi subsystem */
+/* LMAC shared token: cleared on power-on, set on power-off */
 #define WIFI_SYSTEM_OFF_TOKEN           0x280002FCUL
+#define WIFI_SYSTEM_OFF_TOKEN_ACTIVE    1UL
 
 /* RPU reset poll timeout */
 #define RPU_RESET_TIMEOUT_US            3000
+
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_pwr_antswc)
+#if !defined(CONFIG_TRUSTED_EXECUTION_NONSECURE)
+#define WIFI_PWR_ANTSWC_REG             0x5010F780UL
+#else
+#define WIFI_PWR_ANTSWC_REG             0x4010F780UL
+#endif
+#define WIFI_PWR_ANTSWC_ENABLE          0x3UL
+#endif
+
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf71_antsw)
+#define ANTSW_NODE DT_COMPAT_GET_ANY_STATUS_OKAY(nordic_nrf71_antsw)
+
+static void antsw_rf_fe_sleep_hold(void)
+{
+	uint32_t sel_psel = NRF_DT_GPIOS_TO_PSEL(ANTSW_NODE, sel_gpios);
+
+	nrf_gpio_pin_control_select(sel_psel, NRF_GPIO_PIN_SEL_GPIO);
+	nrf_gpio_pin_clear(sel_psel);
+	nrf_gpio_cfg_output(sel_psel);
+}
+#endif
+
+static void antsw_rf_fe_sleep_enter(void)
+{
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf71_antsw)
+	antsw_rf_fe_sleep_hold();
+#endif
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_pwr_antswc)
+	*(volatile uint32_t *)WIFI_PWR_ANTSWC_REG &= ~WIFI_PWR_ANTSWC_ENABLE;
+#endif
+}
+
+static void antsw_rf_fe_sleep_exit(void)
+{
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_pwr_antswc)
+	*(volatile uint32_t *)WIFI_PWR_ANTSWC_REG |= WIFI_PWR_ANTSWC_ENABLE;
+#endif
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf71_antsw)
+	antsw_rf_fe_sleep_hold();
+#endif
+}
 
 int nrf_wifi_power_on(void)
 {
@@ -57,6 +103,8 @@ int nrf_wifi_power_on(void)
 
 	LOG_DBG("Powering on Wi-Fi subsystem");
 
+	antsw_rf_fe_sleep_exit();
+
 	/* Assert the LRC power-on request for the WIFICORE domain */
 	nrf_lrcconf_poweron_force_set(NRF_WIFICORE_LRCCONF_LRC0,
 				      NRF_LRCCONF_POWER_MAIN, true);
@@ -67,6 +115,9 @@ int nrf_wifi_power_on(void)
 	sys_write32(WIFI_ENABLE_ALL_TRIGGER, WIFI_RAM_ENABLE_SET_ALL);
 	sys_write32(WIFI_RF_CLOCK_INT_EXT, WIFI_RF_CLOCK_CTRL_SET);
 	__DSB();
+
+	nrf_lrcconf_task_trigger(NRF_WIFICORE_LRCCONF_LRC0,
+				 NRF_LRCCONF_TASK_SYSTEMOFFNOTREADY);
 
 	nrf_vpr_initpc_set(NRF_WIFICORE_LMAC_VPR,
 			   (uint32_t)(uintptr_t)NRF_WICR->FIRMWARE.LMACINITPC);
@@ -136,12 +187,18 @@ int nrf_wifi_power_off(void)
 	nrf_lrcconf_retain_set(NRF_WIFICORE_LRCCONF_LRC0,
 			       NRF_LRCCONF_POWER_DOMAIN_0, false);
 
+	sys_write32(WIFI_SYSTEM_OFF_TOKEN_ACTIVE, WIFI_SYSTEM_OFF_TOKEN);
+	nrf_lrcconf_task_trigger(NRF_WIFICORE_LRCCONF_LRC0,
+				 NRF_LRCCONF_TASK_SYSTEMOFFREADY);
+
 	/* Drop the LRC power requests */
 	nrf_lrcconf_poweron_force_set(NRF_WIFICORE_LRCCONF_LRC0,
 				      NRF_LRCCONF_POWER_MAIN |
 				      NRF_LRCCONF_POWER_DOMAIN_0,
 				      false);
 	__DSB();
+
+	antsw_rf_fe_sleep_enter();
 
 	return ret;
 }
