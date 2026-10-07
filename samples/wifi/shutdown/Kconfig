@@ -28,7 +28,25 @@ config OPERATION_MODE_BUTTONS
 	help
 	  Enable button interaction in the sample. If enabled, the sample will
 	  enable use of buttons to toggle the Wi-Fi shutdown or startup.
+
+config OPERATION_MODE_BOOT_DOWN_IDLE
+	bool "Boot, bring interface down, idle for current measurement"
+	help
+	  After boot (and optional MAC setup), bring the default network
+	  interface down once, suspend the console when
+	  CONFIG_NRF71_IDLE_POWER is enabled, then sleep forever. No scan
+	  and no stay-up leg. Pair with the nrf71-idle-power-quiet snippet
+	  (CONFIG_SERIAL=n) so PD_PERIP is not kept up by UART during
+	  measurement.
 endchoice
+
+config SHUTDOWN_BOOT_DOWN_SETTLE_MS
+	int "Delay before net_if down in boot-down-idle mode (ms)"
+	default 500
+	depends on OPERATION_MODE_BOOT_DOWN_IDLE
+	help
+	  Wait for Wi-Fi driver and auto-start interface bring-up to finish
+	  before calling net_if_down().
 
 config SHUTDOWN_TIMEOUT_S
 	int "Wi-Fi shutdown timeout"

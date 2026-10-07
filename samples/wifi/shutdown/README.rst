@@ -98,6 +98,14 @@ Measure host idle current on the nRF71 Series device
 
 On an nRF7120 DK, the ``nrf71-idle-power``, ``nrf71-idle-power-quiet``, and ``nrf71-idle-power-diag`` snippets build a One-shot mode image that brings Wi-Fi up, scans once, shuts Wi-Fi down, and idles the host SoC forever using the :ref:`lib_nrf71_idle_power` library.
 
+Boot-down idle (no UART, no scan) mirrors ``net iface down`` for VBAT measurement when P0.09 follows PD_PERIP while the console is enabled:
+
+.. code-block:: console
+
+   west build -p -b nrf7120dk/nrf7120/cpuapp --sysbuild -- \
+     -Dshutdown_CONFIG_OPERATION_MODE_BOOT_DOWN_IDLE=y \
+     -Dshutdown_SNIPPET="nrf71-idle-power;nrf71-idle-power-quiet"
+
 * ``nrf71-idle-power`` together with ``nrf71-idle-power-quiet`` silences the console for a clean current reading:
 
   .. code-block:: console

@@ -267,11 +267,27 @@ int main(void)
 #endif /* CONFIG_OPERATION_MODE_BUTTONS */
 
 #ifdef CONFIG_NRF_WIFI_IF_AUTO_START
+#if !defined(CONFIG_OPERATION_MODE_BOOT_DOWN_IDLE)
 	exit_shutdown_mode();
 	enter_shutdown_mode();
 #endif
+#endif
 
-#if defined(CONFIG_OPERATION_MODE_ONE_SHOT)
+#if defined(CONFIG_OPERATION_MODE_BOOT_DOWN_IDLE)
+	struct net_if *iface = net_if_get_default();
+
+	k_msleep(CONFIG_SHUTDOWN_BOOT_DOWN_SETTLE_MS);
+
+	shutdown_wifi(iface);
+
+#if defined(CONFIG_NRF71_IDLE_POWER)
+#if defined(CONFIG_NRF71_IDLE_DIAGNOSTICS)
+	nrf71_idle_power_print_snapshot("post-down");
+#endif
+	nrf71_idle_power_suspend_console();
+#endif
+	k_sleep(K_FOREVER);
+#elif defined(CONFIG_OPERATION_MODE_ONE_SHOT)
 	exit_shutdown_mode();
 #if !defined(CONFIG_SHUTDOWN_STAY_UP)
 	enter_shutdown_mode();

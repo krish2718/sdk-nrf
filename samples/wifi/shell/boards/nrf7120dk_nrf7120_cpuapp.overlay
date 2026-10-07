@@ -19,3 +19,13 @@
 &wifi {
 	status = "okay";
 };
+
+
+
+&pwr_antswc {
+status = "disabled";
+};
+
+&antsw {
+status = "disabled";
+};
