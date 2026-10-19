@@ -8,6 +8,15 @@ config BENCH_LOCAL_RAM_HOTPATH
 	bool "Place the UDP TX hot path in core-local RAM (APP_RAM0)"
 	select CODE_DATA_RELOCATION
 
+config BENCH_HOTPATH_REGION
+	string "Linker region for the UDP TX hot path"
+	depends on BENCH_LOCAL_RAM_HOTPATH
+	default "APPTCM_TEXT"
+	help
+	  APPTCM_TEXT is the nRF54H20 app core local RAM (tcm.overlay). Parts
+	  without core-local RAM, such as nRF7120, use SRAMCODE_TEXT together
+	  with sramcode.overlay.
+
 config BENCH_NULL_ETH
 	bool "Ethernet L2 sink driver instead of loopback"
 	depends on NET_L2_ETHERNET

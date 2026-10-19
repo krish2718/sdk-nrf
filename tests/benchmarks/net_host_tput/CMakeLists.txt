@@ -56,5 +56,5 @@ if(CONFIG_BENCH_LOCAL_RAM_HOTPATH)
     ${ZEPHYR_BASE}/subsys/net/lib/sockets/sockets.c
     ${ZEPHYR_BASE}/subsys/net/lib/sockets/sockets_inet.c
     ${ZEPHYR_BASE}/subsys/net/lib/zperf/zperf_udp_uploader.c
-    LOCATION APPTCM_TEXT NOKEEP)
+    LOCATION ${CONFIG_BENCH_HOTPATH_REGION} NOKEEP)
 endif()

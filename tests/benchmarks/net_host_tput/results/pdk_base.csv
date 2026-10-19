@@ -1,0 +1,5 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+pdk_base,,256.3,1024,0,126.49,0.494,16598
+pdk_base,,256.3,1024,1,126.53,0.494,16593
+pdk_base,,256.3,292,0,39.43,0.154,15184
+pdk_base,,256.3,292,1,39.43,0.154,15184

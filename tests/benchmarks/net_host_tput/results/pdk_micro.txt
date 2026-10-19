@@ -1,0 +1,9 @@
+cpu_hz=256130756
+csum len=64 cpu_hz=256261196 cycles_per_call=150 milli_cycles_per_byte=2349
+memcpy len=64 cpu_hz=256181328 cycles_per_call=86 milli_cycles_per_byte=1352
+csum len=292 cpu_hz=256286308 cycles_per_call=416 milli_cycles_per_byte=1426
+memcpy len=292 cpu_hz=256253000 cycles_per_call=271 milli_cycles_per_byte=929
+csum len=1024 cpu_hz=256236128 cycles_per_call=1230 milli_cycles_per_byte=1201
+memcpy len=1024 cpu_hz=256225368 cycles_per_call=865 milli_cycles_per_byte=845
+csum len=1472 cpu_hz=256254540 cycles_per_call=1734 milli_cycles_per_byte=1178
+memcpy len=1472 cpu_hz=256241752 cycles_per_call=1229 milli_cycles_per_byte=835

@@ -13,9 +13,13 @@
 
 #include <cmsis_core.h>
 
+#define HAS_CPU_DVFS DT_NODE_EXISTS(DT_NODELABEL(cpuapp_hsfll))
+
+#if HAS_CPU_DVFS
 static const struct device *const cpu_clk = DEVICE_DT_GET(DT_NODELABEL(cpuapp_hsfll));
 static struct nrf_clock_spec cur_spec;
 static bool have_req;
+#endif
 
 static uint32_t measure_cpu_hz(void)
 {
@@ -52,6 +56,12 @@ static uint32_t measure_cpu_hz(void)
 
 static int cmd_clk(const struct shell *sh, size_t argc, char **argv)
 {
+#if !HAS_CPU_DVFS
+	/* Fixed app core clock (e.g. nRF7120 HFPLL): report it so sweeps still log cpu_hz. */
+	shell_print(sh, "cpu_hz=%u", measure_cpu_hz());
+
+	return 0;
+#else
 	struct nrf_clock_spec spec = {0};
 	struct onoff_client cli;
 	int res = 0;
@@ -86,6 +96,7 @@ static int cmd_clk(const struct shell *sh, size_t argc, char **argv)
 	shell_print(sh, "cpu_hz=%u", measure_cpu_hz());
 
 	return 0;
+#endif
 }
 
 static int cmd_freq(const struct shell *sh, size_t argc, char **argv)

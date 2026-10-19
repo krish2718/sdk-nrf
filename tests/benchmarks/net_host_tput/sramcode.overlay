@@ -1,0 +1,22 @@
+/*
+ * nRF7120 has no core-local RAM. Carve RAM02 + RAM03 (top 248 KB of SRAM)
+ * out of cpuapp_sram as a separate region for relocated code. The KMU push
+ * area must stay at RAM_ADDR, which rules out relocating into the main SRAM
+ * region. Full net stack relocation needs ~128 KB, more than RAM03 alone.
+ * The region name cannot contain '_' (gen_relocate_app.py).
+ */
+/delete-node/ &ram02_sram;
+/delete-node/ &ram03_sram;
+
+&cpuapp_sram {
+	reg = <0x0 DT_SIZE_K(768)>;
+	ranges = <0x0 0x0 DT_SIZE_K(768)>;
+};
+
+&sram {
+	sramcode: memory@c0000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0xc0000 (DT_SIZE_K(248) - 0x20)>;
+		zephyr,memory-region = "SRAMCODE";
+	};
+};
