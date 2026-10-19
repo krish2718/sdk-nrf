@@ -14,6 +14,7 @@
 #   build_pdk_hot1500      loopback, UDP TX hot path in SRAM   -> results/pdk_hot1500.csv
 #   build_pdk_eth_sw       null Ethernet L2, SW checksum       -> results/pdk_eth_sw.csv
 #   build_pdk_eth_off      null Ethernet L2, csum offload      -> results/pdk_eth_off.csv
+#   build_pdk_eth_sw_hot   SW checksum, hot path in SRAM       -> results/pdk_eth_sw_hot.csv
 #   build_pdk_eth_off_hot  same, UDP TX hot path in SRAM       -> results/pdk_eth_off_hot.csv
 cd "$(dirname "$0")" || exit 1
 board=nrf7120dk/nrf7120/cpuapp
@@ -43,6 +44,9 @@ sram()
 {
 	b build_pdk_reloc1500 "-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-reloc.conf" $dtc
 	b build_pdk_hot1500 "-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-hot.conf" $dtc
+	b build_pdk_eth_sw_hot \
+		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-nulleth.conf;overlay-pdk-hot.conf" \
+		$dtc
 	b build_pdk_eth_off_hot \
 		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-nulleth.conf;overlay-pdk-hot.conf" \
 		-DCONFIG_BENCH_NULL_ETH_CSUM_OFFLOAD=y $dtc

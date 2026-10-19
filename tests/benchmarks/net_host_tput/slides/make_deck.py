@@ -37,6 +37,15 @@ MEAS = "TO MEASURE"
 
 ZEPHYR_ROWS = [
     [
+        "nRF54H20DK (ours)",
+        "M33 @ 320",
+        "null Ethernet",
+        "UDP TX 258",
+        "0.81",
+        "csum offload, hot path in TCM",
+        "this work",
+    ],
+    [
         "nRF7120 PDK (ours)",
         "M33 @ 256",
         "null Ethernet",
@@ -93,7 +102,7 @@ ZEPHYR_ROWS = [
 ]
 ZEPHYR_NOTES = [
     "Only UDP has crossed 400 on Zephyr, and only on ~1 GHz cores. Per MHz every one of them is "
-    "below our 0.69 (0.2-0.5): they win on clock, not on a cheaper per-packet path.",
+    "below our 0.69-0.81 (0.2-0.5): they win on clock, not on a cheaper per-packet path.",
     "Same RT1170 board: NXP bare-metal SDK does ~916 Mbps UDP vs ~477 on Zephyr. The stack is the "
     "limit, not the MAC.",
     "No Zephyr TCP above ~230 Mbps anywhere. tcp.c parses window scaling but never applies it, "
@@ -101,6 +110,14 @@ ZEPHYR_NOTES = [
     "this fixed first.",
 ]
 TASK3_ROWS = [
+    [
+        "nRF54H20DK (ours)",
+        "M33 @ 320",
+        "Zephyr, sockets",
+        "UDP TX 258",
+        "0.81",
+        "csum offload, hot path in TCM",
+    ],
     [
         "nRF7120 PDK (ours)",
         "M33 @ 256",
@@ -153,9 +170,9 @@ TASK3_ROWS = [
     ],
 ]
 TASK3_NOTES = [
-    "Our 0.69 Mbps/MHz is close to lwIP sockets on A9/A53 (0.81). Dropping the socket layer "
-    "(lwIP RAW callbacks) is >= 1.75x on the same A9. We are 2.26x short, so that alone is "
-    "not enough.",
+    "Our 0.69-0.81 Mbps/MHz is lwIP sockets on A9/A53 (0.81). Dropping the socket layer "
+    "(lwIP RAW callbacks) is >= 1.75x on the same A9. We are 1.55-2.26x short, so on the 7120 "
+    "that alone is not enough.",
     "Same NXP radio: 86-221 Mbps with lwIP on an MCU host, 405-502 with Linux. The host stack "
     "makes the gap.",
     "Linux UDP GSO 2.4x, GRO 1.8x bytes per cycle (LPC 2018). No published Zephyr GbE numbers on "
@@ -359,8 +376,8 @@ def build(src, out):
         0.67,
         1.3,
         2.75,
-        "177 Mbps",
-        "UDP TX, stack only, nRF7120 @ 256 MHz\nchecksum offload + hot path in SRAM",
+        "258 / 177 Mbps",
+        "Best UDP TX, stack only\nnRF54H20 @ 320 / nRF7120 @ 256",
         BLUE,
     )
     stat(
@@ -377,8 +394,8 @@ def build(src, out):
         6.57,
         1.3,
         2.76,
-        "1.45 MHz/Mbps",
-        "with offload + SRAM hot path\n1.8 with SW csum, all in MRAM",
+        "1.55x / 2.26x",
+        "short of 400, stack only\nnRF54H20 @ 320 / nRF7120 @ 256",
         NAVY,
     )
     tb = s.shapes.add_textbox(Inches(0.67), Inches(2.65), Inches(8.66), Inches(2.4))
@@ -386,34 +403,35 @@ def build(src, out):
         tb.text_frame,
         [
             [
-                ("Task 1: NO-GO. ", True),
+                ("Task 1: NO-GO on both boards. ", True),
                 (
-                    "Measured on the nRF7120 PDK. The stack alone, with nothing below it, "
-                    "is 2.26x short of 400 (1.98x of 350). Driver, IPC and FW only add to that.",
+                    "With nothing below the stack, nRF54H20DK does 258 Mbps at 320 MHz and the "
+                    "nRF7120 PDK 177 at its fixed 256 MHz. Driver, IPC and FW only add to that.",
                     False,
                 ),
             ],
             [
                 ("Rule of thumb holds. ", True),
                 (
-                    "SW checksum, code in MRAM: 142 Mbps, 1.8 MHz per Mbps. "
-                    "Offload +14%, hot path in SRAM another +9%.",
+                    "SW checksum, code in MRAM: 1.8-1.9 MHz per Mbps on both. Offload saves "
+                    "~2.7-2.8k cycles/pkt on both.",
+                    False,
+                ),
+            ],
+            [
+                ("Local RAM is where they differ. ", True),
+                (
+                    "54H TCM is +48%. nRF7120 has no TCM; code in SRAM only helps with offload "
+                    "(+9%) and is slower otherwise.",
                     False,
                 ),
             ],
             [
                 ("Per-packet cost is the wall. ", True),
                 (
-                    "17.1k cycles per 1472 B packet, ~15.9k of it fixed per packet. "
-                    "The per-byte part is one memcpy. Even at 0 cycles/byte the stack "
-                    "would top out at ~190 Mbps.",
-                    False,
-                ),
-            ],
-            [
-                ("400 Mbps needs a different architecture: ", True),
-                (
-                    "far fewer packets through the stack (USO/TSO, GRO) or TCP/IP off the host.",
+                    "Best case 14.6k (54H) / 17.1k (7120) cycles per 1472 B packet, mostly fixed "
+                    "per packet. 400 Mbps needs far fewer packets through the stack (USO/TSO, "
+                    "GRO) or TCP/IP off the host.",
                     False,
                 ),
             ],
@@ -425,9 +443,9 @@ def build(src, out):
         p.space_after = Pt(5)
     notes(
         s,
-        "All numbers are UDP TX only, 1472 B payload, zperf, Zephyr stack, nRF7120 PDK app core "
-        "at its fixed 256 MHz (measured 256.2-256.4). TCP and RX are not measured yet. Earlier "
-        "nRF54H20DK runs (TCM, 64-320 MHz) are on the wiki and point the same way.",
+        "All numbers are UDP TX only, 1472 B payload, zperf, Zephyr stack, measured on each "
+        "board's app core. 54H at its 320 MHz DVFS point, nRF7120 at its fixed 256 MHz. TCP and "
+        "RX are not measured yet.",
     )
 
     # 3. How we measured
@@ -435,7 +453,7 @@ def build(src, out):
     set_title(
         s,
         "How we measured",
-        "Zephyr stack on the nRF7120 PDK app core, Wi-Fi replaced by a null driver",
+        "Same Zephyr stack on two CM33 app cores, Wi-Fi replaced by a null driver",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
@@ -460,7 +478,7 @@ def build(src, out):
         4.9,
         3.6,
         0.3,
-        "Hot path code in SRAM (RAM02+03, 248 KB carved out)",
+        "Hot path code in TCM (54H) or a carved-out SRAM region (7120)",
         size=8,
         color=GREY,
         italic=True,
@@ -470,11 +488,12 @@ def build(src, out):
         tb.text_frame,
         [
             [
-                ("Board: ", True),
-                (
-                    "nRF7120 PDK app core (nrf7120dk/nrf7120/cpuapp), CM33F, MRAM + 8 KB I-cache.",
-                    False,
-                ),
+                ("nRF54H20DK: ", True),
+                ("M33, 16 KB I + 16 KB D cache, 32 KB TCM, DVFS 64/128/320 MHz.", False),
+            ],
+            [
+                ("nRF7120 PDK: ", True),
+                ("M33F, 8 KB I-cache, no TCM, fixed 256 MHz (nrf7120dk/nrf7120/cpuapp).", False),
             ],
             [
                 ("Checksum A/B: ", True),
@@ -487,20 +506,19 @@ def build(src, out):
             [
                 ("Code placement: ", True),
                 (
-                    "MRAM + I-cache (default), whole net stack in SRAM, or only the UDP TX "
-                    "hot path in SRAM. No TCM on nRF7120.",
+                    "MRAM + cache (default), whole net stack in RAM, or the UDP TX hot path "
+                    "in local RAM.",
                     False,
                 ),
             ],
             [
-                ("Clock: ", True),
+                ("Clock and runs: ", True),
                 (
-                    "fixed 256 MHz (HFPLL), measured each run with SysTick vs GRTC. "
-                    "No interpolation.",
+                    "clock measured every run (SysTick vs GRTC), 2 x 10 s per point, runs agree "
+                    "within 0.1%. No interpolation.",
                     False,
                 ),
             ],
-            [("Runs: ", True), ("2 x 10 s per point, the two runs agree within 0.1%.", False)],
             [
                 ("Gotcha: ", True),
                 (
@@ -518,7 +536,9 @@ def build(src, out):
     notes(
         s,
         "Cycles per packet = CPU Hz / packets per second. Mbps/MHz = Mbps / measured CPU MHz. "
-        "Everything needed to rebuild is on the last slide.",
+        "Why two boards: 54H has TCM and DVFS, so it can split core cycles from MRAM stalls and "
+        "show the TCM case task 1 asks for. nRF7120 is the actual Wi-Fi part at 256 MHz. "
+        "Everything needed to rebuild is in the appendix.",
     )
 
     # 4. Results
@@ -526,97 +546,112 @@ def build(src, out):
     set_title(
         s,
         "Results: UDP TX, 1472 B",
-        "nRF7120 PDK at 256 MHz; table shows all payload sizes for the Ethernet L2 runs",
+        "Each board at its own measured clock; cycles/packet normalises for clock",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
     ph._element.getparent().remove(ph._element)
     cd = CategoryChartData()
     cd.categories = [
-        "Loopback, MRAM (SW csum)",
-        "Loopback, stack in SRAM",
-        "Ethernet L2, MRAM (SW csum)",
-        "Ethernet L2, MRAM (offload)",
-        "Ethernet L2, SRAM hot path (offload)",
+        "Loopback, MRAM",
+        "Loopback, stack in RAM",
+        "Loopback, hot path local",
+        "Ethernet L2, local, SW csum",
+        "Ethernet L2, local, offload",
     ]
-    cd.add_series("Mbps @ 256 MHz", (172.9, 161.8, 142.0, 162.4, 176.8))
+    cd.add_series("nRF54H20DK @ 320 MHz", (168.8, 144.3, 249.7, 216.3, 257.7))
+    cd.add_series("nRF7120 PDK @ 256 MHz", (172.9, 161.8, 156.2, 133.9, 176.8))
     gf = s.shapes.add_chart(
-        XL_CHART_TYPE.BAR_CLUSTERED, Inches(0.5), Inches(1.65), Inches(4.9), Inches(3.5), cd
+        XL_CHART_TYPE.BAR_CLUSTERED, Inches(0.4), Inches(1.6), Inches(5.0), Inches(3.6), cd
     )
     ch = gf.chart
-    style_chart(ch)
-    ch.has_legend = False
+    style_chart(ch, size=8)
+    ch.has_legend = True
+    ch.legend.position = XL_LEGEND_POSITION.BOTTOM
+    ch.legend.include_in_layout = False
+    ch.legend.font.size = Pt(9)
     plot = ch.plots[0]
-    plot.gap_width = 60
+    plot.gap_width = 50
+    plot.overlap = -10
     plot.has_data_labels = True
-    plot.data_labels.font.size = Pt(10)
+    plot.data_labels.font.size = Pt(8)
     plot.data_labels.font.bold = True
     plot.data_labels.number_format = "0"
     plot.data_labels.number_format_is_linked = False
     plot.data_labels.position = XL_LABEL_POSITION.OUTSIDE_END
-    for i, col in enumerate((GREY, LIGHT, MID, NAVY, BLUE)):
-        pt = plot.series[0].points[i]
-        pt.format.fill.solid()
-        pt.format.fill.fore_color.rgb = col
+    for ser, col in zip(plot.series, (NAVY, BLUE), strict=True):
+        ser.format.fill.solid()
+        ser.format.fill.fore_color.rgb = col
     ch.value_axis.visible = False
     ch.value_axis.has_major_gridlines = False
     ch.value_axis.minimum_scale = 0
-    ch.value_axis.maximum_scale = 215
-    ch.category_axis.tick_labels.font.size = Pt(9)
+    ch.value_axis.maximum_scale = 300
+    ch.category_axis.tick_labels.font.size = Pt(8)
     ch.category_axis.reverse_order = True
     ch.category_axis.format.line.fill.background()
     table(
         s,
         5.6,
-        1.75,
+        1.65,
         3.73,
         [
-            ["Ethernet L2", "SW csum", "Offload", "+ SRAM"],
-            ["1472 B", "142.0", "162.4", "176.8"],
-            ["1024 B", "103.0", "115.2", "125.7"],
-            ["292 B", "31.5", "33.9", "37.1"],
-            ["Mbps/MHz, 1472", "0.55", "0.63", "0.69"],
-            ["Cycles/pkt, 1472", "21,250", "18,575", "17,069"],
+            ["Cycles/pkt, 1472 B", "54H @128", "54H @320", "7120 @256"],
+            ["Loopback, MRAM", "17,202", "22,284", "17,460"],
+            ["Loopback, stack in RAM", "20,262", "26,055", "18,646"],
+            ["Loopback, hot path local", "13,196", "15,052", "19,317"],
+            ["Eth, local, SW csum", "15,391", "17,400", "22,536"],
+            ["Eth, local, offload", "12,672", "14,592", "17,069"],
+            ["Eth, MRAM, offload", "-", "-", "18,575"],
         ],
-        [1.21, 0.84, 0.84, 0.84],
-        size=9,
-        bold_rows=(1,),
+        [1.43, 0.76, 0.76, 0.78],
+        size=8,
+        row_h=0.25,
+        bold_rows=(5,),
     )
     text_box(
         s,
         5.6,
         3.5,
         3.73,
-        1.6,
+        1.7,
         [
-            "Offload: +14% at 1472 B, -2.7k cycles/pkt (+8% at 292 B).",
-            "Hot path in SRAM: another +9% with offload.",
-            "But on loopback SRAM is slower than MRAM (-6% whole stack, -10% hot path). "
-            "Likely uncached SRAM fetch sharing the bus with packet data; not root-caused.",
+            "MRAM code: 7120 at 256 costs about what 54H costs at 128. On 54H MRAM wait grows "
+            "with clock.",
+            "Local RAM: 54H TCM is zero-wait. 7120 SRAM code wins only with offload; with SW "
+            "csum or loopback it loses to MRAM. Likely bus contention with packet data, not "
+            "root-caused.",
+            "Offload: +19% on 54H, +14% (MRAM) / +32% (SRAM) on 7120.",
         ],
-        size=9,
+        size=8,
     )
     notes(
         s,
-        "Loopback rows compute checksums in SW by design and run TX and RX on one core, so they "
-        "are not comparable 1:1 with the Ethernet L2 rows. Every point is 2 x 10 s, runs agree "
-        "within 0.1%. Raw CSVs: results/pdk_*.csv.",
+        "Local = TCM on 54H, SRAMCODE region (RAM02+03) on 7120. Loopback rows compute "
+        "checksums in SW by design and run TX and RX on one core. 54H Ethernet runs were only "
+        "done with the hot path in TCM. Raw CSVs: results/*.csv (54H), results/pdk_*.csv (7120).",
     )
 
     # 5. Where the cycles go
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
-        s, "Where the cycles go", "Per 1472 B packet at 256 MHz, against the budget for 400 Mbps"
+        s,
+        "Where the cycles go",
+        "Per 1472 B packet, best case on each board, against the budget for 400 Mbps",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
     ph._element.getparent().remove(ph._element)
     cd = CategoryChartData()
-    cd.categories = ["Budget for 400 Mbps", "Today (offload + SRAM hot path)"]
-    cd.add_series("Per packet (fixed)", (7537, 15879))
-    cd.add_series("Per byte (one copy, 1,190)", (0, 1190))
+    cd.categories = [
+        "Budget @ 320 MHz",
+        "nRF54H20DK @ 320",
+        "Budget @ 256 MHz",
+        "nRF7120 PDK @ 256",
+    ]
+    cd.add_series("Per packet (fixed)", (9421, 12990, 7537, 15879))
+    cd.add_series("Per byte (one copy)", (0, 1602, 0, 1190))
     gf = s.shapes.add_chart(
-        XL_CHART_TYPE.BAR_STACKED, Inches(0.5), Inches(1.7), Inches(5.0), Inches(2.6), cd
+        XL_CHART_TYPE.BAR_STACKED, Inches(0.5), Inches(1.65), Inches(5.0), Inches(2.85), cd
     )
     ch = gf.chart
     style_chart(ch)
@@ -625,18 +660,22 @@ def build(src, out):
     ch.legend.include_in_layout = False
     ch.legend.font.size = Pt(9)
     plot = ch.plots[0]
-    plot.gap_width = 50
+    plot.gap_width = 40
     plot.overlap = 100
     plot.has_data_labels = True
     plot.data_labels.number_format = "#,##0;;"
     plot.data_labels.number_format_is_linked = False
-    plot.data_labels.font.size = Pt(10)
+    plot.data_labels.font.size = Pt(9)
     plot.data_labels.font.color.rgb = WHITE
     plot.data_labels.position = XL_LABEL_POSITION.CENTER
     for ser, col in zip(plot.series, (NAVY, YELLOW), strict=True):
         ser.format.fill.solid()
         ser.format.fill.fore_color.rgb = col
     plot.series[1].data_labels.show_value = False
+    for i in (0, 2):
+        pt = plot.series[0].points[i]
+        pt.format.fill.solid()
+        pt.format.fill.fore_color.rgb = GREY
     ch.value_axis.visible = False
     ch.value_axis.has_major_gridlines = False
     ch.category_axis.tick_labels.font.size = Pt(9)
@@ -644,11 +683,12 @@ def build(src, out):
     text_box(
         s,
         0.67,
-        4.4,
+        4.55,
         4.8,
-        0.7,
-        "Budget = 256 MHz x 8 x 1472 / 400 Mbps = 7,537. Today = 17,069 measured. Split from "
-        "a line through 292 B (16,115) and 1472 B: 0.81 cycles/B + 15,879 fixed.",
+        0.6,
+        "Budget = clock x 8 x 1472 / 400 Mbps. Split from a line through the 292 B and 1472 B "
+        "points: 54H 1.09 cycles/B + 12,990, 7120 0.81 cycles/B + 15,879. Ethernet L2, offload, "
+        "hot path in local RAM.",
         size=8,
         color=GREY,
         italic=True,
@@ -660,22 +700,26 @@ def build(src, out):
             [
                 ("Per-byte is small: ", True),
                 (
-                    "0.81 cycles/B with offload, same as memcpy on the bench (0.84). "
-                    "SW checksum adds ~2.7k/pkt.",
+                    "0.8-1.1 cycles/B, about one memcpy (0.84 on the 7120 bench). SW checksum "
+                    "adds ~2.7k/pkt.",
                     False,
                 ),
             ],
             [
                 ("Per-packet dominates: ", True),
-                ("~15.9k cycles: alloc, socket, UDP/IP, L2, scheduling. 93% of the total.", False),
+                (
+                    "~13k (54H, TCM) / ~15.9k (7120) fixed: alloc, socket, UDP/IP, L2, "
+                    "scheduling. 89-93% of the total.",
+                    False,
+                ),
             ],
             [
                 ("Gap: ", True),
-                ("2.26x for 400 Mbps, 1.98x for 350 (TCP target).", False),
+                ("1.55x on 54H @ 320, 2.26x on 7120 @ 256 (1.98x for the 350 TCP target).", False),
             ],
             [
                 ("Zero-copy alone: ", True),
-                ("~190 Mbps. The per-packet path has to shrink 2x.", False),
+                ("~290 Mbps (54H @ 320), ~190 (7120). The per-packet path has to shrink.", False),
             ],
         ],
         size=10,
@@ -815,10 +859,10 @@ def build(src, out):
             + TASK3_ROWS,
             [1.6, 1.3, 1.15, 1.85, 0.75, 2.35],
             size=7,
-            row_h=0.25,
+            row_h=0.23,
         )
     if TASK3_NOTES:
-        text_box(s, 0.5, 4.2, 9.0, 0.9, TASK3_NOTES, size=8)
+        text_box(s, 0.5, 4.25, 9.0, 0.9, TASK3_NOTES, size=8)
 
     # 7b. Task 3: Zephyr hosts
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
@@ -849,9 +893,9 @@ def build(src, out):
         + ZEPHYR_ROWS,
         [1.35, 1.1, 1.2, 1.95, 0.8, 1.6, 1.0],
         size=7,
-        row_h=0.27,
+        row_h=0.25,
     )
-    text_box(s, 0.5, 3.75, 9.0, 1.4, ZEPHYR_NOTES, size=8)
+    text_box(s, 0.5, 3.85, 9.0, 1.3, ZEPHYR_NOTES, size=8)
 
     # 8. Architecture options
     s = prs.slides.add_slide(layout(prs, "18_three messages title + text"))
@@ -869,8 +913,8 @@ def build(src, out):
         [
             "Same stack, faster core: higher clock, core-local RAM, wider core (M55/M85 or "
             "A-class).",
-            "400 Mbps is 34k pkts/s. At 17.1k cycles/pkt that is ~580 MHz of CM33, ~540 MHz "
-            "even with zero-copy. No headroom left for driver or app.",
+            "400 Mbps is 34k pkts/s. At 14.6k (54H, TCM) to 17.1k (7120) cycles/pkt that is "
+            "~500-580 MHz of CM33. No headroom left for driver or app.",
         ],
         [
             "Stack on a network core or in Wi-Fi FW; host uses socket offload (WZN-108, WZN-8705).",
@@ -883,8 +927,9 @@ def build(src, out):
         fill_bullets(body_ph(s, 19 + i).text_frame, bodies[i], size=10)
     notes(
         s,
-        "B: 400 Mbps at 1472 B is 33,967 pkt/s; x 17,069 cycles (PDK, offload + SRAM hot path) "
-        "= 580 MHz; x 15,879 (fixed part only) = 539 MHz. "
+        "B: 400 Mbps at 1472 B is 33,967 pkt/s; x 14,592 cycles (54H @ 320, offload + TCM) "
+        "= 496 MHz; x 17,069 (7120 @ 256, offload + SRAM hot path) = 580 MHz. Zero-wait floor "
+        "on 54H (64 MHz, 12,022) = 408 MHz. "
         "A: assumes stack per-packet cost is paid once per super-packet; driver segmentation cost "
         "is unknown and is what E8 measures.",
     )
@@ -947,12 +992,15 @@ def build(src, out):
     tf.margin_left = tf.margin_top = Inches(0.12)
     lines = [
         "cd nrf/tests/benchmarks/net_host_tput",
-        "./pdk_build.sh          # 7 variants, nrf7120dk/nrf7120/cpuapp",
-        "./pdk_sweep.sh base 1500 reloc hot eth_sw eth_off eth_off_hot",
-        "                        # -> results/pdk_*.csv",
+        "# nRF54H20DK",
+        "./build.sh && ./sweep.sh && ./sweep_eth.sh  # results/*.csv",
+        "# nRF7120 PDK",
+        "./pdk_build.sh",
+        "./pdk_sweep.sh base 1500 reloc hot eth_sw eth_off \\",
+        "    eth_sw_hot eth_off_hot              # results/pdk_*.csv",
         "",
         "# by hand, offload build:",
-        "uart:~$ bench freq",
+        "uart:~$ bench clk 320   # 54H only; bench freq on 7120",
         "uart:~$ net arp add 192.0.2.2 02:00:5e:10:00:02",
         "uart:~$ zperf udp upload 192.0.2.2 5001 10 1472 1000M",
         "# read the client rate in brackets",
@@ -972,8 +1020,10 @@ def build(src, out):
         3.03,
         3.4,
         [
-            "nRF7120 PDK, zephyr 2bbcaa7ddf2, sdk-nrf b419792d143.",
-            "Zephyr SDK 1.0.0 (GCC 14.3), CONFIG_SPEED_OPTIMIZATIONS, picolibc module.",
+            "zephyr 2bbcaa7ddf2 for all runs, CONFIG_SPEED_OPTIMIZATIONS, picolibc module.",
+            "nRF54H20DK: sdk-nrf 02edfdd44a0 (loopback) / b419792d143 (Ethernet), "
+            "Zephyr SDK 0.17.0.",
+            "nRF7120 PDK: sdk-nrf b419792d143, Zephyr SDK 1.0.0 (GCC 14.3).",
             "",
             "SRAM builds add sramcode.overlay: RAM02+03 become a separate SRAMCODE region, "
             "since the KMU push area has to stay at RAM_ADDR, ahead of any relocated code.",
@@ -983,7 +1033,7 @@ def build(src, out):
         size=9,
     )
 
-    # Backup: every PDK run
+    # Backup: every run, both boards
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
@@ -1005,26 +1055,91 @@ def build(src, out):
             ["Loopback", "SW", "whole stack SRAM", "161.8", "122.9", "41.3", "18,646"],
             ["Loopback", "SW", "hot path SRAM", "156.2", "118.3", "39.4", "19,317"],
             ["Null Ethernet", "SW", "MRAM", "142.0", "103.0", "31.5", "21,250"],
+            ["Null Ethernet", "SW", "hot path SRAM", "133.9", "100.1", "32.5", "22,536"],
             ["Null Ethernet", "offload", "MRAM", "162.4", "115.2", "33.9", "18,575"],
             ["Null Ethernet", "offload", "hot path SRAM", "176.8", "125.7", "37.1", "17,069"],
         ],
         [1.7, 0.9, 1.6, 0.9, 0.9, 0.9, 1.76],
         size=8,
-        row_h=0.27,
-        bold_rows=(7,),
+        row_h=0.26,
+        bold_rows=(8,),
     )
     text_box(
         s,
         0.67,
-        3.9,
+        4.15,
         8.66,
-        1.2,
+        1.0,
         [
             "The first row reproduces the old PDK baseline (124 Mbps at 1 KB).",
-            "Cross-check: nRF54H20DK at 320 MHz with the hot path in 32 KB TCM did 14,593 "
-            "cycles/pkt (257.7 Mbps), against 17,069 here from SRAM. Different toolchain "
-            "(SDK 0.17.0). Both are about 2x over the 7,537 budget.",
             "Microbench at 1472 B: checksum 1,734 cycles (1.18/B), memcpy 1,229 (0.84/B).",
+            "Zephyr SDK 1.0.0 (GCC 14.3). The 54H runs used SDK 0.17.0.",
+        ],
+        size=9,
+    )
+
+    s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
+    set_title(
+        s,
+        "Backup: all nRF54H20DK runs",
+        "UDP TX Mbps at 1472 B per DVFS point, 2 x 10 s each; cycles/pkt in brackets",
+    )
+    add_slide_number(s)
+    ph = body_ph(s, 10)
+    ph._element.getparent().remove(ph._element)
+    table(
+        s,
+        0.67,
+        1.62,
+        8.66,
+        [
+            ["Variant", "Checksum", "Code", "64 MHz", "128 MHz", "320 MHz"],
+            ["Loopback", "SW", "MRAM", "49.0 (15,349)", "87.4 (17,202)", "168.8 (22,284)"],
+            [
+                "Loopback",
+                "SW",
+                "whole stack RAM",
+                "41.7 (18,046)",
+                "74.2 (20,262)",
+                "144.3 (26,055)",
+            ],
+            ["Loopback", "SW", "hot path TCM", "59.9 (12,564)", "113.9 (13,196)", "249.7 (15,052)"],
+            [
+                "Null Ethernet",
+                "SW",
+                "hot path TCM",
+                "51.2 (14,703)",
+                "97.6 (15,391)",
+                "216.3 (17,400)",
+            ],
+            [
+                "Null Ethernet",
+                "offload",
+                "hot path TCM",
+                "62.6 (12,022)",
+                "118.6 (12,672)",
+                "257.7 (14,592)",
+            ],
+        ],
+        [1.7, 0.9, 1.6, 1.4, 1.5, 1.56],
+        size=8,
+        row_h=0.3,
+        bold_rows=(5,),
+    )
+    text_box(
+        s,
+        0.67,
+        3.65,
+        8.66,
+        1.4,
+        [
+            "Cycles/pkt rise with clock because MRAM wait is fixed in ns. The 64 MHz column is "
+            "the closest to a zero-wait floor (12k cycles/pkt with offload).",
+            "Mike asked for 256 MHz; IronSide only has 64/128/320. Linear interpolation on "
+            "cycles/pkt puts the offload case at ~216 Mbps at 256 MHz, against 177 measured on "
+            "the 7120.",
+            "zephyr 2bbcaa7ddf2, sdk-nrf 02edfdd44a0 (loopback) / b419792d143 (Ethernet), "
+            "Zephyr SDK 0.17.0.",
         ],
         size=9,
     )
