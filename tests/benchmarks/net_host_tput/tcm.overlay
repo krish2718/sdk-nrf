@@ -1,0 +1,4 @@
+/* gen_relocate_app.py cannot parse region names containing '_'. */
+&cpuapp_tcm_region {
+	zephyr,memory-region = "APPTCM";
+};

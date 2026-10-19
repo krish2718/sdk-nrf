@@ -1,0 +1,20 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config BENCH_LOCAL_RAM_HOTPATH
+	bool "Place the UDP TX hot path in core-local RAM (APP_RAM0)"
+	select CODE_DATA_RELOCATION
+
+config BENCH_NULL_ETH
+	bool "Ethernet L2 sink driver instead of loopback"
+	depends on NET_L2_ETHERNET
+	select NET_CHECKSUM_OFFLOAD_SUPPORTED
+
+config BENCH_NULL_ETH_CSUM_OFFLOAD
+	bool "Advertise TX/RX checksum offload from the sink driver"
+	depends on BENCH_NULL_ETH
+
+source "$(ZEPHYR_BASE)/samples/net/zperf/Kconfig"
