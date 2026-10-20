@@ -173,6 +173,13 @@ static int cmd_memcpy(const struct shell *sh, size_t argc, char **argv)
 #define HAS_ICACHE_PROF 0
 #endif
 
+/* Same bit, 1 while busy: READY on nRF7120, BUSY on nRF54H20. */
+#if defined(CACHE_STATUS_READY_Msk)
+#define BENCH_CACHE_BUSY_Msk CACHE_STATUS_READY_Msk
+#elif defined(CACHE_STATUS_BUSY_Msk)
+#define BENCH_CACHE_BUSY_Msk CACHE_STATUS_BUSY_Msk
+#endif
+
 #if HAS_MRAMC_WS
 static uint32_t mram_ws_get(void)
 {
@@ -230,7 +237,7 @@ static int cmd_icache(const struct shell *sh, size_t argc, char **argv)
 
 	if (on) {
 		NRF_ICACHE->TASKS_INVALIDATECACHE = 1;
-		while (NRF_ICACHE->STATUS & CACHE_STATUS_READY_Msk) {
+		while (NRF_ICACHE->STATUS & BENCH_CACHE_BUSY_Msk) {
 		}
 	}
 	NRF_ICACHE->ENABLE = on;

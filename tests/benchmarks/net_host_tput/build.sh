@@ -14,6 +14,9 @@
 #   build_local1500  loopback, UDP TX hot path in TCM       -> results/tcm1500.csv
 #   build_eth_sw     null Ethernet L2, TCM, SW checksum     -> results/eth_sw.csv
 #   build_eth_off    null Ethernet L2, TCM, csum offload    -> results/eth_off.csv
+#   build_eth_*_mram same, code in MRAM                     -> results/eth_*_mram.csv
+#   build_eth_*_tc0  no TX thread (NET_TC_TX_COUNT=0)       -> results/eth_*_tc0.csv
+#   build_eth_*_abl  no TX thread, net stats, net logging   -> results/eth_*_abl.csv
 set -e
 cd "$(dirname "$0")"
 board=nrf54h20dk/nrf54h20/cpuapp
@@ -39,3 +42,15 @@ b build_local1500 -DEXTRA_CONF_FILE=overlay-mtu1500.conf $tcm
 b build_eth_sw "$eth" $tcm
 # shellcheck disable=SC2086
 b build_eth_off "$eth" $tcm -DCONFIG_BENCH_NULL_ETH_CSUM_OFFLOAD=y
+
+# Same Ethernet paths with code left in MRAM, and the lean config
+# (overlay-ablate.conf: no TX thread, no net stats, no net logging).
+abl="-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-nulleth.conf;overlay-ablate.conf"
+off=-DCONFIG_BENCH_NULL_ETH_CSUM_OFFLOAD=y
+b build_eth_sw_mram "$eth"
+b build_eth_off_mram "$eth" $off
+# shellcheck disable=SC2086
+b build_eth_off_tc0 "$eth" $tcm $off -DCONFIG_NET_TC_TX_COUNT=0
+# shellcheck disable=SC2086
+b build_eth_off_abl "$abl" $tcm $off
+b build_eth_off_mram_abl "$abl" $off

@@ -4,11 +4,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
-# Checksum offload A/B through Ethernet L2 (null driver), hot path in TCM.
-# Expects the build directories from build.sh. Usage: sweep_eth.sh [port]
+# Checksum offload A/B through Ethernet L2 (null driver), hot path in TCM
+# or MRAM, bench and lean config. Expects the build directories from
+# build.sh. Usage: sweep_eth.sh [port] [variant...], default eth_sw eth_off
 set -e
 cd "$(dirname "$0")"
 port=${1:-/dev/ttyACM0}
+[ $# -gt 0 ] && shift
+variants=${*:-eth_sw eth_off}
 
 run() {
 	build=$1
@@ -21,5 +24,6 @@ run() {
 		--raw "results/$tag.log" | tee "results/$tag.csv"
 }
 
-run build_eth_sw eth_sw
-run build_eth_off eth_off
+for v in $variants; do
+	run "build_$v" "$v"
+done
