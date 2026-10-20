@@ -17,6 +17,13 @@ config BENCH_HOTPATH_REGION
 	  without core-local RAM, such as nRF7120, use SRAMCODE_TEXT together
 	  with sramcode.overlay.
 
+config BENCH_HOTPATH_CSUM_IN_NVM
+	bool "Keep the checksum (utils.c) out of the relocated hot path"
+	depends on BENCH_LOCAL_RAM_HOTPATH
+	help
+	  On nRF7120, code in SRAM is fetched over the same S-AHB port as its
+	  data, so the load-heavy checksum loop runs faster from cached MRAM.
+
 config BENCH_NULL_ETH
 	bool "Ethernet L2 sink driver instead of loopback"
 	depends on NET_L2_ETHERNET

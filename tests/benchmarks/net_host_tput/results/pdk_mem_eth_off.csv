@@ -1,0 +1,4 @@
+tag,case,mram_ws,size,mbps,cycles_per_pkt,hit_per_pkt,miss_per_pkt,csum_cyc,memcpy_cyc
+eth_off,ws6,6,1472,160.87,18743,4394,734,1734,1229
+eth_off,ws10,10,1472,139.05,21684,4394,734,1734,1229
+eth_off,nocache,6,1472,106.01,28442,0,0,3863,2403

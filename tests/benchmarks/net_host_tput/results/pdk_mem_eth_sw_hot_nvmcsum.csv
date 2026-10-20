@@ -1,0 +1,4 @@
+tag,case,mram_ws,size,mbps,cycles_per_pkt,hit_per_pkt,miss_per_pkt,csum_cyc,memcpy_cyc
+eth_sw_hot_nvmcsum,ws6,6,1472,149.66,20145,4207,256,1734,1229
+eth_sw_hot_nvmcsum,ws10,10,1472,142.42,21169,4207,256,1735,1230
+eth_sw_hot_nvmcsum,nocache,6,1472,99.95,30165,0,0,3864,2402

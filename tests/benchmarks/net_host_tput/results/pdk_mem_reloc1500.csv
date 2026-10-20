@@ -1,0 +1,4 @@
+tag,case,mram_ws,size,mbps,cycles_per_pkt,hit_per_pkt,miss_per_pkt,csum_cyc,memcpy_cyc
+reloc1500,ws6,6,1472,161.74,18641,1829,83,4117,1229
+reloc1500,ws10,10,1472,158.88,18977,1829,83,4117,1229
+reloc1500,nocache,6,1472,125.72,23982,0,0,4136,2402

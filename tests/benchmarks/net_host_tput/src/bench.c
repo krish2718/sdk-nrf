@@ -161,11 +161,115 @@ static int cmd_memcpy(const struct shell *sh, size_t argc, char **argv)
 	return cmd_perbyte(sh, argc, argv, false);
 }
 
+#if defined(NRF_MRAMC) && defined(MRAMC_WAITSTATES_WAITSTATENUM_Msk)
+#define HAS_MRAMC_WS 1
+#else
+#define HAS_MRAMC_WS 0
+#endif
+
+#if defined(NRF_ICACHE) && defined(CACHE_PROFILING_ENABLE_ENABLE_Msk)
+#define HAS_ICACHE_PROF 1
+#else
+#define HAS_ICACHE_PROF 0
+#endif
+
+#if HAS_MRAMC_WS
+static uint32_t mram_ws_get(void)
+{
+	return (NRF_MRAMC->WAITSTATES & MRAMC_WAITSTATES_WAITSTATENUM_Msk) >>
+	       MRAMC_WAITSTATES_WAITSTATENUM_Pos;
+}
+#endif
+
+static int cmd_mem(const struct shell *sh, size_t argc, char **argv)
+{
+	shell_print(sh, "cpu_hz=%u", measure_cpu_hz());
+#if HAS_MRAMC_WS
+	shell_print(sh, "mramc_waitstates=0x%08x mram_ws=%u mramc_config=0x%08x",
+		    NRF_MRAMC->WAITSTATES, mram_ws_get(), NRF_MRAMC->CONFIG);
+#endif
+#if HAS_ICACHE_PROF
+	shell_print(sh, "icache_enable=%u icache_status=0x%08x prof_enable=%u",
+		    NRF_ICACHE->ENABLE, NRF_ICACHE->STATUS, NRF_ICACHE->PROFILING.ENABLE);
+#endif
+	return 0;
+}
+
+static int cmd_ws(const struct shell *sh, size_t argc, char **argv)
+{
+#if HAS_MRAMC_WS
+	uint32_t ws = strtoul(argv[1], NULL, 10);
+	uint32_t reg;
+
+	if (ws < MRAMC_WAITSTATES_WAITSTATENUM_Min || ws > MRAMC_WAITSTATES_WAITSTATENUM_Max) {
+		shell_error(sh, "ws out of range %lu..%lu", MRAMC_WAITSTATES_WAITSTATENUM_Min,
+			    MRAMC_WAITSTATES_WAITSTATENUM_Max);
+		return -EINVAL;
+	}
+
+	/* KEY is write-only; the other control bits must be written back unchanged. */
+	reg = NRF_MRAMC->WAITSTATES & ~(MRAMC_WAITSTATES_WAITSTATENUM_Msk |
+					MRAMC_WAITSTATES_KEY_Msk);
+	reg |= (ws << MRAMC_WAITSTATES_WAITSTATENUM_Pos) |
+	       (MRAMC_WAITSTATES_KEY_Enable << MRAMC_WAITSTATES_KEY_Pos);
+	NRF_MRAMC->WAITSTATES = reg;
+	__DSB();
+	__ISB();
+
+	shell_print(sh, "mram_ws=%u", mram_ws_get());
+	return 0;
+#else
+	return -ENOTSUP;
+#endif
+}
+
+static int cmd_icache(const struct shell *sh, size_t argc, char **argv)
+{
+#if HAS_ICACHE_PROF
+	bool on = strcmp(argv[1], "on") == 0;
+
+	if (on) {
+		NRF_ICACHE->TASKS_INVALIDATECACHE = 1;
+		while (NRF_ICACHE->STATUS & CACHE_STATUS_READY_Msk) {
+		}
+	}
+	NRF_ICACHE->ENABLE = on;
+	__DSB();
+	__ISB();
+
+	shell_print(sh, "icache_enable=%u", NRF_ICACHE->ENABLE);
+	return 0;
+#else
+	return -ENOTSUP;
+#endif
+}
+
+static int cmd_prof(const struct shell *sh, size_t argc, char **argv)
+{
+#if HAS_ICACHE_PROF
+	if (strcmp(argv[1], "clear") == 0) {
+		NRF_ICACHE->PROFILING.ENABLE = 1;
+		NRF_ICACHE->PROFILING.CLEAR = 1;
+		return 0;
+	}
+
+	shell_print(sh, "icache_hit=%u icache_miss=%u", NRF_ICACHE->PROFILING.HIT,
+		    NRF_ICACHE->PROFILING.MISS);
+	return 0;
+#else
+	return -ENOTSUP;
+#endif
+}
+
 SHELL_STATIC_SUBCMD_SET_CREATE(bench_cmds,
 	SHELL_CMD_ARG(clk, NULL, "Request app core clock: clk <MHz>", cmd_clk, 2, 0),
 	SHELL_CMD(freq, NULL, "Measure app core clock", cmd_freq),
 	SHELL_CMD_ARG(csum, NULL, "Time calc_chksum: csum <len> <iters>", cmd_csum, 3, 0),
 	SHELL_CMD_ARG(memcpy, NULL, "Time memcpy: memcpy <len> <iters>", cmd_memcpy, 3, 0),
+	SHELL_CMD(mem, NULL, "Dump MRAM wait states and I-cache state", cmd_mem),
+	SHELL_CMD_ARG(ws, NULL, "Set MRAM read wait states: ws <n>", cmd_ws, 2, 0),
+	SHELL_CMD_ARG(icache, NULL, "I-cache: icache <on|off>", cmd_icache, 2, 0),
+	SHELL_CMD_ARG(prof, NULL, "I-cache profiling: prof <clear|show>", cmd_prof, 2, 0),
 	SHELL_SUBCMD_SET_END
 );
 

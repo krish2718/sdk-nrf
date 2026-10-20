@@ -16,6 +16,10 @@
 #   build_pdk_eth_off      null Ethernet L2, csum offload      -> results/pdk_eth_off.csv
 #   build_pdk_eth_sw_hot   SW checksum, hot path in SRAM       -> results/pdk_eth_sw_hot.csv
 #   build_pdk_eth_off_hot  same, UDP TX hot path in SRAM       -> results/pdk_eth_off_hot.csv
+#   build_pdk_*_nvmcsum    hot path in SRAM, checksum left in cached MRAM
+#
+# mem_probe.py runs on the same builds for MRAM wait-state and I-cache
+# numbers (results/pdk_mem_*.csv).
 cd "$(dirname "$0")" || exit 1
 board=nrf7120dk/nrf7120/cpuapp
 dtc="-DEXTRA_DTC_OVERLAY_FILE=sramcode.overlay"
@@ -42,7 +46,8 @@ base()
 
 sram()
 {
-	b build_pdk_reloc1500 "-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-reloc.conf" $dtc
+	b build_pdk_reloc1500 "-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-reloc.conf" \
+		$dtc
 	b build_pdk_hot1500 "-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-hot.conf" $dtc
 	b build_pdk_eth_sw_hot \
 		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-nulleth.conf;overlay-pdk-hot.conf" \
@@ -50,6 +55,12 @@ sram()
 	b build_pdk_eth_off_hot \
 		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-nulleth.conf;overlay-pdk-hot.conf" \
 		-DCONFIG_BENCH_NULL_ETH_CSUM_OFFLOAD=y $dtc
+	b build_pdk_hot1500_nvmcsum \
+		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-hot.conf" \
+		-DCONFIG_BENCH_HOTPATH_CSUM_IN_NVM=y $dtc
+	b build_pdk_eth_sw_hot_nvmcsum \
+		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-nulleth.conf;overlay-pdk-hot.conf" \
+		-DCONFIG_BENCH_HOTPATH_CSUM_IN_NVM=y $dtc
 }
 
 case ${1:-all} in

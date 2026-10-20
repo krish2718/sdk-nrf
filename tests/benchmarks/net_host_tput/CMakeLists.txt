@@ -43,11 +43,14 @@ if(CONFIG_BENCH_LOCAL_RAM_HOTPATH)
     set(l2_hot ${ZEPHYR_BASE}/drivers/net/loopback.c)
   endif()
 
+  if(NOT CONFIG_BENCH_HOTPATH_CSUM_IN_NVM)
+    list(APPEND l2_hot ${ZEPHYR_BASE}/subsys/net/ip/utils.c)
+  endif()
+
   zephyr_code_relocate(FILES
     ${l2_hot}
     ${ZEPHYR_BASE}/subsys/net/ip/net_context.c
     ${ZEPHYR_BASE}/subsys/net/ip/net_pkt.c
-    ${ZEPHYR_BASE}/subsys/net/ip/utils.c
     ${ZEPHYR_BASE}/subsys/net/ip/udp.c
     ${ZEPHYR_BASE}/subsys/net/ip/ipv4.c
     ${ZEPHYR_BASE}/subsys/net/ip/net_core.c
