@@ -421,8 +421,8 @@ def build(src, out):
             [
                 ("Local RAM is where they differ. ", True),
                 (
-                    "54H TCM is +48%. nRF7120 has no TCM; code in SRAM only helps with offload "
-                    "(+9%) and is slower otherwise.",
+                    "54H TCM is +48%. nRF7120 has no TCM; hot path in SRAM gives +6-11% "
+                    "once the checksum stays in cached MRAM.",
                     False,
                 ),
             ],
@@ -617,9 +617,10 @@ def build(src, out):
         [
             "MRAM code: 7120 at 256 costs about what 54H costs at 128. On 54H MRAM wait grows "
             "with clock.",
-            "Local RAM: 54H TCM is zero-wait. 7120 SRAM code wins only with offload; with SW "
-            "csum or loopback it loses to MRAM. Likely bus contention with packet data, not "
-            "root-caused.",
+            "Local RAM: 54H TCM is zero-wait. On 7120 the 8 KB I-cache only covers MRAM "
+            "(6 wait states at 256 MHz, ~610 misses/pkt). Hot path in SRAM cuts misses ~70%, "
+            "but SRAM code is fetched over S-AHB with its own data, so csum runs 2.4x slower. "
+            "Keeping csum in MRAM makes SRAM win everywhere: 182 loopback, 150 SW csum.",
             "Offload: +19% on 54H, +14% (MRAM) / +32% (SRAM) on 7120.",
         ],
         size=8,
@@ -628,7 +629,18 @@ def build(src, out):
         s,
         "Local = TCM on 54H, SRAMCODE region (RAM02+03) on 7120. Loopback rows compute "
         "checksums in SW by design and run TX and RX on one core. 54H Ethernet runs were only "
-        "done with the hot path in TCM. Raw CSVs: results/*.csv (54H), results/pdk_*.csv (7120).",
+        "done with the hot path in TCM. Raw CSVs: results/*.csv (54H), results/pdk_*.csv (7120)."
+        "\n\nWhy SRAM helps on 7120: the M33 fetches MRAM over C-AHB through the 8 KB "
+        "direct-mapped I-cache, and SRAM over S-AHB, uncached, on the same port as its "
+        "loads and stores. MRAMC reads back 6 wait states at 256 MHz; sweeping it "
+        "(bench ws) adds exactly one cycle per wait state per miss, and the cache counters "
+        "show ~610 misses/pkt, so at least 21% of the packet is MRAM stall. The SRAM hot path "
+        "drops that to ~180-210. What it costs is contention: calc_chksum on 1472 B takes "
+        "1,734 cycles from cached MRAM and 4,116 from SRAM, worse than MRAM with the cache "
+        "off (3,870). With offload there is no checksum pass, so SRAM wins (+11%). With SW "
+        "csum the extra 2.4k cycles per pass eat the gain. Leaving utils.c in MRAM "
+        "(BENCH_HOTPATH_CSUM_IN_NVM) gives 181.8 loopback and 149.7 SW csum, both above "
+        "MRAM. Data: results/pdk_mem_*.csv.",
     )
 
     # 5. Where the cycles go
