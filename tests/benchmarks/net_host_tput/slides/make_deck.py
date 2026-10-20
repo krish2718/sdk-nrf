@@ -414,7 +414,7 @@ def build(src, out):
                 ("Rule of thumb holds. ", True),
                 (
                     "SW checksum, code in MRAM: 1.8-1.9 MHz per Mbps on both. Offload saves "
-                    "~2.7-2.8k cycles/pkt on both.",
+                    "~2.7-2.8k cycles/pkt: +19% on 54H, +14% (MRAM) / +32% (SRAM) on 7120.",
                     False,
                 ),
             ],
@@ -613,12 +613,12 @@ def build(src, out):
         tb.text_frame,
         [
             [
-                ("With csum offload (what we ship): ", True),
-                (
-                    "7120 hot path in SRAM is +9% over MRAM (162 to 177). Offload itself is "
-                    "+19% on 54H (TCM), +14% (MRAM) / +32% (SRAM) on 7120.",
-                    False,
-                ),
+                ("Checksum offload gain: ", True),
+                ("+19% on 54H (TCM); +14% (MRAM) / +32% (SRAM) on 7120.", False),
+            ],
+            [
+                ("With offload (what we ship): ", True),
+                ("7120 hot path in SRAM is +9% over MRAM (162 to 177).", False),
             ],
             [
                 ("Why SRAM helps on 7120: ", True),
@@ -872,6 +872,32 @@ def build(src, out):
         "1472 B at 400 Mbps = 33,967 pkt/s = 34 pkts per ms. Buffer cost assumes a 1.5 KB net_buf "
         "per packet, net_pkt overhead not included. A-MPDU 64 x 1544 B MPDU. BDP = rate x RTT. "
         "Every Measured cell is a placeholder until E13-E15 run.",
+    )
+    veil = card(s, 0.5, 1.5, 9.0, 3.75, fill=WHITE)
+    clr = veil._element.spPr.find(qn("a:solidFill")).find(qn("a:srgbClr"))
+    etree.SubElement(clr, qn("a:alpha"), val="70000")
+    text_box(
+        s,
+        0.5,
+        1.8,
+        9.0,
+        1.5,
+        "TBD",
+        size=80,
+        color=RED,
+        bold=True,
+        align=PP_ALIGN.CENTER,
+    )
+    text_box(
+        s,
+        0.5,
+        3.75,
+        9.0,
+        0.4,
+        "Model only. Numbers come after the TX turnaround and buffer sweeps (E13-E15).",
+        size=14,
+        color=DARK,
+        align=PP_ALIGN.CENTER,
     )
 
     # 7. Task 3: what others do
