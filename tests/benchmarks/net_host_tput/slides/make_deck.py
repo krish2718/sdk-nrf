@@ -421,8 +421,8 @@ def build(src, out):
             [
                 ("Local RAM is where they differ. ", True),
                 (
-                    "54H TCM is +48%. nRF7120 has no TCM; hot path in SRAM gives +6-11% "
-                    "once the checksum stays in cached MRAM.",
+                    "54H TCM is +48%. nRF7120 has no TCM; with csum offload, hot path in SRAM "
+                    "is +9%. Zero-copy TX (not on yet) is worth at most 7-11%.",
                     False,
                 ),
             ],
@@ -608,23 +608,40 @@ def build(src, out):
         row_h=0.25,
         bold_rows=(5,),
     )
-    text_box(
-        s,
-        5.6,
-        3.5,
-        3.73,
-        1.7,
+    tb = s.shapes.add_textbox(Inches(5.6), Inches(3.45), Inches(3.73), Inches(1.75))
+    fill_bullets(
+        tb.text_frame,
         [
-            "MRAM code: 7120 at 256 costs about what 54H costs at 128. On 54H MRAM wait grows "
-            "with clock.",
-            "Local RAM: 54H TCM is zero-wait. On 7120 the 8 KB I-cache only covers MRAM "
-            "(6 wait states at 256 MHz, ~610 misses/pkt). Hot path in SRAM cuts misses ~70%, "
-            "but SRAM code is fetched over S-AHB with its own data, so csum runs 2.4x slower. "
-            "Keeping csum in MRAM makes SRAM win everywhere: 182 loopback, 150 SW csum.",
-            "Offload: +19% on 54H, +14% (MRAM) / +32% (SRAM) on 7120.",
+            [
+                ("With csum offload (what we ship): ", True),
+                (
+                    "7120 hot path in SRAM is +9% over MRAM (162 to 177). Offload itself is "
+                    "+19% on 54H (TCM), +14% (MRAM) / +32% (SRAM) on 7120.",
+                    False,
+                ),
+            ],
+            [
+                ("Why SRAM helps on 7120: ", True),
+                (
+                    "the 8 KB I-cache only covers MRAM (6 wait states, ~610 misses/pkt). "
+                    "SRAM code shares S-AHB with its data, so SW csum runs 2.4x slower there; "
+                    "keep it in MRAM.",
+                    False,
+                ),
+            ],
+            [
+                ("Zero-copy TX, not on yet: ", True),
+                (
+                    "the bench has no driver copy. On the real driver it saves one memcpy, "
+                    "at most ~7% (7120) / ~11% (54H).",
+                    False,
+                ),
+            ],
         ],
         size=8,
     )
+    for p in tb.text_frame.paragraphs:
+        p.space_after = Pt(3)
     notes(
         s,
         "Local = TCM on 54H, SRAMCODE region (RAM02+03) on 7120. Loopback rows compute "
@@ -637,10 +654,16 @@ def build(src, out):
         "show ~610 misses/pkt, so at least 21% of the packet is MRAM stall. The SRAM hot path "
         "drops that to ~180-210. What it costs is contention: calc_chksum on 1472 B takes "
         "1,734 cycles from cached MRAM and 4,116 from SRAM, worse than MRAM with the cache "
-        "off (3,870). With offload there is no checksum pass, so SRAM wins (+11%). With SW "
-        "csum the extra 2.4k cycles per pass eat the gain. Leaving utils.c in MRAM "
-        "(BENCH_HOTPATH_CSUM_IN_NVM) gives 181.8 loopback and 149.7 SW csum, both above "
-        "MRAM. Data: results/pdk_mem_*.csv.",
+        "off (3,870). With offload there is no checksum pass, so SRAM wins (+9%, 162.4 to "
+        "176.8 in the sweep, 18,575 to 17,069 cycles). With SW csum the extra 2.4k cycles "
+        "per pass eat the gain. Leaving utils.c in MRAM (BENCH_HOTPATH_CSUM_IN_NVM) gives "
+        "181.8 loopback and 149.7 SW csum, both above MRAM. Data: results/pdk_mem_*.csv."
+        "\n\nZero-copy TX (NRF_WIFI_ZERO_COPY_TX) is not enabled on either board yet. The null "
+        "driver frees the packet without copying, so these numbers already behave like "
+        "zero-copy. On the real driver it removes one memcpy: 0.81-1.09 cycles/B x 1472 = "
+        "1.2-1.6k cycles/pkt, about 7% (7120) / 11% (54H) of the offload case. It moves "
+        "TX bytes from the driver heap into the Zephyr TX pool for the whole TX-done "
+        "turnaround, so pool sizing (task 2) changes with it.",
     )
 
     # 5. Where the cycles go
@@ -946,6 +969,88 @@ def build(src, out):
         "is unknown and is what E8 measures.",
     )
 
+    # 8b. Zephyr gaps
+    s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
+    set_title(
+        s,
+        "Zephyr gaps to raise upstream",
+        "Checked against Zephyr main in our tree; candidates for feature requests",
+    )
+    add_slide_number(s)
+    ph = body_ph(s, 10)
+    ph._element.getparent().remove(ph._element)
+    table(
+        s,
+        0.5,
+        1.6,
+        9.0,
+        [
+            ["Gap", "Why it matters (our data)", "Ask", "Impact"],
+            [
+                "No TX segmentation offload (TSO/USO)",
+                "Per-packet cost is 89-93% of the cycles; stack runs once per 1472 B",
+                "L2 capability + MSS hint; stack hands down up to 64 KB, driver/FW segments",
+                "High",
+            ],
+            [
+                "No RX coalescing (GRO)",
+                "Every MPDU walks IP/UDP/TCP and the socket layer on its own",
+                "GRO hook in net_core before L3, merge in-order TCP/UDP segments",
+                "High",
+            ],
+            [
+                "TCP window scaling ignored",
+                "WS option is parsed but never used; windows capped at 64 KB. "
+                "BDP at 350 Mbps, 5 ms RTT is 219 KB",
+                "RFC 7323 window scaling, send and receive",
+                "High (TCP)",
+            ],
+            [
+                "No batched socket I/O",
+                "One syscall, net_context and net_pkt alloc per datagram",
+                "sendmmsg/recvmmsg, or a batch send API on net_context",
+                "Medium",
+            ],
+            [
+                "No hot-path placement",
+                "SRAM hot path +9% on 7120, TCM +48% on 54H; done by hand with "
+                "zephyr_code_relocate per file",
+                "__net_hot annotation and a Kconfig to place it in TCM/SRAM",
+                "Medium",
+            ],
+            [
+                "Socket TX always copies",
+                "One memcpy per packet, 7-11% of the offload case",
+                "Zero-copy send from app buffers (MSG_ZEROCOPY-like)",
+                "Low-Med",
+            ],
+            [
+                "No buffer lifetime stats",
+                "TXTIME stats stop at driver send; task 2 needs alloc-to-free hold time",
+                "net_pkt/net_buf lifetime histogram and pool high-water in net mem",
+                "Medium",
+            ],
+            [
+                "Checksum is generic C",
+                "calc_chksum 1.18 cycles/B on M33; only matters without offload",
+                "Arch hook for an optimised checksum (e.g. Armv8-M DSP)",
+                "Low",
+            ],
+        ],
+        [2.0, 3.1, 3.1, 0.8],
+        size=7,
+        row_h=0.36,
+    )
+    notes(
+        s,
+        "TSO/GRO: include/zephyr/net/ethernet.h has only checksum, VLAN and filter offload "
+        "caps. Window scaling: tcp.c parses option 3 into recv_options.window but nothing "
+        "reads it, and cwnd is clamped to UINT16_MAX. No sendmmsg/recvmmsg in "
+        "include/zephyr/net/socket.h. Socket send copies into net_pkt (net_pkt_write); "
+        "NRF_WIFI_ZERO_COPY_TX only removes the driver copy. TSO and GRO are the ones that "
+        "attack the per-packet cost, the rest are percent-level.",
+    )
+
     # 9. Next
     s = prs.slides.add_slide(layout(prs, "13_full content"))
     set_title(s, "Next steps")
@@ -978,6 +1083,10 @@ def build(src, out):
             [
                 ("Task 3: ", True),
                 ("pick 1-2 comparable platforms from the table and reproduce on our bench.", False),
+            ],
+            [
+                ("Upstream: ", True),
+                ("raise Zephyr feature requests for TSO/USO, GRO and TCP window scaling.", False),
             ],
             [
                 ("Decision for the review: ", True),
