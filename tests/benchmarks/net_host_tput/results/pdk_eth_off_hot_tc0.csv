@@ -1,0 +1,7 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+pdk_eth_off_hot_tc0,,256.0,1472,0,194.66,0.760,15486
+pdk_eth_off_hot_tc0,,256.0,1472,1,194.69,0.761,15484
+pdk_eth_off_hot_tc0,,256.0,1024,0,138.78,0.542,15111
+pdk_eth_off_hot_tc0,,256.0,1024,1,138.75,0.542,15114
+pdk_eth_off_hot_tc0,,256.0,292,0,41.14,0.161,14536
+pdk_eth_off_hot_tc0,,256.0,292,1,41.13,0.161,14539
