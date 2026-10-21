@@ -10,6 +10,7 @@
 #   pdk_mem        results/pdk_mem_*.csv: MRAM wait states, I-cache, microbench
 #   mem            results/mem_*.csv: 54H I-cache misses and microbench per clock
 #   pdk_crossover  results/pdk_crossover.csv: MRAM vs SRAM hot path vs size
+#   pdk_ramblk     results/ramblk_*.csv: hot path code in RAM02/03 vs RAM01 vs RAM00
 #   pdk_boot2boot  results/pdk_boot2boot.csv: 3 resets, 7120 offload + SRAM
 #   boot2boot      results/boot2boot.csv: 3 resets, 54H lean offload + TCM
 #   rebuild        results/eth_off_rebuild.csv: 54H offload + TCM, fresh build
@@ -84,6 +85,30 @@ pdk_crossover()
 	done
 }
 
+# Same session: MRAM, code in RAM02/03 (2-cycle), RAM01 and RAM00 (single-cycle).
+pdk_ramblk()
+{
+	for v in "eth_off:eth_off_mram:1" "eth_off_hot:eth_off_ram02:1" \
+		"eth_off_hot_ram01:eth_off_ram01:1" "eth_off_hot_ram00:eth_off_ram00:1" \
+		"eth_sw:eth_sw_mram:1" "eth_sw_hot:eth_sw_ram02:1" \
+		"eth_sw_hot_ram01:eth_sw_ram01:1" "eth_sw_hot_ram00:eth_sw_ram00:1" \
+		"1500:lo_mram:0" "hot1500:lo_ram02:0" "hot1500_ram01:lo_ram01:0" \
+		"hot1500_ram00:lo_ram00:0" "eth_off_hot_abl_ram01:eth_off_abl_ram01:1"; do
+		build=build_pdk_${v%%:*}
+		rest=${v#*:}
+		tag=${rest%%:*}
+		set --
+		[ "${rest#*:}" = 1 ] && set -- --pre "$arp"
+		flash "$build"
+		python3 run.py --port "$port" --tag "$tag" --runs 2 --dur 10 "$@" \
+			--sizes 1472 1024 292 --raw "results/ramblk_$tag.log" \
+			> "results/ramblk_$tag.csv"
+		python3 mem_probe.py --port "$port" --tag "$tag" --dur 5 "$@" \
+			--raw "results/ramblk_mem_$tag.log" "ws6:bench ws 6" \
+			> "results/ramblk_mem_$tag.csv"
+	done
+}
+
 # boot <build> <tag> <out> [run.py args]
 boot()
 {
@@ -105,6 +130,7 @@ for step in "$@"; do
 	pdk_mem) pdk_mem ;;
 	mem) mem ;;
 	pdk_crossover) pdk_crossover ;;
+	pdk_ramblk) pdk_ramblk ;;
 	pdk_boot2boot)
 		boot build_pdk_eth_off_hot pdk_eth_off_hot results/pdk_boot2boot.csv --runs 2 ;;
 	boot2boot)

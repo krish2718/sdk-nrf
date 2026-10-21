@@ -1,0 +1,22 @@
+/*
+ * Relocated code in the top 128 KB of RAM00, in the same RAM block as all
+ * data. Control case for sramcode-ram01.overlay: same single-cycle latency,
+ * but code fetch and data share one block.
+ */
+/delete-node/ &ram00_sram;
+/delete-node/ &ram01_sram;
+/delete-node/ &ram02_sram;
+/delete-node/ &ram03_sram;
+
+&cpuapp_sram {
+	reg = <0x0 DT_SIZE_K(384)>;
+	ranges = <0x0 0x0 DT_SIZE_K(384)>;
+};
+
+&sram {
+	sramcode: memory@60000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x60000 DT_SIZE_K(128)>;
+		zephyr,memory-region = "SRAMCODE";
+	};
+};

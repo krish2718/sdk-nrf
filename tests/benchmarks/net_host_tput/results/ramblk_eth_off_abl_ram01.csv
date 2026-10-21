@@ -1,0 +1,7 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+eth_off_abl_ram01,,256.1,1472,0,280.71,1.096,10742
+eth_off_abl_ram01,,256.1,1472,1,280.69,1.096,10743
+eth_off_abl_ram01,,256.1,1024,0,202.18,0.790,10376
+eth_off_abl_ram01,,256.1,1024,1,202.21,0.790,10374
+eth_off_abl_ram01,,256.1,292,0,61.16,0.239,9781
+eth_off_abl_ram01,,256.1,292,1,61.15,0.239,9782

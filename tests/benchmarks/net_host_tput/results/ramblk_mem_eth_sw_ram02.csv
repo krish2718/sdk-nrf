@@ -1,0 +1,5 @@
+# cpu_hz=255972108
+# mramc_waitstates=0x00000006 mram_ws=6 mramc_config=0x00000000
+# icache_enable=1 icache_status=0x00000000 prof_enable=0
+tag,case,mram_ws,size,mbps,cycles_per_pkt,hit_per_pkt,miss_per_pkt,csum_cyc,memcpy_cyc
+eth_sw_ram02,ws6,6,1472,133.33,22603,2743,231,4116,1229

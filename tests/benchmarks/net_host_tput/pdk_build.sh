@@ -6,7 +6,9 @@
 #
 # Build every variant used for the CAL-7627 numbers on the nRF7120 PDK.
 # nRF7120 has no core-local RAM, so relocated code goes to RAM02+03
-# (sramcode.overlay). Usage: pdk_build.sh [all|base|sram|abl]
+# (sramcode.overlay). RAM02/03 are 2-cycle for the CM33; the ramblk set
+# repeats the hot path builds with code in RAM01 or RAM00 (single-cycle).
+# Usage: pdk_build.sh [all|base|sram|abl|ramblk]
 #
 #   build_pdk_base         loopback, MTU 1100, MRAM            -> results/pdk_base.csv
 #   build_pdk_1500         loopback, MTU 1500, MRAM            -> results/pdk_mtu1500.csv
@@ -19,6 +21,8 @@
 #   build_pdk_*_nvmcsum    hot path in SRAM, checksum left in cached MRAM
 #   build_pdk_*_tc0        no TX thread (NET_TC_TX_COUNT=0)
 #   build_pdk_*_abl        no TX thread, no net stats, no net logging (overlay-ablate.conf)
+#   build_pdk_*_ram01      hot path code in RAM01, data in RAM00 (sramcode-ram01.overlay)
+#   build_pdk_*_ram00      hot path code in top of RAM00 with the data (sramcode-ram00.overlay)
 #
 # mem_probe.py runs on the same builds for MRAM wait-state and I-cache
 # numbers (results/pdk_mem_*.csv).
@@ -77,10 +81,28 @@ abl()
 	b build_pdk_eth_off_abl "-DEXTRA_CONF_FILE=$eth;overlay-ablate.conf" $off
 }
 
+ramblk()
+{
+	eth="overlay-mtu1500.conf;overlay-nulleth.conf;overlay-pdk-hot.conf"
+	lo="overlay-mtu1500.conf;overlay-pdk-hot.conf"
+	off=-DCONFIG_BENCH_NULL_ETH_CSUM_OFFLOAD=y
+
+	for r in ram01 ram00; do
+		ov=-DEXTRA_DTC_OVERLAY_FILE=sramcode-$r.overlay
+		b "build_pdk_eth_off_hot_$r" "-DEXTRA_CONF_FILE=$eth" $off $ov
+		b "build_pdk_eth_sw_hot_$r" "-DEXTRA_CONF_FILE=$eth" $ov
+		b "build_pdk_hot1500_$r" "-DEXTRA_CONF_FILE=$lo" $ov
+	done
+	b build_pdk_eth_off_hot_abl_ram01 \
+		"-DEXTRA_CONF_FILE=$eth;overlay-ablate.conf" $off \
+		-DEXTRA_DTC_OVERLAY_FILE=sramcode-ram01.overlay
+}
+
 case ${1:-all} in
-all) base; sram; abl ;;
+all) base; sram; abl; ramblk ;;
 base) base ;;
 sram) sram ;;
 abl) abl ;;
-*) echo "usage: $0 [all|base|sram|abl]"; exit 1 ;;
+ramblk) ramblk ;;
+*) echo "usage: $0 [all|base|sram|abl|ramblk]"; exit 1 ;;
 esac

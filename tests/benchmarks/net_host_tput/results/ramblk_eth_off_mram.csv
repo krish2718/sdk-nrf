@@ -1,0 +1,7 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+eth_off_mram,,256.0,1472,0,159.26,0.622,18928
+eth_off_mram,,256.0,1472,1,159.29,0.622,18924
+eth_off_mram,,256.0,1024,0,112.98,0.441,18561
+eth_off_mram,,256.0,1024,1,112.99,0.441,18559
+eth_off_mram,,256.0,292,0,33.28,0.130,17968
+eth_off_mram,,256.0,292,1,33.29,0.130,17962

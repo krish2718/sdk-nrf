@@ -1,0 +1,22 @@
+/*
+ * Relocated code in RAM01 (single-cycle for the CM33), data in RAM00 only.
+ * RAM02/03 are 2-cycle for the CM33, so sramcode.overlay pays that on every
+ * uncached fetch. Code and data stay in separate RAM blocks to limit S-AHB
+ * contention. RAM02/03 are left unused.
+ */
+/delete-node/ &ram01_sram;
+/delete-node/ &ram02_sram;
+/delete-node/ &ram03_sram;
+
+&cpuapp_sram {
+	reg = <0x0 DT_SIZE_K(512)>;
+	ranges = <0x0 0x0 DT_SIZE_K(512)>;
+};
+
+&sram {
+	sramcode: memory@80000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x80000 DT_SIZE_K(256)>;
+		zephyr,memory-region = "SRAMCODE";
+	};
+};

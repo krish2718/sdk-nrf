@@ -15,14 +15,16 @@ config BENCH_HOTPATH_REGION
 	help
 	  APPTCM_TEXT is the nRF54H20 app core local RAM (tcm.overlay). Parts
 	  without core-local RAM, such as nRF7120, use SRAMCODE_TEXT together
-	  with sramcode.overlay.
+	  with sramcode-ram01.overlay (RAM01, single-cycle for the CM33).
+	  sramcode.overlay (RAM02/03, 2-cycle) is kept for the older runs.
 
 config BENCH_HOTPATH_CSUM_IN_NVM
 	bool "Keep the checksum (utils.c) out of the relocated hot path"
 	depends on BENCH_LOCAL_RAM_HOTPATH
 	help
-	  On nRF7120, code in SRAM is fetched over the same S-AHB port as its
-	  data, so the load-heavy checksum loop runs faster from cached MRAM.
+	  On nRF7120, RAM02/03 are 2-cycle for the CM33 and code in SRAM is not
+	  cached, so with sramcode.overlay the checksum loop runs faster from
+	  cached MRAM. From RAM01 it is within ~6% of cached MRAM.
 
 config BENCH_NULL_ETH
 	bool "Ethernet L2 sink driver instead of loopback"
