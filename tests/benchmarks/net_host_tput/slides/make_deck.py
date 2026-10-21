@@ -310,6 +310,23 @@ def card(slide, x, y, w, h, fill=LIGHT):
     return shp
 
 
+def scope_tag(slide, x=5.6, y=0.7, w=3.73):
+    card(slide, x, y, w, 0.34, fill=RED)
+    text_box(
+        slide,
+        x,
+        y,
+        w,
+        0.34,
+        "UDP TX only. TCP and RX not measured.",
+        size=11,
+        color=WHITE,
+        bold=True,
+        align=PP_ALIGN.CENTER,
+        anchor=MSO_ANCHOR.MIDDLE,
+    )
+
+
 def stat(slide, x, y, w, value, label, color):
     card(slide, x, y, w, 1.15)
     text_box(slide, x + 0.12, y + 0.08, w - 0.24, 0.6, value, size=22, color=color, bold=True)
@@ -376,6 +393,7 @@ def build(src, out):
     s = prs.slides.add_slide(layout(prs, "13_full content"))
     set_title(s, "Bottom line")
     add_slide_number(s)
+    scope_tag(s)
     body_ph(s, 13)._element.getparent().remove(body_ph(s, 13)._element)
     stat(
         s,
