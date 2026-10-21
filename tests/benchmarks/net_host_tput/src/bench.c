@@ -64,10 +64,16 @@ static int cmd_clk(const struct shell *sh, size_t argc, char **argv)
 #else
 	struct nrf_clock_spec spec = {0};
 	struct onoff_client cli;
+	unsigned long mhz = strtoul(argv[1], NULL, 10);
 	int res = 0;
 	int ret;
 
-	spec.frequency = MHZ(strtoul(argv[1], NULL, 10));
+	if (mhz == 0) {
+		shell_error(sh, "invalid clock: %s", argv[1]);
+		return -EINVAL;
+	}
+
+	spec.frequency = MHZ(mhz);
 
 	sys_notify_init_spinwait(&cli.notify);
 	ret = nrf_clock_control_request(cpu_clk, &spec, &cli);
@@ -111,6 +117,7 @@ uint16_t calc_chksum(uint16_t sum_in, const uint8_t *data, size_t len);
 
 static uint8_t src_buf[1536] __aligned(4);
 static uint8_t dst_buf[1536] __aligned(4);
+/* Keeps the compiler from dropping the timed calls as dead code. */
 static volatile uint16_t sink;
 
 static int cmd_perbyte(const struct shell *sh, size_t argc, char **argv, bool csum)
@@ -161,7 +168,9 @@ static int cmd_memcpy(const struct shell *sh, size_t argc, char **argv)
 	return cmd_perbyte(sh, argc, argv, false);
 }
 
-#if defined(NRF_MRAMC) && defined(MRAMC_WAITSTATES_WAITSTATENUM_Msk)
+/* NRF_MRAMC is the secure alias, so a non-secure build would fault on it. */
+#if defined(NRF_MRAMC) && defined(MRAMC_WAITSTATES_WAITSTATENUM_Msk) && \
+	!defined(CONFIG_TRUSTED_EXECUTION_NONSECURE)
 #define HAS_MRAMC_WS 1
 #else
 #define HAS_MRAMC_WS 0
@@ -222,6 +231,12 @@ static int cmd_ws(const struct shell *sh, size_t argc, char **argv)
 	NRF_MRAMC->WAITSTATES = reg;
 	__DSB();
 	__ISB();
+
+	/* MRAMC keeps the old value for settings below its floor (4 and 3 at 256 MHz). */
+	if (mram_ws_get() != ws) {
+		shell_error(sh, "ws %u rejected, mram_ws=%u", ws, mram_ws_get());
+		return -EIO;
+	}
 
 	shell_print(sh, "mram_ws=%u", mram_ws_get());
 	return 0;

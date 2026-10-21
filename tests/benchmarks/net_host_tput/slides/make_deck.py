@@ -102,8 +102,8 @@ ZEPHYR_ROWS = [
 ]
 ZEPHYR_NOTES = [
     "Only UDP has crossed 400 on Zephyr, and only on ~1 GHz cores. Their 0.2-0.5 Mbps/MHz "
-    "includes a real MAC driver and ours (0.69-0.81) has none, so this is not a like-for-like "
-    "win; it only shows nobody has a cheaper per-packet path, they have more clock.",
+    "includes a real MAC driver and ours (0.69-0.81) has none, so per-MHz numbers are not "
+    "like-for-like, here or against other stacks.",
     "Same RT1170 board: NXP bare-metal SDK does ~916 Mbps UDP vs ~477 on Zephyr. The stack is the "
     "limit, not the MAC.",
     "No Zephyr TCP above ~230 Mbps anywhere. tcp.c parses window scaling but never applies it, "
@@ -149,9 +149,9 @@ TASK3_ROWS = [
         "RT1180 + AW611, HE80",
         "M33 @ 240 / M7 @ 792",
         "lwIP + FreeRTOS",
-        "UDP 221 / 190, TCP 86 / 95",
-        "0.92 (M33) / 0.28 (M7)",
-        "same radio as below, MCU host",
+        "UDP TX 221 / RX 190, TCP 86 / 95",
+        "n/a",
+        "core not stated; same radio as below",
     ],
     [
         "i.MX 8M + IW612, HE80",
@@ -167,7 +167,7 @@ TASK3_ROWS = [
         "TCP/IP offloaded",
         "UDP 66, TCP 56",
         "-",
-        "all offload Wi-Fi parts < 70",
+        "the one offload part found",
     ],
 ]
 TASK3_NOTES = [
@@ -175,7 +175,8 @@ TASK3_NOTES = [
     "per MHz is not like-for-like. lwIP RAW callbacks are >= 1.75x its sockets on the same A9, "
     "but that is TCP capped by GbE; the gain for Zephyr UDP is unknown.",
     "Same NXP radio: 86-221 Mbps with lwIP on an MCU host, 405-502 with Linux. The host stack "
-    "makes the gap.",
+    "makes the gap. The RT1180 page (MCUXpresso SDK 25.03 Wi-Fi throughput) does not say which "
+    "core ran the test, so no Mbps/MHz.",
     "Linux UDP GSO 2.4x, GRO 1.8x bytes per cycle (LPC 2018). No published Zephyr GbE numbers on "
     "any MCU.",
 ]
@@ -408,7 +409,8 @@ def build(src, out):
                 (
                     "With nothing below the stack, nRF54H20DK does 258 Mbps at 320 MHz and the "
                     "nRF7120 PDK 177 at 256. A lean config (no TX thread, no net stats/log) "
-                    "gives 267 / 205, still 1.50x / 1.95x short. Driver, IPC and FW add on top.",
+                    "gives 267 / 205, still 1.50x / 1.95x short. Driver, IPC and FW add on top. "
+                    "UDP TX measured, TCP inferred.",
                     False,
                 ),
             ],
@@ -416,15 +418,15 @@ def build(src, out):
                 ("Checksum offload pays on both. ", True),
                 (
                     "+19% (TCM) / +18% (MRAM) on 54H, +32% (SRAM) / +14% (MRAM) on 7120. "
-                    "Across all variants the stack costs 1.2-2.4 MHz per Mbps.",
+                    "At 1472 B (54H @ 320, 7120 @ 256) the stack costs 1.2-2.4 MHz per Mbps.",
                     False,
                 ),
             ],
             [
                 ("Local RAM is where they differ. ", True),
                 (
-                    "With offload, 54H hot path in TCM is +61% over MRAM (159 to 256); the "
-                    "7120 SRAM hot path only +9%. MRAM stalls cost far more at 320 MHz.",
+                    "With offload, moving part of the UDP TX path into 54H TCM is +61% over MRAM "
+                    "(159 to 256); into 7120 SRAM only +9%. MRAM stalls cost far more at 320 MHz.",
                     False,
                 ),
             ],
@@ -448,12 +450,17 @@ def build(src, out):
         "All numbers are UDP TX only, zperf, Zephyr stack, measured on each board's app core. "
         "Mbps is UDP payload goodput (1472 B payload per packet, no L2/L3 headers); the 400 Mbps "
         "target is taken on the same basis. 54H at its 320 MHz DVFS point, nRF7120 at its fixed "
-        "256 MHz. TCP and RX are not measured yet.\n\n"
+        "256 MHz. TCP and RX are not measured yet. TCP > 350 is inferred from UDP TX being the "
+        "cheaper path: TCP adds ACK RX, timers and retransmit state on top.\n\n"
+        "Every A/B percentage compares builds run in the same session; the 258 / 177 headlines "
+        "are the original sweeps. 54H TCM vs MRAM uses the same-day rebuild (255.9 vs 159.2, "
+        "+61%; +62% against 257.7). 7120 lean uses its same-day probe build (177.9).\n\n"
         "Bench config = zperf sample defaults: NET_TC_TX_COUNT=1 (TX thread), net stats and net "
         "logging on. Lean config (overlay-ablate.conf) on the 7120, offload + SRAM hot path: "
-        "TX thread off 177.9 to 194.7 (+9.4%), stats/log off as well 204.7 (+15%, 16,945 to "
-        "14,734 cycles/pkt). On the 54H, offload + TCM, against a same-day rebuild of the bench "
-        "config (255.9): TX thread off 265.7 (+3.8%), lean 267.2 (+4.4%, 14,081 cycles/pkt). "
+        "TX thread off 177.9 (same-day rebuild) to 194.7 (+9.4%), stats/log off as well 204.7 "
+        "(+15%, 16,945 to 14,734 cycles/pkt; +15.8% against the 176.8 sweep). On the 54H, "
+        "offload + TCM, against a same-day rebuild of the bench "
+        "config (255.9): TX thread off 265.7 (+3.8%), lean 267.2 (+4.4%, 14,080 cycles/pkt). "
         "With code in MRAM lean helps much more, 159.2 to 202.1 (+27%): less code, fewer "
         "misses. The 258 headline is the original run; the rebuild came in 0.7% lower, inside "
         "the ~1% layout error bar.\n\n"
@@ -478,7 +485,7 @@ def build(src, out):
         ("BSD sockets", MID),
         ("UDP / IPv4 / net_pkt", MID),
         ("Ethernet L2 (ARP static)", MID),
-        ("null Ethernet driver: count + free at send()", BLUE),
+        ("null Ethernet driver: count and return", BLUE),
     ]
     for i, (t, col) in enumerate(stack):
         c = card(s, 0.67, 1.8 + i * 0.62, 3.6, 0.5, fill=col)
@@ -513,24 +520,24 @@ def build(src, out):
             [
                 ("Loopback: ", True),
                 (
-                    "zperf UDP to our own IP, dummy L2. The driver clones each packet and feeds "
-                    "it to RX, so one core pays TX + copy + RX. Checksum always in SW.",
+                    "zperf UDP to the peer address, dummy L2. The driver clones each packet, "
+                    "swaps src/dst and feeds it to RX: one core pays TX + copy + RX. SW checksum.",
                     False,
                 ),
             ],
             [
                 ("Ethernet L2: ", True),
                 (
-                    "zperf UDP to a static ARP peer through a null Ethernet driver that frees "
-                    "frames at send(). TX only, no copy, no wire. Offload on/off by Kconfig.",
+                    "zperf UDP to a static ARP peer. The null driver counts and returns; the "
+                    "stack frees the packet after send(). TX only, no copy, no wire.",
                     False,
                 ),
             ],
             [
                 ("Code placement: ", True),
                 (
-                    "MRAM + cache (default), whole net stack in RAM, or the UDP TX hot path "
-                    "in local RAM.",
+                    "MRAM + cache (default), whole net stack in RAM, or a partial UDP TX hot "
+                    "path in local RAM. Offload on/off by Kconfig.",
                     False,
                 ),
             ],
@@ -538,7 +545,7 @@ def build(src, out):
                 ("Clock and runs: ", True),
                 (
                     "clock measured once per clock step (SysTick vs GRTC), 2 x 10 s per point. "
-                    "Runs and reboots agree within 0.05%; a rebuilt image moves results ~1% "
+                    "Runs and reboots agree within ~0.1%; a rebuilt image moves results ~1% "
                     "(code layout vs cache).",
                     False,
                 ),
@@ -561,20 +568,28 @@ def build(src, out):
         s,
         "Cycles per packet = CPU Hz / packets per second. Mbps/MHz = Mbps / measured CPU MHz. "
         "Mbps is the zperf client send rate in both setups.\n\n"
-        "Loopback vs Ethernet L2: loopback (CONFIG_NET_LOOPBACK) uses the dummy L2, "
-        "so no Ethernet header or ARP. drivers/net/loopback.c does net_pkt_rx_clone() and "
-        "net_recv_data(), so the same core also runs the IP/UDP RX path and the zperf server. "
-        "It is a pessimistic TX number and can't show offload. Ethernet L2 (overlay-nulleth.conf, "
-        "src/null_eth.c) runs the real Ethernet TX path up to the driver: header, ARP "
-        "lookup (static entry for 192.0.2.2), TX queue. The driver counts and returns at send(), "
-        "so this is the stack-only TX cost with a free driver. A real driver adds its copy (7-11%) "
-        "and bus time on top.\n\n"
+        "Loopback vs Ethernet L2: both send to 192.0.2.2 (run.py --dest). Loopback "
+        "(CONFIG_NET_LOOPBACK) uses the dummy L2, so no Ethernet header or ARP. "
+        "drivers/net/loopback.c clones the packet (net_pkt_rx_clone, :137), swaps src and dst "
+        "(:143-158) and hands it to net_recv_data (:163), so the same core also runs the IP/UDP "
+        "RX path and the zperf server. It is a pessimistic TX number and can't show offload. "
+        "Ethernet L2 (overlay-nulleth.conf, src/null_eth.c) runs the real Ethernet TX path up "
+        "to the driver: header, ARP lookup (static entry for 192.0.2.2), TX queue. "
+        "null_eth_send() counts and returns 0; ethernet_send() then drops the last reference "
+        "(subsys/net/l2/ethernet/ethernet.c:791). So this is the stack-only TX cost with a free "
+        "driver. A real driver adds its copy (est. 7-11%) and bus time on top.\n\n"
+        "Partial hot path: CMakeLists.txt relocates net_context, net_pkt, udp, ipv4, net_core, "
+        "utils (checksum), net_buf, sockets, the zperf uploader and the L2/driver file. "
+        "net_if.c, arp.c, net_tc.c, connection.c and the kernel stay in MRAM, so the TCM/SRAM "
+        "gains are for this subset only and do not bound a full relocation.\n\n"
         "Why two boards: 54H has TCM and DVFS, so it can split core cycles from MRAM stalls and "
         "show the TCM case task 1 asks for. nRF7120 is the actual Wi-Fi part at 256 MHz. "
         "Everything needed to rebuild is in the appendix.\n\n"
         "Repeatability: two back-to-back runs per point, plus three reboots of the 7120 offload "
         "+ SRAM build (results/pdk_boot2boot.csv) and of the 54H lean offload + TCM build "
-        "(results/boot2boot.csv), all within 0.05%. Rebuilding with unrelated code changes "
+        "(results/boot2boot.csv): within 0.07% at 1472 B, worst 0.11% (292 B, eth_sw_mram @ 64 "
+        "MHz). A/B percentages always compare builds run in the same session. Rebuilding with "
+        "unrelated code changes "
         "moved the same variant 176.8 to 177.9 and 162.4 to 160.9 (7120) and 257.7 to 255.9 "
         "(54H, results/eth_off_rebuild.csv), so treat ~1% as the error bar. One board per "
         "type, so board-to-board spread is not covered.\n\n"
@@ -639,11 +654,11 @@ def build(src, out):
             ["Cycles/pkt, 1472 B", "54H @128", "54H @320", "7120 @256"],
             ["Loopback, MRAM", "17,202", "22,284", "17,460"],
             ["Loopback, stack in RAM", "20,262", "26,055", "18,646"],
-            ["Loopback, hot path local", "13,196", "15,052", "19,317"],
+            ["Loopback, hot path local", "13,196", "15,052", "19,316"],
             ["Eth, local, SW csum", "15,391", "17,400", "22,536"],
             ["Eth, local, offload", "12,672", "14,592", "17,069"],
-            ["Eth, MRAM, offload", "17,699", "23,620", "18,575"],
-            ["Eth, local, offload, lean", "12,006", "14,081", "14,734"],
+            ["Eth, MRAM, offload", "17,699", "23,620", "18,574"],
+            ["Eth, local, offload, lean", "12,006", "14,080", "14,734"],
         ],
         [1.43, 0.76, 0.76, 0.78],
         size=8,
@@ -655,36 +670,27 @@ def build(src, out):
         tb.text_frame,
         [
             [
-                ("Checksum offload gain: ", True),
+                ("Checksum offload: ", True),
                 ("54H +19% (TCM) / +18% (MRAM); 7120 +32% (SRAM) / +14% (MRAM).", False),
             ],
             [
-                ("With offload (what we ship): ", True),
+                ("Partial hot path in local RAM, offload on: ", True),
+                ("54H +61% (159 to 256), 7120 +9% (162 to 177). Lean: 267 / 205.", False),
+            ],
+            [
+                ("7120 gains less: ", True),
                 (
-                    "local RAM over MRAM is +61% on 54H (159 to 256), +9% on 7120 (162 to "
-                    "177). Lean: 267 / 205.",
+                    "SRAM cuts I-cache misses 734 to 213 (6 ws, >= 23% of the packet), but its "
+                    "code and data share S-AHB (~1.3-1.6k/pkt).",
                     False,
                 ),
             ],
             [
-                ("Why SRAM helps on 7120: ", True),
-                (
-                    "the 8 KB I-cache only covers MRAM (6 wait states, ~610 misses/pkt). "
-                    "SRAM code shares S-AHB with its data, so SW csum runs 2.4x slower there; "
-                    "keep it in MRAM.",
-                    False,
-                ),
-            ],
-            [
-                ("Driver zero-copy TX, not on yet: ", True),
-                (
-                    "the null driver has no copy, so a real driver lands at or below these. "
-                    "Zero-copy only avoids the ~7% (7120) / ~11% (54H) a driver copy adds.",
-                    False,
-                ),
+                ("Driver copy: ", True),
+                ("none in the null driver; est. +7% (7120) / +11% (54H) without zero-copy.", False),
             ],
         ],
-        size=8,
+        size=9,
     )
     for p in tb.text_frame.paragraphs:
         p.space_after = Pt(3)
@@ -692,34 +698,42 @@ def build(src, out):
         s,
         "Local = TCM on 54H, SRAMCODE region (RAM02+03) on 7120. Loopback rows compute "
         "checksums in SW by design and run TX and RX on one core. Raw CSVs: results/*.csv "
-        "(54H), results/pdk_*.csv (7120)."
+        "(54H), results/pdk_*.csv (7120). The table shows the original runs. The 54H MRAM and "
+        "lean rows come from a later session, so the +61% compares them with that session's "
+        "rebuild of the offload + TCM build (14,695 cycles, 255.9), not the 14,592 in the "
+        "table (+62% against that)."
         "\n\n54H MRAM vs TCM, Ethernet L2 with offload (eth_off_mram vs eth_off_rebuild, same "
         "day): 23,620 vs 14,695 cycles/pkt at 320 MHz, 17,699 vs 12,740 at 128, 15,579 vs "
         "12,072 at 64. The MRAM penalty grows from 3.5k to 8.9k cycles as the clock goes up, "
         "because the MRAM access time is fixed in ns. That is why TCM pays +61% on the 54H at "
         "320 MHz and SRAM only +9% on the 7120 at 256 MHz, where SRAM code also fights its "
         "own data on S-AHB. SW csum, MRAM: 135.4 (27,764 cycles); TCM 216.3, also +60%."
-        "\n\nWhy SRAM helps on 7120: the M33 fetches MRAM over C-AHB through the 8 KB "
-        "direct-mapped I-cache, and SRAM over S-AHB, uncached, on the same port as its "
-        "loads and stores. MRAMC reads back 6 wait states at 256 MHz; sweeping it "
-        "(bench ws) adds exactly one cycle per wait state per miss, and the cache counters "
-        "show ~610 misses/pkt, so at least 21% of the packet is MRAM stall. The SRAM hot path "
-        "drops that to ~180-210. What it costs is contention: calc_chksum on 1472 B takes "
-        "1,734 cycles from cached MRAM and 4,116 from SRAM, worse than MRAM with the cache "
-        "off (3,870). With offload there is no checksum pass, so SRAM wins (+9%, 162.4 to "
-        "176.8 in the sweep, 18,575 to 17,069 cycles). With SW csum the extra 2.4k cycles "
-        "per pass eat the gain. SW csum Ethernet only goes 21,250 to 22,536 (+1.3k, not +2.4k) "
-        "because the same build also drops ~560 misses/pkt. The penalty scales with bytes and "
-        "the miss saving does not, so SRAM wins at 128 B, ties near 292 B and loses from 600 B "
-        "(results/pdk_crossover.csv); that is why the 292 B loopback points match MRAM. "
+        "\n\nWhy the 7120 SRAM hot path gains less: the M33 fetches MRAM over C-AHB through the "
+        "8 KB direct-mapped I-cache, and SRAM over S-AHB, uncached, on the same port as its "
+        "loads and stores. MRAMC reads back 6 wait states at 256 MHz; sweeping it (bench ws) "
+        "adds exactly one cycle per wait state per miss. The Ethernet offload build misses "
+        "734 times per packet (results/pdk_mem_eth_off.csv), so at least 734 x 6 / 18,743 = "
+        "23% of the packet is MRAM stall (21% for the 610-miss loopback build). The SRAM hot "
+        "path cuts that to 213, which should save >= 3.1k cycles, but only 1.5-1.8k shows up "
+        "(18,743 to 16,945 in the probe, 18,574 to 17,069 in the sweep): SRAM code and its "
+        "data share S-AHB and that costs ~1.3-1.6k per packet. With SW csum the same build "
+        "drops 557 misses (>= 3.3k) but calc_chksum goes from 1,734 cycles (cached MRAM) to "
+        "4,116 (SRAM), +2.4k, and contention adds ~1.9-2.2k, so SW csum Ethernet ends up "
+        "+0.9k to +1.3k (21,492 to 22,407 probe, 21,250 to 22,536 sweep). In SRAM a SW "
+        "checksum costs 5.5k per packet against 2.7k from MRAM. The penalty scales with bytes "
+        "and the miss saving does not, so the loopback crossover is between ~300 and ~600 B "
+        "(+3.2% at 128 B, +1.4% at 292 B, -1.6% at 600 B; single runs, about the ~1% build "
+        "noise; results/pdk_crossover.csv). "
         "Leaving utils.c in MRAM (BENCH_HOTPATH_CSUM_IN_NVM) gives 181.8 loopback and 149.7 "
         "SW csum, both above MRAM. Data: results/pdk_mem_*.csv, mem_probe.py, bench ws / "
         "bench icache / bench prof in src/bench.c."
         "\n\nDriver zero-copy TX (NRF_WIFI_ZERO_COPY_TX) is not enabled on either board yet. "
         "The null driver frees the packet without copying, so the bench already has no "
         "driver copy and a real driver can only be slower. With the copy path a real driver "
-        "adds one memcpy: 0.81-1.09 cycles/B x 1472 = 1.2-1.6k cycles/pkt, about 7% (7120) / "
-        "11% (54H) of the offload case; zero-copy avoids that. It moves TX bytes from the "
+        "adds one memcpy. Estimate: the stack's own per-byte slope (the socket copy) as a "
+        "proxy, 0.81-1.09 cycles/B x 1472 = 1.2-1.6k cycles/pkt, about 7% (7120) / 11% (54H) "
+        "of the offload case; zero-copy avoids that. On the 7120 the slope matches the "
+        "measured memcpy (0.84 cycles/B); no 54H memcpy microbench yet. It moves TX bytes from the "
         "driver heap into the Zephyr TX pool for the whole TX-done turnaround, so pool sizing "
         "(task 2) changes with it. The copy the bench still does is the socket one, app "
         "buffer to net_pkt; slide 5 prices that one."
@@ -785,7 +799,7 @@ def build(src, out):
         0.6,
         "Budget = nominal clock x 8 x 1472 / 400 Mbps. Split from a line through the 292 B and "
         "1472 B points: 54H 1.09 cycles/B + 12,990, 7120 0.81 cycles/B + 15,879; the 1024 B "
-        "point lands within 3 cycles. Ethernet L2, offload, hot path in local RAM.",
+        "point lands within 5 cycles. Ethernet L2, offload, hot path in local RAM.",
         size=8,
         color=GREY,
         italic=True,
@@ -797,8 +811,8 @@ def build(src, out):
             [
                 ("Per-byte is small: ", True),
                 (
-                    "0.8-1.1 cycles/B, about one memcpy (0.84 on the 7120 bench). SW checksum "
-                    "adds ~2.7k/pkt.",
+                    "0.8-1.1 cycles/B in the bench config, about one memcpy (0.84 on the 7120). "
+                    "SW checksum adds ~2.7-2.8k/pkt from MRAM or TCM, ~5.5k from 7120 SRAM.",
                     False,
                 ),
             ],
@@ -838,7 +852,8 @@ def build(src, out):
         "per-fragment step between 292 and 1472 B. The intercept still carries cache effects "
         "that scale with packets, not bytes. Lean 7120 build: 0.82 cycles/B + 13,528, 92% "
         "fixed. Lean 54H build @ 320: 1.28 cycles/B + 12,194, 87% fixed, but its 1024 B point "
-        "is 156 cycles off the line, so take that split as rough.\n\n"
+        "is 156 cycles off the line, so take that split as rough; the slope is outside the "
+        "0.8-1.1 bench-config range for the same reason.\n\n"
         "No copy at all = drop the per-byte term, i.e. the socket copy from the app buffer "
         "into net_pkt, which the bench still does. This is not driver zero-copy (slide 4): "
         "the null driver has no copy to remove.\n\n"
@@ -1056,13 +1071,13 @@ def build(src, out):
         [
             "Same stack, faster core: higher clock, core-local RAM, wider core (M55/M85 or "
             "A-class).",
-            "400 Mbps is 34k pkts/s. At 14.6k (54H, TCM) to 17.1k (7120) cycles/pkt that is "
-            "~500-580 MHz of CM33. No headroom left for driver or app.",
+            "400 Mbps is 34k pkts/s. At 14.1k (54H, TCM) to 14.7k (7120) cycles/pkt, lean, "
+            "that is ~480-500 MHz of CM33. No headroom left for driver or app.",
         ],
         [
             "Stack on a network core or in Wi-Fi FW; host uses socket offload (WZN-108, WZN-8705).",
-            "Host cost becomes IPC + copy, network core has the B problem. Offload Wi-Fi parts "
-            "shipping today are 20 MHz, < 70 Mbps.",
+            "Host cost becomes IPC + copy, network core has the B problem. The one offload "
+            "Wi-Fi part found (SiWG917) is 20 MHz, 66 Mbps.",
         ],
     ]
     for i, h in enumerate(heads):
@@ -1070,9 +1085,10 @@ def build(src, out):
         fill_bullets(body_ph(s, 19 + i).text_frame, bodies[i], size=10)
     notes(
         s,
-        "B: 400 Mbps at 1472 B is 33,967 pkt/s; x 14,592 cycles (54H @ 320, offload + TCM) "
-        "= 496 MHz; x 17,069 (7120 @ 256, offload + SRAM hot path) = 580 MHz. Zero-wait floor "
-        "on 54H (64 MHz, 12,022) = 408 MHz. "
+        "B: 400 Mbps at 1472 B is 33,967 pkt/s. Lean builds: x 14,080 cycles (54H @ 320, "
+        "offload + TCM) = 478 MHz; x 14,734 (7120 @ 256, offload + SRAM hot path) = 500 MHz. "
+        "Bench config: 14,592 = 496 MHz, 17,069 = 580 MHz. Lean 54H at 64 MHz (11,289 cycles, "
+        "closest to zero MRAM wait) = 383 MHz. "
         "A: assumes stack per-packet cost is paid once per super-packet; driver segmentation cost "
         "is unknown and is what E8 measures.",
     )
@@ -1096,7 +1112,7 @@ def build(src, out):
             ["Gap", "Why it matters (our data)", "Ask", "Impact"],
             [
                 "No TX segmentation offload (TSO/USO)",
-                "Per-packet cost is 89-93% of the cycles; stack runs once per 1472 B",
+                "Per-packet cost is 87-93% of the cycles; stack runs once per 1472 B",
                 "L2 capability + MSS hint; stack hands down up to 64 KB, driver/FW segments",
                 "High",
             ],
@@ -1121,14 +1137,14 @@ def build(src, out):
             ],
             [
                 "No hot-path placement",
-                "With offload: 54H TCM hot path +61%, 7120 SRAM +9%. Done by hand "
+                "With offload, partial hot path: 54H TCM +61%, 7120 SRAM +9%. Done by hand "
                 "with zephyr_code_relocate per file",
                 "__net_hot annotation and a Kconfig to place it in TCM/SRAM",
                 "Medium",
             ],
             [
                 "Socket TX always copies",
-                "One memcpy per packet, 7-11% of the offload case",
+                "One memcpy per packet, est. 7-11% of the offload case",
                 "Zero-copy send from app buffers (MSG_ZEROCOPY-like)",
                 "Low-Med",
             ],
@@ -1151,10 +1167,12 @@ def build(src, out):
     )
     notes(
         s,
-        "TSO/GRO: include/zephyr/net/ethernet.h has only checksum, VLAN and filter offload "
-        "caps. Window scaling: tcp.c parses option 3 into recv_options.window but nothing "
-        "reads it, and cwnd is clamped to UINT16_MAX. No sendmmsg/recvmmsg in "
-        "include/zephyr/net/socket.h. Socket send copies into net_pkt (net_pkt_write); "
+        "TSO/GRO: enum ethernet_hw_caps (include/zephyr/net/ethernet.h:145-208) has no "
+        "TSO/USO/GRO bit. Window scaling: tcp.c:1172-1175 parses option 3 into "
+        "recv_options.window but nothing reads it, the windows are uint16_t "
+        "(tcp_private.h:334-337) and cwnd is clamped to UINT16_MAX (tcp.c:547, 563, 2266). "
+        "No sendmmsg/recvmmsg in include/zephyr/net/socket.h. Socket send copies into net_pkt "
+        "(net_pkt_write, net_context.c:2252, 2264); "
         "NRF_WIFI_ZERO_COPY_TX only removes the driver copy. TSO and GRO are the ones that "
         "attack the per-packet cost, the rest are percent-level.",
     )
@@ -1230,7 +1248,9 @@ def build(src, out):
         "./pdk_sweep.sh base 1500 reloc hot eth_sw eth_off \\",
         "    eth_sw_hot eth_off_hot              # results/pdk_*.csv",
         "./pdk_sweep.sh eth_off_hot_tc0 eth_off_hot_abl eth_off_abl",
-        "./mem_probe.py ws6:'bench ws 6' ...  # pdk_mem_*.csv",
+        "# probes, crossover, reboots, rebuild (case lists inside)",
+        "./repro_extra.sh pdk_mem pdk_crossover pdk_boot2boot",
+        "./repro_extra.sh boot2boot rebuild       # 54H",
         "",
         "# by hand, offload build:",
         "uart:~$ bench clk 320   # 54H only; bench freq on 7120",
@@ -1254,10 +1274,13 @@ def build(src, out):
         3.4,
         [
             "Bench code: the branch above (pdk_build.sh / build.sh build every variant).",
-            "All runs: zephyr 2bbcaa7ddf2, Zephyr SDK 1.0.0 (GCC 14.3, checked in each "
-            "zephyr.elf), CONFIG_SPEED_OPTIMIZATIONS, picolibc module.",
-            "sdk-nrf base under the bench: 02edfdd44a0 (54H loopback) / b419792d143 (rest). "
-            "They differ only in files the bench does not build (Wi-Fi driver, samples).",
+            "All runs: zephyr 2bbcaa7ddf2 (local, not the manifest pin), Zephyr SDK 1.0.0 "
+            "(GCC 14.3, checked in each zephyr.elf), CONFIG_SPEED_OPTIMIZATIONS, picolibc.",
+            "sdk-nrf module: b419792d143 (54H loopback rows: 02edfdd44a0). The diff is Wi-Fi, "
+            "security (cracen, linked but off the UDP TX path), samples and manifest pins. "
+            "results/west_list.txt has the workspace.",
+            "54H loopback / eth_sw / eth_off rows were built from an older copy of the bench; "
+            "build.sh reproduces them within ~1%.",
             "",
             "SRAM builds add sramcode.overlay: RAM02+03 become a separate SRAMCODE region, "
             "since the KMU push area has to stay at RAM_ADDR, ahead of any relocated code.",
@@ -1287,13 +1310,13 @@ def build(src, out):
             ["Loopback, 1 KB MTU", "SW", "MRAM", "-", "126.5", "39.4", "16,596 (1 KB)"],
             ["Loopback", "SW", "MRAM", "172.9", "126.5", "39.4", "17,460"],
             ["Loopback", "SW", "whole stack SRAM", "161.8", "122.9", "41.3", "18,646"],
-            ["Loopback", "SW", "hot path SRAM", "156.2", "118.3", "39.4", "19,317"],
+            ["Loopback", "SW", "hot path SRAM", "156.2", "118.3", "39.4", "19,316"],
             ["Null Ethernet", "SW", "MRAM", "142.0", "103.0", "31.5", "21,250"],
             ["Null Ethernet", "SW", "hot path SRAM", "133.9", "100.1", "32.5", "22,536"],
-            ["Null Ethernet", "offload", "MRAM", "162.4", "115.2", "33.9", "18,575"],
+            ["Null Ethernet", "offload", "MRAM", "162.4", "115.2", "33.9", "18,574"],
             ["Null Ethernet", "offload", "hot path SRAM", "176.8", "125.7", "37.1", "17,069"],
             ["Null Ethernet, lean", "offload", "MRAM", "185.5", "132.0", "39.1", "16,261"],
-            ["Null Ethernet, lean", "offload", "hot path SRAM", "204.7", "146.0", "43.5", "14,734"],
+            ["Null Ethernet, lean", "offload", "hot path SRAM", "204.7", "146.0", "43.4", "14,734"],
         ],
         [1.7, 0.9, 1.6, 0.9, 0.9, 0.9, 1.76],
         size=8,
@@ -1307,7 +1330,7 @@ def build(src, out):
         8.66,
         0.9,
         [
-            "The first row reproduces the old PDK baseline (124 Mbps at 1 KB). Lean = "
+            "The first row lands within 2% of the old PDK baseline (124 Mbps at 1 KB). Lean = "
             "overlay-ablate.conf: no TX thread, no net stats, no net logging.",
             "Microbench at 1472 B: checksum 1,734 cycles (1.18/B), memcpy 1,229 (0.84/B).",
             "Zephyr SDK 1.0.0 (GCC 14.3) on both boards.",
@@ -1380,7 +1403,7 @@ def build(src, out):
                 "hot path TCM",
                 "66.7 (11,289)",
                 "125.2 (12,006)",
-                "267.2 (14,081)",
+                "267.2 (14,080)",
             ],
         ],
         [1.7, 0.9, 1.6, 1.4, 1.5, 1.56],
@@ -1396,10 +1419,11 @@ def build(src, out):
         0.8,
         [
             "Cycles/pkt rise with clock because MRAM wait is fixed in ns: MRAM vs TCM with "
-            "offload is +3.5k cycles at 64 MHz and +8.9k at 320. Lean = overlay-ablate.conf; "
-            "TX thread off alone gives 265.7 at 320 (results/eth_off_tc0.csv).",
-            "No 256 MHz DVFS point; interpolating cycles/pkt gives a rough ~216 Mbps for "
-            "offload + TCM (7120: 177). MRAM wait states may step between 128 and 320.",
+            "offload is +3.5k cycles at 64 MHz and +8.9k at 320 (against the same-session "
+            "rebuild, results/eth_off_rebuild.csv; 3.6k / 9.0k against the rows above). Lean = "
+            "overlay-ablate.conf; TX thread off alone gives 265.7 at 320 (eth_off_tc0.csv).",
+            "No 256 MHz DVFS point. Interpolating cycles/pkt gives a rough ~216 Mbps for offload "
+            "+ TCM (7120: 177); the MRAM penalty is not linear in clock, so treat it as rough.",
             "zephyr 2bbcaa7ddf2, sdk-nrf 02edfdd44a0 (loopback) / b419792d143 (Ethernet), "
             "Zephyr SDK 1.0.0 (GCC 14.3).",
         ],

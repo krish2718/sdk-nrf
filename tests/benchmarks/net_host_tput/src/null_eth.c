@@ -5,7 +5,8 @@
  */
 
 /*
- * Ethernet L2 sink: frames are counted and freed at send(). Unlike the
+ * Ethernet L2 sink: send() only counts the frame and returns 0, then
+ * ethernet_send() drops the last reference and frees it. Unlike the
  * loopback (dummy L2), this exercises the Ethernet L2 path and lets the
  * stack skip software checksums when offload is advertised.
  */

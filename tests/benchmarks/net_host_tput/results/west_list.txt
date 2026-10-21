@@ -1,0 +1,56 @@
+# west list from the bench workspace, captured 2026-10-21 after the runs.
+# zephyr is 2bbcaa7ddf2, the commit every build used (local, not the sdk-nrf
+# manifest pin). Module SHAs other than zephyr and hal_nordic do not affect the
+# bench, which builds only Zephyr, hal_nordic, cmsis and picolibc.
+manifest N/A                                      nrf
+zephyr 2bbcaa7ddf2f544208d4b7220d32823d338c5b5d zephyr
+wfa-qt-control-app 1f19f0b23e42205bab5f34ace335fffa5e7d32ff modules/lib/wfa-qt-control-app
+mcuboot 2b21b8b1bd3e93b0538dd50768dab71b8836ac25 bootloader/mcuboot
+qcbor bfe7b348dda29783c960d7a9cac05abecc4a22ed modules/tee/tf-m/qcbor
+t_cose 024c4298f84a82409e0ac0e1d5c2e8ee22cca901 modules/tee/tf-m/t_cose
+mbedtls 804249ddcdcf78a16f9be760b9ff1f65c2f29d9e modules/crypto/mbedtls
+oberon-psa-crypto e8db62ed0fba5028e7ae0eba7b1fb63436ae6416 modules/crypto/oberon-psa-crypto
+nrfxlib 3391b849f32da5a25703dcaa321790d487bd58db nrfxlib
+trusted-firmware-m 39329596a865299ff77a1f7036986ae3f8032bac modules/tee/tf-m/trusted-firmware-m
+psa-arch-tests e643fa5ee34723fe4fc2b38a6eff570addd0a087 modules/tee/tf-m/psa-arch-tests
+cjson c6af068b7f05207b28d68880740e4b9ec1e4b50a modules/lib/cjson
+azure-sdk-for-c 308c171cb4b5eed266649012a68406487ec81fb2 modules/lib/azure-sdk-for-c
+cirrus 1c837bcc27de9ccc06b020b9500e1547e559a1df modules/hal/cirrus-logic
+openthread 0fe68ff23527e8bb9a9821ca96a255fccfbb44a7 modules/lib/openthread
+nrf_wifi 3ef388f588bd241e5aa5261fdb5840bba9abe0fc modules/lib/nrf_wifi
+cmock f65066f15d8248e6dcb778efb8739904a4512087 test/cmock
+memfault-firmware-sdk 1cae263fb27397628c0d46779295f4067a66b6de modules/lib/memfault-firmware-sdk
+bsim 9fce3723520edcdfddcfa0f1162b45c80d3da527 tools/bsim
+coremark d5fad6bd094899101a4e5fd53af7298160ced6ab modules/benchmark/coremark
+hostap 09cf9bf998b9e70c2926203447f620c01d68a064 modules/lib/hostap
+chre c4c2f49fdcaa2fed49eb1db027696a5734a010d2 modules/lib/chre
+cmsis 512cc7e895e8491696b61f7ba8066b4a182569b8 modules/hal/cmsis
+cmsis-dsp 97512610ec92058f0119450b9e743eeb7e95b5c8 modules/lib/cmsis-dsp
+cmsis-nn d20117c9e88cf9018d6fa06744dddac700c3e3a1 modules/lib/cmsis-nn
+cmsis_6 b2dfbe1a20bbd49c2d2c605073799671074bbb30 modules/hal/cmsis_6
+dhara 6f163ca05e174b168b4d148160b50eeaeeb561fc modules/lib/dhara
+edtt c282625e694f0b53ea53e13231ea6d2f49411768 tools/edtt
+fatfs f4ead3bf4a6dab3a07d7b5f5315795c073db568d modules/fs/fatfs
+hal_nordic c708b9fe1b7a36090c468374811a6e934b97e54a modules/hal/nordic
+hal_st e9f0468ade3c06d5e3961e3821543dd67c7ea7f0 modules/hal/st
+hal_tdk fa54cb65535b0ed69564423c9e0bf4e7ee47dcb1 modules/hal/tdk
+hal_wurthelektronik 7c1297ea071d03289112eb24e789c89c7095c0a2 modules/hal/wurthelektronik
+liblc3 48bbd3eacd36e99a57317a0a4867002e0b09e183 modules/lib/liblc3
+libmetal c41f476ba425663cadf7e456b6432e4b21591278 modules/hal/libmetal
+libsbc 8e1beda02acb8972e29e6edbb423f7cafe16e445 modules/lib/libsbc
+littlefs 7b969efe9ecf2942e811aeaaa3f2782623642ccf modules/fs/littlefs
+loramac-node fb00b383072518c918e2258b0916c996f2d4eebe modules/lib/loramac-node
+lvgl bbedf2656086a93a8468a1c98168a6b36631ce9a modules/lib/gui/lvgl
+mipi-sys-t 5a9d6055b62edc54566d6d0034d9daec91749b98 modules/debug/mipi-sys-t
+mldsa-native 3fc19982839305d305071f0de0c540bc9c9bea8a modules/crypto/mldsa-native
+nanopb 5499fd4c9a478f8139eeb07a82c3b4468d6067f7 modules/lib/nanopb
+net-tools c3431f482ea8a7b570fa4573aa5d35875b7f2a23 tools/net-tools
+nrf_hw_models 253d42e4c124aecd7b51afa4782140270e890a7d modules/bsim_hw_models/nrf_hw_models
+open-amp 01032a8a7bdfdd541686f5dfa3671e602b9fcbff modules/lib/open-amp
+percepio 57358a359d95fa7239d0dccd768f587ffc8f71bb modules/debug/percepio
+picolibc 01254932e8e81085817ed61fd858648584ffe37c modules/lib/picolibc
+segger 50892fdbcf2f570e67baa72b8894a66b16946f72 modules/debug/segger
+tf-m-tests 420c95daa7a25143bb88f807a1e2c432dd4372e8 modules/tee/tf-m/tf-m-tests
+tf-psa-crypto 765af96a20a2b408474dcd950372ba9af4d26b62 modules/crypto/tf-psa-crypto
+uoscore-uedhoc dc0ab6345450668de3f9597320a48c5a2d409bb6 modules/lib/uoscore-uedhoc
+zcbor 9164bd18dcd88ff9d9ef98279501fc1093571017 modules/lib/zcbor

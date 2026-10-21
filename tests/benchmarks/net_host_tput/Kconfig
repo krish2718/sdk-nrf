@@ -5,7 +5,7 @@
 #
 
 config BENCH_LOCAL_RAM_HOTPATH
-	bool "Place the UDP TX hot path in core-local RAM (APP_RAM0)"
+	bool "Place the UDP TX hot path in local RAM (TCM or SRAMCODE)"
 	select CODE_DATA_RELOCATION
 
 config BENCH_HOTPATH_REGION
