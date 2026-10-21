@@ -659,17 +659,17 @@ def build(src, out):
         1.65,
         3.73,
         [
-            ["Cycles/pkt, 1472 B", "54H @128", "54H @320", "7120 @256"],
-            ["Loopback, MRAM", "17,202", "22,284", "17,460"],
-            ["Loopback, stack in RAM", "20,262", "26,055", "18,646"],
-            ["Loopback, hot path local", "13,196", "15,052", "19,316"],
-            ["Eth, local, SW csum", "15,391", "17,400", "22,536"],
-            ["Eth, local, offload", "12,672", "14,592", "17,069"],
-            ["Eth, MRAM, offload", "17,699", "23,620", "18,574"],
-            ["Eth, local, offload, lean", "12,006", "14,080", "14,734"],
+            ["Cycles/pkt (MHz/Mbps)", "54H @128", "54H @320", "7120 @256"],
+            ["Loopback, MRAM", "17,202 (1.46)", "22,284 (1.89)", "17,460 (1.48)"],
+            ["Loopback, stack in RAM", "20,262 (1.72)", "26,055 (2.21)", "18,646 (1.58)"],
+            ["Loopback, hot path local", "13,196 (1.12)", "15,052 (1.28)", "19,316 (1.64)"],
+            ["Eth, local, SW csum", "15,391 (1.31)", "17,400 (1.48)", "22,536 (1.91)"],
+            ["Eth, local, offload", "12,672 (1.08)", "14,592 (1.24)", "17,069 (1.45)"],
+            ["Eth, MRAM, offload", "17,699 (1.50)", "23,620 (2.01)", "18,574 (1.58)"],
+            ["Eth, local, offload, lean", "12,006 (1.02)", "14,080 (1.20)", "14,734 (1.25)"],
         ],
-        [1.43, 0.76, 0.76, 0.78],
-        size=8,
+        [1.24, 0.83, 0.83, 0.83],
+        size=7,
         row_h=0.22,
         bold_rows=(5,),
     )
@@ -677,6 +677,14 @@ def build(src, out):
     fill_bullets(
         tb.text_frame,
         [
+            [
+                ("\"2 MHz per Mbps\": ", True),
+                (
+                    "UDP TX, SW csum, code in MRAM (PDK loopback, 1 KB: 2.06). Offload + "
+                    "local RAM: 1.0-1.5. TCP not measured.",
+                    False,
+                ),
+            ],
             [
                 ("Checksum offload: ", True),
                 ("54H +19% (TCM) / +18% (MRAM); 7120 +32% (SRAM) / +14% (MRAM).", False),
@@ -698,7 +706,7 @@ def build(src, out):
                 ("none in the null driver; one memcpy adds 7% (7120) / 11% (54H).", False),
             ],
         ],
-        size=9,
+        size=8,
     )
     for p in tb.text_frame.paragraphs:
         p.space_after = Pt(3)
@@ -752,6 +760,15 @@ def build(src, out):
         "driver heap into the Zephyr TX pool for the whole TX-done turnaround, so pool sizing "
         "(task 2) changes with it. The copy the bench still does is the socket one, app "
         "buffer to net_pkt; slide 5 prices that one."
+        "\n\nMHz/Mbps = cycles per packet / (1472 x 8), i.e. CPU MHz per Mbps of UDP payload "
+        "at 1472 B. The \"2 MHz per 1 Mbps\" rule of thumb is UDP TX: the PDK loopback baseline "
+        "(SW checksum, code in MRAM, 1 KB) does 124 Mbps at 256 MHz, 2.06 MHz/Mbps, and the 54H "
+        "SW csum MRAM Ethernet build is 2.36 at 320 MHz. It is not a constant: the cost is per "
+        "packet, so small packets are much worse (292 B on the PDK baseline: 40 Mbps, ~6.4 "
+        "MHz/Mbps), and with code in MRAM it rises with clock (54H offload: 1.50 at 128, 2.01 "
+        "at 320). TCP, RX and the Wi-Fi driver/IPC/FW are not in any of these numbers; Wi-Fi "
+        "only reached 0.36-0.45 of loopback on the PDK (air-limited), so on a full Wi-Fi "
+        "system the per-Mbps figure is higher."
         "\n\nLean row: overlay-ablate.conf (NET_TC_TX_COUNT=0, no net stats, no net log), "
         "267.2 Mbps on 54H @ 320 (results/eth_off_abl.csv), 204.7 on 7120 "
         "(results/pdk_eth_off_hot_abl.csv).",
