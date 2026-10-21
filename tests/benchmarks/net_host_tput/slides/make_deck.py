@@ -1188,6 +1188,160 @@ def build(src, out):
         "attack the per-packet cost, the rest are percent-level.",
     )
 
+    # 8c. SoC options
+    s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
+    set_title(
+        s,
+        "SoC options for an nRF71-based host",
+        "What a new chip could change, with the gain our data supports",
+    )
+    add_slide_number(s)
+    ph = body_ph(s, 10)
+    ph._element.getparent().remove(ph._element)
+    table(
+        s,
+        0.5,
+        1.55,
+        9.0,
+        [
+            ["Option", "Gain (our data)", "Pros", "Cons"],
+            [
+                "TCM (I+D) for the net path and kernel",
+                "54H partial hot path +61% over MRAM. 7120 est. ~+30% (>= 4.3k stall "
+                "cycles/pkt). All code zero-wait: ~334 Mbps @ 320, ~267 @ 256",
+                "Proven on 54H. No SW model change; driver and kernel gain too",
+                "Area. 32 KB holds only part of the path. Alone it stays below 400",
+            ],
+            [
+                "Bigger I-cache, own code bus for SRAM",
+                "7120 (8 KB) misses 734/pkt vs 508 on 54H (16 KB). SRAM code loses "
+                "~1.3-1.6k/pkt to S-AHB contention (~8%)",
+                "Cheaper than TCM, no linker work",
+                "Percent-level. Misses still pay MRAM wait states",
+            ],
+            [
+                "Higher CM33 clock (or M55/M85)",
+                "400 needs ~480-500 MHz lean, ~383 MHz with all code zero-wait",
+                "Every SW path gains, nothing to port",
+                "256-320 MHz cap comes from the backend cell choice; faster cells cost "
+                "power, leakage, area. MRAM miss cost grows with clock (7 to 18 cycles)",
+            ],
+            [
+                "Checksum in the HW datapath, TX and RX",
+                "+18-32% UDP TX (measured)",
+                "Cheapest big win; nRF71 FW already does TX",
+                "FW cycles per packet today (WZN-9251). RX is advertised, FW validation "
+                "unconfirmed",
+            ],
+            [
+                "Zero-copy DMA from host net_buf",
+                "Removes the driver copy, 7-11% (measured memcpy)",
+                "Less bus load as well",
+                "Buffer ownership across cores, alignment and headroom; buffers held "
+                "until TX-done (task 2 pool size)",
+            ],
+            [
+                "HW TSO/USO and GRO in the Wi-Fi datapath",
+                "Stack runs once per up to 64 KB. Linux GSO 2.4x, GRO 1.8x; at 2x, "
+                "400 Mbps needs ~240 MHz (est., E8)",
+                "Only option that cuts the 87-93% per-packet cost. Fits A-MPDU",
+                "No TSO/GRO in Zephyr yet. HW segments and builds headers. UDP gain "
+                "only for big datagrams; TCP also needs window scaling",
+            ],
+            [
+                "Dedicated network processor (TCP/IP off host)",
+                "Host stack cost replaced by socket offload + IPC per call (TO MEASURE)",
+                "Host CPU free for the app; network core sized for the job",
+                "Network core needs ~383-500 MHz CM33-class unless it has the rows above. "
+                "IPC per packet, socket offload gaps (WZN-108)",
+            ],
+        ],
+        [1.55, 2.65, 2.0, 2.8],
+        size=7,
+        row_h=0.42,
+    )
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.26)
+    shp.height = Inches(0.26 + 0.42 * 7)
+    notes(
+        s,
+        "TCM: 54H offload, code in MRAM 159.2 vs partial hot path in TCM 255.9 (same session). "
+        "7120 estimate: the offload MRAM build takes 734 I-cache misses at 6 wait states, at "
+        "least 4.4k of 18,574 cycles; removing ~4.3k gives ~14.3k, ~211 Mbps at 256 MHz. Zero-"
+        "wait ceiling: lean 54H at 64 MHz is 11,289 cycles/pkt (MRAM wait closest to zero), "
+        "scaled to 320 / 256 MHz.\n\n"
+        "Clock: 33,967 pkt/s x 14,080 (54H lean) = 478 MHz, x 14,734 (7120 lean) = 500 MHz, x "
+        "11,289 = 383 MHz. 54H per-miss cost fit: ~4 cycles + ~43 ns, so wait states do not "
+        "shrink with clock.\n\n"
+        "TSO/GRO: 2x is a planning number taken from the Linux results (LPC 2018), not ours: "
+        "14,080 / 2 = 7,040 cycles x 33,967 pkt/s = 239 MHz. Part of the gain comes from SW GSO "
+        "in the stack alone; HW makes the segmentation free. E8 measures it on the null "
+        "driver.\n\n"
+        "Network processor: the stack cost per packet does not go away, it moves. The only "
+        "Wi-Fi offload part found (SiWG917) is 20 MHz class.",
+    )
+
+    # 8d. Two takeaways
+    s = prs.slides.add_slide(layout(prs, "13_full content"))
+    set_title(s, "Two takeaways")
+    add_slide_number(s)
+    body_ph(s, 13)._element.getparent().remove(body_ph(s, 13)._element)
+    cols = []
+    for i, head in enumerate(("1. Zephyr network stack (SW)", "2. SoC / HW offloads")):
+        x = 0.67 + i * 4.42
+        card(s, x, 1.5, 4.24, 3.0, fill=LIGHT)
+        text_box(s, x + 0.15, 1.58, 3.9, 0.4, head, size=14, color=NAVY, bold=True)
+        cols.append(s.shapes.add_textbox(Inches(x + 0.15), Inches(2.0), Inches(3.94), Inches(2.4)))
+    fill_bullets(
+        cols[0].text_frame,
+        [
+            "Lean config and hot-path placement: 267 Mbps measured on 54H @ 320. Upstream a "
+            "__net_hot placement so it is not hand-made per file",
+            "GSO/GRO in the stack: the only SW change that cuts the per-packet cost. SW GSO "
+            "helps alone, HW segmentation makes it pay",
+            "TCP window scaling: needed for TCP > 350 (64 KB window, ~105 Mbps at 5 ms RTT)",
+            "Batched socket I/O, zero-copy send: percent-level",
+        ],
+        size=10,
+        bullets=True,
+    )
+    fill_bullets(
+        cols[1].text_frame,
+        [
+            "TCM sized for net path + kernel: biggest proven gain (+61% on 54H), ceiling "
+            "~334 Mbps @ 320 with all code zero-wait",
+            "HW TSO/USO + GRO, checksum (TX + RX) and zero-copy DMA in the Wi-Fi datapath",
+            "Clock is capped at 256-320 MHz by the cell choice; 400 needs ~383 MHz even "
+            "with all code zero-wait",
+            "Network processor only moves the stack cost and adds IPC, unless it brings "
+            "the items above",
+        ],
+        size=10,
+        bullets=True,
+    )
+    for tb in cols:
+        for p in tb.text_frame.paragraphs:
+            p.space_after = Pt(5)
+    text_box(
+        s,
+        0.67,
+        4.62,
+        8.66,
+        0.5,
+        "Neither alone gets to 400 at 256-320 MHz. Fewer packets per byte needs both: the "
+        "stack API and segmentation in HW.",
+        size=11,
+        color=NAVY,
+        bold=True,
+    )
+    notes(
+        s,
+        "Stack-only numbers, UDP TX, null driver: the Wi-Fi driver, IPC and FW come on top. "
+        "At 320 MHz 400 Mbps allows 9,421 cycles/pkt; the best zero-wait lean build is 11,289, "
+        "so even full TCM needs another ~17% cut. At 256 MHz the budget is 7,537, 33% below "
+        "zero-wait lean. TSO/GRO is the item that closes that, and it needs work on both sides.",
+    )
+
     # 9. Next
     s = prs.slides.add_slide(layout(prs, "13_full content"))
     set_title(s, "Next steps")
@@ -1227,7 +1381,11 @@ def build(src, out):
             ],
             [
                 ("Decision for the review: ", True),
-                ("which of A / B / C to take to architecture.", False),
+                (
+                    "which stack items to take upstream and which SoC options go into the "
+                    "nRF71-based chip spec.",
+                    False,
+                ),
             ],
         ],
         size=12,
