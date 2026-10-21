@@ -518,10 +518,10 @@ def build(src, out):
                 ("M33F, 8 KB I-cache, no TCM, fixed 256 MHz (nrf7120dk/nrf7120/cpuapp).", False),
             ],
             [
-                ("Loopback: ", True),
+                ("Loopback TX-only: ", True),
                 (
-                    "zperf UDP to the peer address, dummy L2. The driver clones each packet, "
-                    "swaps src/dst and feeds it to RX: one core pays TX + copy + RX. SW checksum.",
+                    "zperf UDP to the peer address, dummy L2. The driver drops every packet at "
+                    "send() (zperf sample, drop ratio 1), so no RX. Checksum always in SW.",
                     False,
                 ),
             ],
@@ -568,16 +568,18 @@ def build(src, out):
         s,
         "Cycles per packet = CPU Hz / packets per second. Mbps/MHz = Mbps / measured CPU MHz. "
         "Mbps is the zperf client send rate in both setups.\n\n"
-        "Loopback vs Ethernet L2: both send to 192.0.2.2 (run.py --dest). Loopback "
-        "(CONFIG_NET_LOOPBACK) uses the dummy L2, so no Ethernet header or ARP. "
-        "drivers/net/loopback.c clones the packet (net_pkt_rx_clone, :137), swaps src and dst "
-        "(:143-158) and hands it to net_recv_data (:163), so the same core also runs the IP/UDP "
-        "RX path and the zperf server. It is a pessimistic TX number and can't show offload. "
-        "Ethernet L2 (overlay-nulleth.conf, src/null_eth.c) runs the real Ethernet TX path up "
-        "to the driver: header, ARP lookup (static entry for 192.0.2.2), TX queue. "
-        "null_eth_send() counts and returns 0; ethernet_send() then drops the last reference "
-        "(subsys/net/l2/ethernet/ethernet.c:791). So this is the stack-only TX cost with a free "
-        "driver. A real driver adds its copy (7-11%) and bus time on top.\n\n"
+        "Loopback vs Ethernet L2: both are TX-only and send to 192.0.2.2 (run.py --dest). "
+        "Loopback (CONFIG_NET_LOOPBACK) uses the dummy L2, so no Ethernet header or ARP. "
+        "prj.conf sets CONFIG_NET_LOOPBACK_SIMULATE_PACKET_DROP=y and the zperf sample main.c "
+        "then calls loopback_set_packet_drop_ratio(1), so loopback_send() returns 0 before "
+        "the RX clone (drivers/net/loopback.c:114-125) and dummy_send() frees the packet. The "
+        "clone, address swap and net_recv_data() further down never run. The dummy L2 has no "
+        "offload caps, so need_calc_checksum() always computes the checksum in SW and loopback "
+        "can't show offload. Ethernet L2 (overlay-nulleth.conf, src/null_eth.c) runs the real "
+        "Ethernet TX path up to the driver: header, ARP lookup (static entry for 192.0.2.2), "
+        "TX queue. null_eth_send() counts and returns 0; ethernet_send() then drops the last "
+        "reference (subsys/net/l2/ethernet/ethernet.c:791). So this is the stack-only TX cost "
+        "with a free driver. A real driver adds its copy (7-11%) and bus time on top.\n\n"
         "Partial hot path: CMakeLists.txt relocates net_context, net_pkt, udp, ipv4, net_core, "
         "utils (checksum), net_buf, sockets, the zperf uploader and the L2/driver file. "
         "net_if.c, arp.c, net_tc.c, connection.c and the kernel stay in MRAM, so the TCM/SRAM "
@@ -604,7 +606,7 @@ def build(src, out):
     set_title(
         s,
         "Results: UDP TX, 1472 B",
-        "Bench config, each board at its own clock. Loopback = TX + RX on one core",
+        "Bench config, each board at its own clock. All rows TX-only, loopback drops at send()",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
@@ -699,7 +701,7 @@ def build(src, out):
     notes(
         s,
         "Local = TCM on 54H, SRAMCODE region (RAM02+03) on 7120. Loopback rows compute "
-        "checksums in SW by design and run TX and RX on one core. Raw CSVs: results/*.csv "
+        "checksums in SW by design and are TX-only like the Ethernet rows. Raw CSVs: results/*.csv "
         "(54H), results/pdk_*.csv (7120). The table shows the original runs. The 54H MRAM and "
         "lean rows come from a later session, so the +61% compares them with that session's "
         "rebuild of the offload + TCM build (14,695 cycles, 255.9), not the 14,592 in the "
