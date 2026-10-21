@@ -8,6 +8,7 @@
 # build directories from build.sh (54H) or pdk_build.sh (7120).
 #
 #   pdk_mem        results/pdk_mem_*.csv: MRAM wait states, I-cache, microbench
+#   mem            results/mem_*.csv: 54H I-cache misses and microbench per clock
 #   pdk_crossover  results/pdk_crossover.csv: MRAM vs SRAM hot path vs size
 #   pdk_boot2boot  results/pdk_boot2boot.csv: 3 resets, 7120 offload + SRAM
 #   boot2boot      results/boot2boot.csv: 3 resets, 54H lean offload + TCM
@@ -62,6 +63,17 @@ pdk_mem()
 	done
 }
 
+mem()
+{
+	for v in eth_off_mram eth_sw_mram eth_off eth_off_mram_abl eth_off_abl; do
+		flash "build_$v"
+		set -- "c320:bench clk 320" "c128:bench clk 128" "c64:bench clk 64"
+		[ "$v" = eth_off_mram ] && set -- "$@" "nocache320:bench clk 320;bench icache off"
+		python3 mem_probe.py --port "$port" --tag "$v" --dur 5 --pre "$arp" \
+			--raw "results/mem_$v.log" "$@" > "results/mem_$v.csv"
+	done
+}
+
 pdk_crossover()
 {
 	echo "$hdr" > results/pdk_crossover.csv
@@ -91,6 +103,7 @@ boot()
 for step in "$@"; do
 	case $step in
 	pdk_mem) pdk_mem ;;
+	mem) mem ;;
 	pdk_crossover) pdk_crossover ;;
 	pdk_boot2boot)
 		boot build_pdk_eth_off_hot pdk_eth_off_hot results/pdk_boot2boot.csv --runs 2 ;;

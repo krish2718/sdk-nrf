@@ -3,7 +3,7 @@
 # Copyright (c) 2026 Nordic Semiconductor ASA
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
-"""nRF7120 memory probe: MRAM wait states, I-cache hit/miss per packet and
+"""Memory probe: MRAM wait states (nRF7120), I-cache hit/miss per packet and
 checksum/memcpy cost, using the bench shell commands over UART.
 
 Each case is "<label>:<setup>" where setup is a ';' separated list of shell
@@ -57,16 +57,18 @@ def main():
     for line in args.pre:
         run_cmd(sh, line)
 
-    m, _ = run_cmd(sh, "bench freq", HZ_RE)
-    hz = int(m.group(1))
-
     print("tag,case,mram_ws,size,mbps,cycles_per_pkt,hit_per_pkt,miss_per_pkt,csum_cyc,memcpy_cyc")
     for case in args.cases:
         label, _, setup = case.partition(":")
         for line in filter(None, (s.strip() for s in setup.split(";"))):
             run_cmd(sh, line)
 
-        m, _ = run_cmd(sh, "bench mem", WS_RE)
+        # A setup step may change the clock (bench clk on nRF54H20).
+        m, _ = run_cmd(sh, "bench freq", HZ_RE)
+        hz = int(m.group(1))
+
+        _, out = run_cmd(sh, "bench mem")
+        m = WS_RE.search(out)
         ws = m.group(1) if m else ""
 
         m, _ = run_cmd(sh, f"bench csum {args.size} 20000", MICRO_RE, 20)

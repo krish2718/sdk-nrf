@@ -577,7 +577,7 @@ def build(src, out):
         "to the driver: header, ARP lookup (static entry for 192.0.2.2), TX queue. "
         "null_eth_send() counts and returns 0; ethernet_send() then drops the last reference "
         "(subsys/net/l2/ethernet/ethernet.c:791). So this is the stack-only TX cost with a free "
-        "driver. A real driver adds its copy (est. 7-11%) and bus time on top.\n\n"
+        "driver. A real driver adds its copy (7-11%) and bus time on top.\n\n"
         "Partial hot path: CMakeLists.txt relocates net_context, net_pkt, udp, ipv4, net_core, "
         "utils (checksum), net_buf, sockets, the zperf uploader and the L2/driver file. "
         "net_if.c, arp.c, net_tc.c, connection.c and the kernel stay in MRAM, so the TCM/SRAM "
@@ -687,7 +687,7 @@ def build(src, out):
             ],
             [
                 ("Driver copy: ", True),
-                ("none in the null driver; est. +7% (7120) / +11% (54H) without zero-copy.", False),
+                ("none in the null driver; one memcpy adds 7% (7120) / 11% (54H).", False),
             ],
         ],
         size=9,
@@ -707,7 +707,14 @@ def build(src, out):
         "12,072 at 64. The MRAM penalty grows from 3.5k to 8.9k cycles as the clock goes up, "
         "because the MRAM access time is fixed in ns. That is why TCM pays +61% on the 54H at "
         "320 MHz and SRAM only +9% on the 7120 at 256 MHz, where SRAM code also fights its "
-        "own data on S-AHB. SW csum, MRAM: 135.4 (27,764 cycles); TCM 216.3, also +60%."
+        "own data on S-AHB. SW csum, MRAM: 135.4 (27,764 cycles); TCM 216.3, also +60%. "
+        "I-cache counters (results/mem_eth_off*.csv): 508 misses/pkt with code in MRAM, 14 "
+        "with the hot path in TCM. Putting the whole MRAM-TCM difference on those 494 misses "
+        "gives 18 cycles per miss at 320 MHz, 10 at 128 and 7 at 64, i.e. ~4 cycles + ~43 ns "
+        "per miss (the fit lands within 2% at 128 MHz). The 54H misses less often than the "
+        "7120 (508 vs 734) but each miss costs about three times the 7120's 6 wait states. "
+        "The lean config halves the MRAM misses (508 to 257), which is why lean helps the "
+        "MRAM build by +27% and the TCM build by only +4%."
         "\n\nWhy the 7120 SRAM hot path gains less: the M33 fetches MRAM over C-AHB through the "
         "8 KB direct-mapped I-cache, and SRAM over S-AHB, uncached, on the same port as its "
         "loads and stores. MRAMC reads back 6 wait states at 256 MHz; sweeping it (bench ws) "
@@ -730,10 +737,10 @@ def build(src, out):
         "\n\nDriver zero-copy TX (NRF_WIFI_ZERO_COPY_TX) is not enabled on either board yet. "
         "The null driver frees the packet without copying, so the bench already has no "
         "driver copy and a real driver can only be slower. With the copy path a real driver "
-        "adds one memcpy. Estimate: the stack's own per-byte slope (the socket copy) as a "
-        "proxy, 0.81-1.09 cycles/B x 1472 = 1.2-1.6k cycles/pkt, about 7% (7120) / 11% (54H) "
-        "of the offload case; zero-copy avoids that. On the 7120 the slope matches the "
-        "measured memcpy (0.84 cycles/B); no 54H memcpy microbench yet. It moves TX bytes from the "
+        "adds one memcpy: bench memcpy at 1472 B is 1,229 cycles on the 7120 and 1,598 on the "
+        "54H (same at 64/128/320 MHz, results/mem_*.csv), about 7% / 11% of the offload case; "
+        "zero-copy avoids that. Both match the stack's own per-byte slope (0.81 / 1.09 "
+        "cycles/B). It moves TX bytes from the "
         "driver heap into the Zephyr TX pool for the whole TX-done turnaround, so pool sizing "
         "(task 2) changes with it. The copy the bench still does is the socket one, app "
         "buffer to net_pkt; slide 5 prices that one."
@@ -811,7 +818,7 @@ def build(src, out):
             [
                 ("Per-byte is small: ", True),
                 (
-                    "0.8-1.1 cycles/B in the bench config, about one memcpy (0.84 on the 7120). "
+                    "0.8-1.1 cycles/B in the bench config, one memcpy (0.84 / 1.09 measured). "
                     "SW checksum adds ~2.7-2.8k/pkt from MRAM or TCM, ~5.5k from 7120 SRAM.",
                     False,
                 ),
@@ -1144,7 +1151,7 @@ def build(src, out):
             ],
             [
                 "Socket TX always copies",
-                "One memcpy per packet, est. 7-11% of the offload case",
+                "One memcpy per packet, 7-11% of the offload case (measured)",
                 "Zero-copy send from app buffers (MSG_ZEROCOPY-like)",
                 "Low-Med",
             ],
@@ -1250,7 +1257,7 @@ def build(src, out):
         "./pdk_sweep.sh eth_off_hot_tc0 eth_off_hot_abl eth_off_abl",
         "# probes, crossover, reboots, rebuild (case lists inside)",
         "./repro_extra.sh pdk_mem pdk_crossover pdk_boot2boot",
-        "./repro_extra.sh boot2boot rebuild       # 54H",
+        "./repro_extra.sh boot2boot rebuild mem   # 54H",
         "",
         "# by hand, offload build:",
         "uart:~$ bench clk 320   # 54H only; bench freq on 7120",
@@ -1419,9 +1426,9 @@ def build(src, out):
         0.8,
         [
             "Cycles/pkt rise with clock because MRAM wait is fixed in ns: MRAM vs TCM with "
-            "offload is +3.5k cycles at 64 MHz and +8.9k at 320 (against the same-session "
-            "rebuild, results/eth_off_rebuild.csv; 3.6k / 9.0k against the rows above). Lean = "
-            "overlay-ablate.conf; TX thread off alone gives 265.7 at 320 (eth_off_tc0.csv).",
+            "offload is +3.5k cycles at 64 MHz and +8.9k at 320 (same-session rebuild; 3.6k / "
+            "9.0k against the rows above). I-cache misses/pkt: 508 MRAM, 14 TCM, 257 MRAM lean "
+            "(results/mem_*.csv), ~4 cycles + ~43 ns each. TX thread off alone: 265.7 at 320.",
             "No 256 MHz DVFS point. Interpolating cycles/pkt gives a rough ~216 Mbps for offload "
             "+ TCM (7120: 177); the MRAM penalty is not linear in clock, so treat it as rough.",
             "zephyr 2bbcaa7ddf2, sdk-nrf 02edfdd44a0 (loopback) / b419792d143 (Ethernet), "

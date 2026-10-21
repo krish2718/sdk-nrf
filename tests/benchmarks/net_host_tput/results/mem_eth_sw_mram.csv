@@ -1,0 +1,6 @@
+# cpu_hz=319225176
+# icache_enable=1 icache_status=0x00000000 prof_enable=0
+tag,case,mram_ws,size,mbps,cycles_per_pkt,hit_per_pkt,miss_per_pkt,csum_cyc,memcpy_cyc
+eth_sw_mram,c320,,1472,136.78,27493,6153,572,1742,1598
+eth_sw_mram,c128,,1472,71.56,20991,6156,572,1741,1598
+eth_sw_mram,c64,,1472,40.31,18663,6161,572,1741,1597
