@@ -34,6 +34,10 @@ YELLOW = RGBColor(0xFF, 0xCD, 0x00)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 THEME_FONT = "+mn-lt"
 MEAS = "TO MEASURE"
+LLM_FOOTNOTE = (
+    "Published data collected with an LLM (Cursor, Claude Opus 5.5 medium) from vendor pages, "
+    "Zephyr PRs and issues; spot-check the sources before quoting."
+)
 
 ZEPHYR_ROWS = [
     [
@@ -1032,6 +1036,7 @@ def build(src, out):
         )
     if TASK3_NOTES:
         text_box(s, 0.5, 4.25, 9.0, 0.9, TASK3_NOTES, size=8)
+    text_box(s, 0.5, 5.17, 8.7, 0.25, LLM_FOOTNOTE, size=7, color=GREY, italic=True)
 
     # 7b. Task 3: Zephyr hosts
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
@@ -1065,6 +1070,7 @@ def build(src, out):
         row_h=0.25,
     )
     text_box(s, 0.5, 3.85, 9.0, 1.3, ZEPHYR_NOTES, size=8)
+    text_box(s, 0.5, 5.17, 8.7, 0.25, LLM_FOOTNOTE, size=7, color=GREY, italic=True)
 
     # 8. Architecture options
     s = prs.slides.add_slide(layout(prs, "18_three messages title + text"))
