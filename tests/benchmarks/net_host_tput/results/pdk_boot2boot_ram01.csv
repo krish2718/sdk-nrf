@@ -1,0 +1,7 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+eth_off_ram01_boot1,,256.0,1472,0,230.31,0.900,13090
+eth_off_ram01_boot1,,256.0,1472,1,230.30,0.900,13090
+eth_off_ram01_boot2,,256.1,1472,0,230.31,0.899,13093
+eth_off_ram01_boot2,,256.1,1472,1,230.29,0.899,13094
+eth_off_ram01_boot3,,256.0,1472,0,230.35,0.900,13088
+eth_off_ram01_boot3,,256.0,1472,1,230.34,0.900,13088

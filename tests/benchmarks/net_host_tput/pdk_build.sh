@@ -93,6 +93,9 @@ ramblk()
 		b "build_pdk_eth_sw_hot_$r" "-DEXTRA_CONF_FILE=$eth" $ov
 		b "build_pdk_hot1500_$r" "-DEXTRA_CONF_FILE=$lo" $ov
 	done
+	b build_pdk_reloc1500_ram01 \
+		"-DEXTRA_CONF_FILE=overlay-mtu1500.conf;overlay-pdk-reloc.conf" \
+		-DEXTRA_DTC_OVERLAY_FILE=sramcode-ram01.overlay
 	b build_pdk_eth_off_hot_abl_ram01 \
 		"-DEXTRA_CONF_FILE=$eth;overlay-ablate.conf" $off \
 		-DEXTRA_DTC_OVERLAY_FILE=sramcode-ram01.overlay

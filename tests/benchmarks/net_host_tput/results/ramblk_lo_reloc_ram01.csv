@@ -1,0 +1,7 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+lo_reloc_ram01,,256.0,1472,0,257.22,1.005,11720
+lo_reloc_ram01,,256.0,1472,1,257.19,1.005,11722
+lo_reloc_ram01,,256.0,1024,0,193.74,0.757,10825
+lo_reloc_ram01,,256.0,1024,1,193.76,0.757,10824
+lo_reloc_ram01,,256.0,292,0,63.98,0.250,9347
+lo_reloc_ram01,,256.0,292,1,63.97,0.250,9349
