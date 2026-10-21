@@ -430,9 +430,9 @@ def build(src, out):
                 ("Task 1: NO-GO on both boards. ", True),
                 (
                     "With nothing below the stack, nRF54H20DK does 258 Mbps at 320 MHz and the "
-                    "nRF7120 PDK 230 at 256. A lean config (no TX thread, no net stats/log) "
-                    "gives 267 / 281, still 1.50x / 1.43x short. Driver, IPC and FW add on top. "
-                    "UDP TX measured, TCP inferred.",
+                    "nRF7120 PDK 230 at 256. A lean config (no TX thread, no net stats/log; "
+                    "not default, see backup) gives 267 / 281, still 1.50x / 1.43x short. "
+                    "Driver, IPC and FW add on top. UDP TX measured, TCP inferred.",
                     False,
                 ),
             ],
@@ -1652,6 +1652,109 @@ def build(src, out):
             "Zephyr SDK 1.0.0 (GCC 14.3).",
         ],
         size=8,
+    )
+
+    s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
+    set_title(
+        s,
+        "Backup: why lean is not the default",
+        "overlay-ablate.conf is three Kconfig switches, no stack code change",
+    )
+    add_slide_number(s)
+    ph = body_ph(s, 10)
+    ph._element.getparent().remove(ph._element)
+    table(
+        s,
+        0.67,
+        1.62,
+        8.66,
+        [
+            ["Switch", "What it removes per packet", "Measured gain", "Production?"],
+            [
+                "NET_TC_TX_COUNT=0",
+                "TX queue, wake-up, 2 context switches; on 7120 that code runs from MRAM",
+                "54H +3.1%, 7120 +9.4% (RAM02/03 run)",
+                "Only after real-driver test",
+            ],
+            [
+                "NET_STATISTICS=n",
+                "Per-layer counters",
+                "Rest of the lean gain, with logging",
+                "Yes, lose net stats",
+            ],
+            [
+                "NET_LOG=n",
+                "Log level checks in net code",
+                "(combined above)",
+                "Yes, 7120 sta sample already does",
+            ],
+            [
+                "All three (lean)",
+                "I-cache misses 233 to 97 per packet on 7120",
+                "54H +3.7% (258 to 267), 7120 +22% (230 to 281)",
+                "-",
+            ],
+        ],
+        [1.6, 3.2, 2.2, 1.66],
+        size=8,
+        row_h=0.3,
+        bold_rows=(4,),
+    )
+    tb = s.shapes.add_textbox(Inches(0.67), Inches(3.25), Inches(8.66), Inches(1.9))
+    fill_bullets(
+        tb.text_frame,
+        [
+            [
+                ("Every sender runs the driver. ", True),
+                (
+                    "With no TX thread, socket to Wi-Fi driver runs in the caller's context. Each "
+                    "sending thread needs that stack depth; only the one 4 KB TX stack goes away.",
+                    False,
+                ),
+            ],
+            [
+                ("TCP ACKs go out from the RX thread. ", True),
+                (
+                    "Retransmits from the TCP work queue. If the driver waits for FW TX credits "
+                    "or IPC, RX stalls behind it, and shared driver locks risk a deadlock. "
+                    "send() blocks too. Null Ethernet never blocks, so the bench cannot show it.",
+                    False,
+                ),
+            ],
+            [
+                ("Not what NCS ships. ", True),
+                (
+                    "nRF71 Kconfig forces TC_TX_COUNT=1 (from nRF70) and every Wi-Fi sample sets "
+                    "it; Zephyr's own default is 0. Net shell over telnet/MQTT needs the thread.",
+                    False,
+                ),
+            ],
+            [
+                ("So: ", True),
+                (
+                    "headline = bench config, lean = upside once the real nRF71 driver passes "
+                    "UDP + TCP with TC_TX_COUNT=0. Verdict unchanged: lean is 1.43x short.",
+                    False,
+                ),
+            ],
+        ],
+        size=9,
+        bullets=True,
+    )
+    for p in tb.text_frame.paragraphs:
+        p.space_after = Pt(4)
+    notes(
+        s,
+        "Lean gains more on the 7120 because the code it removes (k_fifo, scheduler, net_tc.c, "
+        "stats) is not in the relocated hot path and runs from MRAM behind an 8 KB I-cache. "
+        "136 fewer misses at ~11 cycles is ~1.5k of the 2.35k cycles saved. The 54H gains only "
+        "+3.7%; we have not fully explained the difference. The per-switch split on the 7120 is "
+        "from the older RAM02/03 build (TX thread +9.4% of +15%); not yet redone for RAM01.\n\n"
+        "The 4 KB TX stack is the nRF71 default (NET_TX_STACK_SIZE). One sending thread is "
+        "roughly a wash on RAM; several senders each pay for the full TX path.\n\n"
+        "To make lean a recommendation: per-switch split on RAM01, then the real nRF71 driver "
+        "on the PDK with TC_TX_COUNT=0, UDP and TCP, watching for RX stalls and deadlocks. If "
+        "clean, propose dropping the forced default in drivers/wifi/nrf71/Kconfig.",
     )
 
     # 11. Appendix: Jira map
