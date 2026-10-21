@@ -591,8 +591,10 @@ def build(src, out):
         "MHz). A/B percentages always compare builds run in the same session. Rebuilding with "
         "unrelated code changes "
         "moved the same variant 176.8 to 177.9 and 162.4 to 160.9 (7120) and 257.7 to 255.9 "
-        "(54H, results/eth_off_rebuild.csv), so treat ~1% as the error bar. One board per "
-        "type, so board-to-board spread is not covered.\n\n"
+        "(54H, results/eth_off_rebuild.csv), so treat ~1% as the error bar. The exception is "
+        "the 54H lean MRAM build: rebuilt for the cache probe after a bench.c change it moved "
+        "202.1 to 209.7 (+3.8%); MRAM-heavy builds are the most layout-sensitive. One board "
+        "per type, so board-to-board spread is not covered.\n\n"
         "Gotcha: zperf silently clamps the payload to 1064 B unless "
         "CONFIG_NET_ZPERF_MAX_PACKET_SIZE is raised.",
     )
@@ -714,7 +716,7 @@ def build(src, out):
         "per miss (the fit lands within 2% at 128 MHz). The 54H misses less often than the "
         "7120 (508 vs 734) but each miss costs about three times the 7120's 6 wait states. "
         "The lean config halves the MRAM misses (508 to 257), which is why lean helps the "
-        "MRAM build by +27% and the TCM build by only +4%."
+        "MRAM build by +27% (+31% in the probe rebuild) and the TCM build by only +4%."
         "\n\nWhy the 7120 SRAM hot path gains less: the M33 fetches MRAM over C-AHB through the "
         "8 KB direct-mapped I-cache, and SRAM over S-AHB, uncached, on the same port as its "
         "loads and stores. MRAMC reads back 6 wait states at 256 MHz; sweeping it (bench ws) "
