@@ -2146,7 +2146,8 @@ def build_prb(src, out):
         3.95,
         2.6,
         0.55,
-        "More than 250 needs packet offload in the Wi-Fi chip, or more processor power.",
+        "More than 250 needs packet batching (software, Wi-Fi chip or both), or more "
+        "processor power.",
         size=11,
         color=NAVY,
         bold=True,
