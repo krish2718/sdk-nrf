@@ -45,7 +45,7 @@ ZEPHYR_ROWS = [
         "M33 @ 320",
         "null Ethernet",
         "UDP TX 258",
-        "0.81",
+        "1.24",
         "csum offload, hot path in TCM",
         "this work",
     ],
@@ -54,7 +54,7 @@ ZEPHYR_ROWS = [
         "M33 @ 256",
         "null Ethernet",
         "UDP TX 230",
-        "0.90",
+        "1.11",
         "csum offload, hot path in RAM01",
         "this work",
     ],
@@ -63,7 +63,7 @@ ZEPHYR_ROWS = [
         "A55 @ <= 1700",
         "1G ENET",
         "UDP RX 619",
-        ">= 0.36",
+        "<= 2.8",
         "cacheable RX buffers",
         "PR 82210 (merged)",
     ],
@@ -72,7 +72,7 @@ ZEPHYR_ROWS = [
         "M7 @ 996",
         "1G ENET_1G",
         "UDP RX ~477, TX 200-512; TCP TX ~200",
-        "0.2-0.51",
+        "2.0-5.0",
         "deeper rings, IRQ coalescing",
         "PR 118810 (open)",
     ],
@@ -81,7 +81,7 @@ ZEPHYR_ROWS = [
         "A53 @ <= 1250",
         "1G CPSW3G",
         "UDP TX ~460; TCP TX ~230",
-        ">= 0.37 / 0.18",
+        "<= 2.7 / 5.6",
         "new DMA driver, SW csum",
         "PR 109327 (open)",
     ],
@@ -90,7 +90,7 @@ ZEPHYR_ROWS = [
         "M85 @ <= 1000",
         "1G RMAC",
         "UDP TX 279; TCP TX 158 (1000 B)",
-        ">= 0.28 / 0.16",
+        "<= 3.6 / 6.3",
         "driver fix",
         "issue 109078",
     ],
@@ -99,14 +99,14 @@ ZEPHYR_ROWS = [
         "A9 @ 667",
         "1G GEM",
         "UDP ~240; TCP ~130",
-        "~0.36 / 0.19",
+        "~2.8 / 5.3",
         "L2 cache on",
         "PR 111154 / 111833",
     ],
 ]
 ZEPHYR_NOTES = [
-    "Only UDP has crossed 400 on Zephyr, and only on ~1 GHz cores. Their 0.2-0.5 Mbps/MHz "
-    "includes a real MAC driver and ours (0.81-0.90) has none, so per-MHz numbers are not "
+    "Only UDP has crossed 400 on Zephyr, and only on ~1 GHz cores. Their 2-5 MHz per Mbps "
+    "includes a real MAC driver and ours (1.1-1.2) has none, so per-MHz numbers are not "
     "like-for-like, here or against other stacks.",
     "Same RT1170 board: NXP bare-metal SDK does ~916 Mbps UDP vs ~477 on Zephyr. The stack is the "
     "limit, not the MAC.",
@@ -120,7 +120,7 @@ TASK3_ROWS = [
         "M33 @ 320",
         "Zephyr, sockets",
         "UDP TX 258",
-        "0.81",
+        "1.24",
         "csum offload, hot path in TCM",
     ],
     [
@@ -128,25 +128,25 @@ TASK3_ROWS = [
         "M33 @ 256",
         "Zephyr, sockets",
         "UDP TX 230",
-        "0.90",
+        "1.11",
         "csum offload, hot path in RAM01",
     ],
-    ["Zynq-7000 ZC702", "A9 @ 667", "lwIP, sockets", "TCP TX 542 / RX 521", "0.81", "HW csum"],
+    ["Zynq-7000 ZC702", "A9 @ 667", "lwIP, sockets", "TCP TX 542 / RX 521", "1.23", "HW csum"],
     [
         "Zynq-7000 ZC702",
         "A9 @ 667",
         "lwIP, RAW API",
         "TCP TX 949 / RX 943",
-        ">= 1.42",
+        "<= 0.70",
         "same HW, no socket layer (GbE cap)",
     ],
-    ["ZynqMP ZCU102", "A53 @ 1100", "lwIP, sockets", "TCP RX 887", "0.81", "HW csum"],
+    ["ZynqMP ZCU102", "A53 @ 1100", "lwIP, sockets", "TCP RX 887", "1.24", "HW csum"],
     [
         "i.MX RT1170 (user report)",
         "M7 @ ~1000",
         "lwIP, bare metal",
         "TCP RX 390 / TX 150",
-        "0.39 / 0.15",
+        "2.6 / 6.7",
         "GbE MAC, driver/buffer bound",
     ],
     [
@@ -175,12 +175,12 @@ TASK3_ROWS = [
     ],
 ]
 TASK3_NOTES = [
-    "Our 0.81-0.90 Mbps/MHz (null driver) is close to lwIP sockets on A9/A53 (0.81, real MAC), so "
+    "Our 1.1-1.2 MHz per Mbps (null driver) is close to lwIP sockets on A9/A53 (1.2, real MAC), so "
     "per MHz is not like-for-like. lwIP RAW callbacks are >= 1.75x its sockets on the same A9, "
     "but that is TCP capped by GbE; the gain for Zephyr UDP is unknown.",
     "Same NXP radio: 86-221 Mbps with lwIP on an MCU host, 405-502 with Linux. The host stack "
     "makes the gap. The RT1180 page (MCUXpresso SDK 25.03 Wi-Fi throughput) does not say which "
-    "core ran the test, so no Mbps/MHz.",
+    "core ran the test, so no MHz per Mbps.",
     "Linux UDP GSO 2.4x, GRO 1.8x bytes per cycle (LPC 2018). No published Zephyr GbE numbers on "
     "any MCU.",
 ]
@@ -413,11 +413,11 @@ def build(src, out):
         2.0,
         [
             "Best case, with every step on the right done.",
+            "0.97 MHz per Mbps UDP, 1.3 TCP (old rule of thumb: 2, UDP).",
             "The CPU is the limit, not the air: 80 MHz HE MCS9 (480 Mbps PHY) carries "
-            "~330-350 Mbps TCP.",
+            "~330-350 Mbps TCP goodput.",
             "If the TX thread has to stay: ~220 TCP.",
-            "CAL-7627 targets (TCP > 350, UDP > 400) are out of reach with the stack on the "
-            "host CPU alone.",
+            "CAL-7627 targets (TCP > 350, UDP > 400) are out of reach on one CM33.",
         ],
         size=10,
     )
@@ -453,8 +453,8 @@ def build(src, out):
         4.45,
         5.0,
         0.5,
-        "Past ~250 TCP needs fewer packets through the stack (TSO/GRO) or the stack on its "
-        "own core.",
+        "Past ~250 TCP needs fewer packets through the stack (TSO/GRO). A second CM33 for the "
+        "driver gives ~280-290.",
         size=10,
         color=NAVY,
         bold=True,
@@ -494,12 +494,12 @@ def build(src, out):
             [
                 "UDP TX, stack only",
                 "What we measured: zperf UDP send, 1472 B payload, through the Zephyr stack into "
-                "a driver that frees the packet. No Wi-Fi, no TCP, no RX.",
+                "a null Ethernet driver that frees each frame. No Wi-Fi, no TCP, no RX.",
             ],
             [
-                "null Ethernet driver",
-                "Test driver that counts each frame and frees it. Gives the stack's own cost "
-                "with a free driver.",
+                "Goodput",
+                "Payload delivered per second, after all headers, ACKs and retries. Every Mbps "
+                "in this deck is goodput.",
             ],
             [
                 "nRF54H20DK / nRF7120 PDK",
@@ -533,6 +533,11 @@ def build(src, out):
                 "CPU clock / packets per second. Takes the clock out of the comparison.",
             ],
             [
+                "MHz per Mbps",
+                "CPU clock needed per Mbps of goodput, lower is better. The old rule of thumb "
+                "is 2 (UDP TX, SW checksum, code in MRAM).",
+            ],
+            [
                 "TSO / USO, GRO",
                 "Segmentation offload: the stack hands down one large chunk and HW/FW cuts it "
                 "into packets. GRO: the RX side merges packets before the stack.",
@@ -544,7 +549,7 @@ def build(src, out):
         ],
         [2.0, 6.66],
         size=8,
-        row_h=0.28,
+        row_h=0.255,
     )
 
     # 4. How we got there
@@ -837,10 +842,16 @@ def build(src, out):
                 "RX is not measured at all",
                 "RX on the null driver with injected frames (E7)",
             ],
+            [
+                "Host interface is free",
+                "Companion config: socket data from the customer host over SPI/SDIO/USB also "
+                "costs the CM33",
+                "Not in the ~250 yet; measure with the host transport in the loop",
+            ],
         ],
         [2.6, 3.1, 2.96],
         size=8,
-        row_h=0.42,
+        row_h=0.38,
     )
     shp = s.shapes[-1]
     shp.table.rows[0].height = Inches(0.26)
@@ -849,7 +860,7 @@ def build(src, out):
     s = sub_slide(
         prs,
         "Getting past ~250 Mbps TCP",
-        "None of these is measured; the gains are planning numbers",
+        "The CM33 runs only TCP/IP, the app has its own core. Not measured",
     )
     table(
         s,
@@ -865,16 +876,17 @@ def build(src, out):
                 "Not in Zephyr. Needs segmentation in Wi-Fi FW/HW, cost unknown (E8)",
             ],
             [
-                "Stack on its own core",
-                "Host sends socket calls over IPC to a network core",
-                "Host CPU freed for the app",
-                "The network core needs the same CPU as above, plus IPC per call",
+                "Second CM33 for the driver",
+                "TCP/IP core keeps only the stack; Wi-Fi driver, RPU IPC and host transport "
+                "move to another core",
+                "~280-290 TCP, minus a handoff per packet between the cores",
+                "More cores do not split one TCP stream: Zephyr has no SMP on Cortex-M",
             ],
             [
-                "Faster core",
-                "Same stack, higher clock or a wider core",
-                "400 UDP stack-only needs ~330-380 MHz with all code in TCM",
-                "256-320 MHz cap from the cell library choice",
+                "Wider core at 320 MHz",
+                "Same stack on e.g. Cortex-M85",
+                "M85 is ~1.5x M33 on CoreMark per MHz; network code likely ~1.3x",
+                "Unmeasured. Clock stays capped at 256-320 MHz by the cell library",
             ],
         ],
         [1.6, 2.6, 2.4, 2.06],
@@ -1043,7 +1055,7 @@ def build(src, out):
         p.space_after = Pt(4)
     notes(
         s,
-        "Cycles per packet = CPU Hz / packets per second. Mbps/MHz = Mbps / measured CPU MHz. "
+        "Cycles per packet = CPU Hz / packets per second. MHz/Mbps = measured CPU MHz / Mbps. "
         "Mbps is the zperf client send rate in both setups.\n\n"
         "Loopback vs Ethernet L2: both are TX-only and send to 192.0.2.2 (run.py --dest). "
         "Loopback (CONFIG_NET_LOOPBACK) uses the dummy L2, so no Ethernet header or ARP. "
@@ -1445,7 +1457,7 @@ def build(src, out):
             0.5,
             1.65,
             9.0,
-            [["Platform", "CPU @ MHz", "Stack", "Result", "Mbps/MHz", "What makes it work"]]
+            [["Platform", "CPU @ MHz", "Stack", "Result", "MHz/Mbps", "What makes it work"]]
             + TASK3_ROWS,
             [1.6, 1.3, 1.15, 1.85, 0.75, 2.35],
             size=7,
@@ -1476,7 +1488,7 @@ def build(src, out):
                 "Core @ MHz",
                 "Link / driver",
                 "Result (Mbps)",
-                "Mbps/MHz",
+                "MHz/Mbps",
                 "What helped",
                 "Source",
             ]
