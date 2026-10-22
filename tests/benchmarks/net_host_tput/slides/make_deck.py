@@ -2074,16 +2074,59 @@ def build_prb(src, out):
         "Wi-Fi throughput on one 320 MHz processor",
         "CAL-7627: best TCP throughput on a 320 MHz nRF71 derivative, 80 MHz radio channel",
     )
-    card(s, 0.67, 1.6, 3.55, 2.9)
-    text_box(s, 0.82, 1.75, 3.3, 0.55, "About 250 Mbps TCP", size=22, color=NAVY, bold=True)
-    text_box(s, 0.82, 2.28, 3.3, 0.3, "at best, range 200-265", size=12, color=NAVY)
-    text_box(s, 0.82, 2.75, 3.3, 0.4, "About 330 Mbps UDP", size=16, color=BLUE, bold=True)
+    from pptx.enum.shapes import MSO_SHAPE
+
+    boxes = (
+        (
+            0.67,
+            "Today: nRF7120",
+            GREY,
+            "About 30 Mbps TCP",
+            DARK,
+            "About 55 Mbps UDP",
+            DARK,
+            "256 MHz, 20 MHz channel",
+        ),
+        (
+            3.92,
+            "320 MHz derivative",
+            NAVY,
+            "About 250 Mbps TCP",
+            NAVY,
+            "About 330 Mbps UDP",
+            BLUE,
+            "80 MHz channel, with what it takes",
+        ),
+    )
+    for x, head, head_col, tcp, tcp_col, udp, udp_col, foot in boxes:
+        card(s, x, 1.6, 2.75, 2.3)
+        text_box(s, x + 0.13, 1.68, 2.5, 0.3, head, size=12, color=head_col, bold=True)
+        text_box(s, x + 0.13, 2.05, 2.5, 0.42, tcp, size=16, color=tcp_col, bold=True)
+        text_box(s, x + 0.13, 2.85, 2.5, 0.4, udp, size=13, color=udp_col, bold=True)
+        text_box(s, x + 0.13, 3.4, 2.5, 0.4, foot, size=10, color=GREY)
+    text_box(s, 4.05, 2.47, 2.5, 0.3, "at best, range 200-265", size=10, color=NAVY)
+
+    arrow = s.shapes.add_shape(
+        MSO_SHAPE.RIGHT_ARROW, Inches(3.5), Inches(2.5), Inches(0.36), Inches(0.42)
+    )
+    arrow.fill.solid()
+    arrow.fill.fore_color.rgb = BLUE
+    arrow.line.fill.background()
+
     text_box(
-        s, 0.82, 3.45, 3.3, 0.8, "Limited by the processor, not the radio.", size=12, color=DARK
+        s,
+        0.67,
+        4.05,
+        6.0,
+        0.35,
+        "Limited by the processor, not the radio.",
+        size=12,
+        color=DARK,
+        bold=True,
     )
 
-    text_box(s, 4.5, 1.55, 4.85, 0.35, "What it takes", size=14, color=NAVY, bold=True)
-    tb = s.shapes.add_textbox(Inches(4.5), Inches(1.95), Inches(4.85), Inches(1.8))
+    text_box(s, 6.88, 1.55, 2.5, 0.35, "What it takes", size=14, color=NAVY, bold=True)
+    tb = s.shapes.add_textbox(Inches(6.88), Inches(1.95), Inches(2.5), Inches(2.0))
     fill_bullets(
         tb.text_frame,
         [
@@ -2092,19 +2135,19 @@ def build_prb(src, out):
             "Larger TCP window in Zephyr",
             "Trim software overhead",
         ],
-        size=13,
+        size=11,
         bullets=True,
     )
     for p in tb.text_frame.paragraphs:
-        p.space_after = Pt(6)
+        p.space_after = Pt(5)
     text_box(
         s,
-        4.5,
-        3.75,
-        4.85,
-        0.5,
+        6.8,
+        3.95,
+        2.6,
+        0.55,
         "More than 250 needs a new architecture.",
-        size=12,
+        size=11,
         color=NAVY,
         bold=True,
     )
