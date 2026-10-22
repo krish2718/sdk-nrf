@@ -35,8 +35,8 @@ WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 THEME_FONT = "+mn-lt"
 MEAS = "TO MEASURE"
 LLM_FOOTNOTE = (
-    "Published data collected with an LLM (Cursor, Claude Opus 5.5 medium) from vendor pages, "
-    "Zephyr PRs and issues; spot-check the sources before quoting."
+    "Collected with an LLM (Cursor, Claude Opus 5.5 medium), not verified. Only used for: no "
+    "Zephyr host shows TCP above ~230 Mbps, and Zephyr TCP is ~0.5-0.6x UDP elsewhere."
 )
 
 ZEPHYR_ROWS = [
@@ -166,12 +166,12 @@ TASK3_ROWS = [
         "GSO/GRO, big windows, 5 streams",
     ],
     [
-        "SiWG917, 20 MHz",
-        "network CPU",
-        "TCP/IP offloaded",
+        "SiWG917",
+        "own network CPU",
+        "TCP/IP on the Wi-Fi chip",
         "UDP 66, TCP 56",
         "-",
-        "the one offload part found",
+        "20 MHz channel, air-limited",
     ],
 ]
 TASK3_NOTES = [
@@ -377,6 +377,15 @@ def notes(slide, text):
     slide.notes_slide.notes_text_frame.text = text
 
 
+def sub_slide(prs, title, sub):
+    s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
+    set_title(s, title, sub)
+    add_slide_number(s)
+    ph = body_ph(s, 10)
+    ph._element.getparent().remove(ph._element)
+    return s
+
+
 def build(src, out):
     prs = Presentation(src)
     drop_slides_after_first(prs)
@@ -384,122 +393,564 @@ def build(src, out):
     # 1. Title
     s = prs.slides[0]
     s.shapes.title.text = "TCP/IP throughput on CM33"
-    body_ph(
-        s, 1
-    ).text = "CAL-7627 first cut: what the Zephyr stack does today, and what 400 Mbps needs"
+    body_ph(s, 1).text = "CAL-7627: best TCP/IP throughput on a CM33 host, and what it takes"
     body_ph(s, 10).text = "Chaitanya Tata\nOctober 2026"
 
-    # 2. Bottom line
-    s = prs.slides.add_slide(layout(prs, "13_full content"))
-    set_title(s, "Bottom line")
-    add_slide_number(s)
-    scope_tag(s)
-    body_ph(s, 13)._element.getparent().remove(body_ph(s, 13)._element)
-    stat(
-        s,
-        0.67,
-        1.3,
-        2.75,
-        "258 / 230 Mbps",
-        "Best UDP TX, stack only, bench config\nnRF54H20 @ 320 / nRF7120 @ 256",
-        BLUE,
+    # 2. Answer
+    s = sub_slide(
+        prs,
+        "Answer: ~250 Mbps TCP",
+        "Question: best TCP/IP throughput on a 320 MHz Aludra derivative with an 80 MHz MAC/PHY",
     )
-    stat(
+    card(s, 0.67, 1.6, 3.4, 3.3)
+    text_box(s, 0.82, 1.7, 3.1, 0.6, "~250 Mbps TCP", size=28, color=NAVY, bold=True)
+    text_box(s, 0.82, 2.3, 3.1, 0.45, "~330 Mbps UDP", size=20, color=BLUE, bold=True)
+    text_box(
         s,
-        3.62,
-        1.3,
-        2.75,
-        "> 400 Mbps",
-        "CAL-7627 UDP target\n(TCP > 350, 80 MHz MCS9, 480 PHY)",
-        RED,
+        0.82,
+        2.85,
+        3.1,
+        2.0,
+        [
+            "Best case, with every step on the right done.",
+            "The CPU is the limit, not the air: 80 MHz HE MCS9 (480 Mbps PHY) carries "
+            "~330-350 Mbps TCP.",
+            "If the TX thread has to stay: ~220 TCP.",
+            "CAL-7627 targets (TCP > 350, UDP > 400) are out of reach with the stack on the "
+            "host CPU alone.",
+        ],
+        size=10,
     )
-    stat(
-        s,
-        6.57,
-        1.3,
-        2.76,
-        "1.55x / 1.74x",
-        "short of 400, stack only, bench config\nnRF54H20 @ 320 / nRF7120 @ 256",
-        NAVY,
-    )
-    tb = s.shapes.add_textbox(Inches(0.67), Inches(2.65), Inches(8.66), Inches(2.4))
+    text_box(s, 4.35, 1.55, 5.0, 0.35, "What it takes", size=14, color=NAVY, bold=True)
+    tb = s.shapes.add_textbox(Inches(4.35), Inches(1.95), Inches(5.0), Inches(2.9))
     fill_bullets(
         tb.text_frame,
         [
+            [("Checksum offload in the RPU, TX and RX. ", True), ("TX in place, +19%.", False)],
             [
-                ("Task 1: NO-GO on both boards. ", True),
-                (
-                    "With nothing below the stack, nRF54H20DK does 258 Mbps at 320 MHz and the "
-                    "nRF7120 PDK 230 at 256. A lean config (no TX thread, no net stats/log; "
-                    "not default, see backup) gives 267 / 281, still 1.50x / 1.43x short. "
-                    "Driver, IPC and FW add on top. UDP TX measured, TCP inferred.",
-                    False,
-                ),
+                ("Whole net stack and Wi-Fi data path in single-cycle TCM. ", True),
+                ("128 KB measured for the stack, budget 192 KB.", False),
             ],
             [
-                ("Checksum offload pays on both. ", True),
-                (
-                    "+19% with the hot path in local RAM on both boards, +15-18% from MRAM. "
-                    "At 1472 B the stack costs 0.9-2.4 MHz per Mbps depending on build.",
-                    False,
-                ),
+                ("TCP window scaling in Zephyr. ", True),
+                ("Without it TCP stops at ~260 Mbps (2 ms RTT) whatever the CPU.", False),
             ],
+            [("~190 KB of packet buffers ", True), ("in normal RAM for the TCP window.", False)],
+            [("Zero-copy TX in the nRF71 driver. ", True), ("~10% back.", False)],
             [
-                ("Single-cycle local RAM is the biggest lever. ", True),
-                (
-                    "With offload, part of the UDP TX path in 54H TCM is +61% over MRAM, in 7120 "
-                    "RAM01 +45%. 7120 RAM02/03 are 2-cycle: same code there gives only +10%.",
-                    False,
-                ),
-            ],
-            [
-                ("Per-packet cost is the wall. ", True),
-                (
-                    "Best case 14.1k (54H) / 10.7k (7120) cycles per 1472 B packet in the lean "
-                    "build, ~90% fixed per packet. 400 Mbps needs far fewer packets through the "
-                    "stack (USO/TSO, GRO) or TCP/IP off the host.",
-                    False,
-                ),
+                ("Lean config: ", True),
+                ("net stats and logging off, TX thread off (needs a real-driver test).", False),
             ],
         ],
-        size=11,
+        size=10,
         bullets=True,
     )
     for p in tb.text_frame.paragraphs:
-        p.space_after = Pt(5)
+        p.space_after = Pt(4)
+    text_box(
+        s,
+        4.35,
+        4.45,
+        5.0,
+        0.5,
+        "Past ~250 TCP needs fewer packets through the stack (TSO/GRO) or the stack on its "
+        "own core.",
+        size=10,
+        color=NAVY,
+        bold=True,
+    )
+    text_box(
+        s,
+        0.67,
+        5.0,
+        8.66,
+        0.25,
+        "UDP TX is measured. TCP, the Wi-Fi driver cost and 320 MHz are estimated from it, "
+        "see slide 4. Terms on slide 3.",
+        size=8,
+        color=GREY,
+        italic=True,
+    )
     notes(
         s,
-        "All numbers are UDP TX only, zperf, Zephyr stack, measured on each board's app core. "
-        "Mbps is UDP payload goodput (1472 B payload per packet, no L2/L3 headers); the 400 Mbps "
-        "target is taken on the same basis. 54H at its 320 MHz DVFS point, nRF7120 at its fixed "
-        "256 MHz. TCP and RX are not measured yet. TCP > 350 is inferred from UDP TX being the "
-        "cheaper path: TCP adds ACK RX, timers and retransmit state on top.\n\n"
-        "Every A/B percentage compares builds run in the same session. The 258 headline is the "
-        "original 54H sweep; 54H TCM vs MRAM uses the same-day rebuild (255.9 vs 159.2, +61%; "
-        "+62% against 257.7). All 7120 numbers come from one session (results/ramblk_*.csv): "
-        "MRAM, hot path in RAM02/03, RAM01 and RAM00, same code layout in the three RAM builds. "
-        "RAM02/03 are 2-cycle for the CM33, RAM00/01 single-cycle (per the SoC architect); code "
-        "in SRAM is not cached. The older 177 Mbps 7120 headline used RAM02/03.\n\n"
-        "Bench config = zperf sample defaults: NET_TC_TX_COUNT=1 (TX thread), net stats and net "
-        "logging on. Lean config (overlay-ablate.conf) on the 7120, offload + RAM01: 230.4 to "
-        "280.7 (+22%, 13,091 to 10,743 cycles/pkt). On the 54H, "
-        "offload + TCM, against a same-day rebuild of the bench "
-        "config (255.9): TX thread off 265.7 (+3.8%), lean 267.2 (+4.4%, 14,080 cycles/pkt). "
-        "With code in MRAM lean helps much more, 159.2 to 202.1 (+27%): less code, fewer "
-        "misses. The 258 headline is the original run; the rebuild came in 0.7% lower, inside "
-        "the ~1% layout error bar.\n\n"
-        "Offload gain on 54H: 216.3 to 257.7 in TCM (+19%), 135.4 to 159.2 in MRAM (+18%). On "
-        "7120: 194.2 to 230.4 in RAM01 (+19%), 139.0 to 159.3 in MRAM (+15%).\n\n"
-        "MHz per Mbps at 1472 B: 54H 1.20 (lean, offload, TCM) to 2.36 (SW csum, MRAM); 7120 "
-        "0.91 (lean, RAM01) to 1.84 (SW csum, MRAM). The earlier 1.8-1.9 rule only held for "
-        "one pairing.",
+        "One number: ~250 Mbps TCP, ~330 UDP, on a 320 MHz CM33 with every item on the list. "
+        "The chain behind it is on slide 4: measured 10,743 cycles per 1472 B UDP packet on the "
+        "nRF7120 PDK (offload, hot path in single-cycle RAM, lean), scaled to 320 MHz, whole "
+        "stack in TCM, x0.85 for driver/IPC/FW, x~0.75 for TCP.\n\n"
+        "If the TX thread has to stay, take ~10% off: ~220 TCP.\n\n"
+        "Air: HE MCS9, 1 spatial stream, 80 MHz, 0.8 us GI is a 480 Mbps PHY; TCP goodput is "
+        "typically ~70% of PHY rate, so ~330-350.",
+    )
+
+    # 3. Terms
+    s = sub_slide(prs, "Terms used in this deck", "Every number in the deck uses these")
+    table(
+        s,
+        0.67,
+        1.55,
+        8.66,
+        [
+            ["Term", "Meaning here"],
+            [
+                "UDP TX, stack only",
+                "What we measured: zperf UDP send, 1472 B payload, through the Zephyr stack into "
+                "a driver that frees the packet. No Wi-Fi, no TCP, no RX.",
+            ],
+            [
+                "null Ethernet driver",
+                "Test driver that counts each frame and frees it. Gives the stack's own cost "
+                "with a free driver.",
+            ],
+            [
+                "nRF54H20DK / nRF7120 PDK",
+                "The two CM33 boards. 54H: 320 MHz, 32 KB TCM. 7120: 256 MHz, no TCM, four SRAM "
+                "blocks (RAM00/01 single-cycle, RAM02/03 2-cycle).",
+            ],
+            [
+                "MRAM + I-cache",
+                "Default: code runs from MRAM through an 8 KB (7120) or 16 KB (54H) I-cache. "
+                "Each miss costs ~11 cycles on the 7120.",
+            ],
+            [
+                "TCM, local RAM",
+                "Single-cycle RAM next to the core. Local RAM = TCM on the 54H, RAM01 on the 7120.",
+            ],
+            [
+                "Hot path / whole stack",
+                "Hot path: only the UDP TX files moved to local RAM (32 KB). Whole stack: all "
+                "of the net stack (128 KB).",
+            ],
+            [
+                "Checksum offload",
+                "The Wi-Fi chip (RPU) computes the IP/UDP/TCP checksum, not the host CPU.",
+            ],
+            [
+                "Lean config",
+                "Net statistics, net logging and the TX thread off. Not the shipping default.",
+            ],
+            [
+                "Cycles per packet",
+                "CPU clock / packets per second. Takes the clock out of the comparison.",
+            ],
+            [
+                "TSO / USO, GRO",
+                "Segmentation offload: the stack hands down one large chunk and HW/FW cuts it "
+                "into packets. GRO: the RX side merges packets before the stack.",
+            ],
+            [
+                "TCP window scaling",
+                "TCP option that allows windows above 64 KB. Zephyr parses it but ignores it.",
+            ],
+        ],
+        [2.0, 6.66],
+        size=8,
+        row_h=0.28,
+    )
+
+    # 4. How we got there
+    s = sub_slide(
+        prs,
+        "How we got to ~250 Mbps TCP",
+        "From the best measured UDP number to TCP on a 320 MHz part, one step at a time",
+    )
+    steps = [
+        ("Measured\n7120 @ 256", 230, NAVY),
+        ("+ lean\nconfig", 281, NAVY),
+        ("at\n320 MHz", 351, BLUE),
+        ("+ whole\nstack in TCM", 385, GREY),
+        ("x0.85\nWi-Fi driver", 327, GREY),
+        ("x0.75\nTCP", 245, RED),
+    ]
+    cd = CategoryChartData()
+    cd.categories = [x[0] for x in steps]
+    cd.add_series("Mbps", [x[1] for x in steps])
+    gf = s.shapes.add_chart(
+        XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(0.4), Inches(1.5), Inches(4.6), Inches(3.4), cd
+    )
+    ch = gf.chart
+    style_chart(ch, size=8)
+    ch.has_legend = False
+    plot = ch.plots[0]
+    plot.gap_width = 40
+    plot.has_data_labels = True
+    plot.data_labels.font.size = Pt(10)
+    plot.data_labels.font.bold = True
+    plot.data_labels.number_format = "0"
+    plot.data_labels.number_format_is_linked = False
+    plot.data_labels.position = XL_LABEL_POSITION.OUTSIDE_END
+    for i, (_, _, col) in enumerate(steps):
+        pt = plot.series[0].points[i]
+        pt.format.fill.solid()
+        pt.format.fill.fore_color.rgb = col
+    ch.value_axis.visible = False
+    ch.value_axis.has_major_gridlines = False
+    ch.value_axis.minimum_scale = 0
+    ch.value_axis.maximum_scale = 440
+    ch.category_axis.tick_labels.font.size = Pt(8)
+    text_box(
+        s,
+        0.5,
+        4.9,
+        4.5,
+        0.3,
+        "Navy: measured. Blue: clock-scaled. Grey and red: estimated. Slide 2 rounds to "
+        "~330 / ~250.",
+        size=8,
+        color=GREY,
+        italic=True,
+    )
+    table(
+        s,
+        5.15,
+        1.55,
+        4.2,
+        [
+            ["Step", "Mbps", "Basis"],
+            [
+                "Measured",
+                "230",
+                "7120 PDK at 256 MHz, checksum offload, hot path in RAM01: 13,091 cycles/pkt",
+            ],
+            ["+ lean config", "281", "Measured, same board: 10,743 cycles/pkt"],
+            ["at 320 MHz", "351", "Same cycles/pkt at 320 MHz"],
+            [
+                "+ whole stack in TCM",
+                "385",
+                "Whole stack vs hot path in RAM01: -9% cycles (measured on loopback)",
+            ],
+            [
+                "x0.85 Wi-Fi driver",
+                "327",
+                "Driver, IPC and FW on the host. FPGA keeps 85% (CAL-6689). UDP answer",
+            ],
+            [
+                "x0.75 TCP",
+                "245",
+                "ACK RX and TCP state per segment. Not measured; range 0.6-0.8 gives 200-265",
+            ],
+        ],
+        [1.2, 0.5, 2.5],
+        size=7,
+        row_h=0.46,
+    )
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.26)
+    notes(
+        s,
+        "Step 3 assumes cycles per packet stay flat with clock. That holds once the code runs "
+        "from TCM; from MRAM it does not (54H MRAM build: 17.7k cycles at 128 MHz, 23.6k at "
+        "320), which is one more reason the whole stack has to be in TCM.\n\n"
+        "Step 4: on the 7120, loopback with the whole net stack in RAM01 is 11,720 cycles vs "
+        "12,851 with the hot path only. 10,743 x 0.912 = ~9.8k cycles, 385 Mbps at 320 MHz. "
+        "Independent check: the lean build with its remaining 97 I-cache misses free is ~9.7k.\n\n"
+        "Step 5: 0.85 is the FPGA ratio with the real driver path (CAL-6689). On the PDK we only "
+        "have air-limited runs (0.36-0.45 of loopback, WZN-10644), which say nothing about CPU "
+        "cost. E12 measures it.\n\n"
+        "Step 6: other Zephyr hosts show TCP at 0.5-0.6x UDP, but those are capped by the 64 KB "
+        "window. With window scaling I'd expect 0.7-0.8x. This is the weakest step; a day on "
+        "the PDK with TCP on the null driver replaces it with a number.",
+    )
+
+    # 5. What each step is worth
+    s = sub_slide(
+        prs,
+        "What each optimisation is worth",
+        "Measured, UDP TX, 1472 B, same build compared on the same board",
+    )
+    table(
+        s,
+        0.67,
+        1.55,
+        8.66,
+        [
+            ["Optimisation", "Gain", "Measured on", "Note"],
+            [
+                "Hot path in single-cycle local RAM",
+                "+45% / +61%",
+                "7120 RAM01 / 54H TCM, vs MRAM",
+                "Biggest lever. Code from MRAM spends ~44% of each packet on I-cache misses",
+            ],
+            [
+                "Checksum offload",
+                "+19%",
+                "Both boards, hot path in local RAM",
+                "+15-18% with code in MRAM. TX in the RPU today, RX to confirm",
+            ],
+            [
+                "Lean config",
+                "+22% / +4%",
+                "7120 / 54H",
+                "TX thread is ~60% of it on the 7120; needs a real-driver test",
+            ],
+            [
+                "Whole stack instead of hot path",
+                "+10%",
+                "7120 RAM01, loopback",
+                "54H only in slow general RAM: its 32 KB TCM is too small for 128 KB",
+            ],
+            [
+                "Zero-copy TX in the driver",
+                "+9-11%",
+                "memcpy cost on both boards",
+                "The copy cost is measured; zero-copy itself is not yet",
+            ],
+            [
+                "RAM that is 2-cycle, not 1",
+                "+10% only",
+                "7120 RAM02/03 vs MRAM",
+                "Same code as the RAM01 build. TCM has to be single-cycle",
+            ],
+        ],
+        [2.2, 1.0, 2.1, 3.36],
+        size=8,
+        row_h=0.4,
+    )
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.26)
+    text_box(
+        s,
+        0.67,
+        4.45,
+        8.66,
+        0.6,
+        "Even with all of these, 87-91% of the cost is per packet, not per byte. That is why "
+        "the next big step is fewer packets (TSO/GRO), not faster copies.",
+        size=10,
+        color=NAVY,
+        bold=True,
+    )
+
+    # 6. Sizing
+    s = sub_slide(
+        prs,
+        "How much TCM and RAM",
+        "Measured code sizes from the nRF7120 builds; buffer sizes from the TCP window",
+    )
+    text_box(s, 0.67, 1.5, 4.2, 0.35, "TCM (code)", size=14, color=NAVY, bold=True)
+    table(
+        s,
+        0.67,
+        1.9,
+        4.2,
+        [
+            ["What", "Size"],
+            ["UDP TX hot path", "32 KB, measured"],
+            ["Whole net stack: IPv4, IPv6, UDP, TCP, sockets, net_buf", "128 KB, measured"],
+            ["+ Wi-Fi driver data path, kernel hot functions", "~64 KB, estimate"],
+            ["Budget", "192 KB"],
+        ],
+        [2.9, 1.3],
+        size=8,
+        row_h=0.36,
+        bold_rows=(4,),
+    )
+    text_box(
+        s,
+        0.67,
+        3.8,
+        4.2,
+        1.2,
+        [
+            "Has to be single-cycle: the same code in 2-cycle RAM gave +10% instead of +45%.",
+            "Keep code out of the RAM the Wi-Fi DMA writes into.",
+        ],
+        size=9,
+    )
+    text_box(s, 5.15, 1.5, 4.2, 0.35, "Normal RAM (packet buffers)", size=14, color=NAVY, bold=True)
+    table(
+        s,
+        5.15,
+        1.9,
+        4.2,
+        [
+            ["TCP window for 300 Mbps", "Buffers"],
+            ["2 ms RTT", "~75 KB"],
+            ["5 ms RTT", "~190 KB"],
+            ["10 ms RTT", "~375 KB"],
+        ],
+        [2.9, 1.3],
+        size=8,
+        row_h=0.36,
+    )
+    text_box(
+        s,
+        5.15,
+        3.45,
+        4.2,
+        1.5,
+        [
+            "Window = throughput x round-trip time. Above 64 KB needs TCP window scaling.",
+            "Plus Wi-Fi RX reorder buffering (64-frame block-ack window: ~99 KB).",
+            "Model only; task 2 measures it (backup).",
+        ],
+        size=9,
+    )
+    notes(
+        s,
+        "Code sizes: SRAMCODE usage in build_pdk_eth_off_hot_ram01 (32,160 B, hot path) and "
+        "build_pdk_reloc1500_ram01 (131,160 B, whole net stack: subsys/net/ip, subsys/net, "
+        "drivers/net, net_buf, zperf). The Wi-Fi driver and kernel parts were not relocated in "
+        "any build, so the 64 KB for them is an allowance, not a measurement.\n\n"
+        "Buffers: 300 Mbps x RTT / 8. RX reorder: 64 x 1.5 KB plus headroom.",
+    )
+
+    # 7. Risks
+    s = sub_slide(
+        prs,
+        "What is not measured yet",
+        "The assumptions behind ~250 Mbps, and how to firm each one up",
+    )
+    table(
+        s,
+        0.67,
+        1.55,
+        8.66,
+        [
+            ["Assumption", "If it is wrong", "How to check"],
+            [
+                "TCP costs 0.75x UDP per packet",
+                "0.6-0.8 gives 200-265 Mbps TCP",
+                "TCP on the null driver on the PDK (E6), about a day",
+            ],
+            [
+                "Wi-Fi driver, IPC and FW keep 85% (FPGA)",
+                "PDK data so far is air-limited, so this is untested on silicon",
+                "CPU-bound Wi-Fi run on the PDK (E12)",
+            ],
+            [
+                "TX thread can go (part of lean)",
+                "If it stays: ~220 Mbps TCP",
+                "Real nRF71 driver with no TX thread, UDP and TCP, look for stalls",
+            ],
+            [
+                "TCP window scaling gets done",
+                "Without it TCP stops at ~260 Mbps at 2 ms RTT, ~105 at 5 ms",
+                "Zephyr change, upstream",
+            ],
+            [
+                "Cycles per packet stay flat from 256 to 320 MHz",
+                "54H hot-path TCM build grew 15% from 128 to 320 MHz (rest in MRAM)",
+                "Needs the whole stack in TCM; no board with enough TCM at 320 MHz",
+            ],
+            [
+                "RX costs no more than TX",
+                "RX is not measured at all",
+                "RX on the null driver with injected frames (E7)",
+            ],
+        ],
+        [2.6, 3.1, 2.96],
+        size=8,
+        row_h=0.42,
+    )
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.26)
+
+    # 8. Beyond 250
+    s = sub_slide(
+        prs,
+        "Getting past ~250 Mbps TCP",
+        "None of these is measured; the gains are planning numbers",
+    )
+    table(
+        s,
+        0.67,
+        1.55,
+        8.66,
+        [
+            ["Option", "What changes", "Expected", "Cost / risk"],
+            [
+                "TSO/USO + GRO",
+                "Stack runs once per up to 64 KB instead of once per packet",
+                "Linux sees 1.8-2.4x; at 2x, 350 TCP looks reachable at 320 MHz",
+                "Not in Zephyr. Needs segmentation in Wi-Fi FW/HW, cost unknown (E8)",
+            ],
+            [
+                "Stack on its own core",
+                "Host sends socket calls over IPC to a network core",
+                "Host CPU freed for the app",
+                "The network core needs the same CPU as above, plus IPC per call",
+            ],
+            [
+                "Faster core",
+                "Same stack, higher clock or a wider core",
+                "400 UDP stack-only needs ~330-380 MHz with all code in TCM",
+                "256-320 MHz cap from the cell library choice",
+            ],
+        ],
+        [1.6, 2.6, 2.4, 2.06],
+        size=8,
+        row_h=0.55,
+    )
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.26)
+    text_box(
+        s,
+        0.67,
+        3.85,
+        8.66,
+        0.8,
+        "TSO/GRO is the only option that cuts the per-packet cost itself. It needs work in "
+        "both Zephyr and the Wi-Fi datapath.",
+        size=10,
+        color=NAVY,
+        bold=True,
+    )
+
+    # 9. Next steps
+    s = sub_slide(prs, "Next steps", "In order; the first three firm up the ~250 Mbps number")
+    tb = s.shapes.add_textbox(Inches(0.67), Inches(1.6), Inches(8.66), Inches(3.4))
+    fill_bullets(
+        tb.text_frame,
+        [
+            [("TCP on the null driver ", True), ("(E6): replaces the 0.75 guess.", False)],
+            [
+                ("CPU-bound Wi-Fi run on the PDK ", True),
+                ("(E12): replaces the 0.85 driver factor from FPGA.", False),
+            ],
+            [
+                ("Real nRF71 driver with no TX thread, ", True),
+                ("UDP and TCP: decides whether lean can ship.", False),
+            ],
+            [("Zero-copy TX A/B on nRF71: ", True), ("confirms the ~10%.", False)],
+            [("RX cost on the null driver ", True), ("(E7).", False)],
+            [
+                ("Zephyr: ", True),
+                ("TCP window scaling, then a TSO/GRO prototype on the null driver (E8).", False),
+            ],
+            [
+                ("Decision: ", True),
+                ("which SoC items (TCM size, checksum RX, TSO/GRO) go into the chip spec.", False),
+            ],
+        ],
+        size=12,
+        bullets=True,
+    )
+    for p in tb.text_frame.paragraphs:
+        p.space_after = Pt(6)
+
+    # Backup divider
+    s = prs.slides.add_slide(layout(prs, "13_full content"))
+    set_title(s, "Backup")
+    add_slide_number(s)
+    fill_bullets(
+        body_ph(s, 13).text_frame,
+        [
+            "Test setup and measured results",
+            "Where the cycles go",
+            "Network buffers (task 2)",
+            "Published numbers from other platforms (task 3)",
+            "SoC options and Zephyr gaps",
+            "Why lean is not the default",
+            "Reproduce, all runs, related Jiras",
+        ],
+        size=14,
     )
 
     # 3. How we measured
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "How we measured",
+        "Backup: test setup",
         "Same Zephyr stack on two CM33 app cores, Wi-Fi replaced by a null driver",
     )
     add_slide_number(s)
@@ -545,8 +996,9 @@ def build(src, out):
             [
                 ("Loopback TX-only: ", True),
                 (
-                    "zperf UDP to the peer address, dummy L2. The driver drops every packet at "
-                    "send() (zperf sample, drop ratio 1), so no RX. Checksum always in SW.",
+                    "used only for the whole-stack placement runs. Every packet is dropped "
+                    "at send(), so no RX. The loopback driver cannot claim checksum offload, "
+                    "so the stack always computes it; offload numbers use the null driver.",
                     False,
                 ),
             ],
@@ -636,24 +1088,25 @@ def build(src, out):
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "Results: UDP TX, 1472 B",
-        "Bench config, each board at its own clock. All rows TX-only, loopback drops at send()",
+        "Backup: measured results",
+        "UDP TX, 1472 B, null Ethernet driver, each board at its own clock, bench config",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
     ph._element.getparent().remove(ph._element)
-    cd = CategoryChartData()
-    cd.categories = [
-        "Loopback, MRAM",
-        "Loopback, stack in RAM",
-        "Loopback, hot path local",
-        "Ethernet L2, local, SW csum",
-        "Ethernet L2, local, offload",
+    res_rows = [
+        ("Code in MRAM, SW checksum", 135.4, 139.0, "27,764", "21,682"),
+        ("Code in MRAM, offload", 159.2, 159.3, "23,620", "18,928"),
+        ("Hot path in local RAM, SW checksum", 216.3, 194.2, "17,400", "15,526"),
+        ("Hot path in local RAM, offload", 257.7, 230.4, "14,592", "13,091"),
+        ("Hot path in local RAM, offload, lean", 267.2, 280.7, "14,080", "10,743"),
     ]
-    cd.add_series("nRF54H20DK @ 320 MHz", (168.8, 144.3, 249.7, 216.3, 257.7))
-    cd.add_series("nRF7120 PDK @ 256 MHz", (171.7, 257.2, 234.6, 194.2, 230.4))
+    cd = CategoryChartData()
+    cd.categories = [r[0] for r in res_rows]
+    cd.add_series("nRF54H20DK @ 320 MHz", [r[1] for r in res_rows])
+    cd.add_series("nRF7120 PDK @ 256 MHz", [r[2] for r in res_rows])
     gf = s.shapes.add_chart(
-        XL_CHART_TYPE.BAR_CLUSTERED, Inches(0.4), Inches(1.6), Inches(5.0), Inches(3.6), cd
+        XL_CHART_TYPE.BAR_CLUSTERED, Inches(0.4), Inches(1.55), Inches(5.0), Inches(3.3), cd
     )
     ch = gf.chart
     style_chart(ch, size=8)
@@ -676,131 +1129,55 @@ def build(src, out):
     ch.value_axis.visible = False
     ch.value_axis.has_major_gridlines = False
     ch.value_axis.minimum_scale = 0
-    ch.value_axis.maximum_scale = 300
+    ch.value_axis.maximum_scale = 320
     ch.category_axis.tick_labels.font.size = Pt(8)
     ch.category_axis.reverse_order = True
     ch.category_axis.format.line.fill.background()
+    text_box(s, 5.6, 1.55, 3.73, 0.3, "Cycles per packet (lower is better)", size=9, bold=True)
     table(
         s,
         5.6,
-        1.65,
+        1.85,
         3.73,
-        [
-            ["Cycles/pkt (MHz/Mbps)", "54H @128", "54H @320", "7120 @256"],
-            ["Loopback, MRAM", "17,202 (1.46)", "22,284 (1.89)", "17,556 (1.49)"],
-            ["Loopback, stack in RAM", "20,262 (1.72)", "26,055 (2.21)", "11,720 (1.00)"],
-            ["Loopback, hot path local", "13,196 (1.12)", "15,052 (1.28)", "12,851 (1.09)"],
-            ["Eth, local, SW csum", "15,391 (1.31)", "17,400 (1.48)", "15,526 (1.32)"],
-            ["Eth, local, offload", "12,672 (1.08)", "14,592 (1.24)", "13,091 (1.11)"],
-            ["Eth, MRAM, offload", "17,699 (1.50)", "23,620 (2.01)", "18,928 (1.61)"],
-            ["Eth, local, offload, lean", "12,006 (1.02)", "14,080 (1.20)", "10,743 (0.91)"],
-        ],
-        [1.24, 0.83, 0.83, 0.83],
+        [["Build", "54H @ 320", "7120 @ 256"]] + [[r[0], r[3], r[4]] for r in res_rows],
+        [2.03, 0.85, 0.85],
         size=7,
-        row_h=0.22,
-        bold_rows=(5,),
+        row_h=0.28,
+        bold_rows=(4,),
     )
-    tb = s.shapes.add_textbox(Inches(5.6), Inches(3.4), Inches(3.73), Inches(1.8))
+    tb = s.shapes.add_textbox(Inches(5.6), Inches(3.65), Inches(3.73), Inches(1.5))
     fill_bullets(
         tb.text_frame,
         [
-            [
-                ("\"2 MHz per Mbps\": ", True),
-                (
-                    "UDP TX, SW csum, code in MRAM (PDK loopback, 1 KB: 2.06). Offload + "
-                    "local RAM: 0.9-1.2. TCP not measured.",
-                    False,
-                ),
-            ],
-            [
-                ("Checksum offload: ", True),
-                ("54H +19% (TCM) / +18% (MRAM); 7120 +19% (RAM01) / +15% (MRAM).", False),
-            ],
-            [
-                ("Partial hot path in local RAM, offload on: ", True),
-                ("54H +61% (159 to 256), 7120 +45% (159 to 230). Lean: 267 / 281.", False),
-            ],
-            [
-                ("7120 RAM block matters: ", True),
-                (
-                    "RAM02/03 are 2-cycle, same code there only +10% (checksum 4,116 vs 1,831 "
-                    "cycles). RAM00 next to the data: within 1% of RAM01.",
-                    False,
-                ),
-            ],
-            [
-                ("Driver copy: ", True),
-                ("none in the null driver; one memcpy adds 9% (7120) / 11% (54H).", False),
-            ],
+            "Local RAM = 32 KB TCM on the 54H, single-cycle RAM01 on the 7120.",
+            "Hot path = the UDP TX files only (sockets, UDP, IPv4, net_pkt, net_buf, L2). "
+            "Whole stack in RAM01 is another +10% (7120 loopback, 257 vs 235).",
+            "Lean = net stats, net logging and the TX thread off. Not the shipping config.",
+            "Rows are bench config unless marked lean.",
         ],
         size=8,
+        bullets=True,
     )
     for p in tb.text_frame.paragraphs:
         p.space_after = Pt(3)
     notes(
         s,
-        "Local = TCM on 54H, RAM01 on 7120 (sramcode-ram01.overlay). Loopback rows compute "
-        "checksums in SW by design and are TX-only like the Ethernet rows. Raw CSVs: "
-        "results/*.csv (54H), results/ramblk_*.csv (7120, one session). The 54H column shows "
-        "the original runs. The 54H MRAM and lean rows come from a later session, so the +61% "
-        "compares them with that session's rebuild of the offload + TCM build (14,695 cycles, "
-        "255.9), not the 14,592 in the table (+62% against that)."
-        "\n\n54H MRAM vs TCM, Ethernet L2 with offload (eth_off_mram vs eth_off_rebuild, same "
-        "day): 23,620 vs 14,695 cycles/pkt at 320 MHz, 17,699 vs 12,740 at 128, 15,579 vs "
-        "12,072 at 64. The MRAM penalty grows from 3.5k to 8.9k cycles as the clock goes up, "
-        "because the MRAM access time is fixed in ns. SW csum, MRAM: 135.4 (27,764 cycles); "
-        "TCM 216.3, also +60%. I-cache counters (results/mem_eth_off*.csv): 508 misses/pkt "
-        "with code in MRAM, 14 with the hot path in TCM. Putting the whole MRAM-TCM difference "
-        "on those 494 misses gives 18 cycles per miss at 320 MHz, 10 at 128 and 7 at 64, i.e. "
-        "~4 cycles + ~43 ns per miss (the fit lands within 2% at 128 MHz). The lean config "
-        "halves the MRAM misses (508 to 257), which is why lean helps the MRAM build by +27% "
-        "(+31% in the probe rebuild) and the TCM build by only +4%."
-        "\n\n7120 RAM blocks (results/ramblk_*.csv, offload, 1472 B): MRAM 159.3 (18,928), "
-        "hot path in RAM02/03 175.5 (17,185), RAM01 230.4 (13,091), RAM00 228.7 (13,190). Same "
-        "code layout in the three RAM builds, only the base address differs. I-cache misses "
-        "are 753/pkt in MRAM and 233 in all three RAM builds, so the RAM02/03 vs RAM01 gap is "
-        "the block, not the cache: RAM02/03 are 2-cycle for the CM33, RAM00/01 single-cycle, "
-        "and code in SRAM is not cached, so every fetch pays it. calc_chksum at 1472 B: 1,734 "
-        "cycles from cached MRAM, 4,116 from RAM02/03, 1,831 from RAM01 (54H TCM: 1,839). SW "
-        "csum: MRAM 139.0, RAM02/03 133.3 (slower than MRAM), RAM01 194.2. Loopback: MRAM "
-        "171.7, RAM02/03 156.8, RAM01 234.6; whole net stack in RAM01 257.2 (87 misses/pkt). "
-        "RAM01 wins at 292 B too (49.3 vs 33.3), so the old ~300-600 B crossover was a "
-        "RAM02/03 effect. RAM00 shares the block with all data and is 0.7-0.9% behind RAM01; "
-        "no Wi-Fi DMA here, so a real system would see more contention there."
-        "\n\nMRAM miss cost on 7120: MRAMC reads back 6 wait states at 256 MHz, each extra "
-        "wait state adds exactly one cycle per miss (bench ws sweep), and one miss is one "
-        "128-bit MRAM read (4-8 instructions). MRAM to RAM01 saves 5.8k cycles for 520 fewer "
-        "misses, ~11 cycles per miss if it is all misses (6 ws + ~5), so roughly 44% of the "
-        "MRAM packet is stall. The 54H misses less (508 vs 753) but pays ~18 cycles per miss "
-        "at 320 MHz."
-        "\n\nDriver zero-copy TX (NRF_WIFI_ZERO_COPY_TX) is not enabled on either board yet. "
-        "The null driver frees the packet without copying, so the bench already has no "
-        "driver copy and a real driver can only be slower. With the copy path a real driver "
-        "adds one memcpy: bench memcpy at 1472 B is 1,229 cycles on the 7120 and 1,598 on the "
-        "54H (same at 64/128/320 MHz, results/mem_*.csv), about 9% / 11% of the offload case; "
-        "zero-copy avoids that. Both match the stack's own per-byte slope (0.81 / 1.09 "
-        "cycles/B). It moves TX bytes from the driver heap into the Zephyr TX pool for the "
-        "whole TX-done turnaround, so pool sizing (task 2) changes with it. The copy the bench "
-        "still does is the socket one, app buffer to net_pkt; slide 5 prices that one."
-        "\n\nMHz/Mbps = cycles per packet / (1472 x 8), i.e. CPU MHz per Mbps of UDP payload "
-        "at 1472 B. The \"2 MHz per 1 Mbps\" rule of thumb is UDP TX: the PDK loopback baseline "
-        "(SW checksum, code in MRAM, 1 KB) does 124 Mbps at 256 MHz, 2.06 MHz/Mbps, and the 54H "
-        "SW csum MRAM Ethernet build is 2.36 at 320 MHz. It is not a constant: the cost is per "
-        "packet, so small packets are much worse (292 B on the PDK baseline: 40 Mbps, ~6.4 "
-        "MHz/Mbps), and with code in MRAM it rises with clock (54H offload: 1.50 at 128, 2.01 "
-        "at 320). TCP, RX and the Wi-Fi driver/IPC/FW are not in any of these numbers; Wi-Fi "
-        "only reached 0.36-0.45 of loopback on the PDK (air-limited), so on a full Wi-Fi "
-        "system the per-Mbps figure is higher."
-        "\n\nLean row: overlay-ablate.conf (NET_TC_TX_COUNT=0, no net stats, no net log), "
-        "267.2 Mbps on 54H @ 320 (results/eth_off_abl.csv), 280.7 on 7120 with RAM01 "
-        "(results/ramblk_eth_off_abl_ram01.csv).",
+        "Raw data: results/eth_*.csv (54H) and results/ramblk_*.csv (7120, one session). "
+        "Cycles per packet = CPU Hz / packets per second.\n\n"
+        "54H MRAM rows come from a later session than the TCM rows; against that session's "
+        "rebuild of the offload + TCM build (14,695 cycles) the TCM gain is +62%.\n\n"
+        "Why local RAM matters so much: with code in MRAM the 7120 misses its 8 KB I-cache 753 "
+        "times per packet at ~11 cycles each, ~44% of the packet. RAM01 cuts that to 233. The "
+        "same code in 2-cycle RAM02/03 gives only +10%, so the RAM has to be single-cycle.\n\n"
+        "Driver copy: the null driver frees the packet without copying. A real driver's "
+        "memcpy is 1,229 cycles (7120) / 1,598 (54H) at 1472 B, 9% / 11% of the offload case.",
     )
 
     # 5. Where the cycles go
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "Where the cycles go",
+        "Backup: where the cycles go",
         "Per 1472 B packet, best case on each board, against the budget for 400 Mbps",
     )
     add_slide_number(s)
@@ -910,8 +1287,8 @@ def build(src, out):
         "is 156 cycles off the line, so take that split as rough; the slope is outside the "
         "0.8-1.1 bench-config range for the same reason.\n\n"
         "No copy at all = drop the per-byte term, i.e. the socket copy from the app buffer "
-        "into net_pkt, which the bench still does. This is not driver zero-copy (slide 4): "
-        "the null driver has no copy to remove.\n\n"
+        "into net_pkt, which the bench still does. This is not driver zero-copy: the null "
+        "driver has no copy to remove.\n\n"
         "Budgets use nominal clocks; with measured 319.4 / 256.2 MHz they are 9,404 / 7,542.",
     )
 
@@ -919,7 +1296,7 @@ def build(src, out):
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "Task 2: network buffers vs throughput",
+        "Backup: network buffers (task 2)",
         "Model only, nothing on this slide is measured yet",
     )
     add_slide_number(s)
@@ -1056,8 +1433,8 @@ def build(src, out):
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "Task 3: who gets to 400+ Mbps, and how",
-        "Published numbers only; 20 MHz Wi-Fi parts and FPGA setups left out",
+        "Backup: other platforms (task 3)",
+        "Collected with an LLM, not verified; see the footnote for what we use from it",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
@@ -1082,8 +1459,8 @@ def build(src, out):
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "Task 3: Zephyr hosts at 400+ Mbps (any link)",
-        "Published Zephyr zperf numbers from upstream PRs; max clock where not stated",
+        "Backup: other Zephyr hosts (task 3)",
+        "Zephyr zperf numbers from upstream PRs, collected with an LLM, not verified",
     )
     add_slide_number(s)
     ph = body_ph(s, 10)
@@ -1112,49 +1489,11 @@ def build(src, out):
     text_box(s, 0.5, 3.85, 9.0, 1.3, ZEPHYR_NOTES, size=8)
     text_box(s, 0.5, 5.17, 8.7, 0.25, LLM_FOOTNOTE, size=7, color=GREY, italic=True)
 
-    # 8. Architecture options
-    s = prs.slides.add_slide(layout(prs, "18_three messages title + text"))
-    set_title(s, "Architectures that can reach 400 Mbps")
-    add_slide_number(s)
-    heads = ["A. Fewer packets", "B. More host CPU", "C. TCP/IP off host"]
-    bodies = [
-        [
-            "USO/TSO on TX, GRO on RX, fewer ACKs, and a thin raw/callback path under the socket "
-            "API.",
-            "lwIP RAW is >= 1.75x its sockets on the same A9. Zephyr has no GSO/GRO today; "
-            "driver/FW "
-            "segmentation cost unknown (E8).",
-        ],
-        [
-            "Same stack, faster core: higher clock, core-local RAM, wider core (M55/M85 or "
-            "A-class).",
-            "400 Mbps is 34k pkts/s. At 10.7k (7120, RAM01) to 14.1k (54H, TCM) cycles/pkt, "
-            "lean, that is ~365-480 MHz of CM33. No headroom left for driver or app.",
-        ],
-        [
-            "Stack on a network core or in Wi-Fi FW; host uses socket offload (WZN-108, WZN-8705).",
-            "Host cost becomes IPC + copy, network core has the B problem. The one offload "
-            "Wi-Fi part found (SiWG917) is 20 MHz, 66 Mbps.",
-        ],
-    ]
-    for i, h in enumerate(heads):
-        body_ph(s, 16 + i).text = h
-        fill_bullets(body_ph(s, 19 + i).text_frame, bodies[i], size=10)
-    notes(
-        s,
-        "B: 400 Mbps at 1472 B is 33,967 pkt/s. Lean builds: x 14,080 cycles (54H @ 320, "
-        "offload + TCM) = 478 MHz; x 10,743 (7120 @ 256, offload + RAM01) = 365 MHz. "
-        "Bench config: 14,592 = 496 MHz, 13,091 = 445 MHz. Lean 54H at 64 MHz (11,289 cycles, "
-        "closest to zero MRAM wait) = 383 MHz. "
-        "A: assumes stack per-packet cost is paid once per super-packet; driver segmentation cost "
-        "is unknown and is what E8 measures.",
-    )
-
     # 8b. Zephyr gaps
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "Zephyr gaps to raise upstream",
+        "Backup: Zephyr gaps to raise upstream",
         "Checked against Zephyr main in our tree; candidates for feature requests",
     )
     add_slide_number(s)
@@ -1238,7 +1577,7 @@ def build(src, out):
     s = prs.slides.add_slide(layout(prs, "13_sub_full content"))
     set_title(
         s,
-        "SoC options for an nRF71-based host",
+        "Backup: SoC options for an nRF71-based host",
         "What a new chip could change, with the gain our data supports",
     )
     add_slide_number(s)
@@ -1328,118 +1667,6 @@ def build(src, out):
         "driver.\n\n"
         "Network processor: the stack cost per packet does not go away, it moves. The only "
         "Wi-Fi offload part found (SiWG917) is 20 MHz class.",
-    )
-
-    # 8d. Two takeaways
-    s = prs.slides.add_slide(layout(prs, "13_full content"))
-    set_title(s, "Two takeaways")
-    add_slide_number(s)
-    body_ph(s, 13)._element.getparent().remove(body_ph(s, 13)._element)
-    cols = []
-    for i, head in enumerate(("1. Zephyr network stack (SW)", "2. SoC / HW offloads")):
-        x = 0.67 + i * 4.42
-        card(s, x, 1.5, 4.24, 3.0, fill=LIGHT)
-        text_box(s, x + 0.15, 1.58, 3.9, 0.4, head, size=14, color=NAVY, bold=True)
-        cols.append(s.shapes.add_textbox(Inches(x + 0.15), Inches(2.0), Inches(3.94), Inches(2.4)))
-    fill_bullets(
-        cols[0].text_frame,
-        [
-            "Lean config and hot-path placement: 281 Mbps on 7120 @ 256, 267 on 54H @ 320. "
-            "Upstream a __net_hot placement so it is not hand-made per file",
-            "GSO/GRO in the stack: the only SW change that cuts the per-packet cost. SW GSO "
-            "helps alone, HW segmentation makes it pay",
-            "TCP window scaling: needed for TCP > 350 (64 KB window, ~105 Mbps at 5 ms RTT)",
-            "Batched socket I/O, zero-copy send: percent-level",
-        ],
-        size=10,
-        bullets=True,
-    )
-    fill_bullets(
-        cols[1].text_frame,
-        [
-            "Single-cycle local RAM for net path + kernel: biggest proven gain (+45% 7120, "
-            "+61% 54H). Must be 1-cycle: 2-cycle RAM02/03 gave +10%",
-            "HW TSO/USO + GRO, checksum (TX + RX) and zero-copy DMA in the Wi-Fi datapath",
-            "Clock is capped at 256-320 MHz by the cell choice; 400 needs ~330-380 MHz even "
-            "with all code zero-wait",
-            "Network processor only moves the stack cost and adds IPC, unless it brings "
-            "the items above",
-        ],
-        size=10,
-        bullets=True,
-    )
-    for tb in cols:
-        for p in tb.text_frame.paragraphs:
-            p.space_after = Pt(5)
-    text_box(
-        s,
-        0.67,
-        4.62,
-        8.66,
-        0.5,
-        "Neither alone gets to 400 at 256-320 MHz. Fewer packets per byte needs both: the "
-        "stack API and segmentation in HW.",
-        size=11,
-        color=NAVY,
-        bold=True,
-    )
-    notes(
-        s,
-        "Stack-only numbers, UDP TX, null driver: the Wi-Fi driver, IPC and FW come on top. "
-        "Best measured is 10,743 cycles/pkt (7120 lean, RAM01); with its remaining 97 MRAM "
-        "misses free it would be ~9.7k (54H zero-wait lean: 11,289). At 256 MHz 400 Mbps "
-        "allows 7,537, ~22% below that. At 320 MHz it allows 9,421, so a 320 MHz part with "
-        "all code zero-wait would be within a few percent, before any driver, IPC or FW cost. "
-        "TSO/GRO is the item that closes the gap with margin, and it needs work on both sides.",
-    )
-
-    # 9. Next
-    s = prs.slides.add_slide(layout(prs, "13_full content"))
-    set_title(s, "Next steps")
-    add_slide_number(s)
-    fill_bullets(
-        body_ph(s, 13).text_frame,
-        [
-            [
-                ("Task 1: ", True),
-                (
-                    "TCP TX/RX and UDP RX on the null driver with injected ACKs/frames (E6, E7).",
-                    False,
-                ),
-            ],
-            [
-                ("Task 1/A: ", True),
-                (
-                    "prototype USO in the null driver (stack hands down N x MSS) and GRO "
-                    "before the stack; measure cycles per byte delivered (E8).",
-                    False,
-                ),
-            ],
-            [
-                ("Task 2: ", True),
-                (
-                    "buffer sweep with emulated TX-done latency, fit to the Little's law model.",
-                    False,
-                ),
-            ],
-            [
-                ("Task 3: ", True),
-                ("pick 1-2 comparable platforms from the table and reproduce on our bench.", False),
-            ],
-            [
-                ("Upstream: ", True),
-                ("raise Zephyr feature requests for TSO/USO, GRO and TCP window scaling.", False),
-            ],
-            [
-                ("Decision for the review: ", True),
-                (
-                    "which stack items to take upstream and which SoC options go into the "
-                    "nRF71-based chip spec.",
-                    False,
-                ),
-            ],
-        ],
-        size=12,
     )
 
     # 10. Appendix: reproduce
