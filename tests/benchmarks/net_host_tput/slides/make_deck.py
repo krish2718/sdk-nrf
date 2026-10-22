@@ -2146,7 +2146,7 @@ def build_prb(src, out):
         3.95,
         2.6,
         0.55,
-        "More than 250 needs a new architecture.",
+        "More than 250 needs packet offload in the Wi-Fi chip, or more processor power.",
         size=11,
         color=NAVY,
         bold=True,
