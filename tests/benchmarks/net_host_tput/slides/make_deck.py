@@ -2074,77 +2074,64 @@ def build_prb(src, out):
         "Wi-Fi throughput on one 320 MHz processor",
         "CAL-7627: best TCP throughput on a 320 MHz nRF71 derivative, 80 MHz radio channel",
     )
-    card(s, 0.67, 1.55, 3.55, 3.05)
-    text_box(s, 0.82, 1.62, 3.3, 0.55, "About 250 Mbps TCP", size=21, color=NAVY, bold=True)
-    text_box(s, 0.82, 2.13, 3.3, 0.3, "at best, range 200-265", size=12, color=NAVY)
-    text_box(s, 0.82, 2.45, 3.3, 0.4, "About 330 Mbps UDP", size=16, color=BLUE, bold=True)
+    card(s, 0.67, 1.6, 3.55, 2.9)
+    text_box(s, 0.82, 1.75, 3.3, 0.55, "About 250 Mbps TCP", size=22, color=NAVY, bold=True)
+    text_box(s, 0.82, 2.28, 3.3, 0.3, "at best, range 200-265", size=12, color=NAVY)
+    text_box(s, 0.82, 2.75, 3.3, 0.4, "About 330 Mbps UDP", size=16, color=BLUE, bold=True)
     text_box(
-        s,
-        0.82,
-        2.95,
-        3.3,
-        1.6,
-        [
-            "This is what one 320 MHz processor can offer. More needs extra hardware, see "
-            "Going higher.",
-            "The processor is the limit, not the radio: the channel carries about 330-350 "
-            "Mbps of TCP data.",
-            "1.3 MHz of processor per Mbps of TCP. Old rule of thumb: 2.",
-        ],
-        size=10,
+        s, 0.82, 3.45, 3.3, 0.8, "Limited by the processor, not the radio.", size=12, color=DARK
     )
-    for p in s.shapes[-1].text_frame.paragraphs:
-        p.space_after = Pt(4)
 
-    text_box(s, 4.5, 1.5, 4.85, 0.35, "What it takes to reach 250", size=14, color=NAVY, bold=True)
-    tb = s.shapes.add_textbox(Inches(4.5), Inches(1.88), Inches(4.85), Inches(2.0))
+    text_box(s, 4.5, 1.55, 4.85, 0.35, "What it takes", size=14, color=NAVY, bold=True)
+    tb = s.shapes.add_textbox(Inches(4.5), Inches(1.95), Inches(4.85), Inches(1.8))
     fill_bullets(
         tb.text_frame,
         [
-            "Network and Wi-Fi software run from fast on-chip memory, 192 KB",
-            "Wi-Fi chip calculates packet checksums (done for sending)",
-            "Larger TCP window in Zephyr, about 160 KB of packet memory",
-            "One less data copy in the Wi-Fi driver",
-            "Less software overhead: statistics, logging, one thread hand-off",
+            "Run the software from fast on-chip memory",
+            "Wi-Fi chip calculates the checksums",
+            "Larger TCP window in Zephyr",
+            "Trim software overhead",
         ],
-        size=11,
+        size=13,
         bullets=True,
     )
     for p in tb.text_frame.paragraphs:
-        p.space_after = Pt(3)
-    text_box(s, 4.5, 3.6, 4.85, 0.3, "Going higher", size=12, color=NAVY, bold=True)
+        p.space_after = Pt(6)
     text_box(
         s,
         4.5,
-        3.88,
+        3.75,
         4.85,
-        0.75,
-        "Wi-Fi hardware that splits large blocks into packets: the only route near 2x. "
-        "A second processor for the Wi-Fi driver: about 280-290.",
-        size=10,
+        0.5,
+        "More than 250 needs extra hardware in the chip.",
+        size=12,
+        color=NAVY,
+        bold=True,
     )
 
-    card(s, 0.67, 4.7, 8.68, 0.5, fill=LIGHT)
     text_box(
         s,
-        0.8,
-        4.72,
-        8.45,
-        0.46,
-        [
-            "Measured: UDP sending through the network software on nRF7120, 230 Mbps at 256 MHz.",
-            "Estimated: 320 MHz, Wi-Fi driver cost, TCP. Two tests, about 3 days, turn these "
-            "into measurements.",
-        ],
-        size=9,
-        anchor=MSO_ANCHOR.MIDDLE,
+        0.67,
+        4.75,
+        8.68,
+        0.35,
+        "Measured on today's chips. The 320 MHz, Wi-Fi and TCP parts are estimates; about "
+        "3 days of tests to confirm.",
+        size=10,
+        color=GREY,
+        italic=True,
     )
     notes(
         s,
         "Details and the full chain: Confluence page 3562799288 (CAL-7627).\n\n"
         "230 measured, 281 with the trimmed config (measured), 351 at 320 MHz, 385 with the "
         "whole stack in on-chip memory, x0.85 Wi-Fi driver = 327 UDP, x0.75 TCP = 245. The "
-        "Wi-Fi factor is from the driver alone on FPGA, so the answer is a best case.",
+        "Wi-Fi factor is from the driver alone on FPGA, so the answer is a best case.\n\n"
+        "What it takes, in detail: network stack, Wi-Fi driver and kernel in 192 KB of "
+        "single-cycle TCM; checksum offload in the RPU; TCP window scaling plus ~160 KB of "
+        "packet buffers; zero-copy TX; net stats, logging and the TX thread off.\n\n"
+        "More than 250: TSO/GRO in the Wi-Fi FW/HW (up to ~2x) or a second CM33 for the "
+        "driver (~280-290).",
     )
     prs.save(out)
 
