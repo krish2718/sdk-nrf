@@ -2088,7 +2088,7 @@ def build_prb(src, out):
         tb.text_frame,
         [
             "Run the software from fast on-chip memory",
-            "Wi-Fi chip calculates the checksums",
+            "Checksums in the Wi-Fi chip (already done today)",
             "Larger TCP window in Zephyr",
             "Trim software overhead",
         ],
@@ -2103,7 +2103,7 @@ def build_prb(src, out):
         3.75,
         4.85,
         0.5,
-        "More than 250 needs extra hardware in the chip.",
+        "More than 250 needs a new architecture.",
         size=12,
         color=NAVY,
         bold=True,
@@ -2115,8 +2115,7 @@ def build_prb(src, out):
         4.75,
         8.68,
         0.35,
-        "Measured on today's chips. The 320 MHz, Wi-Fi and TCP parts are estimates; about "
-        "3 days of tests to confirm.",
+        "Measured on today's chips. The 320 MHz, Wi-Fi and TCP parts are estimates.",
         size=10,
         color=GREY,
         italic=True,
