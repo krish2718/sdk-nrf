@@ -670,8 +670,8 @@ def build(src, out):
         "(CAL-6689). On the PDK we only have air-limited runs (0.36-0.45 of loopback, "
         "WZN-10644), which say nothing about CPU cost. E12 measures it.\n\n"
         "Step 6: other Zephyr hosts show TCP at 0.5-0.6x UDP, but those are capped by the 64 KB "
-        "window. With window scaling I'd expect 0.7-0.8x. This is the weakest step; a day on "
-        "the PDK with TCP on the null driver replaces it with a number.",
+        "window. With window scaling I'd expect 0.7-0.8x. TCP on the null driver on the PDK "
+        "replaces it with a number.",
     )
 
     # 5. What each step is worth
@@ -836,7 +836,7 @@ def build(src, out):
             [
                 "TCP costs 0.75x UDP per packet",
                 "0.6-0.8 gives 200-265 Mbps TCP",
-                "TCP on the null driver on the PDK (E6), about a day",
+                "TCP on the null driver on the PDK (E6)",
             ],
             [
                 "Wi-Fi driver, IPC and FW keep 85% (FPGA, driver only)",
