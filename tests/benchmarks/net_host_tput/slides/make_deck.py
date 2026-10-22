@@ -399,12 +399,13 @@ def build(src, out):
     # 2. Answer
     s = sub_slide(
         prs,
-        "Answer: ~250 Mbps TCP",
+        "Answer: ~250 Mbps TCP at best",
         "Question: best TCP/IP throughput on a 320 MHz Aludra derivative with an 80 MHz MAC/PHY",
     )
     card(s, 0.67, 1.6, 3.4, 3.3)
-    text_box(s, 0.82, 1.7, 3.1, 0.6, "~250 Mbps TCP", size=28, color=NAVY, bold=True)
-    text_box(s, 0.82, 2.3, 3.1, 0.45, "~330 Mbps UDP", size=20, color=BLUE, bold=True)
+    text_box(s, 0.82, 1.65, 3.1, 0.55, "~250 Mbps TCP", size=28, color=NAVY, bold=True)
+    text_box(s, 0.82, 2.17, 3.1, 0.3, "at best, range 200-265", size=11, color=NAVY)
+    text_box(s, 0.82, 2.42, 3.1, 0.45, "~330 Mbps UDP", size=20, color=BLUE, bold=True)
     text_box(
         s,
         0.82,
@@ -429,13 +430,13 @@ def build(src, out):
             [("Checksum offload in the RPU, TX and RX. ", True), ("TX in place, +19%.", False)],
             [
                 ("Whole net stack and Wi-Fi data path in single-cycle TCM. ", True),
-                ("128 KB measured for the stack, budget 192 KB.", False),
+                ("Measured: 128 KB stack, 60 KB driver and kernel; budget 192 KB.", False),
             ],
             [
                 ("TCP window scaling in Zephyr. ", True),
                 ("Without it TCP stops at ~260 Mbps (2 ms RTT) whatever the CPU.", False),
             ],
-            [("~190 KB of packet buffers ", True), ("in normal RAM for the TCP window.", False)],
+            [("~160 KB of packet buffers ", True), ("in normal RAM for the TCP window.", False)],
             [("Zero-copy TX in the nRF71 driver. ", True), ("~10% back.", False)],
             [
                 ("Lean config: ", True),
@@ -476,7 +477,8 @@ def build(src, out):
         "One number: ~250 Mbps TCP, ~330 UDP, on a 320 MHz CM33 with every item on the list. "
         "The chain behind it is on slide 4: measured 10,743 cycles per 1472 B UDP packet on the "
         "nRF7120 PDK (offload, hot path in single-cycle RAM, lean), scaled to 320 MHz, whole "
-        "stack in TCM, x0.85 for driver/IPC/FW, x~0.75 for TCP.\n\n"
+        "stack in TCM, x0.85 for the Wi-Fi driver (driver only, FPGA), x~0.75 for TCP. Both "
+        "factors are estimates, so ~250 is a best case and 200-265 the range.\n\n"
         "If the TX thread has to stay, take ~10% off: ~220 TCP.\n\n"
         "Air: HE MCS9, 1 spatial stream, 80 MHz, 0.8 us GI is a 480 Mbps PHY; TCP goodput is "
         "typically ~70% of PHY rate, so ~330-350.",
@@ -556,22 +558,37 @@ def build(src, out):
     s = sub_slide(
         prs,
         "How we got to ~250 Mbps TCP",
-        "From the best measured UDP number to TCP on a 320 MHz part, one step at a time",
+        "Five UDP steps from the best measured number, then one step from UDP to TCP",
     )
     steps = [
         ("Measured\n7120 @ 256", 230, NAVY),
         ("+ lean\nconfig", 281, NAVY),
         ("at\n320 MHz", 351, BLUE),
         ("+ whole\nstack in TCM", 385, GREY),
-        ("x0.85\nWi-Fi driver", 327, GREY),
+        ("x0.85 Wi-Fi\ndriver", 327, GREY),
         ("x0.75\nTCP", 245, RED),
     ]
     cd = CategoryChartData()
     cd.categories = [x[0] for x in steps]
     cd.add_series("Mbps", [x[1] for x in steps])
     gf = s.shapes.add_chart(
-        XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(0.4), Inches(1.5), Inches(4.6), Inches(3.4), cd
+        XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(0.4), Inches(1.78), Inches(4.6), Inches(3.12), cd
     )
+    for x, w, label, col in ((0.55, 3.6, "UDP TX", NAVY), (4.2, 0.72, "TCP", RED)):
+        card(s, x, 1.52, w, 0.24, fill=col)
+        text_box(
+            s,
+            x,
+            1.52,
+            w,
+            0.24,
+            label,
+            size=9,
+            color=WHITE,
+            bold=True,
+            align=PP_ALIGN.CENTER,
+            anchor=MSO_ANCHOR.MIDDLE,
+        )
     ch = gf.chart
     style_chart(ch, size=8)
     ch.has_legend = False
@@ -599,7 +616,7 @@ def build(src, out):
         4.5,
         0.3,
         "Navy: measured. Blue: clock-scaled. Grey and red: estimated. Slide 2 rounds to "
-        "~330 / ~250.",
+        "~330 / ~250 at best.",
         size=8,
         color=GREY,
         italic=True,
@@ -626,7 +643,8 @@ def build(src, out):
             [
                 "x0.85 Wi-Fi driver",
                 "327",
-                "Driver, IPC and FW on the host. FPGA keeps 85% (CAL-6689). UDP answer",
+                "Driver software only, FPGA keeps 85% (CAL-6689). IPC and FW not in it, so "
+                "optimistic. UDP answer",
             ],
             [
                 "x0.75 TCP",
@@ -648,9 +666,9 @@ def build(src, out):
         "Step 4: on the 7120, loopback with the whole net stack in RAM01 is 11,720 cycles vs "
         "12,851 with the hot path only. 10,743 x 0.912 = ~9.8k cycles, 385 Mbps at 320 MHz. "
         "Independent check: the lean build with its remaining 97 I-cache misses free is ~9.7k.\n\n"
-        "Step 5: 0.85 is the FPGA ratio with the real driver path (CAL-6689). On the PDK we only "
-        "have air-limited runs (0.36-0.45 of loopback, WZN-10644), which say nothing about CPU "
-        "cost. E12 measures it.\n\n"
+        "Step 5: 0.85 is the FPGA ratio for the driver software alone, no IPC or FW "
+        "(CAL-6689). On the PDK we only have air-limited runs (0.36-0.45 of loopback, "
+        "WZN-10644), which say nothing about CPU cost. E12 measures it.\n\n"
         "Step 6: other Zephyr hosts show TCP at 0.5-0.6x UDP, but those are capped by the 64 KB "
         "window. With window scaling I'd expect 0.7-0.8x. This is the weakest step; a day on "
         "the PDK with TCP on the null driver replaces it with a number.",
@@ -741,7 +759,7 @@ def build(src, out):
             ["What", "Size"],
             ["UDP TX hot path", "32 KB, measured"],
             ["Whole net stack: IPv4, IPv6, UDP, TCP, sockets, net_buf", "128 KB, measured"],
-            ["+ Wi-Fi driver data path, kernel hot functions", "~64 KB, estimate"],
+            ["+ Wi-Fi driver data path, kernel, Ethernet L2, IPC", "60 KB, measured"],
             ["Budget", "192 KB"],
         ],
         [2.9, 1.3],
@@ -768,10 +786,10 @@ def build(src, out):
         1.9,
         4.2,
         [
-            ["TCP window for 300 Mbps", "Buffers"],
-            ["2 ms RTT", "~75 KB"],
-            ["5 ms RTT", "~190 KB"],
-            ["10 ms RTT", "~375 KB"],
+            ["TCP window for 250 Mbps", "Buffers"],
+            ["2 ms RTT", "~63 KB"],
+            ["5 ms RTT", "~160 KB"],
+            ["10 ms RTT", "~315 KB"],
         ],
         [2.9, 1.3],
         size=8,
@@ -795,8 +813,11 @@ def build(src, out):
         "Code sizes: SRAMCODE usage in build_pdk_eth_off_hot_ram01 (32,160 B, hot path) and "
         "build_pdk_reloc1500_ram01 (131,160 B, whole net stack: subsys/net/ip, subsys/net, "
         "drivers/net, net_buf, zperf). The Wi-Fi driver and kernel parts were not relocated in "
-        "any build, so the 64 KB for them is an allowance, not a measurement.\n\n"
-        "Buffers: 300 Mbps x RTT / 8. RX reorder: 64 x 1.5 KB plus headroom.",
+        "any build. Their 60 KB is the code size from the link map of the nRF71 throughput "
+        "sample (high-performance config, 7120 PDK): driver data path objects 36.5 KB "
+        "(control path and WPA supplicant stay in MRAM), all of libkernel 15.8 KB, Ethernet "
+        "L2 7.1 KB, IPC service and mbox 0.9 KB. Whole objects, so an upper bound.\n\n"
+        "Buffers: 250 Mbps x RTT / 8. RX reorder: 64 x 1.5 KB plus headroom.",
     )
 
     # 7. Risks
@@ -818,7 +839,7 @@ def build(src, out):
                 "TCP on the null driver on the PDK (E6), about a day",
             ],
             [
-                "Wi-Fi driver, IPC and FW keep 85% (FPGA)",
+                "Wi-Fi driver, IPC and FW keep 85% (FPGA, driver only)",
                 "PDK data so far is air-limited, so this is untested on silicon",
                 "CPU-bound Wi-Fi run on the PDK (E12)",
             ],
@@ -2039,5 +2060,97 @@ def build(src, out):
     prs.save(out)
 
 
+def build_prb(src, out):
+    """One slide for the PRB: answer, what it takes, how sure we are. No jargon."""
+    prs = Presentation(src)
+    drop_slides_after_first(prs)
+    sld_ids = prs.slides._sldIdLst
+    first = list(sld_ids)[0]
+    prs.part.drop_rel(first.get(qn("r:id")))
+    sld_ids.remove(first)
+
+    s = sub_slide(
+        prs,
+        "Wi-Fi throughput on one 320 MHz processor",
+        "CAL-7627: best TCP throughput on a 320 MHz nRF71 derivative, 80 MHz radio channel",
+    )
+    card(s, 0.67, 1.55, 3.55, 3.05)
+    text_box(s, 0.82, 1.62, 3.3, 0.55, "About 250 Mbps TCP", size=21, color=NAVY, bold=True)
+    text_box(s, 0.82, 2.13, 3.3, 0.3, "at best, range 200-265", size=12, color=NAVY)
+    text_box(s, 0.82, 2.45, 3.3, 0.4, "About 330 Mbps UDP", size=16, color=BLUE, bold=True)
+    text_box(
+        s,
+        0.82,
+        2.95,
+        3.3,
+        1.6,
+        [
+            "This is what one 320 MHz processor can offer. More needs extra hardware, see "
+            "Going higher.",
+            "The processor is the limit, not the radio: the channel carries about 330-350 "
+            "Mbps of TCP data.",
+            "1.3 MHz of processor per Mbps of TCP. Old rule of thumb: 2.",
+        ],
+        size=10,
+    )
+    for p in s.shapes[-1].text_frame.paragraphs:
+        p.space_after = Pt(4)
+
+    text_box(s, 4.5, 1.5, 4.85, 0.35, "What it takes to reach 250", size=14, color=NAVY, bold=True)
+    tb = s.shapes.add_textbox(Inches(4.5), Inches(1.88), Inches(4.85), Inches(2.0))
+    fill_bullets(
+        tb.text_frame,
+        [
+            "Network and Wi-Fi software run from fast on-chip memory, 192 KB",
+            "Wi-Fi chip calculates packet checksums (done for sending)",
+            "Larger TCP window in Zephyr, about 160 KB of packet memory",
+            "One less data copy in the Wi-Fi driver",
+            "Less software overhead: statistics, logging, one thread hand-off",
+        ],
+        size=11,
+        bullets=True,
+    )
+    for p in tb.text_frame.paragraphs:
+        p.space_after = Pt(3)
+    text_box(s, 4.5, 3.6, 4.85, 0.3, "Going higher", size=12, color=NAVY, bold=True)
+    text_box(
+        s,
+        4.5,
+        3.88,
+        4.85,
+        0.75,
+        "Wi-Fi hardware that splits large blocks into packets: the only route near 2x. "
+        "A second processor for the Wi-Fi driver: about 280-290.",
+        size=10,
+    )
+
+    card(s, 0.67, 4.7, 8.68, 0.5, fill=LIGHT)
+    text_box(
+        s,
+        0.8,
+        4.72,
+        8.45,
+        0.46,
+        [
+            "Measured: UDP sending through the network software on nRF7120, 230 Mbps at 256 MHz.",
+            "Estimated: 320 MHz, Wi-Fi driver cost, TCP. Two tests, about 3 days, turn these "
+            "into measurements.",
+        ],
+        size=9,
+        anchor=MSO_ANCHOR.MIDDLE,
+    )
+    notes(
+        s,
+        "Details and the full chain: Confluence page 3562799288 (CAL-7627).\n\n"
+        "230 measured, 281 with the trimmed config (measured), 351 at 320 MHz, 385 with the "
+        "whole stack in on-chip memory, x0.85 Wi-Fi driver = 327 UDP, x0.75 TCP = 245. The "
+        "Wi-Fi factor is from the driver alone on FPGA, so the answer is a best case.",
+    )
+    prs.save(out)
+
+
 if __name__ == "__main__":
-    build(sys.argv[1], sys.argv[2])
+    if len(sys.argv) > 3 and sys.argv[3] == "prb":
+        build_prb(sys.argv[1], sys.argv[2])
+    else:
+        build(sys.argv[1], sys.argv[2])
