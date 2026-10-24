@@ -430,7 +430,7 @@ def build(src, out):
             [("Checksum offload in the RPU, TX and RX. ", True), ("TX in place, +19%.", False)],
             [
                 ("Whole net stack and Wi-Fi data path in single-cycle TCM. ", True),
-                ("Measured: 128 KB stack, 60 KB driver and kernel; budget 192 KB.", False),
+                ("Measured ~135 KB (stack, nRF71 driver, kernel); budget 192 KB to grow.", False),
             ],
             [
                 ("TCP window scaling in Zephyr. ", True),
@@ -520,7 +520,7 @@ def build(src, out):
             [
                 "Hot path / whole stack",
                 "Hot path: only the UDP TX files moved to local RAM (32 KB). Whole stack: all "
-                "of the net stack (128 KB).",
+                "of the net stack libraries (128 KB in the loopback build).",
             ],
             [
                 "Checksum offload",
@@ -747,7 +747,7 @@ def build(src, out):
     s = sub_slide(
         prs,
         "How much TCM and RAM",
-        "Measured code sizes from the nRF7120 builds; buffer sizes from the TCP window",
+        "Code sizes from the nRF71 Wi-Fi build link map; buffer sizes from the TCP window",
     )
     text_box(s, 0.67, 1.5, 4.2, 0.35, "TCM (code)", size=14, color=NAVY, bold=True)
     table(
@@ -757,22 +757,24 @@ def build(src, out):
         4.2,
         [
             ["What", "Size"],
-            ["UDP TX hot path", "32 KB, measured"],
-            ["Whole net stack: IPv4, IPv6, UDP, TCP, sockets, net_buf", "128 KB, measured"],
-            ["+ Wi-Fi driver data path, kernel, Ethernet L2, IPC", "60 KB, measured"],
+            ["Net stack per packet: IPv4/6, TCP, UDP, sockets", "~94 KB"],
+            ["nRF71 driver data path: TX, RX, events, IPC", "~21 KB"],
+            ["Kernel, IPC service, memcpy, interrupt entry", "~19 KB"],
+            ["Measured total", "~135 KB"],
+            ["Future growth: window scaling, SACK, batching", "~57 KB"],
             ["Budget", "192 KB"],
         ],
-        [2.9, 1.3],
+        [3.3, 0.9],
         size=8,
-        row_h=0.36,
-        bold_rows=(4,),
+        row_h=0.3,
+        bold_rows=(4, 6),
     )
     text_box(
         s,
         0.67,
-        3.8,
+        4.1,
         4.2,
-        1.2,
+        0.9,
         [
             "Has to be single-cycle: the same code in 2-cycle RAM gave +10% instead of +45%.",
             "Keep code out of the RAM the Wi-Fi DMA writes into.",
@@ -810,13 +812,17 @@ def build(src, out):
     )
     notes(
         s,
-        "Code sizes: SRAMCODE usage in build_pdk_eth_off_hot_ram01 (32,160 B, hot path) and "
-        "build_pdk_reloc1500_ram01 (131,160 B, whole net stack: subsys/net/ip, subsys/net, "
-        "drivers/net, net_buf, zperf). The Wi-Fi driver and kernel parts were not relocated in "
-        "any build. Their 60 KB is the code size from the link map of the nRF71 throughput "
-        "sample (high-performance config, 7120 PDK): driver data path objects 36.5 KB "
-        "(control path and WPA supplicant stay in MRAM), all of libkernel 15.8 KB, Ethernet "
-        "L2 7.1 KB, IPC service and mbox 0.9 KB. Whole objects, so an upper bound.\n\n"
+        "Code sizes: link map of the nRF71 throughput sample (high-performance config, 7120 "
+        "PDK, speed optimisations, TCP and IPv6 on). Only objects a packet goes through: net "
+        "shell, zperf, the Wi-Fi control path and the WPA supplicant stay in MRAM. Whole "
+        "objects, since relocation works per file; per function it is ~126 KB. The older "
+        "128 KB came from the loopback build, which relocated whole libraries including "
+        "zperf, the loopback driver and ~30 KB of net shell.\n\n"
+        "Future growth is code that has to sit on the per-packet path but is not there yet: "
+        "TCP window scaling and SACK in the TCP core, packet batching (GSO/GRO) in the stack "
+        "and driver, RX path changes, paths the link map does not attribute (timers, work "
+        "queues) and growth across releases. 160 KB is the floor with modest headroom; keep "
+        "192 KB until a relocation build confirms it.\n\n"
         "Buffers: 250 Mbps x RTT / 8. RX reorder: 64 x 1.5 KB plus headroom.",
     )
 
