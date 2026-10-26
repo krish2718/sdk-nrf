@@ -454,7 +454,7 @@ def build(src, out):
         4.45,
         5.0,
         0.5,
-        "With batching in the Wi-Fi chip (v2): ~330 TCP, ~370 UDP, set by the radio (slide 9).",
+        "With HW accelerators: ~330 TCP, ~370 UDP at 256 or 320 MHz, set by the radio (slide 9).",
         size=10,
         color=NAVY,
         bold=True,
@@ -935,97 +935,101 @@ def build(src, out):
         bold=True,
     )
 
-    # 9. Network processor: today, v1, v2
+    # 9. What we can offer: software vs hardware accelerators
     s = sub_slide(
         prs,
-        "Network processor over SDIO: today, v1, v2",
-        "Upload: host sends over SDIO, nRF71 runs TCP/IP and Wi-Fi. v2 adds batching in the chip",
+        "What we can offer as a network processor",
+        "Upload over SDIO; CM33 runs TCP/IP and Wi-Fi driver. HE MCS9, 1x1, 80 MHz (480 PHY)",
     )
+    table(
+        s,
+        0.67,
+        1.45,
+        8.68,
+        [
+            [
+                "",
+                "CM33 256 MHz, all SW steps",
+                "CM33 320 MHz, all SW steps",
+                "CM33 256 MHz + HW accelerators",
+                "CM33 320 MHz + HW accelerators",
+                "Best competitor, MCS9 80 MHz",
+            ],
+            ["TCP upload", "~200 (160-210)", "~250 (200-265)", "~330", "~330", "325-328"],
+            ["UDP upload", "~260", "~330", "~370", "~370", "375-378"],
+            ["Limited by", "CM33", "CM33", "Radio", "Radio", "Radio"],
+            ["CM33 busy", "100%", "100%", "12-22%", "10-18%", "4x A53 1.8 GHz, Linux"],
+            ["Cycles / TCP segment", "~15,500", "~15,500", "~1,100-2,000", "~1,100-2,000", "-"],
+        ],
+        [1.38, 1.46, 1.46, 1.46, 1.46, 1.46],
+        size=8,
+        row_h=0.3,
+        bold_rows=(1, 2),
+    )
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.42)
+
     text_box(
         s,
         0.67,
-        1.5,
+        3.45,
         4.6,
         0.3,
-        "Cycles per 1460 B TCP segment, 320 MHz",
-        size=12,
+        "HW accelerators, cycles per segment",
+        size=11,
         color=NAVY,
         bold=True,
     )
     table(
         s,
         0.67,
-        1.85,
+        3.75,
         4.6,
         [
-            ["Cost", "v1", "v2"],
-            ["Socket, TCP, IP send", "~8,200", "~200"],
-            ["Payload copy from the SDIO buffer", "~1,600", "~1,600"],
-            ["Wi-Fi driver and IPC to the RPU", "~1,700", "~100"],
-            ["ACK receive, timers, retransmit", "~3,800", "~1,700"],
-            ["SDIO from the host", "~200", "~200"],
-            ["Total", "~15,500", "~3,800"],
-            ["CPU ceiling", "~245 Mbps", "~1,000 Mbps"],
+            ["Accelerator", "Cycles"],
+            ["TX segmentation (TSO/USO) in the RPU", "~9,900 to ~300"],
+            ["RX reassembly: LRO, ACK coalescing", "~3,800 to ~300"],
+            ["DMA from SDIO, scatter-gather to RPU", "~1,600 to ~100"],
+            ["HW buffer manager", "saves ~100-200"],
+            ["Crypto (AES-GCM) for TLS", "needed for TLS"],
         ],
-        [2.8, 0.9, 0.9],
+        [3.2, 1.4],
         size=8,
-        row_h=0.28,
-        bold_rows=(6, 7),
+        row_h=0.22,
     )
     text_box(
         s,
-        0.67,
-        4.2,
-        4.6,
-        0.8,
-        [
-            "v2: stack and driver run once per 64 KB block (44 segments). The copy and the "
-            "returning ACKs stay per segment.",
-            "Cautious v2 (16 KB blocks, 2x driver, ACK per segment): ~6,000, ~600 Mbps.",
-        ],
-        size=8,
-    )
-    text_box(s, 5.55, 1.5, 3.8, 0.3, "Result", size=12, color=NAVY, bold=True)
-    table(
-        s,
         5.55,
-        1.85,
+        3.45,
         3.8,
+        1.75,
         [
-            ["", "Today", "v1", "v2"],
-            ["TCP", "~30", "~250", "~330"],
-            ["UDP", "~55", "~330", "~370"],
-            ["Limit", "20 MHz, CPU", "CPU", "Radio"],
-        ],
-        [0.7, 1.1, 1.0, 1.0],
-        size=8,
-        row_h=0.28,
-    )
-    text_box(s, 5.55, 3.1, 3.8, 0.3, "v2 also takes", size=12, color=NAVY, bold=True)
-    tb = s.shapes.add_textbox(Inches(5.55), Inches(3.4), Inches(3.8), Inches(1.6))
-    fill_bullets(
-        tb.text_frame,
-        [
-            "TSO/USO in the RPU TX path, before 802.11 encapsulation, at ~370 Mbps",
-            "Zephyr: TSO/USO path to the driver, GRO, window scaling, SACK (none exist)",
-            "nRF71 driver and FW: one descriptor and IPC per block",
-            "SDIO 3.0 SDR104 device side with DMA (DDR50 caps TCP near 300)",
-            "~206 KB packet buffers at 5 ms RTT",
+            "Software only: the CM33 is the limit, so the clock sets the number.",
+            "With accelerators the CM33 does ~1/10 of the work per segment. The radio sets "
+            "the number at either clock; 256 MHz is enough and would also carry MCS11.",
+            "Segmentation alone (~3,800 cycles) reaches the radio limit. The rest frees the "
+            "CM33 for TLS and headroom.",
+            "Competitor: NXP IW612 + i.MX 8M Mini, measured; 405 / 461 at HE MCS11.",
         ],
         size=8,
-        bullets=True,
     )
     notes(
         s,
-        "Radio: HE MCS9 1x1 80 MHz is 480 Mbps PHY. IW612 on Linux, not CPU-bound, does TCP "
-        "upload at 70% and UDP at 78% of PHY: ~335 TCP, ~370 UDP at 480.\n\n"
-        "v1 column: the slide 4 chain split by layer. v2: per-block costs divided by 44 "
-        "segments; copy is the measured memcpy (1,598 cycles per 1472 B); ACK cost is one ACK "
-        "per two segments through the driver plus GRO. UDP v2 has no ACKs: ~2,300-3,500 "
-        "cycles per datagram.\n\n"
-        "At 330 TCP the CPU is 35-60% busy. Unknowns: receive (ACK) cost not measured, RPU "
-        "segmentation rate, driver/IPC/FW cost per block. SDIO high-speed mode (50 MHz) caps "
-        "at ~150.",
+        "Software columns: the slide 4 chain. The stack was measured at 256 MHz on the 7120 "
+        "PDK, so the 256 MHz column is the better grounded one; 320 MHz assumes flat cycles "
+        "per packet.\n\n"
+        "Accelerator columns, per 1460 B TCP segment: stack ~200 and driver ~100 (once per "
+        "64 KB block), copy ~100 (DMA), ACKs ~300 (coalesced in the RPU), SDIO ~200, buffers "
+        "and the rest ~200: ~1,100; ~2,000 if cautious. Segmentation with software GRO only: "
+        "~3,800.\n\n"
+        "Radio: IW612 on Linux does TCP upload at ~70% and UDP at ~78% of PHY: ~330 / ~370 at "
+        "480. Competitor: NXP RN00104, 4.6.2.2, Murata 2EL on i.MX 8M Mini, iperf 5 streams, "
+        "2 MB window: 802.11ac 80 MHz (MCS9, 433 PHY) 325-328 TCP / 375-378 UDP upload; "
+        "802.11ax 80 MHz 405 / 461. Best MCU host, same radio (RT1060, M7 600 MHz): 88 / "
+        "219.\n\n"
+        "Needs SDIO 3.0 SDR104. TLS: software AES-GCM costs tens of cycles per byte, more "
+        "than the whole CM33 at these rates. Open: ACK receive cost not measured, RPU "
+        "segmentation rate, driver/IPC/FW cost per block.",
     )
 
     # 10. Next steps
@@ -2174,103 +2178,66 @@ def build_prb(src, out):
 
     s = sub_slide(
         prs,
-        "Wi-Fi upload throughput: today, v1, v2",
-        "Host processor sends data over SDIO; the nRF71 runs TCP/IP, the Wi-Fi driver and radio",
+        "Wi-Fi upload throughput: what we can offer",
+        "nRF71 as network processor over SDIO. Wi-Fi 6, one stream, 80 MHz channel, MCS9",
     )
-    from pptx.enum.shapes import MSO_SHAPE
-
-    box_w = 2.6
-    boxes = (
-        (
-            0.67,
-            "Today: nRF7120",
-            GREY,
-            "About 30 Mbps TCP",
-            DARK,
-            "",
-            "About 55 Mbps UDP",
-            DARK,
-            "256 MHz, 20 MHz channel",
-        ),
-        (
-            3.71,
-            "v1: 320 MHz, software tuned",
-            NAVY,
-            "About 250 Mbps TCP",
-            NAVY,
-            "at best, range 200-265",
-            "About 330 Mbps UDP",
-            BLUE,
-            "80 MHz channel. Limit: the processor",
-        ),
-        (
-            6.75,
-            "v2: v1 + hardware batching",
-            NAVY,
-            "About 330 Mbps TCP",
-            NAVY,
-            "the most the radio allows",
-            "About 370 Mbps UDP",
-            BLUE,
-            "80 MHz channel. Limit: the radio",
-        ),
+    table(
+        s,
+        0.67,
+        1.5,
+        8.68,
+        [
+            [
+                "",
+                "256 MHz, all software steps",
+                "320 MHz, all software steps",
+                "256 MHz + accelerators",
+                "320 MHz + accelerators",
+                "Best competitor",
+            ],
+            ["TCP upload", "~200 Mbps", "~250 Mbps", "~330 Mbps", "~330 Mbps", "~325 Mbps"],
+            ["UDP upload", "~260 Mbps", "~330 Mbps", "~370 Mbps", "~370 Mbps", "~375 Mbps"],
+            ["Limited by", "Processor", "Processor", "Radio", "Radio", "Radio"],
+            ["Processor busy", "100%", "100%", "12-22%", "10-18%", "Four 1.8 GHz cores"],
+        ],
+        [1.38, 1.46, 1.46, 1.46, 1.46, 1.46],
+        size=10,
+        row_h=0.38,
+        bold_rows=(1, 2),
     )
-    for x, head, head_col, tcp, tcp_col, sub, udp, udp_col, foot in boxes:
-        card(s, x, 1.55, box_w, 1.95)
-        text_box(s, x + 0.1, 1.62, box_w - 0.2, 0.3, head, size=11, color=head_col, bold=True)
-        text_box(s, x + 0.1, 1.95, box_w - 0.2, 0.4, tcp, size=16, color=tcp_col, bold=True)
-        if sub:
-            text_box(s, x + 0.1, 2.35, box_w - 0.2, 0.25, sub, size=9, color=NAVY)
-        text_box(s, x + 0.1, 2.62, box_w - 0.2, 0.35, udp, size=13, color=udp_col, bold=True)
-        text_box(s, x + 0.1, 3.0, box_w - 0.2, 0.45, foot, size=9, color=GREY)
+    shp = s.shapes[-1]
+    shp.table.rows[0].height = Inches(0.5)
 
-    for x in (0.67 + box_w + 0.04, 3.71 + box_w + 0.04):
-        arrow = s.shapes.add_shape(
-            MSO_SHAPE.RIGHT_ARROW, Inches(x), Inches(2.3), Inches(0.36), Inches(0.42)
-        )
-        arrow.fill.solid()
-        arrow.fill.fore_color.rgb = BLUE
-        arrow.line.fill.background()
+    text_box(s, 0.67, 3.65, 4.2, 0.3, "Hardware accelerators", size=12, color=NAVY, bold=True)
+    tb = s.shapes.add_textbox(Inches(0.67), Inches(3.95), Inches(4.2), Inches(0.9))
+    fill_bullets(
+        tb.text_frame,
+        [
+            "Wi-Fi chip splits and merges packets",
+            "No processor copy from the host interface",
+            "Crypto engine for secure uploads (TLS)",
+        ],
+        size=10,
+        bullets=True,
+    )
+    for p in tb.text_frame.paragraphs:
+        p.space_after = Pt(2)
 
     text_box(
         s,
-        0.67,
+        5.15,
         3.65,
-        box_w,
+        4.2,
         1.0,
-        "v2 gets the most the 80 MHz radio can carry. v1 is held back by the processor.",
+        [
+            "Software alone: the processor is the limit.",
+            "With accelerators: the radio is the limit, at either clock. A 256 MHz part "
+            "matches the best competitor, which uses Linux on four 1.8 GHz cores.",
+        ],
         size=11,
         color=NAVY,
         bold=True,
     )
-
-    takes = (
-        (
-            3.71,
-            "v1 takes",
-            [
-                "Software in fast on-chip memory",
-                "Wi-Fi chip checksums (done)",
-                "Larger TCP window in Zephyr",
-                "Trim software overhead",
-            ],
-        ),
-        (
-            6.75,
-            "v2 also takes",
-            [
-                "Packet batching hardware in the Wi-Fi chip",
-                "Packet batching in Zephyr and the Wi-Fi driver",
-                "Fastest SDIO mode to the host",
-            ],
-        ),
-    )
-    for x, head, items in takes:
-        text_box(s, x, 3.6, box_w, 0.28, head, size=11, color=NAVY, bold=True)
-        tb = s.shapes.add_textbox(Inches(x), Inches(3.88), Inches(box_w), Inches(0.9))
-        fill_bullets(tb.text_frame, items, size=10, bullets=True)
-        for p in tb.text_frame.paragraphs:
-            p.space_after = Pt(2)
 
     text_box(
         s,
@@ -2278,31 +2245,34 @@ def build_prb(src, out):
         4.95,
         8.68,
         0.3,
-        "Today is measured. v1 and v2 are estimates built on measurements of today's chips.",
-        size=10,
+        "Today's nRF7120 (20 MHz channel): ~30 TCP, ~55 UDP. Our columns are estimates built "
+        "on measurements of today's chips; the competitor is measured.",
+        size=9,
         color=GREY,
         italic=True,
     )
     notes(
         s,
-        "Details: Confluence page 3562799288 (CAL-7627), sections 7 and 9.\n\n"
-        "Setup: an application processor uploads data over SDIO to the nRF71, which runs "
-        "TCP/IP and the Wi-Fi driver on a 320 MHz CM33 and the MAC/PHY on the RPU.\n\n"
-        "v1: 230 Mbps UDP measured, 281 with the trimmed config (measured), 351 at 320 MHz, "
-        "385 with the whole stack in on-chip memory, x0.85 Wi-Fi driver = 327 UDP, x0.75 TCP "
-        "= 245. About 15,500 cycles per 1460 B TCP segment. Takes: stack, driver and kernel "
-        "in 192 KB of single-cycle TCM; checksum offload in the RPU; TCP window scaling plus "
-        "~160 KB of packet buffers; zero-copy TX; net stats, logging and the TX thread "
-        "off.\n\n"
-        "v2: segmentation in the RPU (TSO/USO) plus GSO/GRO, window scaling and SACK in "
-        "Zephyr. Stack and driver run once per 64 KB block instead of per segment. What stays "
-        "per segment is the payload copy (~1,600 cycles) and the TCP ACKs coming back "
-        "(~1,700), about 3,800 cycles in total (6,000 if cautious): a 600-1,000 Mbps CPU "
-        "ceiling, so the radio sets the number. HE MCS9 1x1 80 MHz is 480 Mbps PHY; the "
-        "IW612 on Linux does TCP at 70% and UDP at 78% of PHY: ~330 TCP, ~370 UDP. Needs "
-        "SDIO 3.0 SDR104; DDR50 would cap TCP near 300 and the high-speed mode at ~150.\n\n"
-        "Open for v2: receive (ACK) cost is not measured; the RPU must segment at ~370 Mbps; "
-        "driver, IPC and firmware cost per block unknown.",
+        "Details: Confluence page 3562799288 (CAL-7627), section 9.\n\n"
+        "Setup: an application processor uploads over SDIO to the nRF71; the CM33 runs TCP/IP "
+        "and the Wi-Fi driver, the RPU the MAC/PHY. HE MCS9, 1x1, 80 MHz = 480 Mbps PHY.\n\n"
+        "All software steps: stack, driver and kernel in single-cycle TCM, checksum offload, "
+        "TCP window scaling, zero-copy TX, lean config. ~15,500 cycles per 1460 B TCP "
+        "segment: ~200 TCP at 256 MHz (range 160-210, the stack was measured at this clock), "
+        "~250 at 320 MHz (200-265).\n\n"
+        "Hardware accelerators: TX segmentation (TSO/USO) and RX reassembly (LRO, ACK "
+        "coalescing) in the RPU, DMA from SDIO into packet buffers with scatter-gather to the "
+        "RPU, a hardware buffer manager. ~1,100-2,000 cycles per segment, so the CPU ceiling "
+        "is far above the radio at either clock. Segmentation alone (~3,800 cycles) already "
+        "reaches the radio limit; the rest lowers the load. Radio: IW612 on Linux does TCP at "
+        "~70% and UDP at ~78% of PHY: ~330 / ~370 at 480. TLS needs the crypto engine; "
+        "software AES-GCM would use more than the whole CM33.\n\n"
+        "Best competitor: NXP IW612 (Murata 2EL) on i.MX 8M Mini, 4x Cortex-A53 1.8 GHz, "
+        "Linux, iperf 5 streams: 325-328 TCP / 375-378 UDP upload at 802.11ac 80 MHz MCS9; "
+        "405 / 461 at 802.11ax up to MCS11 (NXP RN00104, 4.6.2.2). Best MCU host with the same "
+        "radio (i.MX RT1060, M7 600 MHz, lwIP): 88 TCP / 219 UDP.\n\n"
+        "Needs: SDIO 3.0 SDR104 (DDR50 caps TCP near 300). Open: receive (ACK) cost not "
+        "measured; RPU segmentation rate; driver, IPC and firmware cost per block.",
     )
     prs.save(out)
 
