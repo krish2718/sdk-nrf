@@ -31,12 +31,12 @@ TYPE_FILL = {
     "Estimate": "FCE5CD",
     "Cushion": "F4CCCC",
 }
-PROFILES = ("Optimistic", "Expected", "Cushioned", "Pessimistic")
+PROFILES = ("Optimistic", "Expected", "Conservative", "Pessimistic")
 PROFILE_TEXT = {
     "Optimistic": "The numbers already given in CAL-7627: host stack and driver only; SDIO, "
     "slow-RAM copy and bus contention not counted.",
     "Expected": "Middle value for every estimate.",
-    "Cushioned": "Planning case: Expected plus margin on every estimate.",
+    "Conservative": "Expected plus margin on every estimate.",
     "Pessimistic": "Every worst case at once, shipping config (TX thread on): a floor.",
 }
 FIRST_PCOL = 3  # Inputs column C holds the first profile
