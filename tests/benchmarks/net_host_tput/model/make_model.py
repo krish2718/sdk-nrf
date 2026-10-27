@@ -36,8 +36,8 @@ PROFILE_TEXT = {
     "Optimistic": "The numbers already given in CAL-7627: host stack and driver only; SDIO, "
     "slow-RAM copy and bus contention not counted.",
     "Expected": "Middle value for every estimate.",
-    "Cushioned": "Expected plus margin on every estimate.",
-    "Pessimistic": "Every worst case at once: a floor, not a likely outcome.",
+    "Cushioned": "Planning case: Expected plus margin on every estimate.",
+    "Pessimistic": "Every worst case at once, shipping config (TX thread on): a floor.",
 }
 FIRST_PCOL = 3  # Inputs column C holds the first profile
 
@@ -60,20 +60,23 @@ INPUTS = [
     (
         "cyc_lean",
         "UDP send through the stack into a null driver, checksum offload, hot path "
-        "in single-cycle RAM, lean config",
-        (10743,) * 4,
+        "in single-cycle RAM",
+        (10743, 10743, 10743, 13091),
         "cycles/pkt",
         "Measured",
-        "nRF7120 PDK at 256 MHz, wiki section 5 and appendix A",
+        "nRF7120 PDK at 256 MHz. 10,743 (280.7 Mbps) is the lean config: TX thread, net "
+        "stats and logging off. 13,091 (230.4 Mbps) keeps the TX thread, as NCS ships; "
+        "dropping it is untested with the real driver",
         0,
     ),
     (
         "cpb_meas",
         "memcpy cost inside that measurement (data warm)",
-        (1.09,) * 4,
+        (0.835,) * 4,
         "cycles/B",
         "Measured",
-        "1,598 cycles per 1472 B, wiki appendix B",
+        "nRF7120: 1,229 cycles per 1472 B, same run as the 10,743 "
+        "(results/ramblk_mem_eth_off_abl_ram01.csv). The 54H is 1,598",
         0,
     ),
     (
@@ -81,18 +84,20 @@ INPUTS = [
         "Whole stack in TCM instead of only the hot path (cycle factor)",
         (0.91, 0.91, 0.93, 0.95),
         "x",
-        "Measured",
-        "-9% measured on loopback (wiki section 6); less in the margin profiles",
+        "Cushion",
+        "0.91 measured on loopback (wiki section 6); 0.93 and 0.95 are margin",
         0,
     ),
     (
         "clk_pen",
         "Cycle growth at the higher clock",
-        (1.00, 1.03, 1.05, 1.08),
+        (1.00, 1.05, 1.08, 1.10),
         "x",
         "Estimate",
-        "Flat if all hot code is in TCM. The 54H hot-path build grew 15% from 128 to 320 MHz "
-        "with the rest in MRAM",
+        "54H lean TCM build: 12,006 / 14,080 cycles at 128 / 320 MHz (+17%), +5% for "
+        "256 to 320 MHz by fit. I-cache misses are constant (38/pkt), so MRAM explains only "
+        "a few %; the rest is a fixed ~11 us per packet, not yet attributed. 7120 not "
+        "measured. Optimistic keeps 1.00 to match the numbers already quoted",
         1,
     ),
     "Software path",
@@ -102,12 +107,13 @@ INPUTS = [
         (0.85, 0.85, 0.82, 0.80),
         "x",
         "Estimate",
-        "FPGA, driver only; IPC and RPU firmware not included",
+        "Driver cost as a fraction of the stack, FPGA (CAL-6689), both from MRAM. IPC and "
+        "RPU firmware not included; absolute driver cost not measured",
         1,
     ),
     (
         "tcp_ratio",
-        "TCP throughput as a fraction of UDP on the same CPU",
+        "TCP/UDP ratio, applied to stack and driver cycles only",
         (0.77, 0.75, 0.70, 0.65),
         "x",
         "Estimate",
@@ -119,10 +125,10 @@ INPUTS = [
     (
         "cpb",
         "memcpy of host data into the stack",
-        (1.09, 1.6, 1.8, 2.0),
+        (0.835, 1.6, 1.8, 2.0),
         "cycles/B",
         "Cushion",
-        "1.09 measured in fast RAM (checksum offloaded). SDIO DMA lands host data in "
+        "0.835 measured in fast RAM (checksum offloaded). SDIO DMA lands host data in "
         "system SRAM, so the copy reads through wait states while DMA is active. Not "
         "measured; bus contention below covers part of it",
         1,
@@ -201,8 +207,9 @@ INPUTS = [
         "Practical TCP efficiency (goodput / PHY)",
         (0.70,) * 4,
         "x",
-        "Measured",
-        "NXP IW612 on Linux, RN00104 4.6.2.2",
+        "Estimate",
+        "IW612 on Linux, RN00104 4.6.2.2: 405/600 at HE MCS11, 325/433 (0.75) at 11ac "
+        "MCS9. Efficiency falls as PHY rate rises, so 0.70 at 480 is conservative",
         0,
     ),
     (
@@ -210,8 +217,9 @@ INPUTS = [
         "Practical UDP efficiency (goodput / PHY)",
         (0.78,) * 4,
         "x",
-        "Measured",
-        "NXP IW612 on Linux, RN00104 4.6.2.2",
+        "Estimate",
+        "IW612 on Linux, RN00104 4.6.2.2: 461/600 (0.77) at HE MCS11, 375/433 (0.87) at "
+        "11ac MCS9. Conservative at 480",
         0,
     ),
     ("sdio_raw", "SDIO 3.0 SDR104 raw rate", (832,) * 4, "Mbps", "Given", "4 bit x 208 MHz", 0),
@@ -401,11 +409,16 @@ OPTIONS = [
 ]
 
 NOTES = [
-    "(1) Code in TCM, checksum offload in RPU, extended TCP window, software overhead trim.",
-    "(2) As per 1, with TSO/GSO hardware offload IP. Software GRO for the returning ACKs.",
+    "(1) Code in TCM, checksum offload in RPU, extended TCP window, lean config (TX "
+    "thread, stats, logging off). Optimistic assumes cycles/packet stay flat from 256 to "
+    "320 MHz; 54H data suggest +5% (~240 TCP / ~310 UDP at 320 MHz).",
+    "(2) As per 1, with TSO/GSO hardware offload IP. Software GRO for the returning ACKs. "
+    "UDP needs applications to send large datagrams (UDP GSO API, not in Zephyr).",
     "(3) throughput_targets_v6.xlsx: 128 A-MPDU, 0.8 us GI, 0% margin.",
-    "(4) NXP RN00104 4.6.2.2: Murata 2EL, iperf 5 streams, 2 MB window. See Competitors.",
-    "(5) 70% (TCP) and 78% (UDP) of the 480 Mbps PHY rate, from the IW612 result in (4).",
+    "(4) NXP RN00104 4.6.2.2: Murata 2EL, iperf 5 streams, 2 MB window, 433 Mbps PHY "
+    "(~360 / ~415 scaled to 480). See Competitors.",
+    "(5) 70% (TCP) and 78% (UDP) of the 480 Mbps PHY rate, from IW612 at HE MCS11 "
+    "(conservative; 11ac MCS9 gives 75% / 87%).",
 ]
 
 thin = Side(style="thin", color="BFBFBF")
@@ -729,7 +742,8 @@ def build_readme(wb):
         (
             "Not modelled",
             "Silicon cost of TSO and SDIO device IP; RPU-side segmentation rate; "
-            "TLS (needs a crypto engine); receive/download; host-side cost of moving data.",
+            "TLS (needs a crypto engine); receive/download; host-side cost of moving data; "
+            "a UDP GSO socket API, which the UDP rows with TSO need.",
         ),
         ("Study", WIKI),
         ("Jira", JIRA),
