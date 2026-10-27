@@ -339,14 +339,28 @@ MODEL = [
     ("radio_udp", "Radio, UDP (target)", "Mbps", "={I:radio_udp}", "0"),
     ("prac_tcp", "Radio, TCP (practical)", "Mbps", "={I:phy}*{I:eff_tcp}", "0"),
     ("prac_udp", "Radio, UDP (practical)", "Mbps", "={I:phy}*{I:eff_udp}", "0"),
+    (
+        "cap_tcp",
+        "Radio cap used, TCP (Results!B4)",
+        "Mbps",
+        '=IF(Results!$B$4="Theoretical",{M:radio_tcp},{M:prac_tcp})',
+        "0",
+    ),
+    (
+        "cap_udp",
+        "Radio cap used, UDP (Results!B4)",
+        "Mbps",
+        '=IF(Results!$B$4="Theoretical",{M:radio_udp},{M:prac_udp})',
+        "0",
+    ),
     ("sdio_bus", "SDIO bus usable", "Mbps", "={I:sdio_raw}*{I:sdio_eff}", "0"),
-    "Result: lowest of CPU, radio target and SDIO",
+    "Result: lowest of CPU, radio cap and SDIO",
 ]
 for kind, label in (("sw", "Software only"), ("tso", "TSO/GSO")):
     for proto in ("tcp", "udp"):
         P = proto.upper()
         ceil = f"{{M:{kind}_{proto}_ceil}}"
-        radio = f"{{M:radio_{proto}}}"
+        radio = f"{{M:cap_{proto}}}"
         MODEL += [
             (
                 f"r_{kind}_{proto}",
@@ -391,6 +405,7 @@ NOTES = [
     "(2) As per 1, with TSO/GSO hardware offload IP. Software GRO for the returning ACKs.",
     "(3) throughput_targets_v6.xlsx: 128 A-MPDU, 0.8 us GI, 0% margin.",
     "(4) NXP RN00104 4.6.2.2: Murata 2EL, iperf 5 streams, 2 MB window. See Competitors.",
+    "(5) 70% (TCP) and 78% (UDP) of the 480 Mbps PHY rate, from the IW612 result in (4).",
 ]
 
 thin = Side(style="thin", color="BFBFBF")
@@ -546,8 +561,24 @@ def build_results(wb, irow, mrow):
     choose = ",".join(f'"{PROFILE_TEXT[p]}"' for p in PROFILES)
     ws["D3"] = f"=CHOOSE($C$3,{choose})"
     ws["D3"].font = font(italic=True, color="595959")
-    ws["A4"] = "Copy A6:C13 into Jira. Columns D-E are detail."
-    ws["A4"].font = font(italic=True, color="595959")
+    ws["A4"] = "Radio cap"
+    ws["A4"].font = font(bold=True)
+    ws["B4"] = "Practical"
+    ws["B4"].font = font(bold=True, color="0000FF")
+    ws["B4"].fill = fill("FFFF00")
+    ws["B4"].border = BORDER
+    cap = DataValidation(type="list", formula1='"Practical,Theoretical"', allow_blank=False)
+    cap.prompt = "Practical: what a real link achieves. Theoretical: perfect link, no retries."
+    cap.promptTitle = "Radio cap"
+    ws.add_data_validation(cap)
+    cap.add("B4")
+    ws["D4"] = (
+        '=IF(B4="Theoretical","Perfect link, 0% margin (3).",'
+        '"Radio efficiency NXP IW612 achieves on Linux, applied to our PHY rate (5).")'
+    )
+    ws["D4"].font = font(italic=True, color="595959")
+    ws["A5"] = "Copy A6:C13 into Jira. Columns D-E are detail."
+    ws["A5"].font = font(italic=True, color="595959")
 
     def pick(key, clk):
         return f"INDEX(Model!${MFIRST}${mrow[key]}:${MLAST}${mrow[key]},($C$3-1)*2+{clk})"
@@ -593,7 +624,7 @@ def build_results(wb, irow, mrow):
             "",
         ),
         (
-            "Radio, practical (IW612 efficiency at 480 Mbps PHY)",
+            "Radio, practical: IW612 efficiency at 480 Mbps PHY (5)",
             f"=ROUND({inp('phy')}*{inp('eff_tcp')},0)",
             f"=ROUND({inp('phy')}*{inp('eff_udp')},0)",
             "Radio",
@@ -679,7 +710,7 @@ def build_readme(wb):
         ),
         (
             "How to use",
-            "Pick a profile in Results (cell B3); the table updates and can be "
+            "Pick a profile (B3) and radio cap (B4) in Results; the table updates and can be "
             "pasted into Jira. To change the model, edit the blue cells in Inputs; yellow cells "
             "are the main levers.",
         ),
@@ -691,7 +722,7 @@ def build_readme(wb):
             "the extra cost of copying out of system SRAM, times bus contention. With TSO/GSO "
             "the stack and driver run once per block; copy, ACKs and SDIO stay per segment. "
             "The result is "
-            "the lowest of the CPU ceiling, the radio target and the SDIO bus, rounded to 5.",
+            "the lowest of the CPU ceiling, the radio cap and the SDIO bus, rounded to 5.",
         ),
         ("Type colours", "Grey = given, green = measured, orange = estimate, red = cushion."),
         ("Cell colours", "Blue text = input, black = formula, green = link to another sheet."),
