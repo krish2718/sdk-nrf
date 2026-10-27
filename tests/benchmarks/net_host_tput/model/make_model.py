@@ -34,7 +34,7 @@ TYPE_FILL = {
 PROFILES = ("Optimistic", "Expected", "Cushioned", "Pessimistic")
 PROFILE_TEXT = {
     "Optimistic": "The numbers already given in CAL-7627: host stack and driver only; SDIO, "
-    "cold data and bus contention not counted.",
+    "slow-RAM copy and bus contention not counted.",
     "Expected": "Middle value for every estimate.",
     "Cushioned": "Expected plus margin on every estimate.",
     "Pessimistic": "Every worst case at once: a floor, not a likely outcome.",
@@ -119,11 +119,12 @@ INPUTS = [
     (
         "cpb",
         "memcpy of host data into the stack",
-        (1.09, 1.6, 2.0, 2.4),
+        (1.09, 1.6, 1.8, 2.0),
         "cycles/B",
         "Cushion",
-        "1.09 warm (measured). Streaming data is cold; from 2-cycle RAM a checksum "
-        "loop ran 2.25x slower (wiki appendix A)",
+        "1.09 measured in fast RAM (checksum offloaded). SDIO DMA lands host data in "
+        "system SRAM, so the copy reads through wait states while DMA is active. Not "
+        "measured; bus contention below covers part of it",
         1,
     ),
     (
@@ -687,8 +688,9 @@ def build_readme(wb):
             "Chain",
             "Measured cycles per UDP packet (null driver) x whole-stack TCM factor x "
             "clock growth, plus the Wi-Fi driver, divided by the TCP ratio for TCP, plus SDIO and "
-            "the extra cost of copying cold data, times bus contention. With TSO/GSO the stack "
-            "and driver run once per block; copy, ACKs and SDIO stay per segment. The result is "
+            "the extra cost of copying out of system SRAM, times bus contention. With TSO/GSO "
+            "the stack and driver run once per block; copy, ACKs and SDIO stay per segment. "
+            "The result is "
             "the lowest of the CPU ceiling, the radio target and the SDIO bus, rounded to 5.",
         ),
         ("Type colours", "Grey = given, green = measured, orange = estimate, red = cushion."),
