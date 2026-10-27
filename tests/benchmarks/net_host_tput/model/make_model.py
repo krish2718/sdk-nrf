@@ -31,37 +31,45 @@ TYPE_FILL = {
     "Estimate": "FCE5CD",
     "Cushion": "F4CCCC",
 }
-PROFILES = ("Optimistic", "Expected", "Conservative", "Pessimistic")
+PROFILES = (
+    "Single chip",
+    "Single chip + margin",
+    "Two chip",
+    "Two chip + margin",
+    "Worst case",
+)
 PROFILE_TEXT = {
-    "Optimistic": "The numbers already given in CAL-7627: host stack and driver only; SDIO, "
-    "slow-RAM copy and bus contention not counted.",
-    "Expected": "Middle value for every estimate.",
-    "Conservative": "Expected plus margin on every estimate.",
-    "Pessimistic": "Every worst case at once, shipping config (TX thread on): a floor.",
+    "Single chip": "App, stack and driver on the nRF71 CM33. The numbers already given in "
+    "CAL-7627.",
+    "Single chip + margin": "Single chip with margin on TCP, driver, TCM, clock and TSO costs.",
+    "Two chip": "Apps processor -> SDIO -> nRF71: single chip plus SDIO, copy from system "
+    "SRAM and bus arbitration.",
+    "Two chip + margin": "Two chip with margin on every estimate.",
+    "Worst case": "Every worst case at once, shipping config (TX thread on): a floor.",
 }
 FIRST_PCOL = 3  # Inputs column C holds the first profile
 
 # Inputs: (id, description, values per profile, unit, type, source, lever) or a section name
 INPUTS = [
     "Clocks and packets",
-    ("clk_lo", "Lower CM33 clock", (256,) * 4, "MHz", "Given", "CAL-7627 description", 0),
-    ("clk_hi", "Higher CM33 clock", (320,) * 4, "MHz", "Given", "CAL-7627 description", 0),
+    ("clk_lo", "Lower CM33 clock", (256,) * 5, "MHz", "Given", "CAL-7627 description", 0),
+    ("clk_hi", "Higher CM33 clock", (320,) * 5, "MHz", "Given", "CAL-7627 description", 0),
     (
         "udp_payload",
         "UDP payload per datagram",
-        (1472,) * 4,
+        (1472,) * 5,
         "B",
         "Given",
         "zperf 1472 B, 1500 B MTU",
         0,
     ),
-    ("mss", "TCP payload per segment (MSS)", (1460,) * 4, "B", "Given", "1500 B MTU", 0),
+    ("mss", "TCP payload per segment (MSS)", (1460,) * 5, "B", "Given", "1500 B MTU", 0),
     "Measured stack cost",
     (
         "cyc_lean",
         "UDP send through the stack into a null driver, checksum offload, hot path "
         "in single-cycle RAM",
-        (10743, 10743, 10743, 13091),
+        (10743, 10743, 10743, 10743, 13091),
         "cycles/pkt",
         "Measured",
         "nRF7120 PDK at 256 MHz. 10,743 (280.7 Mbps) is the lean config: TX thread, net "
@@ -72,7 +80,7 @@ INPUTS = [
     (
         "cpb_meas",
         "memcpy cost inside that measurement (data warm)",
-        (0.835,) * 4,
+        (0.835,) * 5,
         "cycles/B",
         "Measured",
         "nRF7120: 1,229 cycles per 1472 B, same run as the 10,743 "
@@ -82,7 +90,7 @@ INPUTS = [
     (
         "tcm_gain",
         "Whole stack in TCM instead of only the hot path (cycle factor)",
-        (0.91, 0.91, 0.93, 0.95),
+        (0.91, 0.93, 0.91, 0.93, 0.95),
         "x",
         "Cushion",
         "0.91 measured on loopback (wiki section 6); 0.93 and 0.95 are margin",
@@ -91,20 +99,20 @@ INPUTS = [
     (
         "clk_pen",
         "Cycle growth at the higher clock",
-        (1.00, 1.05, 1.08, 1.10),
+        (1.00, 1.08, 1.00, 1.08, 1.10),
         "x",
         "Estimate",
         "54H lean TCM build: 12,006 / 14,080 cycles at 128 / 320 MHz (+17%), +5% for "
         "256 to 320 MHz by fit. I-cache misses are constant (38/pkt), so MRAM explains only "
         "a few %; the rest is a fixed ~11 us per packet, not yet attributed. 7120 not "
-        "measured. Optimistic keeps 1.00 to match the numbers already quoted",
+        "measured. The profiles without margin keep 1.00, as in the numbers already quoted",
         1,
     ),
     "Software path",
     (
         "drv_factor",
         "Throughput kept after adding the Wi-Fi driver",
-        (0.85, 0.85, 0.82, 0.80),
+        (0.85, 0.82, 0.85, 0.82, 0.80),
         "x",
         "Estimate",
         "Driver cost as a fraction of the stack, FPGA (CAL-6689), both from MRAM. IPC and "
@@ -114,7 +122,7 @@ INPUTS = [
     (
         "tcp_ratio",
         "TCP/UDP ratio, applied to stack and driver cycles only",
-        (0.77, 0.75, 0.70, 0.65),
+        (0.77, 0.70, 0.77, 0.70, 0.65),
         "x",
         "Estimate",
         "ACKs, timers, retransmit queue. 0.77 per segment gives the ~250 already quoted "
@@ -125,7 +133,7 @@ INPUTS = [
     (
         "cpb",
         "memcpy of host data into the stack",
-        (0.835, 1.6, 1.8, 2.0),
+        (0.835, 0.835, 1.6, 1.8, 2.0),
         "cycles/B",
         "Cushion",
         "0.835 measured in fast RAM (checksum offloaded). SDIO DMA lands host data in "
@@ -137,10 +145,10 @@ INPUTS = [
         "sdio_cyc",
         "SDIO device side per 1460 B of payload: interrupts, DMA setup, host "
         "protocol and flow control",
-        (0, 700, 1000, 1500),
+        (0, 0, 700, 1000, 1500),
         "cycles",
         "Estimate",
-        "0 matches the quoted numbers, which had no SDIO. One interrupt per 16-32 KB "
+        "0 on a single chip, which has no SDIO. One interrupt per 16-32 KB "
         "transfer is about 200; per 512 B block or command at worst. "
         "No SDIO device exists on nRF71 today",
         1,
@@ -148,7 +156,7 @@ INPUTS = [
     (
         "contention",
         "Bus contention from SDIO, TSO and RPU DMA (cycle factor)",
-        (1.00, 1.10, 1.12, 1.15),
+        (1.00, 1.00, 1.10, 1.12, 1.15),
         "x",
         "Cushion",
         "Each payload byte crosses SRAM about 4 times. Not measured",
@@ -158,7 +166,7 @@ INPUTS = [
     (
         "segs_block",
         "Segments per TSO block",
-        (44, 22, 16, 11),
+        (44, 16, 44, 16, 11),
         "segments",
         "Estimate",
         "64 / 32 / 23 / 16 KB blocks",
@@ -167,7 +175,7 @@ INPUTS = [
     (
         "tso_ovh",
         "CM33 cost of TSO per segment: header template, scatter list, completion",
-        (100, 300, 400, 500),
+        (100, 400, 100, 400, 500),
         "cycles",
         "Estimate",
         "Zephyr chains small buffers, so a block needs a long scatter list",
@@ -176,7 +184,7 @@ INPUTS = [
     (
         "ack_cyc",
         "ACK receive per segment with TSO and software GRO",
-        (1300, 2200, 2600, 3000),
+        (1300, 2600, 1300, 2600, 3000),
         "cycles",
         "Estimate",
         "One ACK per two segments, every frame through the driver. Receive is not measured",
@@ -186,7 +194,7 @@ INPUTS = [
     (
         "radio_tcp",
         "Radio limit, TCP (80 MHz MCS9)",
-        (385,) * 4,
+        (385,) * 5,
         "Mbps",
         "Given",
         "throughput_targets_v6.xlsx: 128 A-MPDU, 0.8 us GI, 0% margin",
@@ -195,17 +203,17 @@ INPUTS = [
     (
         "radio_udp",
         "Radio limit, UDP (80 MHz MCS9)",
-        (425,) * 4,
+        (425,) * 5,
         "Mbps",
         "Given",
         "throughput_targets_v6.xlsx",
         0,
     ),
-    ("phy", "PHY rate, HE MCS9, 1 stream, 80 MHz", (480,) * 4, "Mbps", "Given", "802.11ax", 0),
+    ("phy", "PHY rate, HE MCS9, 1 stream, 80 MHz", (480,) * 5, "Mbps", "Given", "802.11ax", 0),
     (
         "eff_tcp",
         "Practical TCP efficiency (goodput / PHY)",
-        (0.70,) * 4,
+        (0.70,) * 5,
         "x",
         "Estimate",
         "IW612 on Linux, RN00104 4.6.2.2: 405/600 at HE MCS11, 325/433 (0.75) at 11ac "
@@ -215,18 +223,18 @@ INPUTS = [
     (
         "eff_udp",
         "Practical UDP efficiency (goodput / PHY)",
-        (0.78,) * 4,
+        (0.78,) * 5,
         "x",
         "Estimate",
         "IW612 on Linux, RN00104 4.6.2.2: 461/600 (0.77) at HE MCS11, 375/433 (0.87) at "
         "11ac MCS9. Conservative at 480",
         0,
     ),
-    ("sdio_raw", "SDIO 3.0 SDR104 raw rate", (832,) * 4, "Mbps", "Given", "4 bit x 208 MHz", 0),
+    ("sdio_raw", "SDIO 3.0 SDR104 raw rate", (832,) * 5, "Mbps", "Given", "4 bit x 208 MHz", 0),
     (
         "sdio_eff",
         "SDIO usable fraction after commands, CRC and flow control",
-        (0.75, 0.70, 0.65, 0.60),
+        (0.75, 0.75, 0.70, 0.65, 0.60),
         "x",
         "Estimate",
         "IW612 does 461-503 UDP over SDR104 on Linux",
@@ -410,8 +418,9 @@ OPTIONS = [
 
 NOTES = [
     "(1) Code in TCM, checksum offload in RPU, extended TCP window, lean config (TX "
-    "thread, stats, logging off). Optimistic assumes cycles/packet stay flat from 256 to "
-    "320 MHz; 54H data suggest +5% (~240 TCP / ~310 UDP at 320 MHz).",
+    "thread, stats, logging off). Without margin, cycles/packet stay flat from 256 to "
+    "320 MHz; 54H data suggest +5% (~240 TCP / ~310 UDP single chip at 320 MHz). The "
+    "margin profiles use +8%.",
     "(2) As per 1, with TSO/GSO hardware offload IP. Software GRO for the returning ACKs. "
     "UDP needs applications to send large datagrams (UDP GSO API, not in Zephyr).",
     "(3) throughput_targets_v6.xlsx: 128 A-MPDU, 0.8 us GI, 0% margin.",
@@ -498,7 +507,7 @@ def build_inputs(wb):
             ws.cell(row=r, column=col).alignment = Alignment(wrap_text=True, vertical="top")
         rows[iid] = r
         r += 1
-    widths(ws, [14, 52, 12, 12, 12, 12, 11, 11, 70])
+    widths(ws, [14, 52] + [12] * len(PROFILES) + [11, 11, 70])
     ws.freeze_panes = "C5"
     return rows
 
@@ -560,7 +569,7 @@ def build_results(wb, irow, mrow):
 
     ws["A3"] = "Profile"
     ws["A3"].font = font(bold=True)
-    ws["B3"] = "Optimistic"
+    ws["B3"] = "Single chip"
     ws["B3"].font = font(bold=True, color="0000FF")
     ws["B3"].fill = fill("FFFF00")
     ws["B3"].border = BORDER
