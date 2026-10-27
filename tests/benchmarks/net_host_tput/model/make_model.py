@@ -33,7 +33,8 @@ TYPE_FILL = {
 }
 PROFILES = ("Optimistic", "Expected", "Cushioned", "Pessimistic")
 PROFILE_TEXT = {
-    "Optimistic": "Measured values and best-case estimates.",
+    "Optimistic": "The numbers already given in CAL-7627: host stack and driver only; SDIO, "
+    "cold data and bus contention not counted.",
     "Expected": "Middle value for every estimate.",
     "Cushioned": "Expected plus margin on every estimate.",
     "Pessimistic": "Every worst case at once: a floor, not a likely outcome.",
@@ -107,10 +108,11 @@ INPUTS = [
     (
         "tcp_ratio",
         "TCP throughput as a fraction of UDP on the same CPU",
-        (0.80, 0.75, 0.70, 0.65),
+        (0.77, 0.75, 0.70, 0.65),
         "x",
         "Estimate",
-        "ACKs, timers, retransmit queue. Other Zephyr hosts show 0.5-0.6 with a 64 KB window",
+        "ACKs, timers, retransmit queue. 0.77 per segment gives the ~250 already quoted "
+        "(327 x 0.75 = 245 in Mbps). Other Zephyr hosts show 0.5-0.6 with a 64 KB window",
         1,
     ),
     "Network processor over SDIO",
@@ -128,10 +130,11 @@ INPUTS = [
         "sdio_cyc",
         "SDIO device side per 1460 B of payload: interrupts, DMA setup, host "
         "protocol and flow control",
-        (200, 700, 1000, 1500),
+        (0, 700, 1000, 1500),
         "cycles",
         "Estimate",
-        "One interrupt per 16-32 KB transfer at best, per 512 B block or command at worst. "
+        "0 matches the quoted numbers, which had no SDIO. One interrupt per 16-32 KB "
+        "transfer is about 200; per 512 B block or command at worst. "
         "No SDIO device exists on nRF71 today",
         1,
     ),
@@ -528,7 +531,7 @@ def build_results(wb, irow, mrow):
 
     ws["A3"] = "Profile"
     ws["A3"].font = font(bold=True)
-    ws["B3"] = "Expected"
+    ws["B3"] = "Optimistic"
     ws["B3"].font = font(bold=True, color="0000FF")
     ws["B3"].fill = fill("FFFF00")
     ws["B3"].border = BORDER
