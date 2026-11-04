@@ -35,4 +35,14 @@ config BENCH_NULL_ETH_CSUM_OFFLOAD
 	bool "Advertise TX/RX checksum offload from the sink driver"
 	depends on BENCH_NULL_ETH
 
+config BENCH_RAW_TX
+	bool "Raw Ethernet frame TX benchmark (raw tx shell command)"
+	depends on BENCH_NULL_ETH
+	select NET_SOCKETS_PACKET
+	help
+	  Sends raw frames into the null driver through an AF_PACKET socket,
+	  a direct net_pkt with a copy, or an external-data net_buf with no
+	  copy. Prices a network processor that forwards host frames without
+	  running IP/UDP/TCP itself.
+
 source "$(ZEPHYR_BASE)/samples/net/zperf/Kconfig"

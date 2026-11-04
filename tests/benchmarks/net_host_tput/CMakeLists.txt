@@ -17,6 +17,7 @@ target_sources(app PRIVATE
   )
 
 target_sources_ifdef(CONFIG_BENCH_NULL_ETH app PRIVATE src/null_eth.c)
+target_sources_ifdef(CONFIG_BENCH_RAW_TX app PRIVATE src/raw_tx.c)
 
 if(CONFIG_NET_SAMPLE_CODE_RELOCATE)
   zephyr_code_relocate(LIBRARY subsys__net__ip
@@ -41,6 +42,13 @@ if(CONFIG_BENCH_LOCAL_RAM_HOTPATH)
       )
   else()
     set(l2_hot ${ZEPHYR_BASE}/drivers/net/loopback.c)
+  endif()
+
+  if(CONFIG_BENCH_RAW_TX)
+    list(APPEND l2_hot
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/raw_tx.c
+      ${ZEPHYR_BASE}/subsys/net/lib/sockets/sockets_packet.c
+      )
   endif()
 
   if(NOT CONFIG_BENCH_HOTPATH_CSUM_IN_NVM)

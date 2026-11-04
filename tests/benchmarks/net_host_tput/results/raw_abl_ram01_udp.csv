@@ -1,0 +1,7 @@
+tag,clk_req_mhz,cpu_mhz,size,run,mbps,mbps_per_mhz,cycles_per_pkt
+raw_abl_ram01_udp,,255.9,1472,0,277.18,1.083,10873
+raw_abl_ram01_udp,,255.9,1472,1,277.09,1.083,10877
+raw_abl_ram01_udp,,255.9,1024,0,199.21,0.778,10525
+raw_abl_ram01_udp,,255.9,1024,1,199.17,0.778,10527
+raw_abl_ram01_udp,,255.9,292,0,60.30,0.236,9915
+raw_abl_ram01_udp,,255.9,292,1,60.30,0.236,9915

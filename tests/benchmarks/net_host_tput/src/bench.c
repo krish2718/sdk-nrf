@@ -54,6 +54,11 @@ static uint32_t measure_cpu_hz(void)
 	return (uint32_t)(cycles * 4U);
 }
 
+uint32_t bench_cpu_hz(void)
+{
+	return measure_cpu_hz();
+}
+
 static int cmd_clk(const struct shell *sh, size_t argc, char **argv)
 {
 #if !HAS_CPU_DVFS
